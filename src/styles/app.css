@@ -448,3 +448,18 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
   .k-ring, .k-obj, .k-tile img, .k-ladder img { transition: none; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+
+/* KERN.AI avatar: the little cairn with the glowing pebble, next to "You are talking to an AI" */
+.k-avatar { flex: none; width: 36px; height: 36px; margin: -8px 0; filter: drop-shadow(0 6px 8px rgba(0,0,0,.35)); }
+
+/* Signs on the trail: tips left by people who finished the mission before you */
+.k-trailsigns { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 16px; background: color-mix(in srgb, var(--gold) 8%, transparent); border: 1px solid color-mix(in srgb, var(--gold) 28%, transparent); }
+.k-trailsigns > .k-l { color: var(--gold); }
+.k-sign-empty, .k-rf-note { margin: 0; font-size: 12.5px; line-height: 1.4; color: var(--dim); }
+.k-rf-note { margin-top: -6px !important; }
+.k-signs-card > p { margin-bottom: 2px; }
+
+/* First arrival on Missions: the chosen field's object drops into the card with a spring */
+@keyframes kArrive { from { opacity: 0; transform: translateY(-44px) scale(.55) rotate(-14deg); } }
+.k-obj.arrive { animation: kArrive .9s var(--spring) both, kFloat 6s .9s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .k-obj.arrive { animation: none; } }

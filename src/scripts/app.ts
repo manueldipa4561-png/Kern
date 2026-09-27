@@ -10,7 +10,7 @@ import { akey, ver, stamp, mergeAnswers, type Tomb } from './sync';
 
 type Feel = 'flow' | 'ok' | 'drag';
 type Again = 'yes' | 'maybe' | 'no';
-type Refl = { e?: Feel; again?: Again; hard?: string; tip?: string };
+type Refl = { e?: Feel; again?: Again; hard?: string; tip?: string; sid?: number }; // sid: the tip's shared sign, if published
 type Answer = { f: string; i: number; t: string; at: number; ed?: number; r?: Refl };
 type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean };
 type Theme = 'system' | 'dark' | 'light';
@@ -29,6 +29,7 @@ const cleanR = (r: unknown): Refl | undefined => {
   if (AGAINS.includes(o.again as Again)) out.again = o.again as Again;
   if (str(o.hard, 140).trim()) out.hard = str(o.hard, 140).trim();
   if (str(o.tip, 140).trim()) out.tip = str(o.tip, 140).trim();
+  if (out.tip && Number.isSafeInteger(o.sid) && (o.sid as number) > 0) out.sid = o.sid as number;
   return Object.keys(out).length ? out : undefined;
 };
 // Stored or synced data is untrusted input: keep only well-formed values.
@@ -425,6 +426,7 @@ function deleteAnswer(idx: number) {
   if (!toastAct) binned = [];
   binned.push(a);
   S.answers.splice(idx, 1);
+  unshareSign(a); // its sign leaves the trail too; Undo shares it again
   S.gone = [...S.gone, [akey(a), stamp(ver(a))] as Tomb].slice(-200);
   S.stones = Math.max(0, S.stones - worth(a)); save(); setLvl(); renderProgress();
   const n = binned.length;
@@ -435,6 +437,7 @@ function deleteAnswer(idx: number) {
       b.ed = stamp(Math.max(t, ver(b))); // newer than its tombstone, so the restore wins on every device
       const i = S.answers.findIndex((x) => x.at > b.at);
       S.answers.splice(i < 0 ? S.answers.length : i, 0, b); S.stones += worth(b);
+      shareSign(b);
     });
     binned = []; save(); setLvl(); renderProgress();
   });
@@ -505,11 +508,51 @@ function flushDraft() {
   save(); renderHome();
 }
 kTa.addEventListener('input', () => { clearTimeout(dT); dT = window.setTimeout(flushDraft, 500); });
+// Signs on the trail: the tip each person leaves after a mission is shown, without a name, to the next
+// people who open it (cloud.ts, table kern_signs). No account, no sharing: the tip stays on the device.
+const shareable = (t: string) => t.trim().length >= 3 && !/(https?:\/\/|www\.|@|\d{6,})/i.test(t);
+function shareSign(a: Answer) {
+  const tip = a.r?.tip;
+  if (!user || !tip || a.r?.sid || !shareable(tip)) return;
+  cloud.addSign(a.f, a.i, tip).then((id) => {
+    if (!S.answers.includes(a)) { cloud.removeSign(id).catch(() => { /* retried never; row has no name */ }); return; } // deleted meanwhile
+    if (a.r && id > 0) { a.r.sid = id; save(); }
+  }).catch(() => { /* stays on this device */ });
+}
+function unshareSign(a: Answer) {
+  const id = a.r?.sid; if (!id) return;
+  delete a.r!.sid;
+  if (user) cloud.removeSign(id).catch(() => { /* already gone or offline */ });
+}
+const kShS = $('kShS');
+let signReq = 0;
+const renderTrailSigns = (f: string, i: number) => {
+  const req = ++signReq;
+  const note = (en: string) => { kShS.innerHTML = ''; const p = document.createElement('p'); p.className = 'k-sign-empty'; setT(p, en); kShS.appendChild(p); };
+  if (!cloud.enabled) return note('When people finish this mission, the signs they leave for you appear here.');
+  note('Loading signs…');
+  cloud.signs(f, i).then((list) => {
+    if (req !== signReq) return;
+    const ok = list.filter((s) => shareable(s.tip));
+    if (!ok.length) return note('No signs on this trail yet. Finish it and leave the first one.');
+    kShS.innerHTML = '';
+    ok.forEach((s) => {
+      const d = document.createElement('div'), q = document.createElement('p'), w = document.createElement('span');
+      d.className = 'k-sign'; q.textContent = `“${s.tip}”`; w.className = 'k-l';
+      setD(w, `${tr('Someone who finished it')} · ${day(Date.parse(s.at) || Date.now())}`);
+      d.append(q, w); kShS.appendChild(d);
+    });
+  }).catch(() => { if (req === signReq) note("Couldn't load signs right now."); });
+};
+const setRfNote = () => setT($('kRfN'), user ? 'Shared without your name with the next people on this trail.'
+  : cloud.enabled ? 'Stays on this device. Log in to share it, without your name, with the next people on this trail.'
+  : 'Stays on this device for now.');
 const fillSheet = (f: string, i: number) => {
   const m = FIELDS[f].m[i];
   setT($('kShL'), m[0]); setT($('kShT'), m[1]);
   setT($('kShQ'), FIELDS[f].qs[i % FIELDS[f].qs.length]);
   kShA.hidden = false; kShR.hidden = true;
+  renderTrailSigns(f, i);
 };
 const openAnswer = (f: string, i: number, dare = false) => {
   cur = { f, i, dare, edit: -1 };
@@ -551,13 +594,13 @@ $('kSub').addEventListener('click', () => {
   setLvl(); renderProgress();
   groups.forEach((g) => { g.dataset.val = ''; g.querySelectorAll('[data-v]').forEach((o) => { o.classList.remove('sel'); o.setAttribute('aria-pressed', 'false'); }); });
   $<HTMLInputElement>('kRfH').value = ''; $<HTMLInputElement>('kRfT').value = '';
-  kShA.hidden = true; kShR.hidden = false;
+  kShA.hidden = true; kShR.hidden = false; setRfNote();
   groups[0].querySelector<HTMLElement>('[data-v]')!.focus();
 });
 $('kRfOk').addEventListener('click', () => {
   const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value });
   const a = S.answers[lastIdx];
-  if (r && a) { a.r = r; a.ed = stamp(ver(a)); S.stones += 20; save(); }
+  if (r && a) { a.r = r; a.ed = stamp(ver(a)); S.stones += 20; save(); shareSign(a); }
   closeSheet(kSheet); setLvl(); renderProgress();
   say(r ? 'Reflection saved. +20 stones.' : '+50 stones. Your answer is saved on this device.');
 });
@@ -639,7 +682,7 @@ $('kProf').addEventListener('submit', async (e) => {
   if (mode === 'guest') {
     if (!n || !kAge.checked) { fail('Add your name and confirm your age to continue.'); (n ? kAge : kNmI).focus(); return; }
     kErr.hidden = true; kLog.classList.add('busy');
-    window.setTimeout(() => { S.name = n.slice(0, 40); save(); renderMe(); renderHome(); kLog.classList.remove('busy'); kLogin.classList.remove('on'); openStart(); }, still ? 0 : 600);
+    window.setTimeout(() => { S.name = n.slice(0, 40); save(); renderMe(); renderHome(); kLog.classList.remove('busy'); kLogin.classList.remove('on'); if (S.onboarded) arrive(); else openStart(); }, still ? 0 : 600);
     return;
   }
   if (mode === 'up' && !n) { fail('Add your name.'); kNmI.focus(); return; }
@@ -676,7 +719,7 @@ function linkNote() {
   const p = new URLSearchParams(location.search.slice(1) + '&' + location.hash.slice(1));
   if (!p.has('code') && !p.has('error_description')) return;
   history.replaceState(null, '', location.pathname);
-  setMode('in'); kLogin.classList.add('on');
+  setMode('in'); kStart.classList.remove('on'); kLogin.classList.add('on'); // the link is about logging in: that screen goes on top
   note(p.has('code') ? 'Open the link on the device where you asked for it, or log in here.' : 'That link has expired or was already used. Log in, or ask for a new one.');
 }
 const onUser = async (u: cloud.User | null, ev: string) => {
@@ -688,7 +731,7 @@ const onUser = async (u: cloud.User | null, ev: string) => {
   catch { syncOk = false; say("Couldn't load your synced trail. We'll try again."); }
   if (!S.name) S.name = u.name;
   save(); renderMe(); applyField(false); setLang(S.lang); renderAcct();
-  if (kLogin.classList.contains('on')) { kLogin.classList.remove('on'); if (!S.onboarded) openStart(); }
+  if (kLogin.classList.contains('on')) { kLogin.classList.remove('on'); if (!S.onboarded) openStart(); else arrive(); }
 };
 if (cloud.enabled) void cloud.onAuth(onUser).catch(() => { /* SDK failed to load: stay local-only */ });
 $('kAcctUp').addEventListener('click', () => { closeSheet(kSet); setMode('up'); kNmI.value = S.name; kLogin.classList.add('on'); kEm.focus(); });
@@ -718,9 +761,21 @@ $('kPwF').addEventListener('submit', async (e) => {
   catch (err) { setT(er, cloud.why(err)); er.hidden = false; }
 });
 $('kIdk').addEventListener('click', () => { kS1.hidden = true; kS2.hidden = false; });
+// First visit: loader > choice > field > profile (name + 18+, or an account) > missions.
+const arrive = () => { // land on Missions with the field's object dropping into the card
+  goTab('missions');
+  const o = $('kNxImg');
+  if (still) return;
+  o.classList.remove('arrive'); void o.offsetWidth; o.classList.add('arrive');
+};
 const closeStart = () => {
   if (vtBusy) return; // a flight is still playing: ignore the double tap
   const changed = pick !== S.field;
+  if (!S.name) { // no profile yet: keep the choice, ask who they are, then arrive()
+    S.field = pick; S.onboarded = true; save(); applyField(changed);
+    kStart.classList.remove('on'); kLogin.classList.add('on'); syncInert(); (mode === 'in' ? kEm : kNmI).focus();
+    return;
+  }
   const run = () => {
     S.field = pick; S.onboarded = true; save();
     kStart.classList.remove('on'); applyField(changed); goTab('missions');
@@ -947,5 +1002,5 @@ moveInd(onTab(), false);
 setMode(mode);
 renderAcct();
 booted = true;
-if (!S.name) kLogin.classList.add('on');
-else if (!S.onboarded) openStart();
+if (!S.onboarded) openStart(); // the choice comes first, right after the loader
+else if (!S.name) kLogin.classList.add('on');

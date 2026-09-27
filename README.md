@@ -20,7 +20,7 @@ Without the two Supabase variables below, KERN runs without accounts and everyth
 ## Accounts and sync (Supabase)
 
 1. Create a project at supabase.com. Pick an EU region (for example Frankfurt).
-2. SQL Editor, New query: paste `supabase/schema.sql` and Run. It creates the `kern_state` table with Row Level Security (each user reads and writes only their own row) and the `delete_my_account` function.
+2. SQL Editor, New query: paste `supabase/schema.sql` and Run. It creates the `kern_state` table with Row Level Security (each user reads and writes only their own row) the `delete_my_account` function, and the `kern_signs` table with `add_sign` / `delete_my_sign` for signs on the trail. Run it again after updating: every statement is safe to repeat.
 3. Project Settings, API: copy the Project URL and the anon (publishable) key. The key is meant to be public; the database rules protect the data.
 4. Netlify, Site configuration, Environment variables: add `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY`, then redeploy. For local dev copy `.env.example` to `.env` and fill it in.
 5. Supabase, Authentication, URL Configuration: set Site URL to your Netlify address (for example `https://kern.netlify.app`) and add `https://kern.netlify.app/**` and `http://localhost:4322/**` to Redirect URLs.
@@ -37,6 +37,7 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - Home: your next mission first, then your 3 missions with status (done / next / draft)
 - Answers with automatic drafts; edit or delete them (with Undo); +50 stones per answer, +20 for a reflection
 - Quick reflection after each answer (how it felt, would you do it again, hardest part, a sign for the next person)
+- Signs on the trail: with an account, the sign you leave is shown without your name to the next people who open that mission (`kern_signs` in `supabase/schema.sql`: public read of tip and date only, writes through `add_sign` / `delete_my_sign`, 20 a day each, no links, emails or long numbers). Deleting the answer removes its sign
 - Badges for real milestones (first answer, first reflection, full trail, dare sent...)
 - Real "first guess" and Kern card built from your reflections; Kern card shared as a 1080x1350 image
 - Share your Kern card, dare a friend, copy links (native share sheet, clipboard fallback); dare links open the same mission

@@ -75,3 +75,22 @@ export const push = async (uid: string, state: unknown) => {
   const { error } = await (await client()).from('kern_state').upsert({ user_id: uid, state, updated_at: new Date().toISOString() });
   if (error) throw error;
 };
+
+// Signs on the trail (table kern_signs): the latest tips left on a mission, readable by anyone, never
+// with who wrote them. Writes go through add_sign / delete_my_sign, which act for the signed-in user.
+export type Sign = { tip: string; at: string };
+export const signs = async (field: string, mission: number): Promise<Sign[]> => {
+  const { data, error } = await (await client()).from('kern_signs').select('tip, created_at')
+    .eq('field', field).eq('mission', mission).order('created_at', { ascending: false }).limit(3);
+  if (error) throw error;
+  return (data || []).map((r) => ({ tip: String(r.tip).slice(0, 140), at: String(r.created_at) }));
+};
+export const addSign = async (field: string, mission: number, tip: string): Promise<number> => {
+  const { data, error } = await (await client()).rpc('add_sign', { p_field: field, p_mission: mission, p_tip: tip });
+  if (error) throw error;
+  return Number(data);
+};
+export const removeSign = async (id: number) => {
+  const { error } = await (await client()).rpc('delete_my_sign', { sign_id: id });
+  if (error) throw error;
+};

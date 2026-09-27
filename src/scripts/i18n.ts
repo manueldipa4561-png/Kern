@@ -230,5 +230,15 @@ export const IT: Record<string, string> = {
         'What you light up on': 'Cosa ti accende', 'From your reflections. Not a test.': 'Dalle tue riflessioni. Non è un test.',
         'Reflect after a mission to fill this.': 'Rifletti dopo una missione per riempirlo.',
         '+50 stones': '+50 pietre', '+20 if you reflect': '+20 se rifletti', 'Trail': 'Traccia',
+        'Signs from people before you': 'Segni di chi è passato prima di te',
+        'When people finish this mission, the signs they leave for you appear here.': 'Quando qualcuno finisce questa missione, i segni che ti lascia compaiono qui.',
+        'Loading signs…': 'Carico i segni…', "Couldn't load signs right now.": 'Non riesco a caricare i segni adesso.',
+        'No signs on this trail yet. Finish it and leave the first one.': 'Ancora nessun segno su questa traccia. Finiscila e lascia il primo.',
+        'Someone who finished it': "Qualcuno che l'ha finita",
+        'Shared without your name with the next people on this trail.': 'Condiviso senza il tuo nome con chi farà questa traccia dopo di te.',
+        'Stays on this device. Log in to share it, without your name, with the next people on this trail.': 'Resta su questo dispositivo. Accedi per condividerlo, senza il tuo nome, con chi farà questa traccia dopo di te.',
+        'Stays on this device for now.': 'Per ora resta su questo dispositivo.',
+        'Signs on the trail': 'Segni sulla traccia', 'Signs you left': 'I segni che hai lasciato',
+        'People who finish a mission before you leave a short tip for you. Yours helps the next person.': 'Chi finisce una missione prima di te ti lascia un breve consiglio. Il tuo aiuta chi viene dopo.',
 };
 export const t2 = (en: string, it: string) => { IT[en] = it; return en; };
