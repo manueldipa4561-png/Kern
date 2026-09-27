@@ -226,5 +226,9 @@ export const IT: Record<string, string> = {
         'Reviewers rank answers by quality, not likes. The best ones get seen by the company behind the mission.': "I revisori ordinano le risposte per qualità, non per like. Le migliori le vede l'azienda dietro la missione.",
         'Preview: this is what it looks like when reviewers rank your answer first.': 'Anteprima: ecco cosa succede quando i revisori mettono la tua risposta al primo posto.',
         '{n} answers deleted.': '{n} risposte eliminate.',
+        'Try a real mission': 'Prova una missione vera', 'Reflect in 20 seconds': 'Rifletti in 20 secondi', 'See how you work': 'Scopri come lavori',
+        'What you light up on': 'Cosa ti accende', 'From your reflections. Not a test.': 'Dalle tue riflessioni. Non è un test.',
+        'Reflect after a mission to fill this.': 'Rifletti dopo una missione per riempirlo.',
+        '+50 stones': '+50 pietre', '+20 if you reflect': '+20 se rifletti',
 };
 export const t2 = (en: string, it: string) => { IT[en] = it; return en; };

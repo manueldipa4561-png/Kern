@@ -127,7 +127,7 @@ function say(en: string, undo?: () => void) {
 toastB.addEventListener('click', () => { const f = toastAct; toastAct = null; toast.classList.remove('on', 'act'); if (f) f(); });
 
 // Static text: remember the English source so language switches are lossless.
-const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l, h4, h5, p, .k-sig, .k-chips span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs button:not(:nth-child(2))');
+const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l, h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs button:not(:nth-child(2))');
 kTxt.forEach((e) => { e.dataset.en = e.innerHTML.trim(); });
 const SAMPLE = { guess: $('kGuess').dataset.en!, why: $('kWhy').dataset.en!, ai: $('kAiSig').dataset.en!, card: $('kCardH').dataset.en!, cardL: $('kCardL').dataset.en!, drawn: ['Shaping ideas', 'Writing', 'Solo work'], cardC: ['Shaping ideas', 'Writing'] };
 
@@ -148,8 +148,24 @@ const applyTheme = () => {
 mqLight.addEventListener('change', applyTheme);
 document.querySelectorAll<HTMLElement>('[data-k-theme]').forEach((b) => b.addEventListener('click', () => { S.theme = b.dataset.kTheme as Theme; save(); applyTheme(); }));
 
+// View Transitions (Chrome, Safari 18+, Firefox 144+): tab panes slide in the direction you move,
+// the chosen field object flies into the mission card. Older browsers get the plain swap.
+type VT = { ready: Promise<void>; updateCallbackDone: Promise<void>; finished: Promise<void> };
+const startVT = (document as Document & { startViewTransition?: (cb: () => unknown) => VT }).startViewTransition?.bind(document);
+let vtBusy = false, vtSeq = 0;
+// Runs cb inside a View Transition with `cls` on <html> while it plays. A skipped transition (rapid taps,
+// hidden tab) still runs cb; its promises then reject by design, so they are caught here.
+const runVT = (cls: string, cb: () => unknown, after?: () => void) => {
+  const root = document.documentElement, seq = ++vtSeq;
+  root.classList.add(cls);
+  const t = startVT!(cb);
+  t.ready.catch(() => { /* skipped */ }); t.updateCallbackDone.catch(() => { /* skipped */ });
+  t.finished.catch(() => { /* skipped */ }).finally(() => { if (seq === vtSeq) root.classList.remove('vt-tab', 'vt-hero'); after?.(); });
+};
+
 // Tabs
 const tabs = kScr.querySelectorAll<HTMLElement>('[data-k-tab]');
+const tabIds = [...tabs].map((x) => 'k-' + x.dataset.kTab);
 tabs.forEach((t) => t.addEventListener('click', () => {
   const next = 'k-' + t.dataset.kTab, cur = kScr.querySelector<HTMLElement>('.k-pane.on');
   tabs.forEach((x) => { x.classList.toggle('on', x === t); x.setAttribute('aria-current', String(x === t)); });
@@ -157,9 +173,12 @@ tabs.forEach((t) => t.addEventListener('click', () => {
     kScr.querySelectorAll('.k-pane').forEach((p) => { p.classList.remove('leaving'); p.classList.toggle('on', p.id === next); });
     kScr.querySelector<HTMLElement>('.k-body')!.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
-  if (still || !cur || cur.id === next) swap();
-  else { cur.classList.add('leaving'); window.setTimeout(swap, 140); }
   moveInd(t, true);
+  if (still || !cur || cur.id === next || vtBusy) return swap();
+  if (startVT) {
+    document.documentElement.dataset.dir = tabIds.indexOf(next) > tabIds.indexOf(cur.id) ? 'fwd' : 'back';
+    runVT('vt-tab', swap); // only the pane animates; the tab bar stays live so its capsule slides
+  } else { cur.classList.add('leaving'); window.setTimeout(swap, 140); }
 }));
 const goTab = (name: string) => kScr.querySelector<HTMLElement>(`[data-k-tab="${name}"]`)!.click();
 
@@ -176,7 +195,7 @@ function moveInd(btn: HTMLElement, animate: boolean) {
     ind.classList.add('snap'); ind.style.transform = `translateX(${x}px)`;
     void ind.offsetWidth; ind.classList.remove('snap');
   } else {
-    ind.style.transform = `translateX(${(x + indX) / 2}px) scaleX(${Math.min(3, 1 + travel / 60)})`;
+    ind.style.transform = `translateX(${(x + indX) / 2}px) scaleX(${Math.min(1.5, 1 + travel / 300)})`;
     indT = window.setTimeout(() => { ind.style.transform = `translateX(${x}px)`; }, 160);
   }
   indX = x;
@@ -212,12 +231,19 @@ const setLvl = () => {
   const i = rankIdx(S.stones), nx = RANKS[i + 1], it = isIt();
   $<HTMLTextAreaElement>('kTa').placeholder = tr('Write it your way. Nothing is sent.');
   $('kRank').textContent = rn(RANKS[i][0]);
+  $<HTMLImageElement>('kRankImg').src = `/img/r${i}.webp`;
   $('kSt').textContent = String(S.stones);
   $('kBar').style.width = (nx ? ((S.stones - RANKS[i][1]) / (nx[1] - RANKS[i][1])) * 100 : 100) + '%';
   $('kNx').textContent = nx ? (it ? `${nx[1] - S.stones} pietre a ${rn(nx[0])}` : `${nx[1] - S.stones} stones to ${rn(nx[0])}`) : (it ? 'Grado massimo' : 'Top rank');
   const lad = $('kLad');
   lad.innerHTML = '';
-  RANKS.forEach((r, k) => { const s = document.createElement('span'); s.textContent = rn(r[0]); if (k < i) s.className = 'done'; if (k === i) s.className = 'on'; lad.appendChild(s); });
+  RANKS.forEach((r, k) => {
+    const s = document.createElement('span'), im = document.createElement('img'), b = document.createElement('b');
+    im.src = `/img/r${k}.webp`; im.alt = ''; im.width = im.height = 400; im.decoding = 'async';
+    b.textContent = rn(r[0]); s.append(im, b);
+    if (k < i) s.className = 'done'; if (k === i) s.className = 'on';
+    lad.appendChild(s);
+  });
 };
 
 // Signals: which kind of mission you light up on, from your own reflections.
@@ -259,6 +285,19 @@ const renderSignals = () => {
     chips($('kDrawn'), [tr(S.field), tr(KSHORT[sg.best])]);
     chips($('kCardC'), [tr(S.field), tr(KSHORT[sg.best])]);
   }
+  // Energy per kind of mission in this field: the average of your own "how did it feel" answers.
+  const meter = $('kMeter');
+  meter.innerHTML = '';
+  let any = false;
+  [0, 1, 2].forEach((i) => {
+    const l = S.answers.filter((a) => a.f === S.field && a.i === i && a.r?.e);
+    const v = l.length ? l.reduce((s, a) => s + SCORE[a.r!.e!], 0) / (l.length * 2) : 0;
+    any ||= l.length > 0;
+    const row = document.createElement('div'), lab = document.createElement('span'), val = document.createElement('b'), bar = document.createElement('i'), fill = document.createElement('s');
+    row.className = 'k-mt'; lab.textContent = tr(KSHORT[i]); val.textContent = l.length ? Math.round(v * 100) + '%' : '–';
+    fill.style.width = v * 100 + '%'; bar.append(fill); row.append(lab, val, bar); meter.append(row);
+  });
+  setT($('kMeterN'), any ? 'From your reflections. Not a test.' : 'Reflect after a mission to fill this.');
   const n = S.mine.length;
   if (n >= 2) setD($('kAiSig'), it ? `Hai riscritto la tua idea ${n} volte in KERN.AI. Confronta la versione 1 con l'ultima.` : `You rewrote your idea ${n} times in KERN.AI. Compare version 1 with your latest one.`);
   else setT($('kAiSig'), SAMPLE.ai);
@@ -269,6 +308,8 @@ const kAdd = $('kAdd');
 const renderHome = () => {
   const f = F(), done = doneSet(), next = [0, 1, 2].find((k) => !done.has(k)), it = isIt();
   setD($('kHi'), S.name ? `${it ? 'Ciao' : 'Hi'} ${S.name}` : (it ? 'Ciao' : 'Hi'));
+  const img = $<HTMLImageElement>('kNxImg'), src = next === undefined ? '/img/cairn.webp' : `/img/f-${S.field.toLowerCase()}.webp`;
+  if (img.getAttribute('src') !== src) img.src = src;
   if (next === undefined) {
     setT($('kNxL'), 'Your 3 missions are done'); setT($('kNxT'), 'Your Kern card is ready.');
     setT($('kNxP'), 'See what your answers say about how you work, and share it.');
@@ -291,6 +332,7 @@ const renderHome = () => {
 const renderProgress = () => {
   const it = isIt(), done = doneSet(), n = done.size, next = [0, 1, 2].find((k) => !done.has(k));
   $('kPill').textContent = it ? `${n} su 3 fatte` : `${n} of 3 done`;
+  $('kRing').style.setProperty('--p', String(n / 3));
   [0, 1, 2].forEach((i) => {
     const st = $('kTr' + i).parentElement!;
     st.className = 'k-st' + (done.has(i) ? ' fin' : i === next ? ' now' : '');
@@ -326,7 +368,17 @@ const renderProgress = () => {
   $('kCnt').textContent = String(S.answers.length);
   const WEEK = 6048e5, now = Date.now();
   const weeks = [0, 1, 2, 3].map((w) => S.answers.some((a) => now - a.at >= w * WEEK && now - a.at < (w + 1) * WEEK));
-  $('kDots').querySelectorAll('i').forEach((d, i) => d.classList.toggle('f', weeks[3 - i]));
+  // Last 28 days as a grid (oldest first); a day lights up when you answered something on it.
+  const midnight = (t: number) => new Date(t).setHours(0, 0, 0, 0);
+  const made = new Set(S.answers.map((a) => midnight(a.at))), today = new Date(midnight(now));
+  const cal = $('kDots'); cal.innerHTML = '';
+  for (let k = 27; k >= 0; k--) {
+    const d = new Date(today); d.setDate(today.getDate() - k);
+    const c = document.createElement('i');
+    if (made.has(d.getTime())) c.className = 'f';
+    if (!k) c.classList.add('t');
+    cal.appendChild(c);
+  }
   const w = weeks.filter(Boolean).length;
   $('kRhy').textContent = it ? `In ${w} delle ultime 4 settimane hai creato qualcosa.` : `${w} of the last 4 weeks you made something.`;
   renderHome(); renderSignals(); renderBadges();
@@ -518,6 +570,7 @@ kWin.addEventListener('click', () => {
   const gain = 200, before = rankIdx(S.stones), after = rankIdx(S.stones + gain);
   kRU.hidden = after === before;
   $('kRU2').textContent = rn(RANKS[after][0]);
+  $<HTMLImageElement>('kRUImg').src = `/img/r${after}.webp`;
   kRw.hidden = false;
   kConf.innerHTML = '';
   if (still) kGain.textContent = '+' + gain;
@@ -549,7 +602,8 @@ if (GUESSES.includes(S.guess)) fb.dataset.src = S.guess;
 const kLogin = $('kLogin'), kStart = $('kStart'), kS1 = $('kS1'), kS2 = $('kS2');
 const kNmI = $<HTMLInputElement>('kNmI'), kAge = $<HTMLInputElement>('kAge'), kErr = $('kErr'), kLog = $('kLog');
 let pick = S.field;
-const markPick = () => kStart.querySelectorAll<HTMLElement>('#kPick span').forEach((o) => o.classList.toggle('sel', o.dataset.en === pick));
+const tiles = kStart.querySelectorAll<HTMLElement>('#kPick [data-f]');
+const markPick = () => tiles.forEach((o) => { o.classList.toggle('sel', o.dataset.f === pick); o.setAttribute('aria-pressed', String(o.dataset.f === pick)); });
 const openStart = (step2 = false) => { kS1.hidden = step2; kS2.hidden = !step2; markPick(); kStart.classList.add('on'); };
 const renderMe = () => { $('kAv').textContent = (S.name.trim()[0] || 'K').toUpperCase(); };
 // Login screen modes: 'up' create account, 'in' log in, 'guest' local-only profile.
@@ -665,17 +719,38 @@ $('kPwF').addEventListener('submit', async (e) => {
 });
 $('kIdk').addEventListener('click', () => { kS1.hidden = true; kS2.hidden = false; });
 const closeStart = () => {
+  if (vtBusy) return; // a flight is still playing: ignore the double tap
   const changed = pick !== S.field;
-  S.field = pick; S.onboarded = true; save();
-  kStart.classList.remove('on'); applyField(changed); goTab('missions');
+  const run = () => {
+    S.field = pick; S.onboarded = true; save();
+    kStart.classList.remove('on'); applyField(changed); goTab('missions');
+  };
+  // Shared element: the picked field's object flies from its tile into the mission card.
+  const from = kS2.hidden ? null : kStart.querySelector<HTMLElement>(`#kPick [data-f="${pick}"] img`), to = $<HTMLImageElement>('kNxImg');
+  if (still || !startVT || !from) return run();
+  to.style.viewTransitionName = ''; from.style.viewTransitionName = 'k-hero'; vtBusy = true;
+  // vt-hero: the pane joins the page crossfade, so it never paints over the onboarding screen.
+  runVT('vt-hero', async () => {
+    from.style.viewTransitionName = ''; to.style.viewTransitionName = 'k-hero';
+    run(); // vtBusy stays on until the flight has finished (released in `after`)
+    // Wait for the new image, but never hold the page if decoding stalls.
+    await Promise.race([to.decode().catch(() => { /* shows when loaded */ }), new Promise((r) => setTimeout(r, 300))]);
+  }, () => { to.style.viewTransitionName = ''; vtBusy = false; });
 };
 $('kSkip').addEventListener('click', closeStart);
 $('kGo').addEventListener('click', closeStart);
-kStart.querySelectorAll<HTMLElement>('#kPick span').forEach((c) => {
-  const flip = () => { pick = c.dataset.en || 'Design'; markPick(); };
-  c.addEventListener('click', flip);
-  c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
-});
+tiles.forEach((c) => c.addEventListener('click', () => { pick = c.dataset.f || 'Design'; markPick(); }));
+
+// Hero card: the object leans toward the pointer (translate only, so it never fights the float animation).
+const kNext = $('kNext');
+if (!still) {
+  kNext.addEventListener('pointermove', (e) => {
+    const r = kNext.getBoundingClientRect();
+    kNext.style.setProperty('--tx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+    kNext.style.setProperty('--ty', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+  });
+  kNext.addEventListener('pointerleave', () => { kNext.style.removeProperty('--tx'); kNext.style.removeProperty('--ty'); });
+}
 
 // Clipboard with a fallback for browsers that block the async API (older iOS, http on LAN).
 const copy = async (text: string) => {
@@ -727,6 +802,7 @@ const cardImage = async (): Promise<Blob | null> => {
   x.fillStyle = '#0F140E'; x.fillRect(0, 0, 1080, 1350);
   const g = x.createRadialGradient(920, 120, 0, 920, 120, 760); g.addColorStop(0, 'rgba(201,242,74,.28)'); g.addColorStop(1, 'rgba(201,242,74,0)');
   x.fillStyle = g; x.fillRect(0, 0, 1080, 1350);
+  try { const im = new Image(); im.src = '/img/cairn.webp'; await im.decode(); x.drawImage(im, 680, 60, 340, 340); } catch { /* card works without it */ }
   x.font = `800 110px ${D}`; x.fillStyle = '#E8E6DA'; x.fillText('kern', 90, 210);
   x.fillStyle = '#C9F24A'; x.fillText('.', 90 + x.measureText('kern').width, 210);
   x.font = `500 34px ${B}`; x.fillStyle = '#b4b7a9'; x.fillText($('kCardL').textContent!.toUpperCase().slice(0, 48), 90, 470);

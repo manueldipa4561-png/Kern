@@ -45,6 +45,9 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - EN / IT, system / dark / light theme
 - Installable and works offline after the first visit (`public/sw.js`); security headers and CSP in `netlify.toml`
 - Export and delete your data from Settings; privacy page at `/privacy/`
+- Design (v1.0): one 3D object per screen, italic serif accents (Instrument Serif), energy bars from your reflections, a 28-day rhythm grid, a floating tab bar, film grain; View Transitions slide the panes and fly the chosen field object into the mission card (plain swap where unsupported, nothing moves with reduced motion)
+
+The classic design before v1.0 is kept on the `classic-design` branch and the `v0.4-classic` tag.
 
 ## Not built yet
 
@@ -55,4 +58,4 @@ Real partner missions, peer review and ranking, a real AI co-pilot, push notific
 - `src/pages/index.astro` markup, `src/styles/app.css` styles, `src/scripts/app.ts` logic
 - `src/scripts/cloud.ts` accounts and sync (loaded only when the Supabase variables are set), `supabase/schema.sql` database setup
 - `src/scripts/i18n.ts` Italian strings (English is the source), `src/scripts/fields.ts` missions per field
-- `public/` manifest, service worker, icons, favicons
+- `public/` manifest, service worker, icons, favicons; `public/img/` 3D objects (fields, ranks, cairn, co-pilot orb)

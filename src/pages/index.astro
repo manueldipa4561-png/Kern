@@ -1,7 +1,9 @@
 ---
 import '@fontsource-variable/inter-tight';
 import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource/instrument-serif/latin-400-italic.css';
 import '../styles/app.css';
+const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music'];
 const MARK = 'M23.13 76.87A38 38 0 0 1 76.87 23.13Z';
 const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
 ---
@@ -84,7 +86,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             <button type="button" class="k-ask-btn k-danger" id="kDelAcc" hidden>Delete my account</button>
           </div>
           <p class="k-l">Missions are samples while partners join.</p>
-          <p class="k-l"><a href="/privacy/">Privacy</a> · KERN 0.2</p>
+          <p class="k-l"><a href="/privacy/">Privacy</a> · KERN 1.0</p>
           <button type="button" class="k-go" id="kSetX">Close</button>
         </div>
       </div>
@@ -107,13 +109,14 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
           <h4 id="kRwT">Your answer<br>won <b>#1.</b></h4>
           <p>Preview: this is what it looks like when reviewers rank your answer first.</p>
           <div class="k-gain"><b id="kGain">+0</b> <span class="k-l">stones</span></div>
-          <div class="k-rankup" id="kRU" hidden><div class="k-l">New rank</div><div class="k-rank" id="kRU2"></div></div>
+          <div class="k-rankup" id="kRU" hidden><img id="kRUImg" src="/img/r1.webp" alt="" width="400" height="400" decoding="async" /><div><div class="k-l">New rank</div><div class="k-rank" id="kRU2"></div></div></div>
           <button type="button" class="k-go" id="kRwOk">Keep going</button>
         </div>
       </div>
 
       <div class="k-start" id="kLogin">
         <form class="k-sp" id="kProf" novalidate>
+          <img class="k-hero-img" src="/img/cairn.webp" alt="" width="720" height="720" decoding="async" fetchpriority="high" />
           <div class="k-l">Welcome</div>
           <h4>Start your<br><b>trail.</b></h4>
           <div class="k-seg k-authseg" id="kAuthSeg" role="group" hidden><button type="button" data-k-mode="up">Create account</button><button type="button" data-k-mode="in">Log in</button></div>
@@ -133,16 +136,23 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
 
       <div class="k-start" id="kStart">
         <div id="kS1" class="k-sp">
-          <svg class="k-cairn" viewBox="0 0 120 96" aria-hidden="true"><ellipse class="c3" cx="60" cy="82" rx="46" ry="12"/><ellipse class="c2" cx="60" cy="58" rx="34" ry="11"/><ellipse class="c1" cx="60" cy="36" rx="22" ry="9"/><circle class="cd" cx="60" cy="16" r="7"/></svg>
+          <div class="k-float" aria-hidden="true"><img src="/img/f-design.webp" alt="" width="400" height="400" /><img src="/img/f-music.webp" alt="" width="400" height="400" /><img src="/img/f-code.webp" alt="" width="400" height="400" /></div>
           <div class="k-l">Start here</div>
           <h4>What do you want<br>to <b>do?</b></h4>
+          <ol class="k-how">
+            <li><b>01</b><p>Try a real mission</p></li>
+            <li><b>02</b><p>Reflect in 20 seconds</p></li>
+            <li><b>03</b><p>See how you work</p></li>
+          </ol>
           <button type="button" class="k-go" id="kIdk">I don't know what I want to do</button>
           <button type="button" class="k-sk" id="kSkip">Explore missions</button>
         </div>
         <div id="kS2" class="k-sp" hidden>
           <div class="k-l">Good. Let's find out.</div>
           <h4>What are you<br>curious about <b>right now?</b></h4>
-          <div class="k-chips" id="kPick"><span role="button" tabindex="0">Design</span><span role="button" tabindex="0">Writing</span><span role="button" tabindex="0">Code</span><span role="button" tabindex="0">Video</span><span role="button" tabindex="0">Selling</span><span role="button" tabindex="0">Music</span></div>
+          <div class="k-tiles" id="kPick" role="group">
+            {FIELDS.map((f) => <button type="button" class="k-tile" data-f={f} aria-pressed="false"><img src={`/img/f-${f.toLowerCase()}.webp`} alt="" width="400" height="400" decoding="async" /><span>{f}</span></button>)}
+          </div>
           <button type="button" class="k-go" id="kGo">Start my first mission</button>
         </div>
       </div>
@@ -150,13 +160,13 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
       <div class="k-app">
         <header class="k-top">
           <div class="k-logo"><svg viewBox="0 0 100 100" aria-hidden="true"><path d={MARK} fill="currentColor" transform="translate(-5 -5)"/><path d={LINE} fill="none" stroke-width="7" stroke-linejoin="round" stroke="currentColor" transform="translate(5 5)"/><circle cx="66.4" cy="66.4" r="9"/></svg>kern<i>.</i></div>
-          <div class="k-tp"><span class="k-pill" id="kPill">0 of 3 done</span><button type="button" class="k-av" id="kAv" aria-label="Settings" aria-haspopup="dialog">K</button></div>
+          <div class="k-tp"><span class="k-pill"><i class="k-ring" id="kRing" aria-hidden="true"></i><span id="kPill">0 of 3 done</span></span><button type="button" class="k-av" id="kAv" aria-label="Settings" aria-haspopup="dialog">K</button></div>
         </header>
         <div class="k-body">
           <section class="k-pane on" id="k-missions">
             <div><div class="k-l" id="kHi">Hi</div><h4>Pick your<br>next <b>move.</b></h4></div>
             <div class="k-card k-dare" id="kDare" hidden><div class="k-l">A friend dared you</div><h5 id="kDareT"></h5><button type="button" class="k-go" id="kDareGo">Answer the dare</button></div>
-            <div class="k-card k-main" id="kNext"><div class="k-l" id="kNxL">Your next step</div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><button type="button" class="k-btn" id="kAdd">Add your answer</button></div>
+            <div class="k-card k-main" id="kNext"><img class="k-obj" id="kNxImg" src="/img/f-design.webp" alt="" width="400" height="400" decoding="async" fetchpriority="high" /><div class="k-l" id="kNxL">Your next step</div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><div class="k-meta"><span class="k-l">+50 stones</span><span class="k-l">+20 if you reflect</span></div><button type="button" class="k-btn" id="kAdd">Add your answer</button></div>
             <div class="k-card"><div class="k-l">Your 3 missions</div>
               <div class="k-mlist">
                 <button type="button" class="k-mrow" id="kMR0"><i class="k-mdot" aria-hidden="true"></i><span><b>Fix what already exists</b><small></small></span><em aria-hidden="true">›</em></button>
@@ -164,39 +174,40 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
                 <button type="button" class="k-mrow" id="kMR2"><i class="k-mdot" aria-hidden="true"></i><span><b>Work with a partner</b><small></small></span><em aria-hidden="true">›</em></button>
               </div>
             </div>
-            <div class="k-card k-best"><div class="k-l">Coming with partner missions</div><h5>Anonymous review</h5><p>Reviewers rank answers by quality, not likes. The best ones get seen by the company behind the mission.</p><button type="button" class="k-win" id="kWin">See what a win feels like</button></div>
-            <div class="k-card k-aic"><div class="k-l">Stuck?</div><p>KERN.AI asks the questions that get you moving. It never gives you the answer.</p><button type="button" class="k-ask-btn" id="kToAi">Open KERN.AI</button></div>
+            <div class="k-card k-best"><img class="k-side" src="/img/r4.webp" alt="" width="400" height="400" loading="lazy" decoding="async" /><div class="k-l">Coming with partner missions</div><h5>Anonymous review</h5><p>Reviewers rank answers by quality, not likes. The best ones get seen by the company behind the mission.</p><button type="button" class="k-win" id="kWin">See what a win feels like</button></div>
+            <div class="k-card k-aic"><img class="k-side" src="/img/orb.webp" alt="" width="400" height="400" loading="lazy" decoding="async" /><div class="k-l">Stuck?</div><p>KERN.AI asks the questions that get you moving. It never gives you the answer.</p><button type="button" class="k-ask-btn" id="kToAi">Open KERN.AI</button></div>
           </section>
 
           <section class="k-pane" id="k-yourkern">
             <div><div class="k-l">yourKERN · first signs</div><h4>Your <b>KERN</b><br>so far.</h4></div>
-            <div class="k-card k-lvl"><div class="k-lvl-top"><div><div class="k-l">Your rank</div><div class="k-rank" id="kRank">Pebble</div></div><div class="k-stones"><b id="kSt">0</b> <span class="k-l">stones</span></div></div><div class="k-bar k-bar-g"><i id="kBar"></i></div><small class="k-nx" id="kNx"></small><div class="k-ladder" id="kLad"></div></div>
+            <div class="k-card k-lvl"><img class="k-rank-img" id="kRankImg" src="/img/r0.webp" alt="" width="400" height="400" decoding="async" /><div class="k-lvl-top"><div><div class="k-l">Your rank</div><div class="k-rank" id="kRank">Pebble</div></div><div class="k-stones"><b id="kSt">0</b> <span class="k-l">stones</span></div></div><div class="k-bar k-bar-g"><i id="kBar"></i></div><small class="k-nx" id="kNx"></small><div class="k-ladder" id="kLad"></div></div>
             <div class="k-l k-note" id="kSample">Signals below are examples until you answer and reflect.</div>
             <div class="k-card"><div class="k-l">A first guess</div><div class="k-sig" id="kGuess">You seemed to light up on the open brief and drag on the polish.</div><div class="k-l" id="kWhy">Why we think so: you tried 3 versions of the open brief, and you wrote "time flew".</div>
               <div class="k-ask"><button type="button" class="k-yes" data-k-msg="Saved. This sharpens your KERN.">That feels right</button><button type="button" data-k-msg="Noted. We'll give this guess less weight.">Not really</button></div><div class="k-l k-fb" id="kFb" aria-live="polite"></div></div>
+            <div class="k-card"><div class="k-l">What you light up on</div><div class="k-meter" id="kMeter"></div><p class="k-l" id="kMeterN">From your reflections. Not a test.</p></div>
             <div class="k-card"><div class="k-l">What you seem drawn to</div><div class="k-chips" id="kDrawn"><span>Shaping ideas</span><span>Writing</span><span>Solo work</span></div></div>
             <div class="k-card"><div class="k-l">How you work with AI</div><div class="k-sig" id="kAiSig">You rewrote your question 4 times, and every version got clearer.</div></div>
             <div class="k-card"><div class="k-l">Badges</div><div class="k-badges" id="kBadges"></div></div>
             <div class="k-card"><div class="k-l">Your answers</div><div id="kAns"></div></div>
-            <div class="k-duo"><div class="k-card"><div class="k-l">Answers made</div><div class="k-stat"><b id="kCnt">0</b></div><span class="k-l">on this device · only you see this</span></div><div class="k-card"><div class="k-l">Your rhythm · no pressure</div><div class="k-dots" id="kDots"><i></i><i></i><i></i><i></i></div><p id="kRhy"></p></div></div>
+            <div class="k-duo"><div class="k-card"><div class="k-l">Answers made</div><div class="k-stat"><b id="kCnt">0</b></div><span class="k-l">on this device · only you see this</span></div><div class="k-card"><div class="k-l">Your rhythm · no pressure</div><div class="k-cal" id="kDots" aria-hidden="true"></div><p id="kRhy"></p></div></div>
                       </section>
 
           <section class="k-pane" id="k-trail">
-            <div><div class="k-l">Your Trail</div><h4>Follow the<br><b>trail.</b></h4></div>
+            <div class="k-hd"><div class="k-l">Your Trail</div><h4>Follow the<br><b>trail.</b></h4><img class="k-hd-img" src="/img/r3.webp" alt="" width="400" height="400" loading="lazy" decoding="async" /></div>
             <div class="k-tr" id="kTr">
               <div class="k-st"><h5 id="kTr0">Fix what already exists</h5><p>Not started</p></div>
               <div class="k-st"><h5 id="kTr1">Rewrite a confusing email</h5><p>Not started</p></div>
               <div class="k-st"><h5 id="kTr2">Work with a partner</h5><p>Not started</p></div>
               <div class="k-st" id="kTrK"><h5>Your Kern card</h5><p>Ready when your 3 missions are done</p></div>
             </div>
-            <div class="k-card"><div class="k-l">Your Kern card</div><div class="k-kc"><div class="k-kt">kern<i>.</i></div><h5 id="kCardH">You light up when you start from zero.</h5><div class="k-chips" id="kCardC"><span>Shaping ideas</span><span>Writing</span></div><div class="k-l" id="kCardL">Example · answer and reflect to make it yours</div></div><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="card">Share my card</button><button type="button" class="k-ask-btn" data-k-copy="app">Copy link</button></div></div>
+            <div class="k-card"><div class="k-l">Your Kern card</div><div class="k-kc"><img class="k-kc-img" src="/img/cairn.webp" alt="" width="720" height="720" loading="lazy" decoding="async" /><div class="k-kt">kern<i>.</i></div><h5 id="kCardH">You light up when you start from zero.</h5><div class="k-chips" id="kCardC"><span>Shaping ideas</span><span>Writing</span></div><div class="k-l" id="kCardL">Example · answer and reflect to make it yours</div></div><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="card">Share my card</button><button type="button" class="k-ask-btn" data-k-copy="app">Copy link</button></div></div>
             <div class="k-card"><div class="k-l">Leave a sign</div><div id="kSigns"></div></div>
             <div class="k-card"><div class="k-l">Dare a friend</div><p>Send a mission. You both answer, then see the two answers side by side.</p><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="dare">Send a dare</button><button type="button" class="k-ask-btn" data-k-copy="dare">Copy link</button></div></div>
             <div class="k-card k-pilot"><div class="k-l">Testing KERN?</div><p>Send your answers and reflections to the team. It helps us build the next version.</p><button type="button" class="k-ask-btn" data-k-send>Share my trail with the KERN team</button></div>
           </section>
 
           <section class="k-pane" id="k-copilot">
-            <div><div class="k-l">KERN.AI · your co-pilot</div><h4>Your idea.<br>My <b>questions.</b></h4></div>
+            <div class="k-hd"><div class="k-l">KERN.AI · your co-pilot</div><h4>Your idea.<br>My <b>questions.</b></h4><img class="k-hd-img k-orb" src="/img/orb.webp" alt="" width="400" height="400" loading="lazy" decoding="async" /></div>
             <div class="k-ait"><span class="k-dot" aria-hidden="true"></span><div class="k-l">You are talking to an AI · replies are a scripted preview</div></div>
             <div class="k-card k-chat">
               <div class="k-log" id="kChat" aria-live="polite"></div>
