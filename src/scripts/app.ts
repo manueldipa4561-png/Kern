@@ -15,12 +15,12 @@ type Answer = { f: string; i: number; t: string; at: number; ed?: number; r?: Re
 type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean };
 type Theme = 'system' | 'dark' | 'light';
 type Lang = 'en' | 'it';
-type State = { v: 1; name: string; field: string; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[] };
+type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[] };
 
 const KEY = 'kern:v1';
 const FEELS: Feel[] = ['flow', 'ok', 'drag'];
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
-const fresh = (): State => ({ v: 1, name: '', field: 'Design', onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'system', guess: '', saves: 0, badges: [], dared: false, gone: [] });
+const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'system', guess: '', saves: 0, badges: [], dared: false, gone: [] });
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
 const cleanR = (r: unknown): Refl | undefined => {
   if (!r || typeof r !== 'object') return undefined;
@@ -39,16 +39,22 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
     if (!s || typeof s !== 'object' || s.v !== 1) return null;
     const drafts: Record<string, string> = {};
     if (s.drafts && typeof s.drafts === 'object') for (const [k, v] of Object.entries(s.drafts)) if (/^\w+\.[0-2]$/.test(k) && typeof v === 'string' && v) drafts[k] = v.slice(0, 2000);
+    const field: string = FIELDS[s.field] ? s.field : 'Design';
+    const answers: Answer[] = Array.isArray(s.answers)
+      ? s.answers.filter((a: Answer) => a && FIELDS[a.f] && Number.isInteger(a.i) && a.i >= 0 && a.i < 3 && typeof a.t === 'string' && Number.isFinite(a.at))
+        .map((a: Answer) => ({ f: a.f, i: a.i, t: a.t.slice(0, 2000), at: a.at, ed: Number.isFinite(a.ed) ? a.ed : undefined, r: cleanR(a.r) }))
+      : [];
+    // Interests: the fields someone chose to explore, in their order. Older saves have none: use the answered ones.
+    const fields = [...new Set([...(Array.isArray(s.fields) ? s.fields : answers.map((a) => a.f)), ...(s.onboarded ? [field] : [])])]
+      .filter((f): f is string => typeof f === 'string' && !!FIELDS[f]);
     return {
       ...d,
       name: str(s.name, 40),
-      field: FIELDS[s.field] ? s.field : 'Design',
+      field,
+      fields,
       onboarded: !!s.onboarded,
       stones: Number.isFinite(s.stones) ? Math.max(0, s.stones) : 0,
-      answers: Array.isArray(s.answers)
-        ? s.answers.filter((a: Answer) => a && FIELDS[a.f] && Number.isInteger(a.i) && a.i >= 0 && a.i < 3 && typeof a.t === 'string' && Number.isFinite(a.at))
-          .map((a: Answer) => ({ f: a.f, i: a.i, t: a.t.slice(0, 2000), at: a.at, ed: Number.isFinite(a.ed) ? a.ed : undefined, r: cleanR(a.r) }))
-        : [],
+      answers,
       drafts,
       msgs: Array.isArray(s.msgs) ? s.msgs.filter((m: Msg) => m && (m.who === 'ai' || m.who === 'me') && typeof m.t === 'string').map((m: Msg) => ({ who: m.who, t: m.t.slice(0, 400) })) : [],
       mine: Array.isArray(s.mine) ? s.mine.filter((m: unknown) => typeof m === 'string').map((m: string) => m.slice(0, 140)) : [],
@@ -95,6 +101,7 @@ const mergeIn = (raw: unknown) => {
   S.stones = S.answers.reduce((s, a) => s + worth(a), 0); // stones are exactly what the merged answers earned
   if (!S.name) S.name = r.name;
   if (!S.onboarded && r.onboarded) { S.onboarded = true; S.field = r.field; }
+  S.fields = [...new Set([...S.fields, ...r.fields, S.field])]; // interests from every device
   S.drafts = { ...r.drafts, ...S.drafts };
   if (!S.mine.length && r.mine.length) { S.mine = r.mine; S.msgs = r.msgs; }
   S.saves = Math.max(S.saves, r.saves);
@@ -305,8 +312,29 @@ const renderSignals = () => {
 };
 
 // Home: greeting, next mission, the three missions with status.
+// Your interests on Missions: switch path in one tap (progress is kept per field), or add more.
+const switchField = (f: string) => {
+  if (f === S.field || !FIELDS[f]) return;
+  S.field = f; save(); applyField(false); pop();
+};
+const renderFields = () => {
+  const box = $('kFields');
+  box.innerHTML = '';
+  S.fields.forEach((f) => {
+    const b = document.createElement('button'), im = document.createElement('img'), t = document.createElement('span'), n = document.createElement('small');
+    b.type = 'button'; b.className = 'k-fchip' + (f === S.field ? ' on' : ''); b.setAttribute('aria-pressed', String(f === S.field));
+    im.src = `/img/f-${f.toLowerCase()}.webp`; im.alt = ''; im.width = im.height = 400; im.decoding = 'async';
+    t.textContent = tr(f);
+    n.textContent = `${new Set(S.answers.filter((a) => a.f === f).map((a) => a.i)).size}/3`;
+    b.append(im, t, n); b.addEventListener('click', () => switchField(f)); box.appendChild(b);
+  });
+  const add = document.createElement('button');
+  add.type = 'button'; add.className = 'k-fchip k-fadd'; add.textContent = `+ ${tr('Add')}`; add.setAttribute('aria-label', tr('Add interests'));
+  add.addEventListener('click', () => openStart(true)); box.appendChild(add);
+};
 const kAdd = $('kAdd');
 const renderHome = () => {
+  renderFields();
   const f = F(), done = doneSet(), next = [0, 1, 2].find((k) => !done.has(k)), it = isIt();
   setD($('kHi'), S.name ? `${it ? 'Ciao' : 'Hi'} ${S.name}` : (it ? 'Ciao' : 'Hi'));
   const img = $<HTMLImageElement>('kNxImg'), src = next === undefined ? '/img/cairn.webp' : `/img/f-${S.field.toLowerCase()}.webp`;
@@ -511,16 +539,19 @@ kTa.addEventListener('input', () => { clearTimeout(dT); dT = window.setTimeout(f
 // Signs on the trail: the tip each person leaves after a mission is shown, without a name, to the next
 // people who open it (cloud.ts, table kern_signs). No account, no sharing: the tip stays on the device.
 const shareable = (t: string) => t.trim().length >= 3 && !/(https?:\/\/|www\.|@|\d{6,})/i.test(t);
+const sharing = new WeakSet<Answer>(); // uploads in flight: a quick delete + Undo must not publish the sign twice
 function shareSign(a: Answer) {
   const tip = a.r?.tip;
-  if (!user || !tip || a.r?.sid || !shareable(tip)) return;
+  if (!user || !tip || a.r?.sid || sharing.has(a) || !shareable(tip)) return;
+  sharing.add(a);
   cloud.addSign(a.f, a.i, tip).then((id) => {
-    if (!S.answers.includes(a)) { cloud.removeSign(id).catch(() => { /* retried never; row has no name */ }); return; } // deleted meanwhile
+    sharing.delete(a);
+    if (!S.answers.includes(a)) { cloud.removeSign(id).catch(() => { /* row has no name */ }); return; } // deleted meanwhile
     if (a.r && id > 0) { a.r.sid = id; save(); }
-  }).catch(() => { /* stays on this device */ });
+  }).catch(() => { sharing.delete(a); /* stays on this device */ });
 }
 function unshareSign(a: Answer) {
-  const id = a.r?.sid; if (!id) return;
+  const id = a.r?.sid; if (!id) return; // still uploading: shareSign removes it on arrival if the answer is gone
   delete a.r!.sid;
   if (user) cloud.removeSign(id).catch(() => { /* already gone or offline */ });
 }
@@ -644,10 +675,18 @@ if (GUESSES.includes(S.guess)) fb.dataset.src = S.guess;
 // Profile (local only) and onboarding
 const kLogin = $('kLogin'), kStart = $('kStart'), kS1 = $('kS1'), kS2 = $('kS2');
 const kNmI = $<HTMLInputElement>('kNmI'), kAge = $<HTMLInputElement>('kAge'), kErr = $('kErr'), kLog = $('kLog');
-let pick = S.field;
+// Interests: pick one or more fields to explore. You start in the current one if you keep it, else the first picked.
+let picks: string[] = [...S.fields];
 const tiles = kStart.querySelectorAll<HTMLElement>('#kPick [data-f]');
-const markPick = () => tiles.forEach((o) => { o.classList.toggle('sel', o.dataset.f === pick); o.setAttribute('aria-pressed', String(o.dataset.f === pick)); });
-const openStart = (step2 = false) => { kS1.hidden = step2; kS2.hidden = !step2; markPick(); kStart.classList.add('on'); };
+const markPick = () => {
+  tiles.forEach((o) => { const on = picks.includes(o.dataset.f!); o.classList.toggle('sel', on); o.setAttribute('aria-pressed', String(on)); });
+  $<HTMLButtonElement>('kGo').disabled = !picks.length;
+};
+const openStart = (step2 = false) => {
+  if (S.onboarded) picks = [...S.fields];
+  setT($('kGo'), S.onboarded ? 'Save interests' : 'Start my first mission');
+  kS1.hidden = step2; kS2.hidden = !step2; markPick(); kStart.classList.add('on');
+};
 const renderMe = () => { $('kAv').textContent = (S.name.trim()[0] || 'K').toUpperCase(); };
 // Login screen modes: 'up' create account, 'in' log in, 'guest' local-only profile.
 // Without Supabase keys only 'guest' exists and the screen looks like before.
@@ -761,25 +800,24 @@ $('kPwF').addEventListener('submit', async (e) => {
   catch (err) { setT(er, cloud.why(err)); er.hidden = false; }
 });
 $('kIdk').addEventListener('click', () => { kS1.hidden = true; kS2.hidden = false; });
-// First visit: loader > choice > field > profile (name + 18+, or an account) > missions.
-const arrive = () => { // land on Missions with the field's object dropping into the card
-  goTab('missions');
-  const o = $('kNxImg');
+// First visit: loader > choice > interests > profile (name + 18+, or an account) > missions.
+const pop = () => { // the field's object drops into the mission card
   if (still) return;
+  const o = $('kNxImg');
   o.classList.remove('arrive'); void o.offsetWidth; o.classList.add('arrive');
 };
+const arrive = () => { goTab('missions'); pop(); };
 const closeStart = () => {
   if (vtBusy) return; // a flight is still playing: ignore the double tap
+  const pick = (S.onboarded && picks.includes(S.field) ? S.field : picks[0]) || S.field;
   const changed = pick !== S.field;
+  const commit = () => { S.fields = picks.length ? [...picks] : [pick]; S.field = pick; S.onboarded = true; save(); };
   if (!S.name) { // no profile yet: keep the choice, ask who they are, then arrive()
-    S.field = pick; S.onboarded = true; save(); applyField(changed);
+    commit(); applyField(changed);
     kStart.classList.remove('on'); kLogin.classList.add('on'); syncInert(); (mode === 'in' ? kEm : kNmI).focus();
     return;
   }
-  const run = () => {
-    S.field = pick; S.onboarded = true; save();
-    kStart.classList.remove('on'); applyField(changed); goTab('missions');
-  };
+  const run = () => { commit(); kStart.classList.remove('on'); applyField(changed); goTab('missions'); };
   // Shared element: the picked field's object flies from its tile into the mission card.
   const from = kS2.hidden ? null : kStart.querySelector<HTMLElement>(`#kPick [data-f="${pick}"] img`), to = $<HTMLImageElement>('kNxImg');
   if (still || !startVT || !from) return run();
@@ -794,7 +832,11 @@ const closeStart = () => {
 };
 $('kSkip').addEventListener('click', closeStart);
 $('kGo').addEventListener('click', closeStart);
-tiles.forEach((c) => c.addEventListener('click', () => { pick = c.dataset.f || 'Design'; markPick(); }));
+tiles.forEach((c) => c.addEventListener('click', () => {
+  const f = c.dataset.f || 'Design';
+  picks = picks.includes(f) ? picks.filter((x) => x !== f) : [...picks, f];
+  markPick();
+}));
 
 // Hero card: the object leans toward the pointer (translate only, so it never fights the float animation).
 const kNext = $('kNext');
@@ -946,7 +988,7 @@ const setLang = (l: Lang) => {
 document.querySelectorAll<HTMLElement>('[data-k-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.kLang === 'it' ? 'it' : 'en')));
 $('kAv').addEventListener('click', () => openSheetEl(kSet, $('kSetX')));
 $('kSetX').addEventListener('click', () => closeSheet(kSet));
-$('kChField').addEventListener('click', () => { kSet.hidden = true; pick = S.field; openStart(true); });
+$('kChField').addEventListener('click', () => { kSet.hidden = true; openStart(true); });
 $('kExp').addEventListener('click', () => download(JSON.stringify({ ...snapshot(), exportedAt: new Date().toISOString() }, null, 2), 'kern-data.json', 'application/json'));
 // Weekly calendar reminder (.ics): works in every calendar app, no notifications permission, no streaks.
 $('kRemind').addEventListener('click', () => {

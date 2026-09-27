@@ -68,6 +68,7 @@ as $$
 declare new_id bigint;
 begin
   if auth.uid() is null then raise exception 'not signed in'; end if;
+  perform pg_advisory_xact_lock(hashtextextended(auth.uid()::text, 0)); -- one add at a time per user, so the cap holds
   if (select count(*) from public.kern_signs where user_id = auth.uid() and created_at > now() - interval '1 day') >= 20 then
     raise exception 'too many signs today';
   end if;

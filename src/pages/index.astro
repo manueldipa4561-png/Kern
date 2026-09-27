@@ -79,7 +79,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             <button type="button" class="k-ask-btn" data-k-send>Share my trail with the KERN team</button>
             <button type="button" class="k-ask-btn" id="kRemind">Add a weekly reminder to my calendar</button>
             <button type="button" class="k-ask-btn" data-k-copy="app">Copy app link</button>
-            <button type="button" class="k-ask-btn" id="kChField">Change field</button>
+            <button type="button" class="k-ask-btn" id="kChField">Your interests</button>
             <button type="button" class="k-ask-btn" id="kInst" hidden>Install KERN</button>
             <p class="k-l" id="kIos" hidden>On iPhone: tap Share, then Add to Home Screen.</p>
             <button type="button" class="k-ask-btn" id="kExp">Export my data</button>
@@ -151,6 +151,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
         <div id="kS2" class="k-sp" hidden>
           <div class="k-l">Good. Let's find out.</div>
           <h4>What are you<br>curious about <b>right now?</b></h4>
+          <p class="k-l">Pick one or more. You can add others anytime.</p>
           <div class="k-tiles" id="kPick" role="group">
             {FIELDS.map((f) => <button type="button" class="k-tile" data-f={f} aria-pressed="false"><img src={`/img/f-${f.toLowerCase()}.webp`} alt="" width="400" height="400" decoding="async" /><span>{f}</span></button>)}
           </div>
@@ -166,6 +167,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
         <div class="k-body">
           <section class="k-pane on" id="k-missions">
             <div><div class="k-l" id="kHi">Hi</div><h4>Pick your<br>next <b>move.</b></h4></div>
+            <div class="k-fields" id="kFields" role="group" aria-label="Your interests"></div>
             <div class="k-card k-dare" id="kDare" hidden><div class="k-l">A friend dared you</div><h5 id="kDareT"></h5><button type="button" class="k-go" id="kDareGo">Answer the dare</button></div>
             <div class="k-card k-main" id="kNext"><img class="k-obj" id="kNxImg" src="/img/f-design.webp" alt="" width="400" height="400" decoding="async" fetchpriority="high" /><div class="k-l" id="kNxL">Your next step</div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><div class="k-meta"><span class="k-l">+50 stones</span><span class="k-l">+20 if you reflect</span></div><button type="button" class="k-btn" id="kAdd">Add your answer</button></div>
             <div class="k-card"><div class="k-l">Your 3 missions</div>

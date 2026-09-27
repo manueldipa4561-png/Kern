@@ -33,7 +33,7 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 
 - Optional account: sign up, log in, forgot password, log out, delete account; the trail syncs across devices and merges with what was on the device
 - Or no account: local profile (first name, 18+ confirmation), everything stays in the browser
-- Onboarding by field, Missions, yourKERN, Trail, KERN.AI co-pilot (scripted: it only asks questions)
+- Onboarding: the choice first, then one or more interests (fields); on Missions you switch path in one tap and progress is kept per field, "+ Add" picks more. Missions, yourKERN, Trail, KERN.AI co-pilot (scripted: it only asks questions)
 - Home: your next mission first, then your 3 missions with status (done / next / draft)
 - Answers with automatic drafts; edit or delete them (with Undo); +50 stones per answer, +20 for a reflection
 - Quick reflection after each answer (how it felt, would you do it again, hardest part, a sign for the next person)

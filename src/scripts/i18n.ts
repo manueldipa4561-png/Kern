@@ -239,6 +239,8 @@ export const IT: Record<string, string> = {
         'Stays on this device. Log in to share it, without your name, with the next people on this trail.': 'Resta su questo dispositivo. Accedi per condividerlo, senza il tuo nome, con chi farà questa traccia dopo di te.',
         'Stays on this device for now.': 'Per ora resta su questo dispositivo.',
         'Signs on the trail': 'Segni sulla traccia', 'Signs you left': 'I segni che hai lasciato',
+        'Pick one or more. You can add others anytime.': 'Scegline uno o più. Puoi aggiungerne altri quando vuoi.',
+        'Your interests': 'I tuoi interessi', 'Add': 'Aggiungi', 'Add interests': 'Aggiungi interessi', 'Save interests': 'Salva gli interessi',
         'People who finish a mission before you leave a short tip for you. Yours helps the next person.': 'Chi finisce una missione prima di te ti lascia un breve consiglio. Il tuo aiuta chi viene dopo.',
 };
 export const t2 = (en: string, it: string) => { IT[en] = it; return en; };

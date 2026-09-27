@@ -463,3 +463,15 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 @keyframes kArrive { from { opacity: 0; transform: translateY(-44px) scale(.55) rotate(-14deg); } }
 .k-obj.arrive { animation: kArrive .9s var(--spring) both, kFloat 6s .9s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .k-obj.arrive { animation: none; } }
+
+/* Your interests: switch path on Missions, progress per field */
+.k-fields { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -20px; padding: 2px 20px 4px; }
+.k-fields::-webkit-scrollbar { display: none; }
+.k-fchip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px 5px 5px; border-radius: 999px; border: 1px solid var(--edge); background: var(--surf); color: var(--fg); font: 700 12.5px 'Inter Tight Variable', system-ui, sans-serif; cursor: pointer; transition: transform .45s var(--spring), background-color .2s, border-color .2s; }
+.k-fchip img { width: 26px; height: 26px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.3)); }
+.k-fchip small { font: 500 10px var(--mono); color: var(--dim); }
+.k-fchip.on { background: var(--acc); border-color: var(--acc); color: var(--on); }
+.k-fchip.on small { color: var(--on); opacity: .7; }
+.k-fchip:active { transform: scale(.95); transition-duration: .08s; }
+.k-fadd { padding: 8px 14px; border-style: dashed; color: var(--dim); }
+.k-go:disabled { opacity: .4; box-shadow: none; cursor: default; transform: none; }
