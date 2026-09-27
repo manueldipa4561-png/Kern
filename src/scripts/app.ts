@@ -316,7 +316,7 @@ const renderHome = () => {
     setT(kAdd, 'See your Kern card'); kAdd.dataset.kAns = 'card';
   } else {
     const m = f.m[next];
-    setD($('kNxL'), it ? `Il tuo prossimo passo · missione ${next + 1} di 3` : `Your next step · mission ${next + 1} of 3`);
+    setD($('kNxL'), it ? `Prossimo passo · missione ${next + 1} di 3` : `Your next step · mission ${next + 1} of 3`);
     setT($('kNxT'), m[1]); setT($('kNxP'), m[2]);
     setT(kAdd, S.drafts[`${S.field}.${next}`] ? 'Continue your draft' : 'Add your answer'); kAdd.dataset.kAns = String(next);
   }
