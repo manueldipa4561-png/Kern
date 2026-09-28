@@ -60,3 +60,7 @@ Real partner missions, peer review and ranking, a real AI co-pilot, push notific
 - `src/scripts/cloud.ts` accounts and sync (loaded only when the Supabase variables are set), `supabase/schema.sql` database setup
 - `src/scripts/i18n.ts` Italian strings (English is the source), `src/scripts/fields.ts` missions per field
 - `public/` manifest, service worker, icons, favicons; `public/img/` 3D objects (fields, ranks, cairn, co-pilot orb)
+
+## License
+
+© 2026 Manuel Di Paolo. All rights reserved. This code is not open source: see [LICENSE](LICENSE).
