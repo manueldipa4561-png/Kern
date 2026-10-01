@@ -4,6 +4,8 @@ import '@fontsource-variable/bricolage-grotesque';
 import '@fontsource/instrument-serif/latin-400-italic.css';
 import '../styles/app.css';
 import { readFileSync } from 'node:fs';
+import interFont from '@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url';
+import bricolageFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url';
 // Inlined so iOS can read it without a login cookie (it fetches the icon itself, which a password-protected site answers with 401).
 const touchIcon = 'data:image/png;base64,' + readFileSync('public/icons/apple-touch-icon.png').toString('base64');
 const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music'];
@@ -18,6 +20,8 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
     <title>KERN · Find your direction by doing real work</title>
     <meta name="description" content="Try real missions, think with an AI co-pilot that only asks questions, and find out what you want to do by doing it." />
     <meta name="theme-color" content="#0F140E" />
+    <link rel="preload" as="font" type="font/woff2" href={interFont} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={bricolageFont} crossorigin />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -49,6 +53,10 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
               <div class="k-xm"><span class="k-l" id="kXWho"></span><span class="k-l" id="kXMin"></span></div>
               <p class="k-xb" id="kXBrief"></p>
               <div class="k-xa"><div class="k-l" id="kXAT"></div><pre id="kXAB"></pre></div>
+              <p class="k-msg k-ai" id="kXFirst" hidden>First time here? Read the example, tick the steps, then write yours. Your first finish always pays something.</p>
+              <div class="k-xbtns" id="kXBtns"><button type="button" class="k-chipb" id="kXEx">Show an example</button><button type="button" class="k-chipb" id="kXHint">Need a hint?</button></div>
+              <div class="k-xex" id="kXExB" hidden><div class="k-l">A strong answer, for inspiration</div><pre id="kXExT"></pre></div>
+              <div id="kXHints" aria-live="polite"></div>
               <div class="k-xh"><span class="k-l">Your steps</span><span class="k-l" id="kXPn"></span></div>
               <div class="k-xp" aria-hidden="true"><i id="kXPb"></i></div>
               <div id="kXSteps" role="group"></div>
@@ -133,7 +141,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
           <h4 id="kRwT">Your answer<br>won <b>#1.</b></h4>
           <p>Preview: this is what it looks like when reviewers rank your answer first.</p>
           <div class="k-gain"><b id="kGain">+0</b> <span class="k-l">stones</span></div>
-          <div class="k-rankup" id="kRU" hidden><img id="kRUImg" src="/img/r1.webp" alt="" width="400" height="400" decoding="async" /><div><div class="k-l">New rank</div><div class="k-rank" id="kRU2"></div></div></div>
+          <div class="k-rankup" id="kRU" hidden><img id="kRUImg" src="/img/r1.webp" alt="" width="400" height="400" loading="lazy" decoding="async" /><div><div class="k-l">New rank</div><div class="k-rank" id="kRU2"></div></div></div>
           <button type="button" class="k-go" id="kRwOk">Keep going</button>
         </div>
       </div>
@@ -201,6 +209,25 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
                 <button type="button" class="k-mrow" id="kMR2"><i class="k-mdot" aria-hidden="true"></i><span><b>Work with a partner</b><small></small></span><em aria-hidden="true">›</em></button>
               </div>
             </div>
+            <div class="k-card k-habit" id="kHabit">
+              <div class="k-l k-finds-h"><span>Daily habit · tiny on purpose</span><span id="kHbN"></span></div>
+              <div id="kHbSet">
+                <h5>Start one tiny habit</h5>
+                <p>Make it so small you cannot fail. Tie it to something you already do every day, and it sticks.</p>
+                <div class="k-chips" id="kHbPick"></div>
+                <label class="k-l" for="kHbT">Your tiny habit</label><input id="kHbT" type="text" maxlength="60" autocomplete="off" />
+                <div class="k-chips" id="kHbCues"></div>
+                <label class="k-l" for="kHbC">Right after I…</label><input id="kHbC" type="text" maxlength="60" autocomplete="off" />
+                <button type="button" class="k-btn" id="kHbSave">Start my habit</button>
+              </div>
+              <div id="kHbRun" hidden>
+                <h5 id="kHbName"></h5>
+                <p id="kHbCue"></p>
+                <div class="k-hb-dots" id="kHbDots"></div>
+                <div class="k-sh-btns"><button type="button" class="k-go" id="kHbDo">I did it</button><button type="button" class="k-sk" id="kHbEdit">Change habit</button></div>
+                <p class="k-l" id="kHbMsg" aria-live="polite"></p>
+              </div>
+            </div>
             <div class="k-card k-best"><img class="k-side" src="/img/r4.webp" alt="" width="400" height="400" loading="lazy" decoding="async" /><div class="k-l">Coming with partner missions</div><h5>Anonymous review</h5><p>Reviewers rank answers by quality, not likes. The best ones get seen by the company behind the mission.</p><button type="button" class="k-win" id="kWin">See what a win feels like</button></div>
             <div class="k-card k-aic"><img class="k-side" src="/img/ai.webp" alt="" width="400" height="400" loading="lazy" decoding="async" /><div class="k-l">Stuck?</div><p>KERN.AI asks the questions that get you moving. It never gives you the answer.</p><button type="button" class="k-ask-btn" id="kToAi">Open KERN.AI</button></div>
           </section>
@@ -241,7 +268,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
               <div class="k-log" id="kChat" aria-live="polite"></div>
               <div class="k-cmp" id="kCmp" hidden><div class="k-l">Version 1</div><p id="kV1"></p><div class="k-l">Version 3</div><p id="kV3"></p><button type="button" class="k-ask-btn" id="kSaveV">Save to yourKERN</button></div>
               <div class="k-comp"><input id="kIn" type="text" maxlength="140" autocomplete="off" aria-label="Your idea" /><button type="button" class="k-send" id="kSend" aria-label="Send">↑</button></div>
-              <div class="k-chips" id="kEx"><span role="button" tabindex="0">Use an example</span><span role="button" tabindex="0">Start over</span></div>
+              <div class="k-chips" id="kEx"><span role="button" tabindex="0">Use an example</span><span role="button" tabindex="0">Start over</span><span role="button" tabindex="0">I’m stuck</span><span role="button" tabindex="0">Make it smaller</span></div>
             </div>
             <div class="k-card"><div class="k-l">Do it twice</div><p>Make it alone first. Then with the co-pilot. Compare the two.</p></div>
             <div class="k-card"><div class="k-l">The rules</div><p>It asks. It never answers.</p><p>Your idea always comes first.</p><p>If it gets heavy, it stops and points you to a person.</p></div>

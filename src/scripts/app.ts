@@ -7,6 +7,7 @@ import { IT, t2 } from './i18n';
 import { FIELDS } from './fields';
 import { MX } from './missions';
 import { RELICS, rollDrop, type Drop } from './loot';
+import { HELPS } from './helps';
 import * as cloud from './cloud';
 import { akey, ver, stamp, mergeAnswers, type Tomb } from './sync';
 
@@ -17,13 +18,14 @@ type Answer = { f: string; i: number; t: string; at: number; ed?: number; r?: Re
 type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean };
 type Theme = 'system' | 'dark' | 'light';
 type Lang = 'en' | 'it';
-type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[] };
+type Habit = { t: string; c: string; l: [number, string][] }; // t: the tiny habit, c: the cue (after I...), l: [day number, relic id found that day or ''] per day done
+type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit };
 
 const KEY = 'kern:v1';
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
 const FEELS: Feel[] = ['flow', 'ok', 'drag'];
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
-const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'system', guess: '', saves: 0, badges: [], dared: false, gone: [] });
+const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'system', guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] } });
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
 const cleanR = (r: unknown): Refl | undefined => {
   if (!r || typeof r !== 'object') return undefined;
@@ -34,6 +36,11 @@ const cleanR = (r: unknown): Refl | undefined => {
   if (str(o.tip, 140).trim()) out.tip = str(o.tip, 140).trim();
   if (out.tip && Number.isSafeInteger(o.sid) && (o.sid as number) > 0) out.sid = o.sid as number;
   return Object.keys(out).length ? out : undefined;
+};
+const cleanHabit = (h: unknown): Habit => {
+  const o = (h && typeof h === 'object' ? h : {}) as Record<string, unknown>;
+  const l: [number, string][] = Array.isArray(o.l) ? o.l.filter((e): e is [number, string] => Array.isArray(e) && Number.isInteger(e[0]) && e[0] > 0 && typeof e[1] === 'string' && (e[1] === '' || DROP_IDS.includes(e[1]))).map((e): [number, string] => [e[0], e[1]]).slice(-90) : [];
+  return { t: str(o.t, 60).trim(), c: str(o.c, 60).trim(), l };
 };
 // Stored or synced data is untrusted input: keep only well-formed values.
 const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -67,6 +74,7 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
       saves: Number.isFinite(s.saves) ? s.saves : 0,
       badges: Array.isArray(s.badges) ? s.badges.filter((b: unknown) => typeof b === 'string' && b.length < 20).slice(0, 50) : [],
       dared: !!s.dared,
+      habit: cleanHabit(s.habit),
       gone: Array.isArray(s.gone) ? s.gone.filter((g: unknown) => Array.isArray(g) && typeof g[0] === 'string' && g[0].length < 40 && Number.isFinite(g[1])).map((g: Tomb): Tomb => [g[0], g[1]]).slice(-200) : [],
     };
   } catch { return null; }
@@ -111,6 +119,10 @@ const mergeIn = (raw: unknown) => {
   if (!S.guess) S.guess = r.guess;
   S.badges = [...new Set([...S.badges, ...r.badges])];
   S.dared = S.dared || r.dared;
+  if (!S.habit.t && r.habit.t) { S.habit.t = r.habit.t; S.habit.c = r.habit.c; }
+  const hl = new Map<number, string>(); // days done on any device; a day that found something keeps it
+  for (const [d, id] of [...S.habit.l, ...r.habit.l]) if (!hl.get(d)) hl.set(d, id);
+  S.habit.l = [...hl].sort((a, b) => a[0] - b[0]).slice(-90);
 };
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -426,6 +438,7 @@ const BADGES: { id: string; t: string; d: string; ok: () => boolean }[] = [
   { id: 'twice', t: 'Do it twice', d: '3 versions of an idea in KERN.AI', ok: () => S.mine.length >= 3 },
   { id: 'dare', t: 'Challenger', d: 'Dared a friend', ok: () => S.dared },
   { id: 'steady', t: 'Steady', d: 'Made something in 3 different weeks', ok: () => new Set(S.answers.map((a) => WEEKNUM(a.at))).size >= 3 },
+  { id: 'habit7', t: 'Habit builder', d: '7 days of your tiny habit', ok: () => S.habit.l.length >= 7 },
   { id: 'explorer', t: 'Explorer', d: 'Answered in 2 different fields', ok: () => new Set(S.answers.map((a) => a.f)).size >= 2 },
 ];
 let booted = false;
@@ -480,6 +493,13 @@ let busy = false;
 const OPEN = "What is your idea? Write it in your own words first. I won't suggest one.";
 const HEAVY = /(kill myself|suicid|self.?harm|hopeless|want to die|voglio morire|farla finita|non ce la faccio più)/i;
 const ASKED = /(give me|tell me|what should|write it for me|any ideas|dammi|dimmi|che idea|scrivilo tu|cosa dovrei)/i;
+const STUCK = /(stuck|don'?t know|do not know|no idea|not sure|blank|boh|non so|bloccat|nessuna idea)/i;
+const pick = <T,>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
+const Q_STUCK = [t2('Let us make it smaller. What is one sentence you could write in 30 seconds?', 'Facciamolo più piccolo. Qual è una frase che potresti scrivere in 30 secondi?'), t2('Forget good. What would the roughest version look like?', 'Dimentica il bello. Come sarebbe la versione più grezza?'), t2('Who is it for? Name one real person.', 'Per chi è? Fai il nome di una persona vera.')];
+const Q_SMALL = [t2('What is the smallest part of it you could finish today?', 'Qual è la parte più piccola che potresti finire oggi?'), t2('If you only had 5 minutes, what would you do first?', 'Se avessi solo 5 minuti, cosa faresti per prima cosa?')];
+const Q_MORE = [[t2('What would make that clearer for someone brand new?', 'Cosa lo renderebbe più chiaro per chi è nuovo?'), t2('If a friend read that, what would they ask first?', 'Se un amico lo leggesse, cosa chiederebbe per prima cosa?')], [t2('What is the strongest word in that, and what would you cut?', 'Qual è la parola più forte e cosa taglieresti?'), t2('What did you change from your first version, and why?', 'Cosa hai cambiato rispetto alla prima versione, e perché?')]];
+// Echo the user's own opening words back, so the question is clearly about their idea.
+const echo = (v: string) => { const w = v.split(/\s+/); return `“${w.slice(0, 6).join(' ')}${w.length > 6 ? '…' : ''}” `; };
 const renderChat = () => {
   chatEl.innerHTML = '';
   S.msgs.forEach((m) => {
@@ -498,21 +518,29 @@ const aiSay = (t: string) => {
   S.msgs.push({ who: 'ai', t: '', typing: true }); renderChat();
   window.setTimeout(() => { S.msgs.pop(); S.msgs.push({ who: 'ai', t }); busy = false; save(); renderChat(); renderSignals(); renderBadges(); }, still ? 0 : 750);
 };
-const startChat = () => { S.msgs = [{ who: 'ai', t: OPEN }]; S.mine = []; busy = false; inEl.value = ''; save(); renderChat(); };
+const startChat = () => {
+  S.msgs = [{ who: 'ai', t: OPEN }]; S.mine = []; busy = false; inEl.value = '';
+  if (S.habit.t && !S.habit.l.some((e) => e[0] === dayN(Date.now()))) S.msgs.push({ who: 'ai', t: tr('Your tiny habit today: {h}. Done it? You can tick it on the Missions screen.').replace('{h}', S.habit.t) });
+  save(); renderChat();
+};
 const sendChat = () => {
   const v = inEl.value.trim(); if (!v || busy) return;
   inEl.value = ''; S.msgs.push({ who: 'me', t: v }); busy = true; renderChat();
   if (HEAVY.test(v)) return aiSay("This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.");
   if (ASKED.test(v)) return aiSay("I won't hand you the idea. What is the first thing that comes to mind, even if it's rough?");
+  if (STUCK.test(v)) return aiSay(tr(pick(Q_STUCK)));
   S.mine.push(v);
-  if (S.mine.length < 3) return aiSay(F().qs[S.mine.length - 1]);
+  if (S.mine.length < 3) return aiSay(echo(v) + tr(pick([F().qs[S.mine.length - 1], ...Q_MORE[S.mine.length - 1]])));
   if (S.mine.length === 3) return aiSay('You wrote it 3 times and each version changed. That is your evidence. Compare the first and the last.');
   aiSay('Save it to yourKERN, or start over with a new idea.');
 };
 $('kSend').addEventListener('click', sendChat);
 inEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendChat(); } });
 document.querySelectorAll<HTMLElement>('#kEx span').forEach((c, i) => {
-  const go = () => { if (i === 1) return startChat(); inEl.value = tr(F().idea).replace(/^[^:]+:\s*/, ''); inEl.focus(); };
+  const go = () => {
+    if (i === 1) return startChat();
+    if (i >= 2) { if (busy) return; S.msgs.push({ who: 'me', t: c.textContent || '' }); busy = true; renderChat(); return aiSay(tr(pick(i === 2 ? Q_STUCK : Q_SMALL))); }
+    inEl.value = tr(F().idea).replace(/^[^:]+:\s*/, ''); inEl.focus(); };
   c.addEventListener('click', go);
   c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
 });
@@ -612,7 +640,25 @@ function renderBrief(f: string, i: number) {
   stepProg();
   x.bar.forEach((b) => tick(kRfBI, b, false, 'bar'));
   tick(kRfBI, x.twist, false, 'tw');
+  // Example + hints. On the very first mission the example is open and a short guide explains the workflow.
+  const hp = HELPS[f]?.[i], first = !S.answers.length;
+  hintN = 0; $('kXHints').innerHTML = '';
+  $('kXBtns').hidden = !hp; $('kXFirst').hidden = !(hp && first);
+  $('kXExB').hidden = !(hp && first);
+  if (hp) { setX($('kXExT'), hp.ex); setT($('kXEx'), first ? 'Hide the example' : 'Show an example'); setT($('kXHint'), 'Need a hint?'); $<HTMLButtonElement>('kXHint').disabled = false; }
 }
+let hintN = 0;
+$('kXEx').addEventListener('click', () => {
+  const b = $('kXExB'); b.hidden = !b.hidden;
+  setT($('kXEx'), b.hidden ? 'Show an example' : 'Hide the example');
+});
+$('kXHint').addEventListener('click', () => {
+  const hp = HELPS[cur.f]?.[cur.i]; if (!hp || hintN >= hp.hints.length) return;
+  const p = document.createElement('p'); p.className = 'k-msg k-ai'; setX(p, hp.hints[hintN]); $('kXHints').appendChild(p);
+  hintN++;
+  const b = $<HTMLButtonElement>('kXHint');
+  if (hintN >= hp.hints.length) { setT(b, 'No more hints'); b.disabled = true; } else setD(b, `${tr('Another hint')} (${hintN}/${hp.hints.length})`);
+});
 // Self-check after submitting: +10 per quality bar met, +25 for the twist. Returns the bonus (not saved here).
 const bonus = () => {
   const b = kRfBar.hidden ? 0 : kRfBI.querySelectorAll('.bar.on').length * 10 + kRfBI.querySelectorAll('.tw.on').length * 25;
@@ -621,16 +667,17 @@ const bonus = () => {
 // Habit loop (Hooked: trigger, action, variable reward, investment). The reward is a random drop after each finished
 // mission (loot.ts), the investment is the collection of finds and the trail days; nothing here punishes a missed day.
 const DAY = 864e5, dayN = (t: number) => Math.floor((t - new Date(t).getTimezoneOffset() * 6e4) / DAY);
-const relicsOwned = () => RELICS.filter((r) => S.answers.some((a) => a.d === r.id)).map((r) => r.id);
+const relicsOwned = () => RELICS.filter((r) => S.answers.some((a) => a.d === r.id) || S.habit.l.some((e) => e[1] === r.id)).map((r) => r.id);
 const dropStreak = () => { let n = 0; for (const a of [...S.answers].sort((x, y) => y.at - x.at)) { if (a.d) break; n++; } return n; };
-// Trail days: days in a row with a finished mission. One missed day is forgiven (a rest day); two in a row end it.
-const trailDays = () => {
-  const days = [...new Set(S.answers.map((a) => dayN(a.at)))].sort((a, b) => b - a);
+// Trail days: days in a row with a finished mission or a habit check-in. One missed day is forgiven (a rest day); two in a row end it.
+const streakOf = (list: number[]) => {
+  const days = [...new Set(list)].sort((a, b) => b - a);
   if (!days.length || dayN(Date.now()) - days[0] > 2) return 0;
   let n = 1;
   for (let i = 1; i < days.length && days[i - 1] - days[i] <= 2; i++) n++;
   return n;
 };
+const trailDays = () => streakOf([...S.answers.map((a) => dayN(a.at)), ...S.habit.l.map((e) => e[0])]);
 const kFinds = $('kFinds');
 const ICON = (d: string) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
 function renderLoot() {
@@ -648,7 +695,69 @@ function renderLoot() {
   const n = trailDays(), st = $('kStreak');
   st.hidden = !n;
   if (n) setD($('kStreakT'), `${n} ${tr(n === 1 ? 'trail day' : 'trail days')}`);
+  renderHabit();
 }
+
+// Tiny habits (BJ Fogg): one very small action tied to a cue you already have ("after I have my coffee, I write one sentence").
+// A check-in counts as a trail day and sometimes (about 1 in 3) turns up a find, so the reward stays unpredictable.
+const STARTERS: Record<string, string[]> = {
+  Design: [t2('Sketch one screen for 2 minutes', 'Schizza una schermata per 2 minuti'), t2('Note why one app screen works', 'Annota perché funziona una schermata di un’app')],
+  Writing: [t2('Write one sentence', 'Scrivi una frase'), t2('Rewrite one confusing message', 'Riscrivi un messaggio confuso')],
+  Code: [t2('Write or fix 5 lines of code', 'Scrivi o correggi 5 righe di codice'), t2('Read one small piece of code', 'Leggi un piccolo pezzo di codice')],
+  Video: [t2('Film 5 seconds of something', 'Filma 5 secondi di qualcosa'), t2('Note the first shot of one video', 'Annota la prima inquadratura di un video')],
+  Selling: [t2('Ask one person what they need', 'Chiedi a una persona di cosa ha bisogno'), t2('Rewrite one pitch in one line', 'Riscrivi una proposta in una riga')],
+  Music: [t2('Hum or tap a rhythm for 30 seconds', 'Canticchia o batti un ritmo per 30 secondi'), t2('Name one instrument in a song', 'Nomina uno strumento in una canzone')],
+};
+const CUES = [t2('wake up', 'mi sveglio'), t2('have my coffee', 'bevo il caffè'), t2('finish lunch', 'finisco di pranzare'), t2('get home', 'torno a casa'), t2('brush my teeth', 'mi lavo i denti')];
+const HB_MSG = [t2('That counts. Small is the point.', 'Conta. Il bello è essere piccoli.'), t2('Done. Your future self noticed.', 'Fatto. Il tuo io futuro se n’è accorto.'), t2('Again tomorrow, same cue. That is the whole trick.', 'Di nuovo domani, stesso segnale. È tutto qui il trucco.'), t2('Easy on purpose. Keep it that way.', 'Facile di proposito. Resta così.'), t2('One more day on the trail.', 'Un altro giorno sul sentiero.')];
+const kHbSet = $('kHbSet'), kHbRun = $('kHbRun'), kHbT = $<HTMLInputElement>('kHbT'), kHbC = $<HTMLInputElement>('kHbC');
+const chip = (host: Element, text: string, on: () => void) => {
+  const c = document.createElement('span'); c.setAttribute('role', 'button'); c.tabIndex = 0; c.textContent = tr(text);
+  c.addEventListener('click', on); c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); on(); } });
+  host.appendChild(c);
+};
+function renderHabit() {
+  const has = !!S.habit.t;
+  kHbSet.hidden = has; kHbRun.hidden = !has;
+  if (!has) {
+    const pick = $('kHbPick'), cues = $('kHbCues'); pick.innerHTML = ''; cues.innerHTML = '';
+    (STARTERS[S.field] || STARTERS.Writing).forEach((t) => chip(pick, t, () => { kHbT.value = tr(t); }));
+    CUES.forEach((c) => chip(cues, c, () => { kHbC.value = tr(c); }));
+    return;
+  }
+  setD($('kHbName'), S.habit.t);
+  setD($('kHbCue'), S.habit.c ? `${tr('After I')} ${S.habit.c}` : tr('Pick a cue you already have.'));
+  const today = dayN(Date.now()), done = new Set(S.habit.l.map((e) => e[0])), dots = $('kHbDots');
+  dots.innerHTML = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = document.createElement('i'), day = today - i;
+    d.className = (done.has(day) ? 'on' : '') + (i === 0 ? ' now' : '');
+    d.setAttribute('aria-label', `${new Date(day * DAY + 12 * 36e5).toLocaleDateString(isIt() ? 'it-IT' : 'en-GB', { weekday: 'long' })}: ${done.has(day) ? tr('done') : tr('not yet')}`);
+    dots.appendChild(d);
+  }
+  const doneToday = done.has(today), btn = $<HTMLButtonElement>('kHbDo');
+  btn.disabled = doneToday; setT(btn, doneToday ? 'Done today' : 'I did it');
+  const n = streakOf(S.habit.l.map((e) => e[0]));
+  setD($('kHbN'), n ? `${n} ${tr(n === 1 ? 'day' : 'days')}` : '');
+}
+$('kHbSave').addEventListener('click', () => {
+  const t = kHbT.value.trim();
+  if (!t) { say('Pick or write your tiny habit first.'); kHbT.focus(); return; }
+  S.habit.t = t.slice(0, 60); S.habit.c = kHbC.value.trim().slice(0, 60); save(); renderHabit();
+  say('Habit set. Make it so small you cannot fail.');
+});
+$('kHbEdit').addEventListener('click', () => { kHbT.value = S.habit.t; kHbC.value = S.habit.c; S.habit.t = ''; S.habit.c = ''; save(); renderHabit(); });
+$('kHbDo').addEventListener('click', () => {
+  const today = dayN(Date.now());
+  if (S.habit.l.some((e) => e[0] === today)) return;
+  const left = RELICS.filter((r) => !relicsOwned().includes(r.id));
+  const find = left.length && Math.random() < 0.33 ? left[Math.floor(Math.random() * left.length)].id : '';
+  S.habit.l = [...S.habit.l, [today, find] as [number, string]].slice(-90);
+  save(); renderLoot(); setLvl(); renderBadges();
+  if ('vibrate' in navigator) navigator.vibrate(find ? [20, 30, 40] : [14]);
+  if (find) { const d: Drop = { tier: 'relic', id: find, stones: 0 }; openSheetEl(kSheet, $('kDrOk')); showDrop(d, 0); }
+  else setD($('kHbMsg'), tr(HB_MSG[Math.floor(Math.random() * HB_MSG.length)]));
+});
 const DROP_T: Record<string, string> = { spark: t2('A spark', 'Una scintilla'), gem: t2('A gem', 'Una gemma'), relic: t2('A find!', 'Un ritrovamento!'), jackpot: t2('Jackpot', 'Jackpot') };
 const kShD = $('kShD');
 const DEFS = '<defs><linearGradient id="kg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>';
@@ -672,7 +781,7 @@ function showDrop(d: Drop, side: number) {
   $('kDrArt').innerHTML = dropArt(d);
   setT($('kDrT'), DROP_T[d.tier]);
   if (rel) setD($('kDrN'), `${tr(rel.name)} · ${relicsOwned().length + 0}/${RELICS.length}`); else setD($('kDrN'), `+${d.stones} ${isIt() ? 'pietre' : 'stones'}`);
-  setD($('kDrS'), rel ? `+${d.stones} ${isIt() ? 'pietre' : 'stones'}${side ? ` · +${side} bonus` : ''}` : side ? `+${side} bonus` : '');
+  setD($('kDrS'), rel ? `${d.stones ? `+${d.stones} ${isIt() ? 'pietre' : 'stones'}` : ''}${side ? ` · +${side} bonus` : ''}` : side ? `+${side} bonus` : '');
   const bits = $('kDrBits'); bits.innerHTML = '';
   if (!still) for (let i = 0; i < 18; i++) { const p = document.createElement('i'); p.style.setProperty('--a', `${(360 / 18) * i + Math.random() * 12}deg`); p.style.setProperty('--r', `${70 + Math.random() * 60}px`); bits.appendChild(p); }
   if ('vibrate' in navigator) navigator.vibrate(d.tier === 'jackpot' ? [30, 40, 30, 40, 60] : d.tier === 'relic' ? [20, 30, 40] : [18]);
@@ -761,7 +870,8 @@ function finish(r: Refl | undefined) {
   if (real && x && openedAt && Date.now() - openedAt <= x.mins * 60000) { side += 15; S.stones += 15; }
   const today = dayN(Date.now());
   const lucky = S.answers.filter((q) => dayN(q.at) === today).length <= 1;
-  const drop: Drop = real ? rollDrop(Math.max(0, dropStreak() - 1), relicsOwned(), lucky) : { tier: 'none', id: '', stones: 0 };
+  let drop: Drop = real ? rollDrop(Math.max(0, dropStreak() - 1), relicsOwned(), lucky) : { tier: 'none', id: '', stones: 0 };
+  if (real && S.answers.length === 1 && drop.tier === 'none') drop = rollDrop(0, relicsOwned(), false, 0.5); // the first finish always pays something
   S.stones += drop.stones;
   if (a) {
     if (r) { a.r = r; S.stones += 20; }

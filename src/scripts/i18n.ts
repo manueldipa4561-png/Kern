@@ -245,6 +245,16 @@ export const IT: Record<string, string> = {
         'Your steps': 'I tuoi passi', 'Check your answer · +10 stones each': 'Controlla la tua risposta · +10 pietre ciascuno',
         'Chance of a find': 'Possibile ritrovamento', 'A missed day is forgiven.': 'Un giorno saltato si perdona.', 'trail day': 'giorno sul sentiero', 'trail days': 'giorni sul sentiero',
         'Finds': 'Ritrovamenti', 'Not found yet': 'Non ancora trovato', 'Finish missions to uncover them. You never know which one drops.': 'Finisci le missioni per scoprirli. Non sai mai quale arriva.',
-        'You found': 'Hai trovato', 'Keep going': 'Continua', 'Take your time': 'Con calma',
+        'You found': 'Hai trovato', 'Take your time': 'Con calma',
+        'Daily habit · tiny on purpose': 'Abitudine quotidiana · piccola di proposito', 'Start one tiny habit': 'Inizia una piccola abitudine',
+        'Make it so small you cannot fail. Tie it to something you already do every day, and it sticks.': 'Falla così piccola che non puoi fallire. Legala a qualcosa che già fai ogni giorno e resta.',
+        'Your tiny habit': 'La tua piccola abitudine', 'Right after I…': 'Subito dopo che…', 'Start my habit': 'Inizia la mia abitudine', 'I did it': 'Fatto', 'Done today': 'Fatto per oggi', 'Change habit': 'Cambia abitudine',
+        'After I': 'Dopo che', 'Pick a cue you already have.': 'Scegli un segnale che hai già.', 'done': 'fatto', 'not yet': 'non ancora', 'day': 'giorno', 'days': 'giorni',
+        'Pick or write your tiny habit first.': 'Scegli o scrivi prima la tua piccola abitudine.', 'Habit set. Make it so small you cannot fail.': 'Abitudine impostata. Falla così piccola che non puoi fallire.',
+        'Habit builder': 'Costruttore di abitudini', '7 days of your tiny habit': '7 giorni della tua piccola abitudine',
+        'First time here? Read the example, tick the steps, then write yours. Your first finish always pays something.': 'Prima volta? Leggi l’esempio, spunta i passi, poi scrivi il tuo. Il tuo primo traguardo paga sempre qualcosa.',
+        'Show an example': 'Mostra un esempio', 'Hide the example': 'Nascondi l’esempio', 'Need a hint?': 'Serve un indizio?', 'Another hint': 'Un altro indizio', 'No more hints': 'Niente più indizi',
+        'A strong answer, for inspiration': 'Una buona risposta, per ispirarti', 'I’m stuck': 'Sono bloccato', 'Make it smaller': 'Rendilo più piccolo',
+        'Your tiny habit today: {h}. Done it? You can tick it on the Missions screen.': 'La tua piccola abitudine di oggi: {h}. Fatto? Puoi spuntarla nella schermata Missioni.',
 };
 export const t2 =(en: string, it: string) => { IT[en] = it; return en; };
