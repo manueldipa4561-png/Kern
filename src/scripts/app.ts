@@ -528,16 +528,45 @@ const startChat = () => {
   if (S.habit.t && !S.habit.l.some((e) => e[0] === dayN(Date.now()))) S.msgs.push({ who: 'ai', t: tr('Your tiny habit today: {h}. Done it? You can tick it on the Missions screen.').replace('{h}', S.habit.t) });
   save(); renderChat();
 };
-const sendChat = () => {
-  const v = inEl.value.trim(); if (!v || busy) return;
-  inEl.value = ''; S.msgs.push({ who: 'me', t: v }); busy = true; renderChat();
-  if (HEAVY.test(v)) return aiSay("This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.");
+// Live co-pilot: asks netlify/functions/coach.mts, which calls Claude with the rules "only ask, never answer".
+// If there is no key, no network or any error, the scripted coach below answers instead, so the chat always works.
+let liveOk: boolean | null = null;
+const setLive = (ok: boolean) => {
+  if (liveOk === ok) return;
+  liveOk = ok; setT($('kAiLbl'), ok ? 'You are talking to an AI · live replies' : 'You are talking to an AI · offline preview');
+};
+async function askAI(): Promise<string | null> {
+  const ctl = new AbortController(), to = window.setTimeout(() => ctl.abort(), 10000);
+  try {
+    const r = await fetch('/api/coach', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal,
+      body: JSON.stringify({ lang: S.lang, field: S.field, versions: S.mine.length, messages: S.msgs.filter((m) => !m.typing).slice(-12).map((m) => ({ who: m.who, t: m.t })) }),
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return typeof j?.reply === 'string' && j.reply.trim() ? j.reply.trim().slice(0, 500) : null;
+  } catch { return null; } finally { clearTimeout(to); }
+}
+const scripted = (v: string) => {
   if (ASKED.test(v)) return aiSay("I won't hand you the idea. What is the first thing that comes to mind, even if it's rough?");
   if (STUCK.test(v)) return aiSay(tr(pick(Q_STUCK)));
   S.mine.push(v);
   if (S.mine.length < 3) return aiSay(echo(v) + tr(pick([F().qs[S.mine.length - 1], ...Q_MORE[S.mine.length - 1]])));
   if (S.mine.length === 3) return aiSay('You wrote it 3 times and each version changed. That is your evidence. Compare the first and the last.');
   aiSay('Save it to yourKERN, or start over with a new idea.');
+};
+const sendChat = () => {
+  const v = inEl.value.trim(); if (!v || busy) return;
+  inEl.value = ''; S.msgs.push({ who: 'me', t: v }); busy = true; renderChat();
+  if (HEAVY.test(v)) return aiSay("This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.");
+  S.msgs.push({ who: 'ai', t: '', typing: true }); renderChat();
+  askAI().then((reply) => {
+    S.msgs = S.msgs.filter((m) => !m.typing);
+    if (!reply) { setLive(false); scripted(v); return; }
+    setLive(true);
+    if (!ASKED.test(v) && !STUCK.test(v)) S.mine.push(v); // versions still count the same way
+    S.msgs.push({ who: 'ai', t: reply }); busy = false; save(); renderChat(); renderSignals(); renderBadges();
+  });
 };
 $('kSend').addEventListener('click', sendChat);
 inEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendChat(); } });

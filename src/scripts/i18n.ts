@@ -257,5 +257,6 @@ export const IT: Record<string, string> = {
         'A strong answer, for inspiration': 'Una buona risposta, per ispirarti', 'I’m stuck': 'Sono bloccato', 'Make it smaller': 'Rendilo più piccolo',
         'Your tiny habit today: {h}. Done it? You can tick it on the Missions screen.': 'La tua piccola abitudine di oggi: {h}. Fatto? Puoi spuntarla nella schermata Missioni.',
         'today': 'oggi', 'stones multiplied': 'pietre moltiplicate',
+        'You are talking to an AI · live when online': "Stai parlando con un'AI · dal vivo quando sei online", 'You are talking to an AI · live replies': "Stai parlando con un'AI · risposte dal vivo", 'You are talking to an AI · offline preview': "Stai parlando con un'AI · anteprima offline",
 };
 export const t2 =(en: string, it: string) => { IT[en] = it; return en; };
