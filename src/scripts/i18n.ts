@@ -252,11 +252,14 @@ export const IT: Record<string, string> = {
         'After I': 'Dopo che', 'Pick a cue you already have.': 'Scegli un segnale che hai già.', 'done': 'fatto', 'not yet': 'non ancora', 'day': 'giorno', 'days': 'giorni',
         'Pick or write your tiny habit first.': 'Scegli o scrivi prima la tua piccola abitudine.', 'Habit set. Make it so small you cannot fail.': 'Abitudine impostata. Falla così piccola che non puoi fallire.',
         'Habit builder': 'Costruttore di abitudini', '7 days of your tiny habit': '7 giorni della tua piccola abitudine',
-        'First time here? Read the example, tick the steps, then write yours. Your first finish always pays something.': 'Prima volta? Leggi l’esempio, spunta i passi, poi scrivi il tuo. Il tuo primo traguardo paga sempre qualcosa.',
+        'First time here? Read the example, tick the steps, then write yours. Too hard? Tap “Make it easier”. Your first finish always pays something.': 'Prima volta? Leggi l’esempio, spunta i passi, poi scrivi il tuo. Troppo difficile? Tocca “Rendilo più facile”. Il tuo primo traguardo paga sempre qualcosa.',
         'Show an example': 'Mostra un esempio', 'Hide the example': 'Nascondi l’esempio', 'Need a hint?': 'Serve un indizio?', 'Another hint': 'Un altro indizio', 'No more hints': 'Niente più indizi',
         'A strong answer, for inspiration': 'Una buona risposta, per ispirarti', 'I’m stuck': 'Sono bloccato', 'Make it smaller': 'Rendilo più piccolo',
         'Your tiny habit today: {h}. Done it? You can tick it on the Missions screen.': 'La tua piccola abitudine di oggi: {h}. Fatto? Puoi spuntarla nella schermata Missioni.',
         'today': 'oggi', 'stones multiplied': 'pietre moltiplicate',
         'You are talking to an AI · live when online': "Stai parlando con un'AI · dal vivo quando sei online", 'You are talking to an AI · live replies': "Stai parlando con un'AI · risposte dal vivo", 'You are talking to an AI · offline preview': "Stai parlando con un'AI · anteprima offline",
+        'Make it easier': 'Rendilo più facile', 'Back to the full version': 'Torna alla versione completa', 'Ask KERN.AI': 'Chiedi a KERN.AI',
+        'Last 7 days': 'Ultimi 7 giorni',
+        'Write it your way. It stays on this device unless you ask KERN.AI.': 'Scrivila a modo tuo. Resta su questo dispositivo, a meno che tu non chieda a KERN.AI.', 'Send': 'Invia', 'Your idea': 'La tua idea',
 };
 export const t2 =(en: string, it: string) => { IT[en] = it; return en; };

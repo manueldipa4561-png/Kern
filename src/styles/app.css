@@ -270,7 +270,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-toast { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .k-toast.act { pointer-events: auto; }
 .k-toast button { flex: none; background: none; border: 0; color: var(--acc); font: 800 13px 'Inter Tight Variable', system-ui, sans-serif; padding: 6px 4px; cursor: pointer; }
-.k-scr.light .k-toast button, .k-toast button { color: color-mix(in srgb, var(--acc) 70%, var(--bg)); }
+.k-toast button { color: var(--bg); text-decoration: underline; }
 .k-toast button[hidden] { display: none; }
 .k-badges { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 8px; }
 .k-badge { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; opacity: .38; }
@@ -602,6 +602,17 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-boost-chip[hidden] { display: none; }
 .k-main .k-boost-chip { margin-top: 2px; }
 .k-mrow.boost .k-mdot { border-color: #F2A71B; }
-.k-mrow.boost small { color: color-mix(in srgb, #F2A71B 80%, var(--fg)); font-weight: 700; }
+.k-mrow.boost small { color: color-mix(in srgb, #F2A71B 55%, var(--fg)); font-weight: 700; }
+.k-scr.light .k-mrow.boost small { color: #7A4B00; }
 @keyframes kBoost { 50% { box-shadow: 0 6px 22px -4px #F2A71B; } }
 @media (prefers-reduced-motion: reduce) { .k-boost-chip { animation: none; } }
+
+/* Review fixes: visible control borders, 44px targets, hidden live region, reduced motion for the typing dots */
+.k-tk::before, .k-hb-dots i { border-color: color-mix(in srgb, var(--fg) 55%, transparent); }
+.k-tk.on::before, .k-hb-dots i.on { border-color: var(--acc); }
+.k-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.k-go[aria-disabled="true"] { opacity: .55; cursor: default; box-shadow: none; }
+.k-sk, .k-ask-btn, .k-chipb, .k-habit .k-chips span { min-height: 44px; display: inline-flex; align-items: center; }
+.k-av { position: relative; }
+.k-av::after { content: ''; position: absolute; inset: -7px; }
+@media (prefers-reduced-motion: reduce) { .k-typing i { animation: none; opacity: .7; } }

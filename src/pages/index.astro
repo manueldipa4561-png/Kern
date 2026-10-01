@@ -54,8 +54,8 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
               <div class="k-boost-chip" id="kXBoost" hidden></div>
               <p class="k-xb" id="kXBrief"></p>
               <div class="k-xa"><div class="k-l" id="kXAT"></div><pre id="kXAB"></pre></div>
-              <p class="k-msg k-ai" id="kXFirst" hidden>First time here? Read the example, tick the steps, then write yours. Your first finish always pays something.</p>
-              <div class="k-xbtns" id="kXBtns"><button type="button" class="k-chipb" id="kXEx">Show an example</button><button type="button" class="k-chipb" id="kXHint">Need a hint?</button></div>
+              <p class="k-msg k-ai" id="kXFirst" hidden>First time here? Read the example, tick the steps, then write yours. Too hard? Tap “Make it easier”. Your first finish always pays something.</p>
+              <div class="k-xbtns" id="kXBtns"><button type="button" class="k-chipb" id="kXEx">Show an example</button><button type="button" class="k-chipb" id="kXHint">Need a hint?</button><button type="button" class="k-chipb k-ai-btn" id="kXAsk">Ask KERN.AI</button><button type="button" class="k-chipb" id="kXEasy">Make it easier</button></div>
               <div class="k-xex" id="kXExB" hidden><div class="k-l">A strong answer, for inspiration</div><pre id="kXExT"></pre></div>
               <div id="kXHints" aria-live="polite"></div>
               <div class="k-xh"><span class="k-l">Your steps</span><span class="k-l" id="kXPn"></span></div>
@@ -74,7 +74,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             <h5 id="kDrT"></h5>
             <p class="k-dr-n" id="kDrN" aria-live="polite"></p>
             <p class="k-l" id="kDrS"></p>
-            <div class="k-sh-btns"><button type="button" class="k-go" id="kDrOk">Keep going</button></div>
+            <div class="k-sh-btns"><button type="button" class="k-go" id="kDrOk" aria-describedby="kDrT kDrN kDrS">Keep going</button></div>
           </div>
           <div class="k-step" id="kShR" hidden>
             <div class="k-l">Quick reflection · 20 seconds</div>
@@ -224,7 +224,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
               <div id="kHbRun" hidden>
                 <h5 id="kHbName"></h5>
                 <p id="kHbCue"></p>
-                <div class="k-hb-dots" id="kHbDots"></div>
+                <div class="k-hb-dots" id="kHbDots" role="group" aria-label="Last 7 days"></div>
                 <div class="k-sh-btns"><button type="button" class="k-go" id="kHbDo">I did it</button><button type="button" class="k-sk" id="kHbEdit">Change habit</button></div>
                 <p class="k-l" id="kHbMsg" aria-live="polite"></p>
               </div>
@@ -266,7 +266,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             <div class="k-hd"><div class="k-l">KERN.AI · your co-pilot</div><h4>Your idea.<br>My <b>questions.</b></h4><img class="k-hd-img" src="/img/ai.webp" alt="" width="400" height="400" loading="lazy" decoding="async" /></div>
             <div class="k-ait"><img class="k-avatar" src="/img/ai.webp" alt="" width="400" height="400" decoding="async" /><div class="k-l" id="kAiLbl">You are talking to an AI · live when online</div></div>
             <div class="k-card k-chat">
-              <div class="k-log" id="kChat" aria-live="polite"></div>
+              <div class="k-log" id="kChat"></div><div class="k-sr" id="kSr" role="status" aria-live="polite"></div>
               <div class="k-cmp" id="kCmp" hidden><div class="k-l">Version 1</div><p id="kV1"></p><div class="k-l">Version 3</div><p id="kV3"></p><button type="button" class="k-ask-btn" id="kSaveV">Save to yourKERN</button></div>
               <div class="k-comp"><input id="kIn" type="text" maxlength="140" autocomplete="off" aria-label="Your idea" /><button type="button" class="k-send" id="kSend" aria-label="Send">↑</button></div>
               <div class="k-chips" id="kEx"><span role="button" tabindex="0">Use an example</span><span role="button" tabindex="0">Start over</span><span role="button" tabindex="0">I’m stuck</span><span role="button" tabindex="0">Make it smaller</span></div>

@@ -20,7 +20,7 @@ self.addEventListener('message', (e) => {
   const list = e.data && e.data.cache;
   if (!Array.isArray(list)) return;
   const urls = list.filter((u) => typeof u === 'string' && new URL(u).origin === self.location.origin);
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(urls)).catch(() => {}));
+  e.waitUntil(caches.open(CACHE).then((c) => Promise.allSettled(urls.map((u) => c.add(u)))).catch(() => {}));
 });
 
 self.addEventListener('fetch', (e) => {

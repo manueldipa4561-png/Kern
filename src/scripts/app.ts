@@ -8,6 +8,7 @@ import { FIELDS } from './fields';
 import { MX } from './missions';
 import { RELICS, rollDrop, type Drop } from './loot';
 import { HELPS } from './helps';
+import { EASY } from './easy';
 import * as cloud from './cloud';
 import { akey, ver, stamp, mergeAnswers, type Tomb } from './sync';
 
@@ -19,13 +20,13 @@ type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean };
 type Theme = 'system' | 'dark' | 'light';
 type Lang = 'en' | 'it';
 type Habit = { t: string; c: string; l: [number, string][] }; // t: the tiny habit, c: the cue (after I...), l: [day number, relic id found that day or ''] per day done
-type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit };
+type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit; easy: boolean };
 
 const KEY = 'kern:v1';
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
 const FEELS: Feel[] = ['flow', 'ok', 'drag'];
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
-const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'system', guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] } });
+const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'system', guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false });
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
 const cleanR = (r: unknown): Refl | undefined => {
   if (!r || typeof r !== 'object') return undefined;
@@ -66,7 +67,7 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
       stones: Number.isFinite(s.stones) ? Math.max(0, s.stones) : 0,
       answers,
       drafts,
-      msgs: Array.isArray(s.msgs) ? s.msgs.filter((m: Msg) => m && (m.who === 'ai' || m.who === 'me') && typeof m.t === 'string').map((m: Msg) => ({ who: m.who, t: m.t.slice(0, 400) })) : [],
+      msgs: Array.isArray(s.msgs) ? s.msgs.filter((m: Msg) => m && (m.who === 'ai' || m.who === 'me') && typeof m.t === 'string').map((m: Msg) => ({ who: m.who, t: m.t.slice(0, 500) })) : [],
       mine: Array.isArray(s.mine) ? s.mine.filter((m: unknown) => typeof m === 'string').map((m: string) => m.slice(0, 140)) : [],
       lang: s.lang === 'it' || s.lang === 'en' ? s.lang : d.lang,
       theme: s.theme === 'dark' || s.theme === 'light' ? s.theme : 'system',
@@ -75,6 +76,7 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
       badges: Array.isArray(s.badges) ? s.badges.filter((b: unknown) => typeof b === 'string' && b.length < 20).slice(0, 50) : [],
       dared: !!s.dared,
       habit: cleanHabit(s.habit),
+      easy: !!s.easy,
       gone: Array.isArray(s.gone) ? s.gone.filter((g: unknown) => Array.isArray(g) && typeof g[0] === 'string' && g[0].length < 40 && Number.isFinite(g[1])).map((g: Tomb): Tomb => [g[0], g[1]]).slice(-200) : [],
     };
   } catch { return null; }
@@ -92,18 +94,20 @@ function save() {
 }
 
 // Cloud sync (only when signed in): debounced upload of the whole state; retried on the next save or when back online.
-let user: cloud.User | null = null, pushT = 0, syncOk = true;
+let user: cloud.User | null = null, pushT = 0, syncOk = true, pulled = false; // pulled: this device has seen the cloud copy; never push before that, or an empty device would overwrite the trail
 function schedulePush() {
   if (!user) return;
   clearTimeout(pushT);
   pushT = window.setTimeout(async () => {
     if (!user) return;
-    try { await cloud.push(user.id, snapshot()); if (!syncOk) say('Synced again.'); syncOk = true; }
+    try {
+      if (!pulled) { const remote = await cloud.pull(user.id); if (remote) mergeIn(remote); pulled = true; renderMe(); applyField(false); }
+      await cloud.push(user.id, snapshot()); if (!syncOk) say('Synced again.'); syncOk = true; }
     catch { if (syncOk) say("Couldn't sync. Your trail is safe on this device and will sync later."); syncOk = false; }
     renderAcct();
   }, 1200);
 }
-addEventListener('online', () => { if (user && !syncOk) schedulePush(); });
+addEventListener('online', () => { if (user && !syncOk) schedulePush(); flushSigns(); });
 // Merge a synced copy into this device (sync.ts rules: newest answer wins, deletes stick), keep local settings.
 const mergeIn = (raw: unknown) => {
   const r = sanitize(raw); if (!r) return;
@@ -113,7 +117,8 @@ const mergeIn = (raw: unknown) => {
   if (!S.name) S.name = r.name;
   if (!S.onboarded && r.onboarded) { S.onboarded = true; S.field = r.field; }
   S.fields = [...new Set([...S.fields, ...r.fields, S.field])]; // interests from every device
-  S.drafts = { ...r.drafts, ...S.drafts };
+  const rd = Object.fromEntries(Object.entries(r.drafts).filter(([k]) => !S.answers.some((a) => `${a.f}.${a.i}` === k)));
+  S.drafts = { ...rd, ...S.drafts };
   if (!S.mine.length && r.mine.length) { S.mine = r.mine; S.msgs = r.msgs; }
   S.saves = Math.max(S.saves, r.saves);
   if (!S.guess) S.guess = r.guess;
@@ -145,9 +150,10 @@ function say(en: string, undo?: () => void) {
   toastT.textContent = tr(en);
   toastAct = undo || null; toastB.hidden = !undo; toastB.textContent = tr('Undo');
   toast.classList.toggle('act', !!undo); toast.classList.add('on');
-  clearTimeout(tT); tT = window.setTimeout(() => { toast.classList.remove('on', 'act'); toastAct = null; }, undo ? 5000 : 2800);
+  clearTimeout(tT); tT = window.setTimeout(() => { toast.classList.remove('on', 'act'); toastAct = null; toastB.hidden = true; }, undo ? 5000 : 2800);
 }
-toastB.addEventListener('click', () => { const f = toastAct; toastAct = null; toast.classList.remove('on', 'act'); if (f) f(); });
+kScr.appendChild(toast); // a direct child of the screen, so a screen reader still hears it while a sheet makes the app shell inert
+toastB.addEventListener('click', () => { const f = toastAct; toastAct = null; toast.classList.remove('on', 'act'); toastB.hidden = true; if (f) f(); });
 
 // Static text: remember the English source so language switches are lossless.
 const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l, h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs button:not(:nth-child(2))');
@@ -233,13 +239,17 @@ const kSheet = $('kSheet'), kSet = $('kSet');
 const LAYERS = ['kReward', 'kPwS', 'kSet', 'kSheet', 'kStart', 'kLogin'].map((id) => $(id)); // top first
 const syncInert = () => {
   const top = LAYERS.find((l) => !l.hidden && (!l.classList.contains('k-start') || l.classList.contains('on')));
-  for (const c of kScr.children) (c as HTMLElement).inert = !!top && c !== top;
+  for (const c of kScr.children) (c as HTMLElement).inert = !!top && c !== top && c.id !== 'kToast';
 };
 const layerWatch = new MutationObserver(syncInert);
 LAYERS.forEach((l) => layerWatch.observe(l, { attributes: true, attributeFilter: ['hidden', 'class'] }));
 let lastFocus: HTMLElement | null = null;
 const openSheetEl = (sh: HTMLElement, focus: HTMLElement) => { lastFocus = document.activeElement as HTMLElement; sh.hidden = false; syncInert(); focus.focus(); };
-const closeSheet = (sh: HTMLElement) => { sh.hidden = true; syncInert(); if (sh === kSheet) flushDraft(); lastFocus?.focus(); };
+const closeSheet = (sh: HTMLElement) => {
+  const reveal = sh === kSheet && !$('kShD').hidden; // closed from the drop screen (Escape or backdrop): refresh stones and rank like Continue does
+  sh.hidden = true; syncInert(); if (sh === kSheet) flushDraft(); lastFocus?.focus();
+  if (reveal) { setLvl(); renderProgress(); }
+};
 [kSheet, kSet].forEach((sh) => {
   sh.addEventListener('click', (e) => { if (e.target === sh) closeSheet(sh); });
   sh.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(sh); });
@@ -252,7 +262,7 @@ const rn = (n: string) => (isIt() && RIT[n]) || n;
 const rankIdx = (s: number) => RANKS.reduce((a, r, i) => (s >= r[1] ? i : a), 0);
 const setLvl = () => {
   const i = rankIdx(S.stones), nx = RANKS[i + 1], it = isIt();
-  $<HTMLTextAreaElement>('kTa').placeholder = tr('Write it your way. Nothing is sent.');
+  $<HTMLTextAreaElement>('kTa').placeholder = tr('Write it your way. It stays on this device unless you ask KERN.AI.');
   $('kRank').textContent = rn(RANKS[i][0]);
   $<HTMLImageElement>('kRankImg').src = `/img/r${i}.webp`;
   $('kSt').textContent = String(S.stones);
@@ -347,6 +357,7 @@ const renderFields = () => {
   add.type = 'button'; add.className = 'k-fchip k-fadd'; add.textContent = `+ ${tr('Add')}`; add.setAttribute('aria-label', tr('Add interests'));
   add.addEventListener('click', () => openStart(true)); box.appendChild(add);
 };
+document.addEventListener('visibilitychange', () => { if (!document.hidden) renderProgress(); }); // habit button, boost, streak and dots go stale overnight otherwise
 const kAdd = $('kAdd');
 const renderHome = () => {
   renderFields();
@@ -494,7 +505,7 @@ function deleteAnswer(idx: number) {
 
 // Co-pilot chat (scripted: it only asks, never proposes the idea)
 const chatEl = $('kChat'), inEl = $<HTMLInputElement>('kIn'), cmp = $('kCmp');
-let busy = false;
+let busy = false, gen = 0; // gen: bumped by startChat, so a reply that was in flight when the chat restarted is dropped
 const OPEN = "What is your idea? Write it in your own words first. I won't suggest one.";
 const HEAVY = /(kill myself|suicid|self.?harm|hopeless|want to die|voglio morire|farla finita|non ce la faccio più)/i;
 const ASKED = /(give me|tell me|what should|write it for me|any ideas|dammi|dimmi|che idea|scrivilo tu|cosa dovrei)/i;
@@ -505,11 +516,14 @@ const Q_SMALL = [t2('What is the smallest part of it you could finish today?', '
 const Q_MORE = [[t2('What would make that clearer for someone brand new?', 'Cosa lo renderebbe più chiaro per chi è nuovo?'), t2('If a friend read that, what would they ask first?', 'Se un amico lo leggesse, cosa chiederebbe per prima cosa?')], [t2('What is the strongest word in that, and what would you cut?', 'Qual è la parola più forte e cosa taglieresti?'), t2('What did you change from your first version, and why?', 'Cosa hai cambiato rispetto alla prima versione, e perché?')]];
 // Echo the user's own opening words back, so the question is clearly about their idea.
 const echo = (v: string) => { const w = v.split(/\s+/); return `“${w.slice(0, 6).join(' ')}${w.length > 6 ? '…' : ''}” `; };
+let announced = '';
 const renderChat = () => {
+  const lastAi = [...S.msgs].reverse().find((m) => !m.typing);
+  if (lastAi && lastAi.who === 'ai' && lastAi.t !== announced) { announced = lastAi.t; $('kSr').textContent = tr(lastAi.t); }
   chatEl.innerHTML = '';
   S.msgs.forEach((m) => {
     const p = document.createElement('p'); p.className = 'k-msg ' + (m.who === 'me' ? 'k-me' : 'k-ai');
-    if (m.typing) { p.classList.add('k-typing'); p.innerHTML = '<i></i><i></i><i></i>'; p.setAttribute('aria-label', 'typing'); }
+    if (m.typing) { p.classList.add('k-typing'); p.innerHTML = '<i></i><i></i><i></i>'; }
     else p.textContent = m.who === 'ai' ? tr(m.t) : m.t;
     chatEl.appendChild(p);
   });
@@ -521,9 +535,11 @@ const renderChat = () => {
 };
 const aiSay = (t: string) => {
   S.msgs.push({ who: 'ai', t: '', typing: true }); renderChat();
-  window.setTimeout(() => { S.msgs.pop(); S.msgs.push({ who: 'ai', t }); busy = false; save(); renderChat(); renderSignals(); renderBadges(); }, still ? 0 : 750);
+  const g = gen;
+  window.setTimeout(() => { if (g !== gen) return; S.msgs.pop(); S.msgs.push({ who: 'ai', t }); busy = false; save(); renderChat(); renderSignals(); renderBadges(); }, still ? 0 : 750);
 };
 const startChat = () => {
+  gen++;
   S.msgs = [{ who: 'ai', t: OPEN }]; S.mine = []; busy = false; inEl.value = '';
   if (S.habit.t && !S.habit.l.some((e) => e[0] === dayN(Date.now()))) S.msgs.push({ who: 'ai', t: tr('Your tiny habit today: {h}. Done it? You can tick it on the Missions screen.').replace('{h}', S.habit.t) });
   save(); renderChat();
@@ -535,12 +551,12 @@ const setLive = (ok: boolean) => {
   if (liveOk === ok) return;
   liveOk = ok; setT($('kAiLbl'), ok ? 'You are talking to an AI · live replies' : 'You are talking to an AI · offline preview');
 };
-async function askAI(): Promise<string | null> {
+async function askAI(extra?: { mission?: { title: string; brief: string }; messages?: { who: string; t: string }[] }): Promise<string | null> {
   const ctl = new AbortController(), to = window.setTimeout(() => ctl.abort(), 10000);
   try {
     const r = await fetch('/api/coach', {
       method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal,
-      body: JSON.stringify({ lang: S.lang, field: S.field, versions: S.mine.length, messages: S.msgs.filter((m) => !m.typing).slice(-12).map((m) => ({ who: m.who, t: m.t })) }),
+      body: JSON.stringify({ lang: S.lang, field: extra?.mission ? cur.f : S.field, versions: extra ? 0 : S.mine.length, mission: extra?.mission, messages: extra?.messages ?? S.msgs.filter((m) => !m.typing).slice(-12).map((m) => ({ who: m.who, t: m.t })) }),
     });
     if (!r.ok) return null;
     const j = await r.json();
@@ -560,7 +576,9 @@ const sendChat = () => {
   inEl.value = ''; S.msgs.push({ who: 'me', t: v }); busy = true; renderChat();
   if (HEAVY.test(v)) return aiSay("This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.");
   S.msgs.push({ who: 'ai', t: '', typing: true }); renderChat();
+  const g = gen;
   askAI().then((reply) => {
+    if (g !== gen) return;
     S.msgs = S.msgs.filter((m) => !m.typing);
     if (!reply) { setLive(false); scripted(v); return; }
     setLive(true);
@@ -591,7 +609,7 @@ const applyField = (resetChat: boolean) => {
 // Answer sheet: step 1 answer (draft autosaved), step 2 quick reflection.
 const kTa = $<HTMLTextAreaElement>('kTa'), kShA = $('kShA'), kShR = $('kShR');
 let cur: { f: string; i: number; dare: boolean; edit: number } = { f: 'Design', i: 0, dare: false, edit: -1 };
-let lastIdx = -1, dT = 0;
+let lastAns: Answer | null = null, inTime = false, dT = 0; // lastAns: the answer being reflected on; inTime: submitted inside the time box
 const dKey = () => `${cur.f}.${cur.i}`;
 function flushDraft() {
   clearTimeout(dT);
@@ -615,10 +633,14 @@ function shareSign(a: Answer) {
     if (a.r && id > 0) { a.r.sid = id; save(); }
   }).catch(() => { sharing.delete(a); /* stays on this device */ });
 }
+const PEND = 'kern:rm-signs'; // ids of signs still to be removed from the trail
+const pend = (): number[] => { try { const v = JSON.parse(localStorage.getItem(PEND) || '[]'); return Array.isArray(v) ? v.filter((n) => Number.isSafeInteger(n) && n > 0).slice(0, 50) : []; } catch { return []; } };
+const setPend = (l: number[]) => { try { localStorage.setItem(PEND, JSON.stringify(l.slice(0, 50))); } catch { /* storage blocked */ } };
+const flushSigns = () => { if (!user) return; for (const id of pend()) cloud.removeSign(id).then(() => setPend(pend().filter((x) => x !== id))).catch(() => { /* retried on the next sign-in or when back online */ }); };
 function unshareSign(a: Answer) {
   const id = a.r?.sid; if (!id) return; // still uploading: shareSign removes it on arrival if the answer is gone
   delete a.r!.sid;
-  if (user) cloud.removeSign(id).catch(() => { /* already gone or offline */ });
+  setPend([...pend(), id]); flushSigns();
 }
 const kShS = $('kShS');
 let signReq = 0;
@@ -661,40 +683,69 @@ const stepProg = () => {
   const all = kXSteps.children.length, n = kXSteps.querySelectorAll('.on').length;
   $('kXPb').style.width = `${(100 * n) / all}%`; setD($('kXPn'), `${n}/${all}`);
 };
+// The mission as shown now: the easy wording when "Make it easier" is on, else the full one. Missing easy parts fall back to the full ones.
+const variant = (f: string, i: number) => {
+  const x = MX[f]?.[i]; if (!x) return null;
+  const hp = HELPS[f]?.[i], ez = S.easy ? EASY[f]?.[i] : undefined;
+  return { x, brief: ez?.brief ?? x.brief, steps: ez?.steps ?? x.steps, asset: ez?.asset ?? x.asset, ex: ez?.ex ?? hp?.ex ?? '', hints: ez?.hints ?? hp?.hints ?? [] };
+};
 function renderBrief(f: string, i: number) {
-  const x = MX[f]?.[i];
-  kShX.hidden = kRfBar.hidden = !x;
+  const v = variant(f, i), x = v?.x;
+  kShX.hidden = kRfBar.hidden = !v;
   kXSteps.innerHTML = ''; kRfBI.innerHTML = '';
-  if (!x) return;
+  if (!v || !x) return;
   setX($('kXWho'), x.who); setD($('kXMin'), `~${x.mins} min`);
   const bo = boostOf(f), bEl = $('kXBoost');
   bEl.hidden = !(bo && bo.i === i && cur.edit < 0);
   if (!bEl.hidden) setD(bEl, `${boostTxt(bo!.m)} · ${tr('stones multiplied')}`);
-  setX($('kXBrief'), x.brief);
-  setX($('kXAT'), x.asset.title); setX($('kXAB'), x.asset.body); $('kXAB').classList.toggle('mono', x.asset.mono);
+  setX($('kXBrief'), v.brief);
+  setX($('kXAT'), v.asset.title); setX($('kXAB'), v.asset.body); $('kXAB').classList.toggle('mono', v.asset.mono);
   tick(kXSteps, t2('Read the brief', 'Leggi il brief'), true, 'st', stepProg);
-  x.steps.forEach((s) => tick(kXSteps, s, false, 'st', stepProg));
+  v.steps.forEach((s) => tick(kXSteps, s, false, 'st', stepProg));
   stepProg();
   x.bar.forEach((b) => tick(kRfBI, b, false, 'bar'));
   tick(kRfBI, x.twist, false, 'tw');
-  // Example + hints. On the very first mission the example is open and a short guide explains the workflow.
-  const hp = HELPS[f]?.[i], first = !S.answers.length;
+  // Example, hints, KERN.AI and the easy switch. On the very first mission the example is open and a short guide explains the workflow.
+  const first = !S.answers.length;
   hintN = 0; $('kXHints').innerHTML = '';
-  $('kXBtns').hidden = !hp; $('kXFirst').hidden = !(hp && first);
-  $('kXExB').hidden = !(hp && first);
-  if (hp) { setX($('kXExT'), hp.ex); setT($('kXEx'), first ? 'Hide the example' : 'Show an example'); setT($('kXHint'), 'Need a hint?'); $<HTMLButtonElement>('kXHint').disabled = false; }
+  $('kXFirst').hidden = !first; $('kXExB').hidden = !(first && v.ex);
+  setX($('kXExT'), v.ex); setT($('kXEx'), first ? 'Hide the example' : 'Show an example');
+  setT($('kXHint'), 'Need a hint?'); $<HTMLButtonElement>('kXHint').disabled = !v.hints.length;
+  setT($('kXEasy'), S.easy ? 'Back to the full version' : 'Make it easier');
+  $<HTMLButtonElement>('kXAsk').disabled = false;
 }
 let hintN = 0;
 $('kXEx').addEventListener('click', () => {
   const b = $('kXExB'); b.hidden = !b.hidden;
   setT($('kXEx'), b.hidden ? 'Show an example' : 'Hide the example');
 });
-$('kXHint').addEventListener('click', () => {
-  const hp = HELPS[cur.f]?.[cur.i]; if (!hp || hintN >= hp.hints.length) return;
-  const p = document.createElement('p'); p.className = 'k-msg k-ai'; setX(p, hp.hints[hintN]); $('kXHints').appendChild(p);
+const nextHint = () => {
+  const v = variant(cur.f, cur.i); if (!v || hintN >= v.hints.length) return;
+  const p = document.createElement('p'); p.className = 'k-msg k-ai'; setX(p, v.hints[hintN]); $('kXHints').appendChild(p);
   hintN++;
   const b = $<HTMLButtonElement>('kXHint');
-  if (hintN >= hp.hints.length) { setT(b, 'No more hints'); b.disabled = true; } else setD(b, `${tr('Another hint')} (${hintN}/${hp.hints.length})`);
+  if (hintN >= v.hints.length) { setT(b, 'No more hints'); b.disabled = true; } else setD(b, `${tr('Another hint')} (${hintN}/${v.hints.length})`);
+};
+$('kXHint').addEventListener('click', nextHint);
+$('kXEasy').addEventListener('click', () => { S.easy = !S.easy; save(); renderBrief(cur.f, cur.i); });
+// KERN.AI inside the task: reads the mission and what you have written so far, and asks one question. Live when online;
+// offline it falls back to a question about your own words, or the next hint.
+$('kXAsk').addEventListener('click', async () => {
+  const btn = $<HTMLButtonElement>('kXAsk'), v = variant(cur.f, cur.i);
+  if (btn.disabled || !v) return;
+  btn.disabled = true;
+  const draft = kTa.value.trim().slice(0, 400);
+  const p = document.createElement('p'); p.className = 'k-msg k-ai k-typing'; p.innerHTML = '<i></i><i></i><i></i>'; p.setAttribute('aria-label', 'typing');
+  $('kXHints').appendChild(p);
+  const f0 = cur.f, i0 = cur.i;
+  const reply = await askAI({ mission: { title: FIELDS[cur.f].m[cur.i][1], brief: v.brief }, messages: [{ who: 'me', t: draft ? `My answer so far: ${draft}` : 'I am about to start this mission. Help me begin.' }] });
+  if (cur.f !== f0 || cur.i !== i0 || kSheet.hidden) return; // another mission was opened meanwhile
+  p.classList.remove('k-typing'); p.removeAttribute('aria-label'); p.textContent = '';
+  setLive(!!reply);
+  if (reply) p.textContent = reply;
+  else if (draft.length >= 10) p.textContent = echo(draft) + tr(pick(Q_MORE[0]));
+  else { p.remove(); nextHint(); }
+  btn.disabled = false;
 });
 // Self-check after submitting: +10 per quality bar met, +25 for the twist. Returns the bonus (not saved here).
 const bonus = () => {
@@ -732,7 +783,7 @@ function renderLoot() {
   RELICS.forEach((r) => {
     const got = own.includes(r.id), el = document.createElement('div'), b = document.createElement('b');
     el.className = 'k-find' + (got ? ' got' : '');
-    el.setAttribute('aria-label', got ? tr(r.name) : tr('Not found yet'));
+    el.setAttribute('role', 'img'); el.setAttribute('aria-label', got ? tr(r.name) : tr('Not found yet'));
     el.innerHTML = got ? ICON(r.d) : '<span aria-hidden="true">?</span>';
     b.textContent = got ? tr(r.name) : '';
     el.appendChild(b); kFinds.appendChild(el);
@@ -761,8 +812,9 @@ const chip = (host: Element, text: string, on: () => void) => {
   c.addEventListener('click', on); c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); on(); } });
   host.appendChild(c);
 };
+let hbEditing = false;
 function renderHabit() {
-  const has = !!S.habit.t;
+  const has = !!S.habit.t && !hbEditing;
   kHbSet.hidden = has; kHbRun.hidden = !has;
   if (!has) {
     const pick = $('kHbPick'), cues = $('kHbCues'); pick.innerHTML = ''; cues.innerHTML = '';
@@ -777,21 +829,21 @@ function renderHabit() {
   for (let i = 6; i >= 0; i--) {
     const d = document.createElement('i'), day = today - i;
     d.className = (done.has(day) ? 'on' : '') + (i === 0 ? ' now' : '');
-    d.setAttribute('aria-label', `${new Date(day * DAY + 12 * 36e5).toLocaleDateString(isIt() ? 'it-IT' : 'en-GB', { weekday: 'long' })}: ${done.has(day) ? tr('done') : tr('not yet')}`);
+    d.setAttribute('role', 'img'); d.setAttribute('aria-label', `${new Date(day * DAY + 12 * 36e5).toLocaleDateString(isIt() ? 'it-IT' : 'en-GB', { weekday: 'long', timeZone: 'UTC' })}: ${done.has(day) ? tr('done') : tr('not yet')}`);
     dots.appendChild(d);
   }
   const doneToday = done.has(today), btn = $<HTMLButtonElement>('kHbDo');
-  btn.disabled = doneToday; setT(btn, doneToday ? 'Done today' : 'I did it');
+  btn.setAttribute('aria-disabled', String(doneToday)); setT(btn, doneToday ? 'Done today' : 'I did it');
   const n = streakOf(S.habit.l.map((e) => e[0]));
   setD($('kHbN'), n ? `${n} ${tr(n === 1 ? 'day' : 'days')}` : '');
 }
 $('kHbSave').addEventListener('click', () => {
   const t = kHbT.value.trim();
   if (!t) { say('Pick or write your tiny habit first.'); kHbT.focus(); return; }
-  S.habit.t = t.slice(0, 60); S.habit.c = kHbC.value.trim().slice(0, 60); save(); renderHabit();
+  S.habit.t = t.slice(0, 60); S.habit.c = kHbC.value.trim().slice(0, 60); hbEditing = false; save(); renderHabit();
   say('Habit set. Make it so small you cannot fail.');
 });
-$('kHbEdit').addEventListener('click', () => { kHbT.value = S.habit.t; kHbC.value = S.habit.c; S.habit.t = ''; S.habit.c = ''; save(); renderHabit(); });
+$('kHbEdit').addEventListener('click', () => { kHbT.value = S.habit.t; kHbC.value = S.habit.c; hbEditing = true; renderHabit(); }); // the old habit stays saved until the new one is
 $('kHbDo').addEventListener('click', () => {
   const today = dayN(Date.now());
   if (S.habit.l.some((e) => e[0] === today)) return;
@@ -884,12 +936,14 @@ $('kSub').addEventListener('click', () => {
   clearTimeout(dT);
   if (cur.edit >= 0) {
     const a = S.answers[cur.edit];
-    if (a) { a.t = t.slice(0, 2000); a.ed = stamp(ver(a)); }
+    if (a && a.f === cur.f && a.i === cur.i) { a.t = t.slice(0, 2000); a.ed = stamp(ver(a)); }
     save(); closeSheet(kSheet); renderProgress(); say('Answer updated.');
     return;
   }
-  S.answers.push({ f: cur.f, i: cur.i, t: t.slice(0, 2000), at: Date.now() });
-  lastIdx = S.answers.length - 1;
+  const na: Answer = { f: cur.f, i: cur.i, t: t.slice(0, 2000), at: Date.now() };
+  S.answers.push(na); lastAns = na;
+  const tb = MX[cur.f]?.[cur.i];
+  inTime = !!tb && openedAt > 0 && Date.now() - openedAt <= tb.mins * 60000;
   delete S.drafts[dKey()];
   S.stones += 50; save();
   if (cur.dare) { dare = null; renderDare(); }
@@ -907,12 +961,12 @@ $('kRfSkip').addEventListener('click', () => finish(undefined));
 // Finishing a mission: self-check bonus, speed bonus, then the random drop. Everything extra is stored on the answer
 // (a.x, a.d) so sync, delete and undo keep stones exact.
 function finish(r: Refl | undefined) {
-  const a = S.answers[lastIdx];
+  const a = lastAns && S.answers.includes(lastAns) ? lastAns : undefined;
   const x = MX[cur.f]?.[cur.i];
   // Bonuses and drops only reward a real attempt (20+ characters), so one-letter answers cannot farm them.
   const real = (a?.t.length || 0) >= 20;
   let side = real ? bonus() : 0;
-  if (real && x && openedAt && Date.now() - openedAt <= x.mins * 60000) { side += 15; S.stones += 15; }
+  if (real && x && inTime) { side += 15; S.stones += 15; }
   const today = dayN(Date.now());
   const bo = boostOf(cur.f);
   if (real && bo && bo.i === cur.i) { const bx = (50 + (r ? 20 : 0)) * (bo.m - 1); side += bx; S.stones += bx; }
@@ -1064,11 +1118,11 @@ const onUser = async (u: cloud.User | null, ev: string) => {
   if (ev === 'PASSWORD_RECOVERY' && $('kPwS').hidden) openSheetEl($('kPwS'), $('kPwN'));
   if (!u) { user = null; renderAcct(); if (ev === 'INITIAL_SESSION') linkNote(); return; }
   if (user && user.id === u.id) { user = u; renderAcct(); return; }
-  user = u;
-  try { const remote = await cloud.pull(u.id); if (remote) mergeIn(remote); syncOk = true; }
+  user = u; pulled = false;
+  try { const remote = await cloud.pull(u.id); if (remote) mergeIn(remote); syncOk = true; pulled = true; }
   catch { syncOk = false; say("Couldn't load your synced trail. We'll try again."); }
   if (!S.name) S.name = u.name;
-  save(); renderMe(); applyField(false); setLang(S.lang); renderAcct();
+  save(); renderMe(); applyField(false); setLang(S.lang); renderAcct(); flushSigns();
   if (kLogin.classList.contains('on')) { kLogin.classList.remove('on'); if (!S.onboarded) openStart(); else arrive(); }
 };
 if (cloud.enabled) void cloud.onAuth(onUser).catch(() => { /* SDK failed to load: stay local-only */ });
@@ -1076,7 +1130,7 @@ $('kAcctUp').addEventListener('click', () => { closeSheet(kSet); setMode('up'); 
 $('kLogout').addEventListener('click', async () => {
   if (!confirm(tr('Log out? Your trail stays in your account and is removed from this device.'))) return;
   clearTimeout(pushT);
-  if (user) { try { await cloud.push(user.id, snapshot()); } catch { /* best effort before leaving */ } }
+  if (user && pulled) { try { await cloud.push(user.id, snapshot()); } catch { /* best effort before leaving */ } }
   try { await cloud.signOut(); } catch { /* still clear the device */ }
   try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
   location.replace('/');
@@ -1279,7 +1333,8 @@ $('kDareGo').addEventListener('click', () => { if (dare) openAnswer(dare.f, dare
 // Settings
 const setLang = (l: Lang) => {
   S.lang = l; save(); document.documentElement.lang = l;
-  kTxt.forEach((e) => { const en = e.dataset.en; if (en) e.innerHTML = tr(en); });
+  kTxt.forEach((e) => { const en = e.dataset.en; if (!en) return; if (e.classList.contains('k-xb')) e.textContent = tr(en); else e.innerHTML = tr(en); });
+  document.querySelectorAll<HTMLElement>('[aria-label]').forEach((e) => { const en = (e.dataset.enLabel ??= e.getAttribute('aria-label') || ''); e.setAttribute('aria-label', tr(en)); });
   if (fb.dataset.src) fb.textContent = tr(fb.dataset.src);
   pressed('lang', l);
   setLvl(); renderProgress(); renderChat(); renderAcct();
@@ -1328,7 +1383,7 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then(() => navigator.serviceWorker.ready)
-      .then((r) => r.active?.postMessage({ cache: [location.origin + '/', ...performance.getEntriesByType('resource').map((e) => e.name).filter((u) => u.startsWith(location.origin))] }))
+      .then((r) => r.active?.postMessage({ cache: [location.origin + '/', ...performance.getEntriesByType('resource').map((e) => e.name).filter((u) => u.startsWith(location.origin) && !u.includes('/api/'))] }))
       .catch(() => { /* offline mode unavailable; app still works online */ });
   });
 }
