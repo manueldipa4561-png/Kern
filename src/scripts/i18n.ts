@@ -242,5 +242,6 @@ export const IT: Record<string, string> = {
         'Pick one or more. You can add others anytime.': 'Scegline uno o più. Puoi aggiungerne altri quando vuoi.',
         'Your interests': 'I tuoi interessi', 'Add': 'Aggiungi', 'Add interests': 'Aggiungi interessi', 'Save interests': 'Salva gli interessi',
         'People who finish a mission before you leave a short tip for you. Yours helps the next person.': 'Chi finisce una missione prima di te ti lascia un breve consiglio. Il tuo aiuta chi viene dopo.',
+        'Your steps': 'I tuoi passi', 'Check your answer · +10 stones each': 'Controlla la tua risposta · +10 pietre ciascuno',
 };
-export const t2 = (en: string, it: string) => { IT[en] = it; return en; };
+export const t2 =(en: string, it: string) => { IT[en] = it; return en; };

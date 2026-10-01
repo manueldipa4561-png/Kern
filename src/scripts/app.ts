@@ -3,8 +3,9 @@
 //  profile ──> field ──> mission ──> answer ──> reflection ──> signals ──> Kern card ──> share
 //                           ^            │ (draft autosaved)      │
 //                           └────────────┴── yourKERN / Trail ◄───┘
-import { IT } from './i18n';
+import { IT, t2 } from './i18n';
 import { FIELDS } from './fields';
+import { MX } from './missions';
 import * as cloud from './cloud';
 import { akey, ver, stamp, mergeAnswers, type Tomb } from './sync';
 
@@ -578,10 +579,48 @@ const renderTrailSigns = (f: string, i: number) => {
 const setRfNote = () => setT($('kRfN'), user ? 'Shared without your name with the next people on this trail.'
   : cloud.enabled ? 'Stays on this device. Log in to share it, without your name, with the next people on this trail.'
   : 'Stays on this device for now.');
+// Practice brief (missions.ts): scenario, material to work on, tick-off steps with a progress bar
+// (first step pre-ticked), and after submitting a self-check that pays bonus stones.
+const kShX = $('kShX'), kXSteps = $('kXSteps'), kRfBar = $('kRfBar'), kRfBI = $('kRfBI');
+const setX = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.textContent = tr(en); }; // textContent: briefs contain code like <button>
+const tick = (host: HTMLElement, en: string, on: boolean, cls: string, change?: () => void) => {
+  const d = document.createElement('div');
+  d.className = `k-tk ${cls}`; d.tabIndex = 0; d.setAttribute('role', 'checkbox');
+  const paint = () => d.setAttribute('aria-checked', String(d.classList.contains('on')));
+  d.classList.toggle('on', on); paint(); setX(d, en);
+  const flip = () => { d.classList.toggle('on'); paint(); change?.(); };
+  d.addEventListener('click', flip);
+  d.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+  host.appendChild(d);
+};
+const stepProg = () => {
+  const all = kXSteps.children.length, n = kXSteps.querySelectorAll('.on').length;
+  $('kXPb').style.width = `${(100 * n) / all}%`; setD($('kXPn'), `${n}/${all}`);
+};
+function renderBrief(f: string, i: number) {
+  const x = MX[f]?.[i];
+  kShX.hidden = kRfBar.hidden = !x;
+  kXSteps.innerHTML = ''; kRfBI.innerHTML = '';
+  if (!x) return;
+  setX($('kXWho'), x.who); setD($('kXMin'), `~${x.mins} min`);
+  setX($('kXBrief'), x.brief);
+  setX($('kXAT'), x.asset.title); setX($('kXAB'), x.asset.body); $('kXAB').classList.toggle('mono', x.asset.mono);
+  tick(kXSteps, t2('Read the brief', 'Leggi il brief'), true, 'st', stepProg);
+  x.steps.forEach((s) => tick(kXSteps, s, false, 'st', stepProg));
+  stepProg();
+  x.bar.forEach((b) => tick(kRfBI, b, false, 'bar'));
+  tick(kRfBI, x.twist, false, 'tw');
+}
+// Self-check after submitting: +10 per quality bar met, +25 for the twist. Returns the bonus (not saved here).
+const bonus = () => {
+  const b = kRfBar.hidden ? 0 : kRfBI.querySelectorAll('.bar.on').length * 10 + kRfBI.querySelectorAll('.tw.on').length * 25;
+  S.stones += b; return b;
+};
 const fillSheet = (f: string, i: number) => {
   const m = FIELDS[f].m[i];
   setT($('kShL'), m[0]); setT($('kShT'), m[1]);
   setT($('kShQ'), FIELDS[f].qs[i % FIELDS[f].qs.length]);
+  renderBrief(f, i);
   kShA.hidden = false; kShR.hidden = true;
   renderTrailSigns(f, i);
 };
@@ -631,11 +670,16 @@ $('kSub').addEventListener('click', () => {
 $('kRfOk').addEventListener('click', () => {
   const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value });
   const a = S.answers[lastIdx];
-  if (r && a) { a.r = r; a.ed = stamp(ver(a)); S.stones += 20; save(); shareSign(a); }
+  const b = bonus();
+  if (r && a) { a.r = r; a.ed = stamp(ver(a)); S.stones += 20; save(); shareSign(a); } else if (b) save();
   closeSheet(kSheet); setLvl(); renderProgress();
-  say(r ? 'Reflection saved. +20 stones.' : '+50 stones. Your answer is saved on this device.');
+  say((r ? tr('Reflection saved. +20 stones.') : tr('+50 stones. Your answer is saved on this device.')) + (b ? ` +${b} bonus` : ''));
 });
-$('kRfSkip').addEventListener('click', () => { closeSheet(kSheet); say('+50 stones. Your answer is saved on this device.'); });
+$('kRfSkip').addEventListener('click', () => {
+  const b = bonus(); if (b) save();
+  closeSheet(kSheet); setLvl(); renderProgress();
+  say(tr('+50 stones. Your answer is saved on this device.') + (b ? ` +${b} bonus` : ''));
+});
 
 // Reward preview: shows what winning feels like without changing your stones.
 const kRw = $('kReward'), kWin = $('kWin'), kConf = $('kConf'), kGain = $('kGain'), kRU = $('kRU');

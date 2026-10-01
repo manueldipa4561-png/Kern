@@ -3,6 +3,9 @@ import '@fontsource-variable/inter-tight';
 import '@fontsource-variable/bricolage-grotesque';
 import '@fontsource/instrument-serif/latin-400-italic.css';
 import '../styles/app.css';
+import { readFileSync } from 'node:fs';
+// Inlined so iOS can read it without a login cookie (it fetches the icon itself, which a password-protected site answers with 401).
+const touchIcon = 'data:image/png;base64,' + readFileSync('public/icons/apple-touch-icon.png').toString('base64');
 const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music'];
 const MARK = 'M23.13 76.87A38 38 0 0 1 76.87 23.13Z';
 const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
@@ -18,7 +21,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href={touchIcon} />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -42,6 +45,14 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
           <div class="k-l" id="kShL">Mission 002 · startup partner</div>
           <h5 id="kShT">Fix what already exists</h5>
           <div class="k-step" id="kShA">
+            <div class="k-x" id="kShX">
+              <div class="k-xm"><span class="k-l" id="kXWho"></span><span class="k-l" id="kXMin"></span></div>
+              <p class="k-xb" id="kXBrief"></p>
+              <div class="k-xa"><div class="k-l" id="kXAT"></div><pre id="kXAB"></pre></div>
+              <div class="k-xh"><span class="k-l">Your steps</span><span class="k-l" id="kXPn"></span></div>
+              <div class="k-xp" aria-hidden="true"><i id="kXPb"></i></div>
+              <div id="kXSteps" role="group"></div>
+            </div>
             <p class="k-msg k-ai" id="kShQ">What would make the first step easier for someone brand new?</p>
             <div class="k-trailsigns"><div class="k-l">Signs from people before you</div><div id="kShS" aria-live="polite"></div></div>
             <label class="k-l" for="kTa">Your answer</label>
@@ -56,6 +67,10 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             <div class="k-chips" id="kRfA" role="group"><span role="button" tabindex="0" data-v="yes">Yes</span><span role="button" tabindex="0" data-v="maybe">Maybe</span><span role="button" tabindex="0" data-v="no">No</span></div>
             <label class="k-l" for="kRfH">Hardest part (optional)</label><input id="kRfH" type="text" maxlength="140" autocomplete="off" />
             <label class="k-l" for="kRfT">Leave a sign for the next person (optional)</label><input id="kRfT" type="text" maxlength="140" autocomplete="off" aria-describedby="kRfN" /><p class="k-rf-note" id="kRfN"></p>
+            <div id="kRfBar" hidden>
+              <div class="k-l">Check your answer · +10 stones each</div>
+              <div id="kRfBI" role="group"></div>
+            </div>
             <div class="k-sh-btns"><button type="button" class="k-go" id="kRfOk">Save</button><button type="button" class="k-sk" id="kRfSkip">Skip</button></div>
           </div>
         </div>

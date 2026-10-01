@@ -475,3 +475,23 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-fchip:active { transform: scale(.95); transition-duration: .08s; }
 .k-fadd { padding: 8px 14px; border-style: dashed; color: var(--dim); }
 .k-go:disabled { opacity: .4; box-shadow: none; cursor: default; transform: none; }
+
+/* Practice brief in the answer sheet (missions.ts) */
+.k-x { display: flex; flex-direction: column; gap: 10px; }
+.k-x[hidden], #kRfBar[hidden] { display: none; }
+.k-xm, .k-xh { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.k-xb { font-size: 14px; line-height: 1.45; margin: 0; }
+.k-xa { border: 1px solid var(--edge); background: var(--surf); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.k-xa pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 500 13px/1.5 'Inter Tight Variable', system-ui, sans-serif; color: var(--fg); }
+.k-xa pre.mono { font: 400 12px/1.55 ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; }
+.k-xp { height: 6px; border-radius: 6px; background: var(--edge); overflow: hidden; }
+.k-xp i { display: block; height: 100%; width: 0; border-radius: 6px; background: var(--acc); transition: width .35s cubic-bezier(.2,.9,.3,1); }
+.k-tk { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: start; padding: 10px 0; min-height: 44px; border-bottom: 1px solid var(--edge); font-size: 13.5px; line-height: 1.4; cursor: pointer; }
+.k-tk::before { content: ''; width: 18px; height: 18px; margin-top: 1px; border-radius: 6px; border: 2px solid var(--edge); box-sizing: border-box; transition: background .2s, border-color .2s; }
+.k-tk.on::before { background: var(--acc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%230F140E' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat; border-color: var(--acc); }
+.k-tk.st.on { color: var(--dim); }
+.k-tk:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 8px; }
+.k-tk.bar::after, .k-tk.tw::after { font: 600 10.5px ui-monospace, Menlo, Consolas, monospace; color: var(--acc); padding-top: 3px; }
+.k-tk.bar::after { content: '+10'; }
+.k-tk.tw::after { content: '+25'; }
+@media (prefers-reduced-motion: reduce) { .k-xp i, .k-tk::before { transition: none; } }
