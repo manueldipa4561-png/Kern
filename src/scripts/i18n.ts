@@ -243,5 +243,8 @@ export const IT: Record<string, string> = {
         'Your interests': 'I tuoi interessi', 'Add': 'Aggiungi', 'Add interests': 'Aggiungi interessi', 'Save interests': 'Salva gli interessi',
         'People who finish a mission before you leave a short tip for you. Yours helps the next person.': 'Chi finisce una missione prima di te ti lascia un breve consiglio. Il tuo aiuta chi viene dopo.',
         'Your steps': 'I tuoi passi', 'Check your answer · +10 stones each': 'Controlla la tua risposta · +10 pietre ciascuno',
+        'Chance of a find': 'Possibile ritrovamento', 'A missed day is forgiven.': 'Un giorno saltato si perdona.', 'trail day': 'giorno sul sentiero', 'trail days': 'giorni sul sentiero',
+        'Finds': 'Ritrovamenti', 'Not found yet': 'Non ancora trovato', 'Finish missions to uncover them. You never know which one drops.': 'Finisci le missioni per scoprirli. Non sai mai quale arriva.',
+        'You found': 'Hai trovato', 'Keep going': 'Continua', 'Take your time': 'Con calma',
 };
 export const t2 =(en: string, it: string) => { IT[en] = it; return en; };

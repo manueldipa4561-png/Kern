@@ -6,19 +6,21 @@
 import { IT, t2 } from './i18n';
 import { FIELDS } from './fields';
 import { MX } from './missions';
+import { RELICS, rollDrop, type Drop } from './loot';
 import * as cloud from './cloud';
 import { akey, ver, stamp, mergeAnswers, type Tomb } from './sync';
 
 type Feel = 'flow' | 'ok' | 'drag';
 type Again = 'yes' | 'maybe' | 'no';
 type Refl = { e?: Feel; again?: Again; hard?: string; tip?: string; sid?: number }; // sid: the tip's shared sign, if published
-type Answer = { f: string; i: number; t: string; at: number; ed?: number; r?: Refl };
+type Answer = { f: string; i: number; t: string; at: number; ed?: number; r?: Refl; x?: number; d?: string }; // x: extra stones (bonuses, drop), d: drop id (loot.ts)
 type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean };
 type Theme = 'system' | 'dark' | 'light';
 type Lang = 'en' | 'it';
 type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[] };
 
 const KEY = 'kern:v1';
+const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
 const FEELS: Feel[] = ['flow', 'ok', 'drag'];
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
 const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'system', guess: '', saves: 0, badges: [], dared: false, gone: [] });
@@ -43,7 +45,7 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
     const field: string = FIELDS[s.field] ? s.field : 'Design';
     const answers: Answer[] = Array.isArray(s.answers)
       ? s.answers.filter((a: Answer) => a && FIELDS[a.f] && Number.isInteger(a.i) && a.i >= 0 && a.i < 3 && typeof a.t === 'string' && Number.isFinite(a.at))
-        .map((a: Answer) => ({ f: a.f, i: a.i, t: a.t.slice(0, 2000), at: a.at, ed: Number.isFinite(a.ed) ? a.ed : undefined, r: cleanR(a.r) }))
+        .map((a: Answer) => ({ f: a.f, i: a.i, t: a.t.slice(0, 2000), at: a.at, ed: Number.isFinite(a.ed) ? a.ed : undefined, r: cleanR(a.r), x: Number.isInteger(a.x) && a.x! > 0 ? Math.min(a.x!, 600) : undefined, d: typeof a.d === 'string' && DROP_IDS.includes(a.d) ? a.d : undefined }))
       : [];
     // Interests: the fields someone chose to explore, in their order. Older saves have none: use the answered ones.
     const fields = [...new Set([...(Array.isArray(s.fields) ? s.fields : answers.map((a) => a.f)), ...(s.onboarded ? [field] : [])])]
@@ -411,7 +413,7 @@ const renderProgress = () => {
   }
   const w = weeks.filter(Boolean).length;
   $('kRhy').textContent = it ? `In ${w} delle ultime 4 settimane hai creato qualcosa.` : `${w} of the last 4 weeks you made something.`;
-  renderHome(); renderSignals(); renderBadges();
+  renderHome(); renderSignals(); renderBadges(); renderLoot();
 };
 
 // Badges (Duolingo/Strava style): earned once, kept even if an answer is later deleted.
@@ -448,7 +450,7 @@ function renderBadges() {
 // Delete with Undo; stones earned by that answer are taken back so nothing can be farmed.
 // Deletes made while the Undo toast is up join one batch, and Undo brings them all back.
 // Each delete leaves a tombstone so it also sticks on the user's other synced devices.
-const worth = (a: Answer) => 50 + (a.r ? 20 : 0);
+const worth = (a: Answer) => 50 + (a.r ? 20 : 0) + (a.x || 0);
 let binned: Answer[] = [];
 function deleteAnswer(idx: number) {
   const a = S.answers[idx]; if (!a) return;
@@ -616,7 +618,69 @@ const bonus = () => {
   const b = kRfBar.hidden ? 0 : kRfBI.querySelectorAll('.bar.on').length * 10 + kRfBI.querySelectorAll('.tw.on').length * 25;
   S.stones += b; return b;
 };
+// Habit loop (Hooked: trigger, action, variable reward, investment). The reward is a random drop after each finished
+// mission (loot.ts), the investment is the collection of finds and the trail days; nothing here punishes a missed day.
+const DAY = 864e5, dayN = (t: number) => Math.floor((t - new Date(t).getTimezoneOffset() * 6e4) / DAY);
+const relicsOwned = () => RELICS.filter((r) => S.answers.some((a) => a.d === r.id)).map((r) => r.id);
+const dropStreak = () => { let n = 0; for (const a of [...S.answers].sort((x, y) => y.at - x.at)) { if (a.d) break; n++; } return n; };
+// Trail days: days in a row with a finished mission. One missed day is forgiven (a rest day); two in a row end it.
+const trailDays = () => {
+  const days = [...new Set(S.answers.map((a) => dayN(a.at)))].sort((a, b) => b - a);
+  if (!days.length || dayN(Date.now()) - days[0] > 2) return 0;
+  let n = 1;
+  for (let i = 1; i < days.length && days[i - 1] - days[i] <= 2; i++) n++;
+  return n;
+};
+const kFinds = $('kFinds');
+const ICON = (d: string) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
+function renderLoot() {
+  const own = relicsOwned();
+  setD($('kFN'), `${own.length}/${RELICS.length}`);
+  kFinds.innerHTML = '';
+  RELICS.forEach((r) => {
+    const got = own.includes(r.id), el = document.createElement('div'), b = document.createElement('b');
+    el.className = 'k-find' + (got ? ' got' : '');
+    el.setAttribute('aria-label', got ? tr(r.name) : tr('Not found yet'));
+    el.innerHTML = got ? ICON(r.d) : '<span aria-hidden="true">?</span>';
+    b.textContent = got ? tr(r.name) : '';
+    el.appendChild(b); kFinds.appendChild(el);
+  });
+  const n = trailDays(), st = $('kStreak');
+  st.hidden = !n;
+  if (n) setD($('kStreakT'), `${n} ${tr(n === 1 ? 'trail day' : 'trail days')}`);
+}
+const DROP_T: Record<string, string> = { spark: t2('A spark', 'Una scintilla'), gem: t2('A gem', 'Una gemma'), relic: t2('A find!', 'Un ritrovamento!'), jackpot: t2('Jackpot', 'Jackpot') };
+const kShD = $('kShD');
+const DEFS = '<defs><linearGradient id="kg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>';
+const hl = (d: string) => `<path d="${d}" fill="url(#kg)"/>`;
+const dropArt = (d: Drop) => {
+  const rel = RELICS.find((r) => r.id === d.id);
+  if (rel) return `<svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring" cx="60" cy="60" r="48"/><circle class="ring2" cx="60" cy="60" r="38"/><g transform="translate(24 24) scale(3)"><path class="ic" d="${rel.d}"/></g></svg>`;
+  if (d.tier === 'gem') { const g = 'M30 44l12-18h36l12 18-30 52z'; return `<svg viewBox="0 0 120 120" aria-hidden="true">${DEFS}<path class="a" d="${g}"/><path class="c" d="M30 44h60M42 26l18 18 18-18M60 44l-18 52M60 44l18 52"/>${hl(g)}</svg>`; }
+  if (d.tier === 'jackpot') {
+    const star = 'M60 18l11 25 27 3-20 18 6 27-24-14-24 14 6-27-20-18 27-3z';
+    const rays = Array.from({ length: 12 }, (_, i) => `<line x1="60" y1="60" x2="${(60 + 58 * Math.cos((i * Math.PI) / 6)).toFixed(1)}" y2="${(60 + 58 * Math.sin((i * Math.PI) / 6)).toFixed(1)}"/>`).join('');
+    return `<svg viewBox="0 0 120 120" aria-hidden="true">${DEFS}<g class="rays">${rays}</g><path class="a" d="${star}"/>${hl(star)}</svg>`;
+  }
+  const sp = 'M60 10l9 33 33 9-33 9-9 33-9-33-33-9 33-9z';
+  return `<svg viewBox="0 0 120 120" aria-hidden="true">${DEFS}<path class="a" d="${sp}"/>${hl(sp)}<circle class="b" cx="96" cy="24" r="4"/><circle class="b" cx="22" cy="94" r="3"/></svg>`;
+};
+// Reveal screen: appears the moment the reflection is saved, under a second to read, one tap to continue.
+function showDrop(d: Drop, side: number) {
+  const rel = RELICS.find((r) => r.id === d.id);
+  kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = d.tier;
+  $('kDrArt').innerHTML = dropArt(d);
+  setT($('kDrT'), DROP_T[d.tier]);
+  if (rel) setD($('kDrN'), `${tr(rel.name)} · ${relicsOwned().length + 0}/${RELICS.length}`); else setD($('kDrN'), `+${d.stones} ${isIt() ? 'pietre' : 'stones'}`);
+  setD($('kDrS'), rel ? `+${d.stones} ${isIt() ? 'pietre' : 'stones'}${side ? ` · +${side} bonus` : ''}` : side ? `+${side} bonus` : '');
+  const bits = $('kDrBits'); bits.innerHTML = '';
+  if (!still) for (let i = 0; i < 18; i++) { const p = document.createElement('i'); p.style.setProperty('--a', `${(360 / 18) * i + Math.random() * 12}deg`); p.style.setProperty('--r', `${70 + Math.random() * 60}px`); bits.appendChild(p); }
+  if ('vibrate' in navigator) navigator.vibrate(d.tier === 'jackpot' ? [30, 40, 30, 40, 60] : d.tier === 'relic' ? [20, 30, 40] : [18]);
+  $('kDrOk').focus();
+}
+$('kDrOk').addEventListener('click', () => { closeSheet(kSheet); setLvl(); renderProgress(); });
 const fillSheet = (f: string, i: number) => {
+  kSheet.classList.remove('drop'); kShD.hidden = true;
   const m = FIELDS[f].m[i];
   setT($('kShL'), m[0]); setT($('kShT'), m[1]);
   setT($('kShQ'), FIELDS[f].qs[i % FIELDS[f].qs.length]);
@@ -624,10 +688,24 @@ const fillSheet = (f: string, i: number) => {
   kShA.hidden = false; kShR.hidden = true;
   renderTrailSigns(f, i);
 };
+// Beat the clock: a gentle countdown from the mission's time box; finishing inside it pays +15. After it, no pressure.
+let openedAt = 0, clockT = 0;
+const runClock = () => {
+  clearInterval(clockT);
+  const x = MX[cur.f]?.[cur.i]; if (!x || cur.edit >= 0) return;
+  const el = $('kXMin');
+  const tick = () => {
+    if (kSheet.hidden || kShA.hidden) { clearInterval(clockT); return; }
+    const left = x.mins * 60 - Math.round((Date.now() - openedAt) / 1000);
+    setD(el, left > 0 ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')} · +15` : tr('Take your time'));
+  };
+  tick(); clockT = window.setInterval(tick, 1000);
+};
 const openAnswer = (f: string, i: number, dare = false) => {
   cur = { f, i, dare, edit: -1 };
   fillSheet(f, i); setT($('kSub'), 'Submit answer');
   kTa.value = S.drafts[dKey()] || '';
+  openedAt = Date.now(); runClock();
   openSheetEl(kSheet, kTa);
 };
 function openEdit(idx: number) {
@@ -669,17 +747,35 @@ $('kSub').addEventListener('click', () => {
 });
 $('kRfOk').addEventListener('click', () => {
   const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value });
+  finish(r);
+});
+$('kRfSkip').addEventListener('click', () => finish(undefined));
+// Finishing a mission: self-check bonus, speed bonus, then the random drop. Everything extra is stored on the answer
+// (a.x, a.d) so sync, delete and undo keep stones exact.
+function finish(r: Refl | undefined) {
   const a = S.answers[lastIdx];
-  const b = bonus();
-  if (r && a) { a.r = r; a.ed = stamp(ver(a)); S.stones += 20; save(); shareSign(a); } else if (b) save();
+  const x = MX[cur.f]?.[cur.i];
+  // Bonuses and drops only reward a real attempt (20+ characters), so one-letter answers cannot farm them.
+  const real = (a?.t.length || 0) >= 20;
+  let side = real ? bonus() : 0;
+  if (real && x && openedAt && Date.now() - openedAt <= x.mins * 60000) { side += 15; S.stones += 15; }
+  const today = dayN(Date.now());
+  const lucky = S.answers.filter((q) => dayN(q.at) === today).length <= 1;
+  const drop: Drop = real ? rollDrop(Math.max(0, dropStreak() - 1), relicsOwned(), lucky) : { tier: 'none', id: '', stones: 0 };
+  S.stones += drop.stones;
+  if (a) {
+    if (r) { a.r = r; S.stones += 20; }
+    const extra = side + drop.stones;
+    if (extra) a.x = (a.x || 0) + extra;
+    if (drop.id) a.d = drop.id;
+    a.ed = stamp(ver(a));
+  }
+  save(); if (a && r) shareSign(a);
+  openedAt = 0;
+  if (drop.tier !== 'none') { showDrop(drop, side); return; }
   closeSheet(kSheet); setLvl(); renderProgress();
-  say((r ? tr('Reflection saved. +20 stones.') : tr('+50 stones. Your answer is saved on this device.')) + (b ? ` +${b} bonus` : ''));
-});
-$('kRfSkip').addEventListener('click', () => {
-  const b = bonus(); if (b) save();
-  closeSheet(kSheet); setLvl(); renderProgress();
-  say(tr('+50 stones. Your answer is saved on this device.') + (b ? ` +${b} bonus` : ''));
-});
+  say((r ? tr('Reflection saved. +20 stones.') : tr('+50 stones. Your answer is saved on this device.')) + (side ? ` +${side} bonus` : ''));
+}
 
 // Reward preview: shows what winning feels like without changing your stones.
 const kRw = $('kReward'), kWin = $('kWin'), kConf = $('kConf'), kGain = $('kGain'), kRU = $('kRU');

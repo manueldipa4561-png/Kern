@@ -13,8 +13,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Lumo, a habit app (fictional)', 'Lumo, app per abitudini (fittizia)'),
       brief: t2(
-        "Lumo's new users quit during sign-up. The founder sent you the current flow and the numbers. Cut it down to a version people finish.",
-        'I nuovi utenti di Lumo abbandonano durante la registrazione. La founder ti ha mandato il flusso attuale e i numeri. Accorcialo fino a una versione che le persone finiscono.'),
+        "Lumo is a habit app. Most people quit while signing up. Make signing up shorter.",
+        "Lumo è un'app per le abitudini. Molti smettono mentre si registrano. Rendi la registrazione più corta."),
       asset: {
         mono: true,
         title: t2('Current onboarding · 5 screens', 'Onboarding attuale · 5 schermate'),
@@ -38,8 +38,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Fjord Yoga, a studio (fictional)', 'Fjord Yoga, uno studio (fittizio)'),
       brief: t2(
-        'Fjord Yoga loses half of its bookings on this form. People leave at question 6. Make it feel like a chat, not paperwork.',
-        'Fjord Yoga perde metà delle prenotazioni su questo modulo. Le persone se ne vanno alla domanda 6. Fallo sembrare una chiacchierata, non una pratica.'),
+        "Fjord Yoga's booking form asks too much, so people give up. Make it quick and friendly.",
+        "Il modulo di prenotazione di Fjord Yoga chiede troppo e la gente rinuncia. Rendilo veloce e amichevole."),
       asset: {
         mono: true,
         title: t2('Booking form · 14 fields, one page', 'Modulo di prenotazione · 14 campi, una pagina'),
@@ -63,8 +63,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Pocket, an expenses app (fictional)', 'Pocket, app per le spese (fittizia)'),
       brief: t2(
-        'New Pocket users open the app and see a grey “No expenses”. 7 in 10 never come back. Design what they should see instead. Pair up: one person describes the layout, the other writes the words. Or play both.',
-        'Chi apre Pocket per la prima volta vede un grigio “Nessuna spesa”. 7 su 10 non tornano. Progetta cosa dovrebbero vedere. In coppia: uno descrive il layout, l’altro scrive le parole. O fai entrambi.'),
+        "Open Pocket for the first time and you see an empty screen, so people leave. Design a better first screen. Pair up, or do both parts.",
+        "Aprendo Pocket per la prima volta si vede una schermata vuota e la gente se ne va. Progetta una prima schermata migliore. In coppia, o fai entrambe le parti."),
       asset: {
         mono: true,
         title: t2('What users see today', 'Cosa vedono oggi gli utenti'),
@@ -89,8 +89,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('The Weekly Wallet, a newsletter (fictional)', 'The Weekly Wallet, una newsletter (fittizia)'),
       brief: t2(
-        'Readers keep replying “I read it twice and still don’t get it.” Rewrite this paragraph so a 15-year-old understands it.',
-        'I lettori rispondono sempre “L’ho letto due volte e ancora non capisco.” Riscrivi questo paragrafo in modo che lo capisca un quindicenne.'),
+        "Readers say they can't follow this paragraph. Rewrite it so a 15-year-old gets it.",
+        "I lettori dicono di non capire questo paragrafo. Riscrivilo in modo che lo capisca un quindicenne."),
       asset: {
         mono: false,
         title: t2('Paragraph from issue #48', 'Paragrafo dal numero 48'),
@@ -114,8 +114,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('an office team (fictional)', 'un team d’ufficio (fittizio)'),
       brief: t2(
-        'Your team got this email on Monday. By Wednesday nobody has done anything. Rewrite it so people act today.',
-        'Il tuo team ha ricevuto questa email lunedì. Mercoledì nessuno ha fatto nulla. Riscrivila così che le persone agiscano oggi.'),
+        "Nobody acted on this email. Rewrite it so people do the task today.",
+        "Nessuno ha fatto nulla dopo questa email. Riscrivila così che le persone agiscano oggi."),
       asset: {
         mono: false,
         title: t2('Email · Subject: Important update re: expenses', 'Email · Oggetto: Aggiornamento importante su spese'),
@@ -139,8 +139,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('The Platform 9 zine (fictional)', 'La zine Platform 9 (fittizia)'),
       brief: t2(
-        'The zine opens its next issue with a shared story, and you get the first line. Take turns: person A writes sentences 2 and 4, person B writes sentences 3 and 5. Or play both.',
-        'La zine apre il prossimo numero con un racconto a più mani, e a te tocca la prima riga. A turno: la persona A scrive le frasi 2 e 4, la persona B le frasi 3 e 5. O fai entrambe.'),
+        "A zine starts a story with this line. Finish it in 5 sentences. Take turns with a friend, or do it alone.",
+        "Una zine inizia un racconto con questa riga. Finiscilo in 5 frasi. A turno con un amico, o da solo."),
       asset: {
         mono: false,
         title: t2('First line', 'Prima riga'),
@@ -165,8 +165,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Linkly, a link tool (fictional)', 'Linkly, uno strumento per link (fittizio)'),
       brief: t2(
-        'Linkly’s “Copy link” button does nothing and support is getting emails. Find why and fix it.',
-        'Il pulsante “Copia link” di Linkly non fa nulla e il supporto riceve email. Scopri perché e correggilo.'),
+        "The “Copy link” button on Linkly does nothing. Find the mistake and fix it.",
+        "Il pulsante “Copia link” di Linkly non fa nulla. Trova l'errore e correggilo."),
       asset: {
         mono: true,
         title: t2('share.html + share.js', 'share.html + share.js'),
@@ -190,8 +190,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('a restaurant app (fictional)', 'un’app per ristoranti (fittizia)'),
       brief: t2(
-        'Friends hate splitting the bill. Write the function that does it, in any language. The tip is added before splitting.',
-        'Gli amici odiano dividere il conto. Scrivi la funzione che lo fa, in qualsiasi linguaggio. La mancia si aggiunge prima di dividere.'),
+        "Write a small function that splits a restaurant bill between friends, tip included.",
+        "Scrivi una piccola funzione che divide il conto del ristorante tra amici, mancia inclusa."),
       asset: {
         mono: true,
         title: t2('Tests your function must pass', 'Test che la tua funzione deve superare'),
@@ -215,8 +215,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Noctis, a notes app (fictional)', 'Noctis, app per appunti (fittizia)'),
       brief: t2(
-        'Noctis needs a dark mode toggle that remembers the choice after a refresh. Pair up: A writes the HTML and CSS, B writes the JavaScript. Or do both.',
-        'Noctis vuole un interruttore per la modalità scura che ricordi la scelta dopo un aggiornamento. In coppia: A scrive HTML e CSS, B scrive il JavaScript. O fai entrambi.'),
+        "Build a dark mode button that remembers your choice. With a friend: one does the look, one does the code.",
+        "Crea un pulsante per la modalità scura che ricordi la scelta. Con un amico: uno fa l'aspetto, uno il codice."),
       asset: {
         mono: true,
         title: t2('The spec', 'Le specifiche'),
@@ -243,8 +243,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Forno Rossi, a bakery (fictional)', 'Forno Rossi, un forno (fittizio)'),
       brief: t2(
-        'Forno Rossi filmed one morning and has no idea what to do with it. Pick the shots for a 20-second reel that hooks people in the first second.',
-        'Forno Rossi ha girato una mattina e non sa che farne. Scegli le inquadrature per un reel di 20 secondi che aggancia nel primo secondo.'),
+        "A bakery filmed 12 clips. Pick the best ones for a 20-second video that grabs attention fast.",
+        "Un forno ha girato 12 clip. Scegli le migliori per un video di 20 secondi che catturi subito l'attenzione."),
       asset: {
         mono: true,
         title: t2('Footage log · 12 clips', 'Registro del girato · 12 clip'),
@@ -268,8 +268,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('a 30-second explainer', 'una spiegazione di 30 secondi'),
       brief: t2(
-        'Pick one thing you know well (a game mechanic, a cooking trick, a training tip) and plan a 30-second clip that teaches it. You only write; nobody sees your face.',
-        'Scegli una cosa che conosci bene (una meccanica di gioco, un trucco in cucina, un consiglio di allenamento) e pianifica un video di 30 secondi che la insegni. Scrivi soltanto: nessuno vede la tua faccia.'),
+        "Pick something you know well. Plan a 30-second video that teaches it. You only write, nobody sees your face.",
+        "Scegli qualcosa che conosci bene. Pianifica un video di 30 secondi che lo insegni. Scrivi soltanto, nessuno vede la tua faccia."),
       asset: {
         mono: true,
         title: t2('A structure that works', 'Una struttura che funziona'),
@@ -293,8 +293,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Vale water bottles (fictional)', 'Vale, borracce (fittizie)'),
       brief: t2(
-        'Vale needs a 15-second clip for a steel bottle. Pair up: one person plans the shots, the other decides the order and the sound. Or do both.',
-        'Vale vuole un video di 15 secondi per una borraccia d’acciaio. In coppia: uno pianifica le inquadrature, l’altro decide ordine e suono. O fai entrambi.'),
+        "A bottle brand needs a 15-second video. Pick the shots and the sound. Pair up, or do both parts.",
+        "Un marchio di borracce vuole un video di 15 secondi. Scegli inquadrature e suono. In coppia, o fai entrambe le parti."),
       asset: {
         mono: true,
         title: t2('Shots you can use', 'Inquadrature disponibili'),
@@ -321,8 +321,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Forno Rossi, a bakery (fictional)', 'Forno Rossi, un forno (fittizio)'),
       brief: t2(
-        'Forno Rossi sells a €12 Saturday Box of pastries. Pitch it on paper to one person: Marta, 34, who runs a coworking for 20 people.',
-        'Forno Rossi vende una Box del sabato di pasticcini a 12 €. Proponila per iscritto a una persona: Marta, 34 anni, gestisce un coworking per 20 persone.'),
+        "A bakery sells a €12 box of pastries. Convince Marta, who runs a coworking, to buy one.",
+        "Un forno vende una box di pasticcini da 12 €. Convinci Marta, che gestisce un coworking, a comprarne una."),
       asset: {
         mono: false,
         title: t2('Who you are pitching', 'A chi stai parlando'),
@@ -346,8 +346,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('a cold message', 'un messaggio a freddo'),
       brief: t2(
-        'You want a 15-minute chat with Dana, founder of a 4-person design studio. She gets 30 messages a week. Write the one she answers.',
-        'Vuoi 15 minuti di chiacchierata con Dana, founder di uno studio di design di 4 persone. Riceve 30 messaggi a settimana. Scrivi quello a cui risponde.'),
+        "Dana gets 30 messages a week and ignores most. Write one she will answer.",
+        "Dana riceve 30 messaggi a settimana e ne ignora quasi tutti. Scrivine uno a cui risponde."),
       asset: {
         mono: false,
         title: t2('Three messages Dana ignored', 'Tre messaggi che Dana ha ignorato'),
@@ -371,8 +371,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Orbit headphones (fictional)', 'Orbit, cuffie (fittizie)'),
       brief: t2(
-        'Role-play. One person sells, one is the buyer who pushes back. Write how the seller answers each objection. Or play both.',
-        'Gioco di ruolo. Uno vende, uno è l’acquirente che si oppone. Scrivi come risponde il venditore a ogni obiezione. O fai entrambi.'),
+        "You sell headphones and the buyer pushes back. Answer 3 objections. Alone? Play both roles.",
+        "Vendi cuffie e l'acquirente si oppone. Rispondi a 3 obiezioni. Da solo? Fai entrambi i ruoli."),
       asset: {
         mono: false,
         title: t2('Objection cards', 'Carte delle obiezioni'),
@@ -399,8 +399,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Nero Coffee Roasters (fictional)', 'Nero Coffee Roasters (fittizia)'),
       brief: t2(
-        'Nero wants a 6-second sound for the moment their machine finishes a coffee. It should feel warm, slow and like Sunday.',
-        'Nero vuole un suono di 6 secondi per il momento in cui la macchina finisce un caffè. Deve sembrare caldo, lento e domenicale.'),
+        "A coffee brand wants a 6-second sound for when the coffee is ready: warm, slow, like Sunday.",
+        "Un marchio di caffè vuole un suono di 6 secondi per quando il caffè è pronto: caldo, lento, come la domenica."),
       asset: {
         mono: true,
         title: t2('Brief', 'Brief'),
@@ -424,8 +424,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('your remix card', 'la tua carta del remix'),
       brief: t2(
-        'Pick a song you love and plan its remix. Fill the card: keep one thing, change two, add one, drop one.',
-        'Scegli una canzone che ami e pianifica il suo remix. Compila la carta: tieni una cosa, cambiane due, aggiungine una, togline una.'),
+        "Pick a song you love and plan a remix on one card: keep one thing, change two, add one, drop one.",
+        "Scegli una canzone che ami e pianifica un remix su una carta: tieni una cosa, cambiane due, aggiungine una, togline una."),
       asset: {
         mono: true,
         title: t2('Remix card · example with “Happy Birthday”', 'Carta del remix · esempio con “Tanti auguri a te”'),
@@ -449,8 +449,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Kite sneakers (fictional)', 'Kite, sneaker (fittizie)'),
       brief: t2(
-        'Kite needs the hook for a 15-second ad. Pair up: one person writes the melody, the other the words. Or do both.',
-        'Kite vuole l’hook per una pubblicità di 15 secondi. In coppia: uno scrive la melodia, l’altro le parole. O fai entrambi.'),
+        "A sneaker brand needs a catchy 15-second tune. Write the melody and a few words. Pair up, or do both.",
+        "Un marchio di sneaker vuole un motivo orecchiabile di 15 secondi. Scrivi melodia e poche parole. In coppia, o fai entrambe."),
       asset: {
         mono: true,
         title: t2('Chords (loop) and brief', 'Accordi (in loop) e brief'),

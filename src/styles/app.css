@@ -495,3 +495,70 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-tk.bar::after { content: '+10'; }
 .k-tk.tw::after { content: '+25'; }
 @media (prefers-reduced-motion: reduce) { .k-xp i, .k-tk::before { transition: none; } }
+
+/* Brief polish */
+.k-xm .k-l:first-child { color: var(--acc); }
+.k-xm .k-l:last-child { border: 1px solid var(--edge); border-radius: 999px; padding: 3px 10px; white-space: nowrap; font-variant-numeric: tabular-nums; background: var(--surf); }
+.k-xa { position: relative; overflow: hidden; padding-top: 16px; }
+.k-xa::before { content: ''; position: absolute; left: 0; top: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--acc), color-mix(in srgb, var(--acc) 20%, transparent)); }
+
+/* Trail days chip */
+.k-streak { display: inline-flex; align-items: center; gap: 7px; align-self: flex-start; padding: 6px 12px 6px 9px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--edge)); background: color-mix(in srgb, var(--gold) 12%, transparent); font-size: 12.5px; }
+.k-streak[hidden] { display: none; }
+.k-streak svg { width: 16px; height: 16px; fill: var(--gold); stroke: var(--gold); stroke-width: 1.4; stroke-linejoin: round; animation: kFlame 2.4s ease-in-out infinite; transform-origin: 50% 90%; }
+.k-streak b { font-weight: 800; }
+.k-streak small { color: var(--dim); font-size: 11px; }
+@keyframes kFlame { 50% { transform: scale(1.12) rotate(-3deg); } }
+
+/* Finds collection */
+.k-finds-h { display: flex; justify-content: space-between; }
+.k-finds { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.k-find { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-radius: 14px; border: 1px dashed var(--edge); color: var(--dim); font-size: 15px; font-weight: 700; padding: 4px; text-align: center; }
+.k-find svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.k-find b { font: 600 9px/1.1 'Inter Tight Variable', system-ui, sans-serif; letter-spacing: .02em; }
+.k-find.got { border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--edge)); background: radial-gradient(90% 90% at 50% 20%, color-mix(in srgb, var(--gold) 22%, transparent), transparent 75%), var(--surf); color: color-mix(in srgb, var(--gold) 70%, var(--fg)); animation: kFindIn .5s cubic-bezier(.3,1.4,.5,1) both; }
+@keyframes kFindIn { from { transform: scale(.6); opacity: 0; } }
+
+/* Drop reveal */
+.k-sheet.drop #kShL, .k-sheet.drop #kShT { display: none; }
+.k-drop { align-items: center; text-align: center; gap: 6px; }
+.k-drop[hidden] { display: none; }
+.k-dr-stage { position: relative; width: 190px; height: 170px; display: grid; place-items: center; margin-top: 4px; }
+.k-dr-art { width: 124px; height: 124px; animation: kDrPop .7s cubic-bezier(.2,1.5,.4,1) both; filter: drop-shadow(0 12px 22px color-mix(in srgb, var(--tc) 55%, transparent)); }
+.k-dr-art svg { width: 100%; height: 100%; overflow: visible; }
+.k-drop { --tc: var(--acc); }
+.k-drop[data-tier="gem"] { --tc: var(--ai); }
+.k-drop[data-tier="relic"], .k-drop[data-tier="jackpot"] { --tc: var(--gold); }
+.k-dr-art .a { fill: var(--tc); stroke: color-mix(in srgb, var(--tc) 50%, #fff); stroke-width: 2; stroke-linejoin: round; }
+.k-dr-art .b { fill: var(--tc); }
+.k-dr-art .c { fill: none; stroke: rgba(255,255,255,.55); stroke-width: 2; stroke-linejoin: round; }
+.k-dr-art .ring { fill: color-mix(in srgb, var(--tc) 16%, var(--bg)); stroke: var(--tc); stroke-width: 3; }
+.k-dr-art .ring2 { fill: none; stroke: var(--tc); stroke-width: 1; stroke-dasharray: 3 5; opacity: .6; transform-origin: 60px 60px; animation: kSpinSlow 14s linear infinite; }
+.k-dr-art .ic { fill: none; stroke: var(--tc); stroke-width: .7; stroke-linecap: round; stroke-linejoin: round; }
+.k-dr-art .rays { stroke: var(--tc); stroke-width: 3; stroke-linecap: round; opacity: .55; transform-origin: 60px 60px; animation: kSpinSlow 9s linear infinite; }
+.k-dr-stage::before { content: ''; position: absolute; inset: 0; background: radial-gradient(closest-side, color-mix(in srgb, var(--tc) 38%, transparent), transparent); animation: kDrGlow 1.2s ease-out both; }
+.k-drop h5 { font-size: 30px; line-height: 1.05; }
+.k-dr-n { font: 800 22px 'Inter Tight Variable', system-ui, sans-serif; color: color-mix(in srgb, var(--tc) 75%, var(--fg)); margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+.k-dr-bits i { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px; border-radius: 2px; background: var(--tc); transform: rotate(var(--a)) translateX(0); opacity: 0; animation: kBurst .8s cubic-bezier(.1,.8,.3,1) forwards; }
+.k-dr-bits i:nth-child(3n) { background: var(--gold); width: 5px; height: 5px; } .k-dr-bits i:nth-child(3n+1) { background: #fff; width: 4px; height: 4px; }
+@keyframes kDrPop { from { transform: scale(0) rotate(-25deg); opacity: 0; } }
+@keyframes kDrGlow { from { opacity: 0; transform: scale(.4); } }
+@keyframes kSpinSlow { to { transform: rotate(360deg); } }
+@keyframes kBurst { 0% { opacity: 1; transform: rotate(var(--a)) translateX(0); } 100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--r)) scale(.4); } }
+@media (prefers-reduced-motion: reduce) { .k-dr-art, .k-dr-stage::before, .k-find.got, .k-streak svg, .k-dr-art .ring2, .k-dr-art .rays { animation: none; } .k-dr-bits { display: none; } }
+
+/* Reward art: fixed bright palette so it reads the same in light and dark */
+.k-drop { --tf: #C9F24A; --ts: #7FA818; }
+.k-drop[data-tier="gem"] { --tf: #7FD1E6; --ts: #2E8FA8; }
+.k-drop[data-tier="relic"], .k-drop[data-tier="jackpot"] { --tf: #F5C04B; --ts: #B8860B; }
+.k-dr-art .a { fill: var(--tf); stroke: var(--ts); }
+.k-dr-art .b { fill: var(--tf); }
+.k-dr-art .ring { fill: color-mix(in srgb, var(--tf) 22%, var(--bg)); stroke: var(--ts); }
+.k-dr-art .ring2, .k-dr-art .rays { stroke: var(--tf); }
+.k-dr-art .ic { stroke: var(--ts); }
+.k-dr-art { filter: drop-shadow(0 12px 22px color-mix(in srgb, var(--tf) 55%, transparent)); }
+.k-dr-stage::before { background: radial-gradient(closest-side, color-mix(in srgb, var(--tf) 40%, transparent), transparent); }
+.k-dr-n { color: color-mix(in srgb, var(--ts) 80%, var(--fg)); }
+.k-dr-bits i { background: var(--tf); }
+
+.k-streak svg { fill: #F2A71B; stroke: #F2A71B; }

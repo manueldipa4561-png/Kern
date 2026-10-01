@@ -59,6 +59,14 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             <textarea id="kTa" rows="5" maxlength="2000"></textarea>
             <div class="k-sh-btns"><button type="button" class="k-go" id="kSub">Submit answer</button><button type="button" class="k-sk" id="kCancel">Not now</button></div>
           </div>
+          <div class="k-step k-drop" id="kShD" hidden>
+            <div class="k-dr-stage"><div class="k-dr-bits" id="kDrBits" aria-hidden="true"></div><div class="k-dr-art" id="kDrArt"></div></div>
+            <div class="k-l" id="kDrL">You found</div>
+            <h5 id="kDrT"></h5>
+            <p class="k-dr-n" id="kDrN" aria-live="polite"></p>
+            <p class="k-l" id="kDrS"></p>
+            <div class="k-sh-btns"><button type="button" class="k-go" id="kDrOk">Keep going</button></div>
+          </div>
           <div class="k-step" id="kShR" hidden>
             <div class="k-l">Quick reflection · 20 seconds</div>
             <p class="k-q">How did it feel?</p>
@@ -182,9 +190,10 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
         <div class="k-body">
           <section class="k-pane on" id="k-missions">
             <div><div class="k-l" id="kHi">Hi</div><h4>Pick your<br>next <b>move.</b></h4></div>
+            <div class="k-streak" id="kStreak" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg><b id="kStreakT"></b><small>A missed day is forgiven.</small></div>
             <div class="k-fields" id="kFields" role="group" aria-label="Your interests"></div>
             <div class="k-card k-dare" id="kDare" hidden><div class="k-l">A friend dared you</div><h5 id="kDareT"></h5><button type="button" class="k-go" id="kDareGo">Answer the dare</button></div>
-            <div class="k-card k-main" id="kNext"><img class="k-obj" id="kNxImg" src="/img/f-design.webp" alt="" width="400" height="400" decoding="async" fetchpriority="high" /><div class="k-l" id="kNxL">Your next step</div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><div class="k-meta"><span class="k-l">+50 stones</span><span class="k-l">+20 if you reflect</span></div><button type="button" class="k-btn" id="kAdd">Add your answer</button></div>
+            <div class="k-card k-main" id="kNext"><img class="k-obj" id="kNxImg" src="/img/f-design.webp" alt="" width="400" height="400" decoding="async" fetchpriority="high" /><div class="k-l" id="kNxL">Your next step</div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><div class="k-meta"><span class="k-l">+50 stones</span><span class="k-l">+20 if you reflect</span><span class="k-l">Chance of a find</span></div><button type="button" class="k-btn" id="kAdd">Add your answer</button></div>
             <div class="k-card"><div class="k-l">Your 3 missions</div>
               <div class="k-mlist">
                 <button type="button" class="k-mrow" id="kMR0"><i class="k-mdot" aria-hidden="true"></i><span><b>Fix what already exists</b><small></small></span><em aria-hidden="true">›</em></button>
@@ -205,6 +214,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             <div class="k-card"><div class="k-l">What you light up on</div><div class="k-meter" id="kMeter"></div><p class="k-l" id="kMeterN">From your reflections. Not a test.</p></div>
             <div class="k-card"><div class="k-l">What you seem drawn to</div><div class="k-chips" id="kDrawn"><span>Shaping ideas</span><span>Writing</span><span>Solo work</span></div></div>
             <div class="k-card"><div class="k-l">How you work with AI</div><div class="k-sig" id="kAiSig">You rewrote your question 4 times, and every version got clearer.</div></div>
+            <div class="k-card"><div class="k-l k-finds-h"><span>Finds</span><span id="kFN"></span></div><div class="k-finds" id="kFinds"></div><p class="k-l">Finish missions to uncover them. You never know which one drops.</p></div>
             <div class="k-card"><div class="k-l">Badges</div><div class="k-badges" id="kBadges"></div></div>
             <div class="k-card"><div class="k-l">Your answers</div><div id="kAns"></div></div>
             <div class="k-duo"><div class="k-card"><div class="k-l">Answers made</div><div class="k-stat"><b id="kCnt">0</b></div><span class="k-l">on this device · only you see this</span></div><div class="k-card"><div class="k-l">Your rhythm · no pressure</div><div class="k-cal" id="kDots" aria-hidden="true"></div><p id="kRhy"></p></div></div>
