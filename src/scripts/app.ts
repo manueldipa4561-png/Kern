@@ -364,11 +364,16 @@ const renderHome = () => {
     setT($('kNxT'), m[1]); setT($('kNxP'), m[2]);
     setT(kAdd, S.drafts[`${S.field}.${next}`] ? 'Continue your draft' : 'Add your answer'); kAdd.dataset.kAns = String(next);
   }
+  const nb = boostOf(S.field), nbEl = $('kNxB');
+  nbEl.hidden = !nb;
+  if (nb) setD(nbEl, `${boostTxt(nb.m)} · ${tr(f.m[nb.i][1])}`);
   [0, 1, 2].forEach((i) => {
     const row = $('kMR' + i), st = done.has(i) ? 'Done' : i === next ? 'Next' : S.drafts[`${S.field}.${i}`] ? 'Draft' : 'Not started';
     row.classList.toggle('done', done.has(i)); row.classList.toggle('next', i === next);
     setT(row.querySelector('b')!, f.m[i][1]);
-    setD(row.querySelector('small')!, `${tr(f.m[i][0])} · ${tr(st)}`);
+    const bo = boostOf(S.field), isB = !!bo && bo.i === i;
+    row.classList.toggle('boost', isB);
+    setD(row.querySelector('small')!, `${tr(f.m[i][0])} · ${tr(st)}${isB ? ' · ' + boostTxt(bo!.m) : ''}`);
   });
 };
 
@@ -633,6 +638,9 @@ function renderBrief(f: string, i: number) {
   kXSteps.innerHTML = ''; kRfBI.innerHTML = '';
   if (!x) return;
   setX($('kXWho'), x.who); setD($('kXMin'), `~${x.mins} min`);
+  const bo = boostOf(f), bEl = $('kXBoost');
+  bEl.hidden = !(bo && bo.i === i && cur.edit < 0);
+  if (!bEl.hidden) setD(bEl, `${boostTxt(bo!.m)} · ${tr('stones multiplied')}`);
   setX($('kXBrief'), x.brief);
   setX($('kXAT'), x.asset.title); setX($('kXAB'), x.asset.body); $('kXAB').classList.toggle('mono', x.asset.mono);
   tick(kXSteps, t2('Read the brief', 'Leggi il brief'), true, 'st', stepProg);
@@ -678,6 +686,14 @@ const streakOf = (list: number[]) => {
   return n;
 };
 const trailDays = () => streakOf([...S.answers.map((a) => dayN(a.at)), ...S.habit.l.map((e) => e[0])]);
+// Daily boost: each day, each field gets a random answer (about 2 days in 3) that pays x2 or x3. Seeded by the date, so it is the
+// same on every device but cannot be guessed ahead; done missions can be replayed for it.
+const boostOf = (f: string, d = dayN(Date.now())): { i: number; m: number } | null => {
+  let h = Math.imul(d ^ [...f].reduce((a, c) => (Math.imul(a, 31) + c.charCodeAt(0)) | 0, 7), 2654435761) >>> 0;
+  h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; h ^= h >>> 13;
+  return h % 100 < 35 ? null : { i: (h >>> 8) % 3, m: (h >>> 16) % 10 < 3 ? 3 : 2 };
+};
+const boostTxt = (m: number) => `×${m} ${tr('today')}`;
 const kFinds = $('kFinds');
 const ICON = (d: string) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
 function renderLoot() {
@@ -869,8 +885,12 @@ function finish(r: Refl | undefined) {
   let side = real ? bonus() : 0;
   if (real && x && openedAt && Date.now() - openedAt <= x.mins * 60000) { side += 15; S.stones += 15; }
   const today = dayN(Date.now());
+  const bo = boostOf(cur.f);
+  if (real && bo && bo.i === cur.i) { const bx = (50 + (r ? 20 : 0)) * (bo.m - 1); side += bx; S.stones += bx; }
+  const nToday = S.answers.filter((q) => dayN(q.at) === today).length; // includes this one
+  if (real && nToday > 1) { const cx = Math.min(30, (nToday - 1) * 10); side += cx; S.stones += cx; } // combo: 2nd mission of the day +10, 3rd +20, 4th+ +30
   const lucky = S.answers.filter((q) => dayN(q.at) === today).length <= 1;
-  let drop: Drop = real ? rollDrop(Math.max(0, dropStreak() - 1), relicsOwned(), lucky) : { tier: 'none', id: '', stones: 0 };
+  let drop: Drop = real ? rollDrop(Math.max(0, dropStreak() - 1), relicsOwned(), lucky, Math.min(0.999, Math.random() + 0.012 * Math.min(trailDays(), 7))) : { tier: 'none', id: '', stones: 0 };
   if (real && S.answers.length === 1 && drop.tier === 'none') drop = rollDrop(0, relicsOwned(), false, 0.5); // the first finish always pays something
   S.stones += drop.stones;
   if (a) {

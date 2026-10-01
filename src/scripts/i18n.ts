@@ -256,5 +256,6 @@ export const IT: Record<string, string> = {
         'Show an example': 'Mostra un esempio', 'Hide the example': 'Nascondi l’esempio', 'Need a hint?': 'Serve un indizio?', 'Another hint': 'Un altro indizio', 'No more hints': 'Niente più indizi',
         'A strong answer, for inspiration': 'Una buona risposta, per ispirarti', 'I’m stuck': 'Sono bloccato', 'Make it smaller': 'Rendilo più piccolo',
         'Your tiny habit today: {h}. Done it? You can tick it on the Missions screen.': 'La tua piccola abitudine di oggi: {h}. Fatto? Puoi spuntarla nella schermata Missioni.',
+        'today': 'oggi', 'stones multiplied': 'pietre moltiplicate',
 };
 export const t2 =(en: string, it: string) => { IT[en] = it; return en; };
