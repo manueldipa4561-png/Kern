@@ -223,7 +223,11 @@ const viewBase = () => base() + (peeking() ? PER_ROUND : 0); // first mission of
 
 const toast = $('kToast'), toastT = $('kToastT'), toastB = $('kToastB');
 let tT = 0, toastAct: (() => void) | null = null;
-const hideToast = () => { toast.classList.remove('on', 'act'); toastAct = null; toastB.hidden = true; };
+let clearT = 0; // the words go once the fade is over: a faded toast must not leave its last message for a screen reader to find
+const hideToast = () => {
+  toast.classList.remove('on', 'act'); toastAct = null; toastB.hidden = true;
+  clearTimeout(clearT); clearT = window.setTimeout(() => { if (!toast.classList.contains('on')) toastT.textContent = ''; }, 400);
+};
 // Short message at the bottom; with `undo`, shows an Undo button for a few seconds (Gmail-style).
 function say(en: string, undo?: () => void) {
   toastT.textContent = tr(en);
@@ -232,9 +236,10 @@ function say(en: string, undo?: () => void) {
   if (undo) toastB.focus({ preventScroll: true }); // keyboard and screen-reader users land on Undo
   clearTimeout(tT); tT = window.setTimeout(hideToast, undo ? 8000 : 2800);
 }
-// A badge is news nobody asked for, so it never takes the place of an Undo that is still on screen: it waits its turn.
+// A badge is news nobody asked for, so it never takes the place of an Undo that is still on screen, and never lands on a sheet someone is filling in
+// (it covered the last self-check row): it waits its turn, and shows once the sheet is closed.
 const sayBadge = (text: string) => {
-  if (toastAct) { window.setTimeout(() => sayBadge(text), 1000); return; }
+  if (toastAct || topLayer()) { window.setTimeout(() => sayBadge(text), 1000); return; }
   say(text); if ('vibrate' in navigator) navigator.vibrate([20, 40, 20]);
 };
 const reveal = (el: Element) => el.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' });
@@ -253,6 +258,9 @@ toast.addEventListener('pointerleave', () => { if (toastAct) tT = window.setTime
 // Static text: remember the English source so language switches are lossless.
 const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs button:not(:nth-child(2)), #kXAsk, .k-streak small, .k-finds-h span');
 kTxt.forEach((e) => { e.dataset.en = e.innerHTML.trim(); });
+// Headings: the page is an h1 (screen-reader only), panes (h4) and cards (h5). Levels 2 and 3 are what a screen reader announces; the tags keep the look.
+kScr.querySelectorAll('h4').forEach((h) => h.setAttribute('aria-level', '2'));
+kScr.querySelectorAll('h5').forEach((h) => h.setAttribute('aria-level', '3'));
 const SAMPLE = { guess: $('kGuess').dataset.en!, why: $('kWhy').dataset.en!, ai: $('kAiSig').dataset.en!, card: $('kCardH').dataset.en!, cardL: $('kCardL').dataset.en!, drawn: ['Shaping ideas', 'Writing', 'Solo work'], cardC: ['Shaping ideas', 'Writing'] };
 
 // Launch loader
@@ -390,7 +398,7 @@ const setLvl = () => {
     const s = document.createElement('span'), im = document.createElement('img'), b = document.createElement('b');
     im.src = `/img/r${k}.webp`; im.alt = ''; im.width = im.height = 400; im.decoding = 'async';
     b.textContent = rn(r[0]); s.append(im, b);
-    if (k < i) s.className = 'done'; if (k === i) s.className = 'on';
+    if (k < i) s.className = 'done'; if (k === i) { s.className = 'on'; s.setAttribute('aria-current', 'true'); }
     lad.appendChild(s);
   });
 };
@@ -575,12 +583,14 @@ const renderProgress = () => {
   S.answers.slice(-5).reverse().forEach((a, k) => {
     const idx = S.answers.length - 1 - k;
     const row = document.createElement('div'); row.className = 'k-an';
+    const title = tr(FIELDS[a.f].m[a.i][1]);
     const l = document.createElement('span'); l.className = 'k-l';
-    l.textContent = `${tr(FIELDS[a.f].m[a.i][1])} · ${day(a.at)}${a.r?.e ? ' · ' + tr(FEEL_EN[a.r.e]) : ''}`;
+    l.textContent = `${title} · ${day(a.at)}${a.r?.e ? ' · ' + tr(FEEL_EN[a.r.e]) : ''}`;
     const p = document.createElement('p'); p.textContent = a.t;
     const acts = document.createElement('div'); acts.className = 'k-an-act';
-    const ed = document.createElement('button'); ed.type = 'button'; ed.textContent = tr('Edit'); ed.addEventListener('click', () => openEdit(idx));
-    const del = document.createElement('button'); del.type = 'button'; del.textContent = tr('Delete'); del.addEventListener('click', once(() => deleteAnswer(idx)));
+    // The same two words repeat on every row: the answer's title tells a screen reader which one it is (the visible word comes first)
+    const ed = document.createElement('button'); ed.type = 'button'; ed.textContent = tr('Edit'); ed.setAttribute('aria-label', `${tr('Edit')}: ${title}`); ed.addEventListener('click', () => openEdit(idx));
+    const del = document.createElement('button'); del.type = 'button'; del.textContent = tr('Delete'); del.setAttribute('aria-label', `${tr('Delete')}: ${title}`); del.addEventListener('click', once(() => deleteAnswer(idx)));
     acts.append(ed, del);
     row.append(l, p, acts); box.appendChild(row);
   });
@@ -634,7 +644,8 @@ function renderBadges() {
     if (!S.badges.includes(b.id) && b.ok()) { S.badges.push(b.id); fresh.push(b.t); }
     const got = S.badges.includes(b.id);
     const el = document.createElement('div'); el.className = 'k-badge' + (got ? ' got' : '');
-    el.setAttribute('aria-label', `${tr(b.t)}: ${tr(b.d)}${got ? '' : ' (' + tr('locked') + ')'}`);
+    el.setAttribute('role', 'img'); // a plain div's aria-label is not exposed; the label names the badge, what it asks for and whether it is yours yet
+    el.setAttribute('aria-label', `${tr(b.t)}: ${tr(b.d)} (${tr(got ? 'earned' : 'locked')})`);
     const m = document.createElement('i'); m.textContent = tr(b.t)[0]; m.setAttribute('aria-hidden', 'true');
     const t = document.createElement('b'); t.textContent = tr(b.t);
     const d = document.createElement('small'); d.textContent = tr(b.d);
@@ -892,6 +903,7 @@ function renderBrief(f: string, i: number) {
   hintN = 0; $('kXHints').innerHTML = '';
   $('kXFirst').hidden = !first; $('kXExB').hidden = !(first && v.ex);
   setX($('kXExT'), v.ex); setT($('kXEx'), first ? 'Hide the example' : 'Show an example');
+  $('kXEx').setAttribute('aria-expanded', String(!$('kXExB').hidden));
   setT($('kXHint'), 'Need a hint?'); hold($('kXHint'), !v.hints.length);
   setT($('kXEasy'), S.easy ? 'Back to the full version' : 'Make it easier');
   hold($('kXAsk'), false);
@@ -903,6 +915,7 @@ const held = (b: Element) => b.getAttribute('aria-disabled') === 'true';
 $('kXEx').addEventListener('click', () => {
   const b = $('kXExB'); b.hidden = !b.hidden;
   setT($('kXEx'), b.hidden ? 'Show an example' : 'Hide the example');
+  $('kXEx').setAttribute('aria-expanded', String(!b.hidden));
 });
 const nextHint = () => {
   const v = variant(cur.f, cur.i); if (!v || hintN >= v.hints.length) return;

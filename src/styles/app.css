@@ -113,7 +113,7 @@
       .k-body { scroll-behavior: smooth; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 12px), transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 12px), transparent 100%); }
       .k-pane.leaving { animation: kOut .14s ease-in both; } @keyframes kOut { to { opacity: 0; transform: translateY(-6px); } }
       @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
-      @media (prefers-reduced-motion: reduce) { .k-sheet, .k-sh-in, .k-start.on, .k-sp, .k-go.busy::after { animation: none; } .k-body { scroll-behavior: auto; } }
+      @media (prefers-reduced-motion: reduce) { .k-sheet, .k-sh-in, .k-start.on, .k-sp, .k-sp:not([hidden]), .k-go.busy::after { animation: none; } .k-body, .k-log { scroll-behavior: auto; } } /* .k-sp:not([hidden]) is more specific than .k-sp, so .k-sp alone left the start steps sliding in; .k-log had no override and scrolled smoothly */
       .k-btn, .k-go, .k-ask-btn, .k-ask button, .k-win, .k-tabs button { transition: transform .15s; }
       .k-btn:active, .k-go:active, .k-ask-btn:active, .k-ask button:active, .k-win:active { transform: scale(.95); }
       .k-tabs { background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px); }
@@ -282,11 +282,12 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-toast button { color: var(--bg); text-decoration: underline; }
 .k-toast button[hidden] { display: none; }
 .k-badges { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 8px; }
-.k-badge { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; opacity: .38; }
+.k-badge { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
 .k-badge i { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font: 800 18px var(--kd); font-style: normal; border: 2px dashed var(--edge); color: var(--dim); }
 .k-badge b { font-size: 11px; font-weight: 700; line-height: 1.15; }
 .k-badge small { display: none; }
-.k-badge.got { opacity: 1; }
+.k-badge:not(.got) i { opacity: .5; } /* a locked badge fades its icon only: the label keeps 4.5:1 */
+.k-badge:not(.got) b { color: var(--dim); }
 .k-badge.got i { border: 0; color: var(--bg); background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.5), transparent 45%), var(--gold); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 22%, transparent); }
 
 /* ---- v1.0 studio redesign ----
@@ -332,7 +333,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-main { margin-top: 48px; overflow: visible; border-radius: 28px; padding: 22px 20px 20px; color: var(--bone); background: radial-gradient(110% 90% at 100% 0%, rgba(201,242,74,.36), transparent 55%), linear-gradient(160deg, #2C5A3A, #14241A 72%); box-shadow: 0 26px 50px -26px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.14); }
 .k-main::after { content: none; }
 .k-main .k-l, .k-main p { color: var(--bone); }
-.k-main .k-l { opacity: .7; }
+.k-main .k-l { opacity: .85; }
 .k-main > .k-l:first-of-type, .k-main h5 { padding-right: 104px; }
 .k-main h5 { min-height: 40px; } /* the stones reach 88px down the card: a one-line title must not let the paragraph run under them */
 .k-main p { padding-right: 18px; opacity: .88; }
@@ -469,6 +470,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-trailsigns > .k-l { color: var(--gold); }
 .k-sign-empty, .k-rf-note { margin: 0; font-size: 12.5px; line-height: 1.4; color: var(--dim); }
 .k-rf-note { margin-top: -6px !important; }
+#kRfShort { margin-top: 4px !important; } /* #kRfBar has no flex gap to tuck into: the note sits under its label, not over it */
 .k-rf-note[hidden] { display: none; }
 .k-signs-card > p { margin-bottom: 2px; }
 
@@ -484,7 +486,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-fchip img { width: 26px; height: 26px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.3)); }
 .k-fchip small { font: 500 10px var(--mono); color: var(--dim); }
 .k-fchip.on { background: var(--acc); border-color: var(--acc); color: var(--on); }
-.k-fchip.on small { color: var(--on); opacity: .7; }
+.k-fchip.on small { color: var(--on); }
 .k-fchip:active { transform: scale(.95); transition-duration: .08s; }
 .k-fadd { padding: 8px 14px; border-style: dashed; color: var(--dim); }
 .k-go:disabled { opacity: .4; box-shadow: none; cursor: default; transform: none; }
@@ -567,7 +569,8 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-scr:has(#kSheet.drop:not([hidden])) .k-toast { bottom: auto; top: max(14px, calc(env(safe-area-inset-top) + 8px)); transform: translateY(-8px); }
 .k-scr:has(#kSheet.drop:not([hidden])) .k-toast.on { transform: none; }
 .k-scr .k-dr-nx { margin: 12px 0 8px; } /* beats .k-scr p { margin: 0 } */
-.k-dr-nx { max-width: 30ch; font: 600 14px/1.35 'Inter Tight Variable', system-ui, sans-serif; color: color-mix(in srgb, var(--fg) 72%, transparent); animation: kDrNx .5s .6s ease-out both; }
+.k-dr-nx { max-width: 30ch; font: 600 14px/1.35 'Inter Tight Variable', system-ui, sans-serif; color: color-mix(in srgb, var(--fg) 72%, transparent); animation: kDrNx .5s .6s ease-out both; text-wrap: balance; } /* balance: the last line is never a lone "min" */
+.k-dr-nx[hidden] + .k-sh-btns { margin-top: 8px; } /* no "Next:" line: the button would sit 6px under the stones */
 @keyframes kDrNx { from { opacity: 0; transform: translateY(6px); } }
 .k-dr-bits i { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px; border-radius: 2px; background: var(--tc); transform: rotate(var(--a)) translateX(0); opacity: 0; animation: kBurst .8s cubic-bezier(.1,.8,.3,1) forwards; }
 .k-dr-bits i:nth-child(3n) { background: var(--gold); width: 5px; height: 5px; } .k-dr-bits i:nth-child(3n+1) { background: #fff; width: 4px; height: 4px; }
@@ -721,19 +724,34 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 /* ---- QA fixes: iOS zoom, keyboard focus, contrast, hidden animations, narrow header ---- */
 /* 16 px stops iOS Safari from zooming the page when a field is focused */
 .k-scr input, .k-scr textarea { font-size: 16px; }
+/* The browser's default placeholder grey is 2.7-3.2:1 on these fills; 70% of the text colour is 5:1 or better in both themes (opacity: Firefox fades placeholders by default) */
+.k-scr ::placeholder { color: color-mix(in srgb, var(--fg) 70%, transparent); opacity: 1; }
 /* A focused control scrolls into view above the floating tab bar, not under it */
 .k-body { scroll-padding-block: 24px 150px; }
 .k-sh-in { scroll-padding-block: 16px 24px; }
 /* Fields and unselected chips: borders that can be seen (3:1) */
 .k-scr input, .k-scr textarea { border-color: color-mix(in srgb, var(--fg) 52%, transparent); }
 .k-chips span:not(.sel), .k-chipb { border-color: color-mix(in srgb, var(--fg) 45%, transparent); }
+.k-kc .k-chips span:not(.sel) { border-color: rgba(236,234,223,.25); } /* the Kern card is dark in both themes: its chips keep their light outline (a dark --fg border vanished on it) */
 /* Nothing animates under a full-screen layer that hides it */
 .k-scr:has(.k-start.on)::before, .k-scr:has(.k-start.on) .k-app *, .k-scr:has(.k-start.on) .k-app *::before, .k-scr:has(.k-start.on) .k-app *::after,
 .k-scr:has(#kLogin.on)::before, .k-scr:has(#kLogin.on) .k-app *, .k-scr:has(#kLogin.on) .k-app *::before, .k-scr:has(#kLogin.on) .k-app *::after,
 .k-scr:has(#kReward:not([hidden]))::before, .k-scr:has(#kReward:not([hidden])) .k-app *, .k-scr:has(#kReward:not([hidden])) .k-app *::before, .k-scr:has(#kReward:not([hidden])) .k-app *::after { animation-play-state: paused !important; }
+/* A sheet (the answer box, Settings) makes the app behind it inert: it stops animating too, so typing is not competing with the halo, the flame and the travelling edge */
+.k-scr [inert], .k-scr [inert] *, .k-scr [inert] *::before, .k-scr [inert] *::after { animation-play-state: paused !important; }
+/* The trail-days flame gets its own layer, so its turn costs the compositor and not the main thread */
+@media (prefers-reduced-motion: no-preference) { .k-streak svg { will-change: transform; } }
 /* Narrow phones: the header must not crowd */
 .k-pill { white-space: nowrap; }
 .k-av { flex: none; } /* stays a 30px circle when the header is tight */
 /* Short screens (iPhone SE class, browser bars showing): the start screen drops its floating stones so both actions fit */
 @media (max-height: 600px) { .k-start .k-float { display: none; } }
+/* Tap targets: 44px (the settings segments were 36px, the guess buttons 32, the chat chips 27, send 42, the age row 20, two plain buttons 34-36) */
+.k-seg button { min-height: 44px; min-width: 44px; }
+.k-ask button, .k-btn, .k-win, .k-check { min-height: 44px; }
+.k-send { width: 44px; height: 44px; }
+#kEx span { min-height: 44px; display: inline-flex; align-items: center; }
+/* A link inside a line of text keeps its look and position; only its tap area grows (the Privacy links were 13px high) */
+.k-scr p a { position: relative; }
+.k-scr p a::after { content: ''; position: absolute; inset: -20px -8px -12px; } /* 12px below: the next control starts 12px under the text */
 @media (max-width: 359px) { .k-logo { font-size: 18px; } .k-demo { padding: 0 6px; } .k-tp .k-demo { margin-right: 0; } .k-pill { font-size: 9.5px; padding-inline: 5px 8px; } .k-top { gap: 6px; } .k-tp { gap: 5px; } }

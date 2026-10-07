@@ -65,12 +65,12 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             </div>
             <div class="k-x" id="kShH">
               <p class="k-msg k-ai" id="kXFirst" hidden>First time here? Write yours above, or use the example, the hints and the steps below. Too hard? Tap “Make it easier”. Your first finish always pays something.</p>
-              <div class="k-xbtns" id="kXBtns"><button type="button" class="k-chipb" id="kXEx">Show an example</button><button type="button" class="k-chipb" id="kXHint">Need a hint?</button><button type="button" class="k-chipb k-ai-btn" id="kXAsk">Ask KERN.AI</button><button type="button" class="k-chipb" id="kXEasy">Make it easier</button></div>
+              <div class="k-xbtns" id="kXBtns"><button type="button" class="k-chipb" id="kXEx" aria-expanded="false" aria-controls="kXExB">Show an example</button><button type="button" class="k-chipb" id="kXHint">Need a hint?</button><button type="button" class="k-chipb k-ai-btn" id="kXAsk">Ask KERN.AI</button><button type="button" class="k-chipb" id="kXEasy">Make it easier</button></div>
               <div class="k-xex" id="kXExB" hidden><div class="k-l">A strong answer, for inspiration</div><pre id="kXExT"></pre></div>
               <div id="kXHints" aria-live="polite"></div>
-              <div class="k-xh"><span class="k-l">Your steps</span><span class="k-l" id="kXPn"></span></div>
+              <div class="k-xh"><span class="k-l" id="kXSL">Your steps</span><span class="k-l" id="kXPn" aria-live="polite"></span></div>
               <div class="k-xp" aria-hidden="true"><i id="kXPb"></i></div>
-              <div id="kXSteps" role="group"></div>
+              <div id="kXSteps" role="group" aria-labelledby="kXSL"></div>
             </div>
             <div class="k-trailsigns"><div class="k-l">Signs from people before you</div><div id="kShS" aria-live="polite"></div></div>
           </div>
@@ -85,16 +85,16 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
           </div>
           <div class="k-step" id="kShR" hidden>
             <div class="k-l">Quick reflection · 20 seconds</div>
-            <p class="k-q">How did it feel?</p>
-            <div class="k-chips" id="kRfE" role="group"><span role="button" tabindex="0" data-v="flow">Time flew</span><span role="button" tabindex="0" data-v="ok">It was fine</span><span role="button" tabindex="0" data-v="drag">It dragged</span></div>
-            <p class="k-q">Would you do this kind of task again?</p>
-            <div class="k-chips" id="kRfA" role="group"><span role="button" tabindex="0" data-v="yes">Yes</span><span role="button" tabindex="0" data-v="maybe">Maybe</span><span role="button" tabindex="0" data-v="no">No</span></div>
+            <p class="k-q" id="kRfEQ">How did it feel?</p>
+            <div class="k-chips" id="kRfE" role="group" aria-labelledby="kRfEQ"><span role="button" tabindex="0" data-v="flow">Time flew</span><span role="button" tabindex="0" data-v="ok">It was fine</span><span role="button" tabindex="0" data-v="drag">It dragged</span></div>
+            <p class="k-q" id="kRfAQ">Would you do this kind of task again?</p>
+            <div class="k-chips" id="kRfA" role="group" aria-labelledby="kRfAQ"><span role="button" tabindex="0" data-v="yes">Yes</span><span role="button" tabindex="0" data-v="maybe">Maybe</span><span role="button" tabindex="0" data-v="no">No</span></div>
             <label class="k-l" for="kRfH">Hardest part (optional)</label><input id="kRfH" type="text" maxlength="140" autocomplete="off" />
             <label class="k-l" for="kRfT">Leave a sign for the next person (optional)</label><input id="kRfT" type="text" maxlength="140" autocomplete="off" aria-describedby="kRfN" /><p class="k-rf-note" id="kRfN"></p>
             <div id="kRfBar" hidden>
-              <div class="k-l">Check your answer · +10 stones each</div>
+              <div class="k-l" id="kRfBL">Check your answer · +10 stones each</div>
               <p class="k-rf-note" id="kRfShort" hidden>Bonus stones and finds start from 20 characters. This answer is a bit short.</p>
-              <div id="kRfBI" role="group"></div>
+              <div id="kRfBI" role="group" aria-labelledby="kRfBL"></div>
             </div>
             <div class="k-sh-btns"><button type="button" class="k-go" id="kRfOk">Save</button><button type="button" class="k-sk" id="kRfSkip">Skip</button></div>
           </div>
@@ -105,8 +105,8 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
         <div class="k-sh-in">
           <div class="k-grab" aria-hidden="true"></div>
           <h5 id="kSetT">Settings</h5>
-          <div class="k-row"><span class="k-l">Language</span><div class="k-seg" role="group"><button type="button" data-k-lang="en">EN</button><button type="button" data-k-lang="it">IT</button></div></div>
-          <div class="k-row"><span class="k-l">Theme</span><div class="k-seg" role="group"><button type="button" data-k-theme="system">System</button><button type="button" data-k-theme="dark">Dark</button><button type="button" data-k-theme="light">Light</button></div></div>
+          <div class="k-row"><span class="k-l" id="kLgL">Language</span><div class="k-seg" role="group" aria-labelledby="kLgL"><button type="button" data-k-lang="en">EN</button><button type="button" data-k-lang="it">IT</button></div></div>
+          <div class="k-row"><span class="k-l" id="kThL">Theme</span><div class="k-seg" role="group" aria-labelledby="kThL"><button type="button" data-k-theme="system">System</button><button type="button" data-k-theme="dark">Dark</button><button type="button" data-k-theme="light">Light</button></div></div>
           <div class="k-acct" id="kAcct" hidden>
             <span class="k-l">Account</span>
             <p id="kAcctE">Not signed in · your trail is only on this device</p>
@@ -161,11 +161,11 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
           <img class="k-hero-img" src="/img/cairn.webp" alt="" width="720" height="720" decoding="async" fetchpriority="high" />
           <div class="k-l">Welcome</div>
           <h4>Start your<br><b>trail.</b></h4>
-          <div class="k-seg k-authseg" id="kAuthSeg" role="group" hidden><button type="button" data-k-mode="up">Create account</button><button type="button" data-k-mode="in">Log in</button></div>
-          <div class="k-field" id="kFName"><label class="k-l" for="kNmI">Your name</label><input id="kNmI" type="text" maxlength="40" autocomplete="given-name" /></div>
-          <div class="k-field" id="kFEmail" hidden><label class="k-l" for="kEm">Email</label><input id="kEm" type="email" maxlength="254" autocomplete="email" inputmode="email" /></div>
-          <div class="k-field" id="kFPw" hidden><label class="k-l" for="kPw">Password</label><input id="kPw" type="password" minlength="8" maxlength="72" autocomplete="new-password" /></div>
-          <label class="k-check" id="kFAge"><input type="checkbox" id="kAge" /><span>I am 18 or older</span></label>
+          <div class="k-seg k-authseg" id="kAuthSeg" role="group" aria-label="Account" hidden><button type="button" data-k-mode="up">Create account</button><button type="button" data-k-mode="in">Log in</button></div>
+          <div class="k-field" id="kFName"><label class="k-l" for="kNmI">Your name</label><input id="kNmI" type="text" maxlength="40" autocomplete="given-name" aria-required="true" /></div>
+          <div class="k-field" id="kFEmail" hidden><label class="k-l" for="kEm">Email</label><input id="kEm" type="email" maxlength="254" autocomplete="email" inputmode="email" aria-required="true" /></div>
+          <div class="k-field" id="kFPw" hidden><label class="k-l" for="kPw">Password</label><input id="kPw" type="password" minlength="8" maxlength="72" autocomplete="new-password" aria-required="true" /></div>
+          <label class="k-check" id="kFAge"><input type="checkbox" id="kAge" aria-required="true" /><span>I am 18 or older</span></label>
           <p class="k-err" id="kErr" role="alert" hidden></p>
           <p class="k-okm" id="kOk" role="status" hidden></p>
           <button type="submit" class="k-go" id="kLog">Start</button>
@@ -193,8 +193,8 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
         <div id="kS2" class="k-sp" hidden>
           <div class="k-l" id="kS2K">Good. Let's find out.</div>
           <h4 id="kS2H">What are you<br>curious about <b>right now?</b></h4>
-          <p class="k-l">Pick one or more. You can add others anytime.</p>
-          <div class="k-tiles" id="kPick" role="group">
+          <p class="k-l" id="kPickL">Pick one or more. You can add others anytime.</p>
+          <div class="k-tiles" id="kPick" role="group" aria-labelledby="kPickL">
             {FIELDS.map((f) => <button type="button" class="k-tile" data-f={f} aria-pressed="false"><img src={`/img/f-${f.toLowerCase()}.webp`} alt="" width="400" height="400" decoding="async" /><span>{f}</span></button>)}
           </div>
           <button type="button" class="k-go" id="kGo">Start my first mission</button>
@@ -256,18 +256,18 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             <div class="k-card"><div class="k-l">What you seem drawn to</div><div class="k-chips" id="kDrawn"><span>Shaping ideas</span><span>Writing</span><span>Solo work</span></div></div>
             <div class="k-card"><div class="k-l">How you work with AI</div><div class="k-sig" id="kAiSig">You rewrote your question 4 times, and every version got clearer.</div></div>
             <div class="k-card"><div class="k-l k-finds-h"><span>Finds</span><span id="kFN"></span></div><div class="k-finds" id="kFinds"></div><p class="k-l">Finish missions to uncover them. You never know which one drops.</p></div>
-            <div class="k-card"><div class="k-l">Badges</div><div class="k-badges" id="kBadges"></div></div>
+            <div class="k-card"><div class="k-l" id="kBdL">Badges</div><div class="k-badges" id="kBadges" role="group" aria-labelledby="kBdL"></div></div>
             <div class="k-card"><div class="k-l">Your answers</div><div id="kAns"></div></div>
             <div class="k-duo"><div class="k-card"><div class="k-l">Answers made</div><div class="k-stat"><b id="kCnt">0</b></div><span class="k-l">on this device · only you see this</span></div><div class="k-card"><div class="k-l">Your rhythm · no pressure</div><div class="k-cal" id="kDots" aria-hidden="true"></div><p id="kRhy"></p></div></div>
                       </section>
 
           <section class="k-pane" id="k-trail">
             <div class="k-hd"><div class="k-l">Your Trail</div><h4>Follow the<br><b>trail.</b></h4><img class="k-hd-img" src="/img/r3.webp" alt="" width="400" height="400" loading="lazy" decoding="async" /></div>
-            <div class="k-tr" id="kTr">
-              <div class="k-st"><h5 id="kTr0">Fix what already exists</h5><p>Not started</p></div>
-              <div class="k-st"><h5 id="kTr1">Rewrite a confusing email</h5><p>Not started</p></div>
-              <div class="k-st"><h5 id="kTr2">Work with a partner</h5><p>Not started</p></div>
-              <div class="k-st" id="kTrK"><h5>Your Kern card</h5><p>Ready when your 3 missions are done</p></div>
+            <div class="k-tr" id="kTr" role="list">
+              <div class="k-st" role="listitem"><h5 id="kTr0">Fix what already exists</h5><p>Not started</p></div>
+              <div class="k-st" role="listitem"><h5 id="kTr1">Rewrite a confusing email</h5><p>Not started</p></div>
+              <div class="k-st" role="listitem"><h5 id="kTr2">Work with a partner</h5><p>Not started</p></div>
+              <div class="k-st" id="kTrK" role="listitem"><h5>Your Kern card</h5><p>Ready when your 3 missions are done</p></div>
             </div>
             <div class="k-card"><div class="k-l">Your Kern card</div><div class="k-kc"><img class="k-kc-img" src="/img/cairn.webp" alt="" width="720" height="720" loading="lazy" decoding="async" /><div class="k-kt">kern<i>.</i></div><h5 id="kCardH">You light up when you start from zero.</h5><div class="k-chips" id="kCardC"><span>Shaping ideas</span><span>Writing</span></div><div class="k-l" id="kCardL">Example · answer and reflect to make it yours</div></div><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="card">Share my card</button><button type="button" class="k-ask-btn" data-k-copy="app">Copy link</button></div></div>
             <div class="k-card k-signs-card"><div class="k-l">Signs on the trail</div><p>People who finish a mission before you leave a short tip for you. Yours helps the next person.</p><div class="k-l">Signs you left</div><div id="kSigns"></div></div>
