@@ -1,6 +1,6 @@
 # KERN
 
-Find your direction by doing real creative work. Installable web app (PWA) by Manuel Di Paolo.
+Missions of real work in design, writing, code, video, selling and music, for people who want to practise and start freelancing. Installable web app (PWA) by Manuel Di Paolo.
 
 ## Run it
 
