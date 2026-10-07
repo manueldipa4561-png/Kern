@@ -391,7 +391,8 @@ const setLvl = () => {
   $<HTMLImageElement>('kRankImg').src = `/img/r${i}.webp`;
   $('kSt').textContent = String(S.stones);
   $('kBar').style.width = (nx ? ((S.stones - RANKS[i][1]) / (nx[1] - RANKS[i][1])) * 100 : 100) + '%';
-  $('kNx').textContent = nx ? (it ? `${nx[1] - S.stones} pietre a ${rn(nx[0])}` : `${nx[1] - S.stones} stones to ${rn(nx[0])}`) : (it ? 'Grado massimo' : 'Top rank');
+  const left = nx ? nx[1] - S.stones : 0;
+  $('kNx').textContent = nx ? (it ? `${left} ${left === 1 ? 'pietra' : 'pietre'} al grado ${rn(nx[0])}` : `${left} ${left === 1 ? 'stone' : 'stones'} to ${rn(nx[0])}`) : (it ? 'Grado massimo' : 'Top rank');
   const lad = $('kLad');
   lad.innerHTML = '';
   RANKS.forEach((r, k) => {
@@ -460,7 +461,7 @@ const renderSignals = () => {
   });
   setT($('kMeterN'), any ? 'From your reflections. Not a test.' : 'Reflect after a mission to fill this.');
   const n = S.mine.length;
-  if (n >= 2) setD($('kAiSig'), it ? `Hai riscritto la tua idea ${n} volte in KERN.AI. Confronta la versione 1 con l'ultima.` : `You rewrote your idea ${n} times in KERN.AI. Compare version 1 with your latest one.`);
+  if (n >= 2) setD($('kAiSig'), it ? `Hai riscritto la tua idea ${n} volte in KERN.AI. Confronta la versione 1 con l’ultima.` : `You rewrote your idea ${n} times in KERN.AI. Compare version 1 with your latest one.`);
   else setT($('kAiSig'), 'Write your idea in KERN.AI. Your versions show up here.'); // never a made-up insight shown as if it were yours
 };
 
@@ -515,12 +516,16 @@ kStatSet.addEventListener('click', async () => {
   say((await stats.turnOff()) ? 'Usage counts are off. What was counted is deleted.' : "Counts are off. We couldn't reach the server to delete the earlier ones: they expire after 12 months.");
   renderStat();
 });
+// A round was just finished and the next one is not started: Home celebrates the Kern card first, and the pill and the Trail say the same.
+const roundJustDone = () => { const b = base(), d = winDone(); return b > 0 && ![0, 1, 2].some((k) => d.has(k) || S.drafts[`${S.field}.${b + k}`]); };
+// The word for a mission's state, the same on Home and in the Trail.
+const stateWord = (done: boolean, next: boolean, draft: boolean) => (done ? 'Done' : next ? 'Next' : draft ? 'Draft' : 'Not started');
 const renderHome = () => {
   renderStat();
   renderFields();
   const f = F(), b = base(), round = b / PER_ROUND, done = winDone(), next = [0, 1, 2].find((k) => !done.has(k)), it = isIt();
   // fresh: a round was just finished and the next one is not started. Celebrate the Kern card first, then offer the new missions.
-  const fresh = round > 0 && ![0, 1, 2].some((k) => done.has(k) || S.drafts[`${S.field}.${b + k}`]);
+  const fresh = roundJustDone();
   setD($('kHi'), S.name ? `${it ? 'Ciao' : 'Hi'} ${S.name}` : (it ? 'Ciao' : 'Hi'));
   const img = $<HTMLImageElement>('kNxImg'), src = next === undefined || fresh ? '/img/cairn.webp' : `/img/f-${S.field.toLowerCase()}.webp`;
   if (img.getAttribute('src') !== src) img.src = src;
@@ -553,7 +558,7 @@ const renderHome = () => {
   if (nb) setD(nbEl, `${boostTxt(nb.m)} · ${tr(f.m[nb.i][1])}`);
   [0, 1, 2].forEach((i) => {
     const a = vb + i, row = $('kMR' + i), isNext = !looking && i === next;
-    const st = vdone.has(i) ? 'Done' : isNext ? 'Next' : S.drafts[`${S.field}.${a}`] ? 'Draft' : 'Not started';
+    const st = stateWord(vdone.has(i), isNext, !!S.drafts[`${S.field}.${a}`]);
     row.classList.toggle('done', vdone.has(i)); row.classList.toggle('next', isNext);
     setT(row.querySelector('b')!, f.m[a][1]);
     const bo = boostOf(S.field), isB = !!bo && bo.i === a;
@@ -562,17 +567,23 @@ const renderHome = () => {
   });
 };
 
+// The pill and the three steps of the Trail: the round in play and where each of its missions stands.
+const renderSteps = () => {
+  const it = isIt(), b = base(), round = b / PER_ROUND, done = winDone(), n = done.size, next = [0, 1, 2].find((k) => !done.has(k));
+  const justDone = roundJustDone(), tb = justDone ? b - PER_ROUND : b; // until the next round is started, the Trail shows the round that was just finished
+  $('kPill').textContent = justDone ? (it ? `Round ${round} fatto` : `Round ${round} done`) : round ? `Round ${round + 1} · ${n}/3` : it ? `${n} su 3 fatte` : `${n} of 3 done`;
+  $('kRing').style.setProperty('--p', String(justDone ? 1 : n / 3));
+  [0, 1, 2].forEach((i) => {
+    setT($('kTr' + i), F().m[tb + i][1]);
+    const st = $('kTr' + i).parentElement!, fin = justDone || done.has(i), now = !justDone && i === next;
+    st.className = 'k-st' + (fin ? ' fin' : now ? ' now' : '');
+    setT(st.querySelector('p')!, stateWord(fin, now, !!S.drafts[`${S.field}.${tb + i}`]));
+  });
+};
 // Progress: pill, trail, answers list, signs, real stats from saved answers.
 const renderProgress = () => {
-  const it = isIt(), b = base(), round = b / PER_ROUND, done = winDone(), n = done.size, next = [0, 1, 2].find((k) => !done.has(k));
-  $('kPill').textContent = round ? `Round ${round + 1} · ${n}/3` : it ? `${n} su 3 fatte` : `${n} of 3 done`;
-  $('kRing').style.setProperty('--p', String(n / 3));
-  [0, 1, 2].forEach((i) => {
-    setT($('kTr' + i), F().m[b + i][1]);
-    const st = $('kTr' + i).parentElement!;
-    st.className = 'k-st' + (done.has(i) ? ' fin' : i === next ? ' now' : '');
-    setT(st.querySelector('p')!, done.has(i) ? 'Done' : i === next ? 'In progress' : 'Not started');
-  });
+  const it = isIt();
+  renderSteps();
   const kc = $('kTrK');
   const ready = doneSet().size >= PER_ROUND; // the Kern card unlocks with round 1 and sharpens with every round after
   kc.className = 'k-st' + (ready ? ' now' : '');
@@ -702,13 +713,15 @@ let announced = '';
 // so a language switch translates them; everything else the person typed stays as typed.
 const chipKeys = [...document.querySelectorAll<HTMLElement>('#kEx span')].map((c) => c.dataset.en);
 const said = (m: Msg) => (m.who === 'ai' ? (m.p ?? '') + tr(m.t) : chipKeys.includes(m.t) ? tr(m.t) : m.t);
+// The three dots of "KERN.AI is typing". The words are for a screen reader (an aria-label on a paragraph is ignored); last, so the dots keep their nth-child timing.
+const typingDots = () => `<i></i><i></i><i></i><span class="k-sr">${tr('KERN.AI is typing')}</span>`;
 const renderChat = () => {
   const lastAi = [...S.msgs].reverse().find((m) => !m.typing);
   if (lastAi && lastAi.who === 'ai' && said(lastAi) !== announced) { announced = said(lastAi); $('kSr').textContent = announced; }
   chatEl.innerHTML = '';
   S.msgs.forEach((m) => {
     const p = document.createElement('p'); p.className = 'k-msg ' + (m.who === 'me' ? 'k-me' : 'k-ai');
-    if (m.typing) { p.classList.add('k-typing'); p.innerHTML = '<i></i><i></i><i></i>'; }
+    if (m.typing) { p.classList.add('k-typing'); p.innerHTML = typingDots(); }
     else p.textContent = said(m);
     chatEl.appendChild(p);
   });
@@ -726,7 +739,7 @@ const aiSay = (t: string, p?: string) => {
 const startChat = () => {
   gen++;
   S.msgs = [{ who: 'ai', t: OPEN }]; S.mine = []; busy = false; inEl.value = '';
-  if (S.habit.t && !S.habit.l.some((e) => e[0] === dayN(Date.now()))) S.msgs.push({ who: 'ai', t: tr('Your tiny habit today: {h}. Done it? You can tick it on the Missions screen.').replace('{h}', S.habit.t) });
+  if (S.habit.t && !S.habit.l.some((e) => e[0] === dayN(Date.now()))) S.msgs.push({ who: 'ai', t: tr('Your tiny habit today: {h}. Done it? You can tick it on the Missions screen.').replace('{h}', hbText(S.habit.t)) });
   save(); renderChat();
 };
 // Live co-pilot: asks netlify/functions/coach.mts, which calls Claude with the rules "only ask, never answer".
@@ -802,7 +815,7 @@ function flushDraft() {
   if (kShA.hidden || cur.edit >= 0) return; // edits are not drafts
   const v = kTa.value.trim() ? kTa.value.slice(0, 2000) : '';
   if (v) S.drafts[dKey()] = v; else delete S.drafts[dKey()];
-  save(); renderHome();
+  save(); renderHome(); renderSteps(); // a first draft in the next round ends the "just finished" moment on the pill and the Trail too
   const note = !v ? NOTE_DEFAULT : saveFailed ? "Couldn't save on this device" : 'Draft saved on this device';
   // The browser cuts a longer paste or stops the typing at the limit without a word: say so, so the end of the text is not lost unseen.
   if (kTa.value.length >= kTa.maxLength) setD(kSaved, `${tr(note)} · ${tr('Limit reached: {n} characters.').replace('{n}', String(kTa.maxLength))}`); else setT(kSaved, note);
@@ -937,12 +950,12 @@ $('kXAsk').addEventListener('click', async () => {
   if (HEAVY.test(draft)) { // heavy words in the draft: nothing is sent or echoed, the mission pauses
     const m = document.createElement('p'); m.className = 'k-msg k-ai'; m.textContent = tr(HEAVY_REPLY); $('kXHints').appendChild(m); reveal(m); hold(btn, false); return;
   }
-  const p = document.createElement('p'); p.className = 'k-msg k-ai k-typing'; p.innerHTML = '<i></i><i></i><i></i>'; p.setAttribute('aria-label', 'typing');
+  const p = document.createElement('p'); p.className = 'k-msg k-ai k-typing'; p.innerHTML = typingDots();
   $('kXHints').appendChild(p); reveal(p);
   const f0 = cur.f, i0 = cur.i;
   const reply = await askAI({ mission: { title: FIELDS[cur.f].m[cur.i][1], brief: v.brief }, messages: [{ who: 'me', t: draft ? `My answer so far: ${draft}` : 'I am about to start this mission. Help me begin.' }] });
   if (cur.f !== f0 || cur.i !== i0 || kSheet.hidden) return; // another mission was opened meanwhile
-  p.classList.remove('k-typing'); p.removeAttribute('aria-label'); p.textContent = '';
+  p.classList.remove('k-typing'); p.textContent = '';
   setLive(!!reply);
   if (reply) p.textContent = reply;
   else p.textContent = draft.length >= 10 ? echo(draft) + tr(pick(Q_MORE[0])) : tr(pick(Q_STUCK)); // never a button that does nothing, and never a hint in disguise
@@ -1007,7 +1020,10 @@ const STARTERS: Record<string, string[]> = {
   Music: [t2('Hum or tap a rhythm for 30 seconds', 'Canticchia o batti un ritmo per 30 secondi'), t2('Name one instrument in a song', 'Nomina uno strumento in una canzone')],
 };
 const CUES = [t2('wake up', 'mi sveglio'), t2('have my coffee', 'bevo il caffè'), t2('finish lunch', 'finisco di pranzare'), t2('get home', 'torno a casa'), t2('brush my teeth', 'mi lavo i denti')];
-const HB_MSG = [t2('That counts. Small is the point.', 'Conta. Il bello è essere piccoli.'), t2('Done. Your future self noticed.', 'Fatto. Il tuo io futuro se n’è accorto.'), t2('Again tomorrow, same cue. That is the whole trick.', 'Di nuovo domani, stesso segnale. È tutto qui il trucco.'), t2('Easy on purpose. Keep it that way.', 'Facile di proposito. Resta così.'), t2('One more day on the trail.', 'Un altro giorno sul sentiero.')];
+// A habit or cue picked from the chips is saved as the words on the chip at that moment (English or Italian): show it in the current language. Words typed by hand stay as typed.
+const HB_EN = new Map([...Object.values(STARTERS).flat(), ...CUES].flatMap((en): [string, string][] => [[en, en], [IT[en], en]]));
+const hbText = (s: string) => tr(HB_EN.get(s) ?? s);
+const HB_MSG = [t2('That counts. Small is the point.', 'Conta. Il bello è essere piccoli.'), t2('Done. Your future self noticed.', 'Fatto. Il tuo io futuro se n’è accorto.'), t2('Again tomorrow, same cue. That is the whole trick.', 'Di nuovo domani, stesso segnale. È tutto qui il trucco.'), t2('Easy on purpose. Keep it that way.', 'Facile di proposito. Resta così.'), t2('One more day on the trail.', 'Un altro giorno sulla traccia.')];
 const kHbSet = $('kHbSet'), kHbRun = $('kHbRun'), kHbT = $<HTMLInputElement>('kHbT'), kHbC = $<HTMLInputElement>('kHbC');
 const chip = (host: Element, text: string, on: () => void) => {
   const c = document.createElement('span'); c.setAttribute('role', 'button'); c.tabIndex = 0; c.textContent = tr(text);
@@ -1024,8 +1040,8 @@ function renderHabit() {
     CUES.forEach((c) => chip(cues, c, () => { kHbC.value = tr(c); }));
     return;
   }
-  setD($('kHbName'), S.habit.t);
-  setD($('kHbCue'), S.habit.c ? `${tr('After I')} ${S.habit.c}` : tr('Pick a cue you already have.'));
+  setD($('kHbName'), hbText(S.habit.t));
+  setD($('kHbCue'), S.habit.c ? `${tr('After I')} ${hbText(S.habit.c)}` : tr('Pick a cue you already have.'));
   const today = dayN(Date.now()), done = new Set(S.habit.l.map((e) => e[0])), dots = $('kHbDots');
   dots.innerHTML = '';
   for (let i = 6; i >= 0; i--) {
@@ -1046,7 +1062,7 @@ $('kHbSave').addEventListener('click', () => {
   land($('kHbName')); // the form this button sat in is gone: focus the habit that replaced it
   say('Habit set. Make it so small you cannot fail.');
 });
-$('kHbEdit').addEventListener('click', () => { kHbT.value = S.habit.t; kHbC.value = S.habit.c; hbEditing = true; renderHabit(); land(kHbSet.querySelector<HTMLElement>('h5')!); }); // the old habit stays saved until the new one is
+$('kHbEdit').addEventListener('click', () => { kHbT.value = hbText(S.habit.t); kHbC.value = hbText(S.habit.c); hbEditing = true; renderHabit(); land(kHbSet.querySelector<HTMLElement>('h5')!); }); // the old habit stays saved until the new one is
 $('kHbDo').addEventListener('click', () => {
   const today = dayN(Date.now());
   if (S.habit.l.some((e) => e[0] === today)) return;
@@ -1273,8 +1289,20 @@ type Mode = 'guest' | 'up' | 'in';
 let mode: Mode = CLOUD ? 'up' : 'guest';
 const kEm = $<HTMLInputElement>('kEm'), kPw = $<HTMLInputElement>('kPw'), kOk = $('kOk');
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) && v.length <= 254;
-const fail = (en: string) => { setT(kErr, en); kErr.hidden = false; kOk.hidden = true; };
-const note = (en: string) => { setT(kOk, en); kOk.hidden = false; kErr.hidden = true; };
+// An error that blames fields marks them invalid, and goes away by itself once they are right.
+let blamed: HTMLInputElement[] = [];
+const hideErr = () => { kErr.hidden = true; blamed.forEach((f) => f.removeAttribute('aria-invalid')); blamed = []; };
+const fail = (en: string, ...bad: HTMLInputElement[]) => { hideErr(); setT(kErr, en); kErr.hidden = false; kOk.hidden = true; blamed = bad; bad.forEach((f) => f.setAttribute('aria-invalid', 'true')); };
+const note = (en: string) => { setT(kOk, en); kOk.hidden = false; hideErr(); };
+const right = (f: HTMLInputElement) => (f === kNmI ? !!cleanName(f.value.trim()).trim() : f === kEm ? emailOk(f.value.trim().toLowerCase()) : f === kPw ? f.value.length >= 8 : f.checked);
+const settle = () => {
+  if (!blamed.length) return;
+  blamed.filter(right).forEach((f) => f.removeAttribute('aria-invalid'));
+  blamed = blamed.filter((f) => !right(f));
+  if (!blamed.length) kErr.hidden = true;
+};
+[kNmI, kEm, kPw].forEach((f) => f.addEventListener('input', settle));
+kAge.addEventListener('change', settle);
 function setMode(m: Mode) {
   mode = m;
   pressed('mode', m);
@@ -1288,7 +1316,7 @@ function setMode(m: Mode) {
   setT($('kGuest'), S.name ? 'Not now' : 'Continue without an account');
   $('kNoteLocal').hidden = m !== 'guest'; $('kNoteCloud').hidden = m === 'guest';
   setT(kLog, m === 'up' ? 'Create account' : m === 'in' ? 'Log in' : 'Start');
-  kErr.hidden = true; kOk.hidden = true;
+  hideErr(); kOk.hidden = true;
 }
 document.querySelectorAll<HTMLElement>('[data-k-mode]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.kMode === 'in' ? 'in' : 'up')));
 $('kGuest').addEventListener('click', () => { if (S.name) { kLogin.classList.remove('on'); return; } setMode('guest'); });
@@ -1298,15 +1326,15 @@ $('kProf').addEventListener('submit', async (e) => {
   if (authBusy) return;
   const n = cleanName(kNmI.value.trim()).trim(), em = kEm.value.trim().toLowerCase(), pw = kPw.value;
   if (mode === 'guest') {
-    if (!n || !kAge.checked) { fail('Add your name and confirm your age to continue.'); (n ? kAge : kNmI).focus(); return; }
-    kErr.hidden = true; kLog.classList.add('busy');
+    if (!n || !kAge.checked) { fail('Add your name and confirm your age to continue.', ...[...(n ? [] : [kNmI]), ...(kAge.checked ? [] : [kAge])]); (n ? kAge : kNmI).focus(); return; }
+    hideErr(); kLog.classList.add('busy');
     window.setTimeout(() => { S.name = n; save(); renderMe(); renderHome(); kLog.classList.remove('busy'); kLogin.classList.remove('on'); if (S.onboarded) arrive(); else openStart(); }, still ? 0 : 600);
     return;
   }
-  if (mode === 'up' && !n) { fail('Add your name.'); kNmI.focus(); return; }
-  if (!emailOk(em)) { fail('Enter a valid email.'); kEm.focus(); return; }
-  if (pw.length < 8) { fail('Use a longer password: at least 8 characters.'); kPw.focus(); return; }
-  if (mode === 'up' && !kAge.checked) { fail('Confirm you are 18 or older.'); kAge.focus(); return; }
+  if (mode === 'up' && !n) { fail('Add your name.', kNmI); kNmI.focus(); return; }
+  if (!emailOk(em)) { fail('Enter a valid email.', kEm); kEm.focus(); return; }
+  if (pw.length < 8) { fail('Use a longer password: at least 8 characters.', kPw); kPw.focus(); return; }
+  if (mode === 'up' && !kAge.checked) { fail('Confirm you are 18 or older.', kAge); kAge.focus(); return; }
   authBusy = true; kLog.classList.add('busy');
   try {
     if (mode === 'up') {
@@ -1320,7 +1348,7 @@ $('kProf').addEventListener('submit', async (e) => {
 });
 $('kForgot').addEventListener('click', async () => {
   const em = kEm.value.trim().toLowerCase();
-  if (!emailOk(em)) { fail('Enter your email first.'); kEm.focus(); return; }
+  if (!emailOk(em)) { fail('Enter your email first.', kEm); kEm.focus(); return; }
   try { await cloud.resetPassword(em); note('If an account exists for this email, we sent a reset link.'); } catch (err) { fail(cloud.why(err)); }
 });
 
@@ -1577,13 +1605,15 @@ const rewriteSample = (toIt: boolean) => {
   S.mine = S.mine.map(idea);
   S.msgs = S.msgs.map((m) => (m.who === 'me' ? { ...m, t: idea(m.t) } : m));
 };
+const kDesc = document.querySelector('meta[name="description"]'), descEn = kDesc?.getAttribute('content') ?? ''; // the page description follows the language like the title does
 const setLang = (l: Lang) => {
   if (DEMO) rewriteSample(l === 'it'); // before the save: the stored demo follows the language too
   S.lang = l; save(); document.documentElement.lang = l;
   if (DEMO) kScr.style.setProperty('--demo-label', JSON.stringify(tr('Demo profile'))); // the tag over every sheet (app.css)
   document.title = tr('KERN · Find your direction by doing real work');
-  document.querySelectorAll<HTMLAnchorElement>('a[href^="/privacy/"]').forEach((a) => a.setAttribute('href', l === 'it' ? '/privacy/#it' : '/privacy/'));
+  kDesc?.setAttribute('content', tr(descEn));
   kTxt.forEach((e) => { const en = e.dataset.en; if (!en) return; if (e.classList.contains('k-xb')) e.textContent = tr(en); else e.innerHTML = tr(en); });
+  document.querySelectorAll<HTMLAnchorElement>('a[href^="/privacy/"]').forEach((a) => a.setAttribute('href', l === 'it' ? '/privacy/#it' : '/privacy/')); // after the texts above: they bring their own links back
   document.querySelectorAll<HTMLElement>('[aria-label]').forEach((e) => { const en = (e.dataset.enLabel ??= e.getAttribute('aria-label') || ''); e.setAttribute('aria-label', tr(en)); });
   if (fb.dataset.src) fb.textContent = tr(fb.dataset.src);
   pressed('lang', l);

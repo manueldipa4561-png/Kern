@@ -64,7 +64,7 @@ export const MX: Record<string, MissionX[]> = {
       who: tag('Elena’s bare room', 'La stanza vuota di Elena'),
       brief: t2(
         'A friend describes their dream room in one sentence. You plan its moodboard (a collage): 6 pictures, described in words. Pair up, or do both parts.',
-        'Qualcuno descrive la sua stanza dei sogni in una frase. Pianifichi il suo moodboard (un collage): 6 immagini, a parole. In coppia, o fai entrambe le parti.'),
+        'Qualcuno descrive la sua stanza dei sogni in una frase. Pianifica il suo moodboard (un collage): 6 immagini, a parole. In coppia, o fai entrambe le parti.'),
       asset: {
         mono: false,
         title: t2('Elena’s room (if you have no partner)', 'La stanza di Elena (se non hai un partner)'),

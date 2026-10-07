@@ -8,6 +8,8 @@ import interFont from '@fontsource-variable/inter-tight/files/inter-tight-latin-
 import bricolageFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url';
 // Inlined so iOS can read it without a login cookie (it fetches the icon itself, which a password-protected site answers with 401).
 const touchIcon = 'data:image/png;base64,' + readFileSync('public/icons/apple-touch-icon.png').toString('base64');
+// Link previews (chat apps, social) need a full address for the image: Netlify gives the site's main address as URL while it builds (a local build has none, so the path stays relative).
+const site = (process.env.URL ?? '').replace(/\/$/, '');
 const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music'];
 const MARK = 'M23.13 76.87A38 38 0 0 1 76.87 23.13Z';
 const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
@@ -33,7 +35,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
     <meta property="og:type" content="website" />
     <meta property="og:title" content="KERN" />
     <meta property="og:description" content="Find your direction by doing real creative work." />
-    <meta property="og:image" content="/icons/icon-512.png" />
+    <meta property="og:image" content={`${site}/icons/icon-512.png`} />
   </head>
   <body>
     <main class="k-scr" id="kScr">
@@ -105,7 +107,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
         <div class="k-sh-in">
           <div class="k-grab" aria-hidden="true"></div>
           <h5 id="kSetT">Settings</h5>
-          <div class="k-row"><span class="k-l" id="kLgL">Language</span><div class="k-seg" role="group" aria-labelledby="kLgL"><button type="button" data-k-lang="en">EN</button><button type="button" data-k-lang="it">IT</button></div></div>
+          <div class="k-row"><span class="k-l" id="kLgL">Language</span><div class="k-seg" role="group" aria-labelledby="kLgL"><button type="button" data-k-lang="en" lang="en" aria-label="English">EN</button><button type="button" data-k-lang="it" lang="it" aria-label="Italiano">IT</button></div></div>
           <div class="k-row"><span class="k-l" id="kThL">Theme</span><div class="k-seg" role="group" aria-labelledby="kThL"><button type="button" data-k-theme="system">System</button><button type="button" data-k-theme="dark">Dark</button><button type="button" data-k-theme="light">Light</button></div></div>
           <div class="k-acct" id="kAcct" hidden>
             <span class="k-l">Account</span>
@@ -269,7 +271,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
               <div class="k-st" role="listitem"><h5 id="kTr2">Work with a partner</h5><p>Not started</p></div>
               <div class="k-st" id="kTrK" role="listitem"><h5>Your Kern card</h5><p>Ready when your 3 missions are done</p></div>
             </div>
-            <div class="k-card"><div class="k-l">Your Kern card</div><div class="k-kc"><img class="k-kc-img" src="/img/cairn.webp" alt="" width="720" height="720" loading="lazy" decoding="async" /><div class="k-kt">kern<i>.</i></div><h5 id="kCardH">You light up when you start from zero.</h5><div class="k-chips" id="kCardC"><span>Shaping ideas</span><span>Writing</span></div><div class="k-l" id="kCardL">Example · answer and reflect to make it yours</div></div><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="card">Share my card</button><button type="button" class="k-ask-btn" data-k-copy="app">Copy link</button></div></div>
+            <div class="k-card"><div class="k-l">Your Kern card</div><div class="k-kc"><img class="k-kc-img" src="/img/cairn.webp" alt="" width="720" height="720" loading="lazy" decoding="async" /><div class="k-kt">kern<i>.</i></div><h5 id="kCardH">You light up when you start from zero.</h5><div class="k-chips" id="kCardC"><span>Shaping ideas</span><span>Writing</span></div><div class="k-l" id="kCardL">Example · answer and reflect to make it yours</div></div><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="card">Share my card</button><button type="button" class="k-ask-btn" data-k-copy="app">Copy app link</button></div></div>
             <div class="k-card k-signs-card"><div class="k-l">Signs on the trail</div><p>People who finish a mission before you leave a short tip for you. Yours helps the next person.</p><div class="k-l">Signs you left</div><div id="kSigns"></div></div>
             <div class="k-card"><div class="k-l">Dare a friend</div><p>Send a mission. You both answer, then see the two answers side by side.</p><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="dare">Send a dare</button><button type="button" class="k-ask-btn" data-k-copy="dare">Copy link</button></div></div>
             <div class="k-card k-pilot"><div class="k-l">Testing KERN?</div><p>Send your answers and reflections to the team. It helps us build the next version.</p><button type="button" class="k-ask-btn" data-k-send>Share my trail with the KERN team</button></div>

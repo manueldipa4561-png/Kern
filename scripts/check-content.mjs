@@ -44,6 +44,8 @@ for (const m of sampleChat(true)) if (m.who === 'ai') assert.ok(IT[m.t], `demo.t
 assert.equal(sampleChat(false).length, SAMPLE_IDEA.length * 2, 'demo.ts: every idea version is followed by one coach line');
 assert.equal(STATS_PER_ROUND, PER_ROUND, 'scripts/stats-core.mjs counts finished rounds with its own PER_ROUND: update it to match src/scripts/next.ts');
 assert.deepEqual(CLASHES, [],'the same English text has two different Italian versions, one overwrites the other');
+// One apostrophe style in Italian: a straight one between letters (l'app) stands out next to the typographic one (l’app) used everywhere else.
+for (const [en, it] of Object.entries(IT)) assert.ok(!/\p{L}'\p{L}/u.test(it), `i18n: the Italian for "${en.slice(0, 50)}" has a straight apostrophe, write ’`);
 
 // The app counts rounds from the current field and searches the other fields with that count, so all fields must match.
 const counts = [...new Set(Object.values(FIELDS).map((f) => f.m.length))];
