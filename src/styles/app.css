@@ -1,4 +1,4 @@
-/* KERN app styles. Base extracted from punto-due-site web.astro; shell and new components at the end. */
+/* KERN app styles. Base and shell first, then components added in layers (v2 to v7) at the end. */
       .k-scr.light { --bg: #E8E6DA; --fg: #141A12; --acc: #2C5A3A; --on: #E8E6DA; --line: #B9B7A8; --dim: #5b6156; }
       .k-scr { --bg: #0F140E; --fg: #E8E6DA; --acc: #C9F24A; --on: #0F140E; --line: #2a3128; --dim: #9a9d8e; position: relative; height: 600px; border-radius: 34px; overflow: hidden; contain: layout paint; background: var(--bg); color: var(--fg); }
       .k-scr h4, .k-scr h5, .k-scr p { margin: 0; }
@@ -209,12 +209,13 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-check input { width: 20px; height: 20px; margin: 0; accent-color: var(--acc); }
 .k-err { color: #ff9a8a; font-size: 13px; } .k-scr.light .k-err { color: #a3241a; }
 .k-danger { border-color: #ff9a8a !important; color: #ff9a8a !important; } .k-scr.light .k-danger { border-color: #a3241a !important; color: #a3241a !important; }
-.k-err[hidden], .k-dare[hidden], .k-note[hidden] { display: none; }
+.k-err[hidden], .k-dare[hidden], .k-note[hidden], .k-stat[hidden] { display: none; }
 .k-an { display: flex; flex-direction: column; gap: 4px; padding: 10px 0; border-bottom: 1px solid var(--edge); }
 .k-an:last-child { border-bottom: 0; }
 .k-an p { font-size: 13.5px; line-height: 1.4; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .k-note { color: var(--gold); }
 .k-dare { border-color: var(--gold); }
+.k-stat a.k-l { display: inline-flex; align-items: center; min-height: 44px; }
 .k-card .k-ask-btn { align-self: flex-start; }
 .k-nojs { position: fixed; inset: auto 0 0; margin: 0; padding: 16px; text-align: center; background: #C9F24A; color: #0F140E; font-weight: 700; }
 

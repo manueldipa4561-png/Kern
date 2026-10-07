@@ -12,6 +12,7 @@ import { SPONSORS } from './sponsors';
 import { HELPS } from './helps';
 import { EASY } from './easy';
 import * as cloud from './cloud';
+import * as stats from './stats';
 import { akey, ver, stamp, mergeAnswers, type Tomb } from './sync';
 
 type Feel = 'flow' | 'ok' | 'drag';
@@ -378,9 +379,38 @@ const renderFields = () => {
   add.type = 'button'; add.className = 'k-fchip k-fadd'; add.textContent = `+ ${tr('Add')}`; add.setAttribute('aria-label', tr('Add interests'));
   add.addEventListener('click', () => openStart(true)); box.appendChild(add);
 };
-document.addEventListener('visibilitychange', () => { if (!document.hidden) renderProgress(); }); // habit button, boost, streak and dots go stale overnight otherwise
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { renderProgress(); track('visit'); } }); // habit button, boost, streak and dots go stale overnight otherwise
 const kAdd = $('kAdd'), kAdd2 = $('kAdd2');
+// Usage counts without names (stats.ts): asked once on Home, switchable in Settings. Off until yes. Without Supabase there is nowhere to send them, so neither control shows.
+const kStat = $('kStat'), kStatSet = $('kStatSet');
+const track = (ev: stats.Ev, f?: string, i?: number) => stats.track(ev, f, i, S.lang);
+function renderStat() {
+  kStat.hidden = !(stats.available && S.onboarded && !stats.decided());
+  kStatSet.hidden = !stats.available;
+  setT(kStatSet, stats.isOn() ? 'Usage counts: on' : 'Usage counts: off');
+}
+// The card hides itself when answered, so focus moves to the main button instead of falling to the page.
+const afterStatChoice = (message: string) => { say(message); renderStat(); kAdd.focus({ preventScroll: true }); };
+const countsOn = () => afterStatChoice(stats.turnOn(S.lang) ? 'Thanks. You can switch this off in Settings.' : "Couldn't switch it on in this browser.");
+$('kStY').addEventListener('click', countsOn);
+$('kStN').addEventListener('click', () => { stats.decline(); afterStatChoice('Okay. Nothing will be counted. You can change this in Settings.'); });
+let armedAt = 0; // the first tap explains, a second tap within 8 seconds switches counting on
+kStatSet.addEventListener('click', async () => {
+  if (!stats.isOn()) {
+    if (Date.now() - armedAt > 8000) {
+      armedAt = Date.now();
+      setT(kStatSet, 'Tap again to switch on (no names, see Privacy)');
+      say('Counts what you do (opened, answered, shared), never your name or your words. Tap again to switch on.');
+      window.setTimeout(renderStat, 8000);
+      return;
+    }
+    armedAt = 0; countsOn(); return;
+  }
+  say((await stats.turnOff()) ? 'Usage counts are off. What was counted is deleted.' : "Counts are off. We couldn't reach the server to delete the earlier ones: they expire after 12 months.");
+  renderStat();
+});
 const renderHome = () => {
+  renderStat();
   renderFields();
   const f = F(), b = base(), round = b / PER_ROUND, done = winDone(), next = [0, 1, 2].find((k) => !done.has(k)), it = isIt();
   // fresh: a round was just finished and the next one is not started. Celebrate the Kern card first, then offer the new missions.
@@ -778,6 +808,7 @@ $('kXAsk').addEventListener('click', async () => {
   const btn = $<HTMLButtonElement>('kXAsk'), v = variant(cur.f, cur.i);
   if (btn.disabled || !v) return;
   btn.disabled = true;
+  track('ask_ai', cur.f, cur.i);
   const draft = kTa.value.trim().slice(0, 400);
   const p = document.createElement('p'); p.className = 'k-msg k-ai k-typing'; p.innerHTML = '<i></i><i></i><i></i>'; p.setAttribute('aria-label', 'typing');
   $('kXHints').appendChild(p);
@@ -960,6 +991,7 @@ const fillSheet = (f: string, i: number) => {
 // No clock on a mission: "~3 min" is a soft estimate shown by renderBrief, never a countdown or a speed bonus (quality over speed).
 const openAnswer = (f: string, i: number, dare = false) => {
   cur = { f, i, dare, edit: -1 };
+  track('open', f, i);
   fillSheet(f, i); setT($('kSub'), 'Submit answer');
   kTa.value = S.drafts[dKey()] || '';
   const title = $('kShT'); title.tabIndex = -1; // focus the title, not the answer box: the brief stays in view and no keyboard pops up before it is read
@@ -997,6 +1029,7 @@ $('kSub').addEventListener('click', once(() => {
   const na: Answer = { f: cur.f, i: cur.i, t: t.slice(0, 2000), at: Date.now() };
   lastBoost = boostOf(cur.f); // before the push: an answer that completes a round moves base(), and with it the boost
   S.answers.push(na); lastAns = na;
+  track('answer', cur.f, cur.i);
   delete S.drafts[dKey()];
   S.stones += 50; save();
   if (cur.dare) { dare = null; renderDare(); }
@@ -1009,6 +1042,7 @@ $('kSub').addEventListener('click', once(() => {
 }));
 $('kRfOk').addEventListener('click', once(() => {
   const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value });
+  if (r) track('reflect', cur.f, cur.i);
   finish(r);
 }));
 $('kRfSkip').addEventListener('click', once(() => finish(undefined)));
@@ -1183,6 +1217,7 @@ $('kLogout').addEventListener('click', async () => {
   clearTimeout(pushT);
   if (user && pulled) { try { await cloud.push(user.id, snapshot()); } catch { /* best effort before leaving */ } }
   try { await cloud.signOut(); } catch { /* still clear the device */ }
+  await stats.erase(); // the next person on this device is asked again
   try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
   location.replace('/');
 });
@@ -1190,6 +1225,7 @@ $('kDelAcc').addEventListener('click', async () => {
   if (!confirm(tr('Delete your account and your whole trail? This cannot be undone.'))) return;
   clearTimeout(pushT); // a pending sync must not race the deletion
   try { await cloud.deleteAccount(); } catch (err) { say(cloud.why(err)); return; }
+  await stats.erase();
   try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
   location.replace('/');
 });
@@ -1270,7 +1306,7 @@ const LINKS: Record<string, () => string> = {
 };
 kScr.querySelectorAll<HTMLElement>('[data-k-copy]').forEach((b) => b.addEventListener('click', async () => {
   const url = (LINKS[b.dataset.kCopy!] || LINKS.app)();
-  if (b.dataset.kCopy === 'dare') markDared();
+  if (b.dataset.kCopy === 'dare') { markDared(); track('share'); }
   if (!(await copy(url))) { say(url); return; }
   say('Link copied.');
   const en = b.dataset.en!;
@@ -1339,6 +1375,7 @@ const shareCard = async () => {
   say('Card saved as an image.');
 };
 kScr.querySelectorAll<HTMLElement>('[data-k-share]').forEach((b) => b.addEventListener('click', () => {
+  track('share'); // counts the tap on Share (card or dare), not whether the person finished sending it
   if (b.dataset.kShare === 'card') { void shareCard(); return; }
   markDared();
   void shareText('KERN', tr('I dare you: {m}. Answer it on KERN, then we compare.').replace('{m}', tr(F().m[0][1])), `${location.origin}/?dare=${encodeURIComponent(S.field)}.0`, 'Link copied.');
@@ -1403,15 +1440,16 @@ $('kRemind').addEventListener('click', () => {
   const start = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}T180000`;
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
   const title = esc(tr('KERN: make one small thing'));
-  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Punto Due Studio//KERN//EN', 'BEGIN:VEVENT',
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//KERN//KERN//EN', 'BEGIN:VEVENT',
     `UID:kern-${Date.now()}@${location.host}`, `DTSTAMP:${stamp}`, `DTSTART:${start}`, 'DURATION:PT20M', 'RRULE:FREQ=WEEKLY',
     `SUMMARY:${title}`, `DESCRIPTION:${esc(tr('No pressure. Open KERN when you feel like it.'))} ${location.origin}/`, `URL:${location.origin}/`,
     'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:PT0M', `DESCRIPTION:${title}`, 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
   download(ics, 'kern-reminder.ics', 'text/calendar');
   say('Open the file to add the reminder to your calendar.');
 });
-$('kDel').addEventListener('click', () => {
+$('kDel').addEventListener('click', async () => {
   if (!confirm(tr('This deletes your trail on this device. Continue?'))) return;
+  await stats.erase(); // also deletes what was counted for this device
   try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
   location.replace('/');
 });
@@ -1449,5 +1487,6 @@ moveInd(onTab(), false);
 setMode(mode);
 renderAcct();
 booted = true;
+track('visit'); // once a day per device, only for people who said yes
 if (!S.onboarded) openStart(); // the choice comes first, right after the loader
 else if (!S.name) kLogin.classList.add('on');

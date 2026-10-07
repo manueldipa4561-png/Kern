@@ -94,3 +94,14 @@ export const removeSign = async (id: number) => {
   const { error } = await (await client()).rpc('delete_my_sign', { sign_id: id });
   if (error) throw error;
 };
+
+// Usage counts without names (stats.ts, table kern_events). Plain calls with the public key and no login, so a count is
+// never tied to an account, and the SDK is not downloaded just to count. keepalive lets one finish while the page unloads.
+const rpc = async (fn: string, body: object) => {
+  if (!enabled) throw new Error('cloud disabled');
+  const res = await fetch(`${URL_!.replace(/\/$/, '')}/rest/v1/rpc/${fn}`, { method: 'POST', keepalive: true, headers: { apikey: KEY_!, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error(`${fn}: ${res.status}`);
+};
+export type CountEvent = { aid: string; ev: string; field: string | null; mission: number | null; brand: boolean; lang: string };
+export const logEvent = (e: CountEvent) => rpc('log_event', { p_aid: e.aid, p_ev: e.ev, p_field: e.field, p_mission: e.mission, p_brand: e.brand, p_lang: e.lang });
+export const forgetEvents = (aid: string) => rpc('forget_events', { p_aid: aid });

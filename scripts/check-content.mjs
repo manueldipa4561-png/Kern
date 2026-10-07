@@ -2,6 +2,7 @@
 // 3 steps / 3 quality bars / 3 hints each, and an Italian text for every string. Run: npm test
 import assert from 'node:assert/strict';
 import { buildSync } from 'esbuild';
+import { PER_ROUND as STATS_PER_ROUND } from './stats-core.mjs';
 
 // The data files import each other without extensions, so bundle them in memory instead of importing directly.
 const entry = ['fields', 'missions', 'helps', 'easy', 'i18n', 'next', 'sponsors'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
@@ -9,7 +10,7 @@ const { text } = buildSync({ stdin: { contents: entry, resolveDir: process.cwd()
 const { FIELDS, MX, HELPS, EASY, IT, CLASHES, PER_ROUND, SPONSORS } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
 
 const strings = (v) => (typeof v === 'string' ? [v] : Array.isArray(v) ? v.flatMap(strings) : v && typeof v === 'object' ? Object.values(v).flatMap(strings) : []);
-// supabase/schema.sql limits kern_signs.mission to 0..MAX_MISSIONS-1: widen it there before adding a round.
+// supabase/schema.sql limits kern_signs.mission and kern_events.mission to 0..MAX_MISSIONS-1: widen both there before adding a round.
 const MAX_MISSIONS = 6;
 
 // A brand deal points at a real mission and has a name and a #rrggbb colour.
@@ -20,7 +21,8 @@ for (const [key, s] of Object.entries(SPONSORS)) {
   const brand = s.name.replace(/\s*\(demo\)$/, '');
   assert.ok(MX[f][i].who.includes(brand), `sponsors.ts: "${key}" names ${brand}, but that mission is about "${MX[f][i].who}"`);
 }
-assert.deepEqual(CLASHES, [], 'the same English text has two different Italian versions, one overwrites the other');
+assert.equal(STATS_PER_ROUND, PER_ROUND, 'scripts/stats-core.mjs counts finished rounds with its own PER_ROUND: update it to match src/scripts/next.ts');
+assert.deepEqual(CLASHES, [],'the same English text has two different Italian versions, one overwrites the other');
 
 // The app counts rounds from the current field and searches the other fields with that count, so all fields must match.
 const counts = [...new Set(Object.values(FIELDS).map((f) => f.m.length))];

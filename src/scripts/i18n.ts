@@ -1,4 +1,4 @@
-// EN is the source text; IT maps EN strings to Italian. Extracted from punto-due-site web.astro.
+// EN is the source text; IT maps EN strings to Italian.
 export const IT: Record<string, string> = {
         'Follow the trail.': 'Segui la traccia.',
         'Find your<b>KERN</b>.': 'Trova il tuo <b>KERN</b>.',
@@ -267,6 +267,16 @@ export const IT: Record<string, string> = {
         'You are talking to an AI · live when online': "Stai parlando con un'AI · dal vivo quando sei online", 'You are talking to an AI · live replies': "Stai parlando con un'AI · risposte dal vivo", 'You are talking to an AI · offline preview': "Stai parlando con un'AI · anteprima offline",
         'Make it easier': 'Rendilo più facile', 'Back to the full version': 'Torna alla versione completa', 'Ask KERN.AI': 'Chiedi a KERN.AI',
         'Last 7 days': 'Ultimi 7 giorni',
+        'Help improve KERN': 'Aiutaci a migliorare KERN',
+        'Count my progress, without my name? We only see which missions you open and finish, when you come back, and whether you use Share or KERN.AI. Never your name, your answers or your email.': 'Contiamo i tuoi progressi, senza il tuo nome? Vediamo solo quali missioni apri e finisci, quando torni e se usi Condividi o KERN.AI. Mai il tuo nome, le tue risposte o la tua email.',
+        'Okay. Nothing will be counted. You can change this in Settings.': 'Va bene. Non conteremo nulla. Puoi cambiare idea dalle Impostazioni.',
+        'Yes, count me in': 'Sì, contatemi', 'No thanks': 'No, grazie',
+        'What is counted?': 'Cosa viene contato?',
+        'Tap again to switch on (no names, see Privacy)': 'Tocca di nuovo per attivare (nessun nome, vedi Privacy)', 'Counts what you do (opened, answered, shared), never your name or your words. Tap again to switch on.': 'Conta cosa fai (aperto, risposto, condiviso), mai il tuo nome o le tue parole. Tocca di nuovo per attivare.', 'Usage counts: on': 'Conteggi di utilizzo: attivi', 'Usage counts: off': 'Conteggi di utilizzo: disattivati',
+        'Thanks. You can switch this off in Settings.': 'Grazie. Puoi disattivarlo dalle Impostazioni.',
+        "Couldn't switch it on in this browser.": 'Impossibile attivarlo in questo browser.',
+        'Usage counts are off. What was counted is deleted.': 'Conteggi di utilizzo disattivati. Quello che era stato contato è stato cancellato.',
+        "Counts are off. We couldn't reach the server to delete the earlier ones: they expire after 12 months.": 'Conteggi disattivati. Non siamo riusciti a raggiungere il server per cancellare i precedenti: scadono dopo 12 mesi.',
         'Write it your way. It stays on this device unless you ask KERN.AI.': 'Scrivila a modo tuo. Resta su questo dispositivo, a meno che tu non chieda a KERN.AI.', 'Send': 'Invia', 'Your idea': 'La tua idea',
 };
 // English texts registered twice with different Italian: the last one silently wins. npm test fails if this list is not empty.

@@ -94,3 +94,67 @@ revoke all on function public.add_sign(text, smallint, text) from public, anon;
 revoke all on function public.delete_my_sign(bigint) from public, anon;
 grant execute on function public.add_sign(text, smallint, text) to authenticated;
 grant execute on function public.delete_my_sign(bigint) to authenticated;
+
+-- Usage counts without names. Only people who said yes in the app are counted (see /privacy). A row is a random id the
+-- device made when they said yes (never an account id), what happened and when: no name, email or text they wrote.
+-- Nobody can read or write the table directly, signed in or not. log_event and forget_events below are the only way in;
+-- the report (scripts/stats.mjs) reads it with the service key, which stays on your own computer.
+create table if not exists public.kern_events (
+  id         bigint generated always as identity primary key,
+  aid        uuid not null,
+  ev         text not null,
+  field      text,
+  mission    smallint,
+  brand      boolean not null default false,
+  lang       text check (lang in ('en', 'it')),
+  created_at timestamptz not null default now()
+);
+-- The lists that grow (a new event, a new field, a new round) are named constraints that this script replaces on every run,
+-- so running it again after an update also updates a table made earlier. mission: same limit as kern_signs.
+alter table public.kern_events drop constraint if exists kern_events_ev_check;
+alter table public.kern_events add constraint kern_events_ev_check check (ev in ('optin', 'visit', 'open', 'answer', 'reflect', 'share', 'ask_ai'));
+alter table public.kern_events drop constraint if exists kern_events_field_check;
+alter table public.kern_events add constraint kern_events_field_check check (field in ('Design', 'Writing', 'Code', 'Video', 'Selling', 'Music'));
+alter table public.kern_events drop constraint if exists kern_events_mission_check;
+alter table public.kern_events add constraint kern_events_mission_check check (mission between 0 and 5);
+create index if not exists kern_events_aid on public.kern_events (aid, created_at);
+create index if not exists kern_events_time on public.kern_events (created_at);
+alter table public.kern_events enable row level security;
+revoke all on public.kern_events from anon, authenticated;
+grant select, delete on public.kern_events to service_role; -- the report reads it and you can clean it, even if default grants are off
+
+-- Adds one event. The checks above reject anything that is not a known event; at most 300 a day per id.
+-- The endpoint is public, so one hourly cap for everyone also stops a script filling the database with made-up ids.
+-- ponytail: 2000 an hour is far above a pilot (a script could still add about 50000 rows a day, roughly 10 MB); raise it if a launch needs more.
+-- Rows older than 12 months are removed 500 at a time on 1 in 100 calls, so a quiet app keeps some. For a guaranteed daily
+-- clean-up enable pg_cron (Database, Extensions) and run once:
+--   select cron.schedule('kern_events_12_months', '17 3 * * *', $$delete from public.kern_events where created_at < now() - interval '12 months'$$);
+create or replace function public.log_event(p_aid uuid, p_ev text, p_field text default null, p_mission smallint default null, p_brand boolean default false, p_lang text default null)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  perform pg_advisory_xact_lock(hashtextextended(p_aid::text, 1)); -- one add at a time per id, so the daily cap holds
+  if (select count(*) from public.kern_events where aid = p_aid and created_at > now() - interval '1 day') >= 300 then raise exception 'too many events today'; end if;
+  if (select count(*) from public.kern_events where created_at > now() - interval '1 hour') >= 2000 then raise exception 'busy, try later'; end if;
+  insert into public.kern_events (aid, ev, field, mission, brand, lang) values (p_aid, p_ev, p_field, p_mission, coalesce(p_brand, false), p_lang);
+  if random() < 0.01 then delete from public.kern_events where id in (select id from public.kern_events where created_at < now() - interval '12 months' limit 500); end if;
+end;
+$$;
+
+-- Removes everything logged under one id (turning counts off, or Delete my data). The id is a random secret held only by that device.
+create or replace function public.forget_events(p_aid uuid)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  delete from public.kern_events where aid = p_aid;
+$$;
+
+revoke all on function public.log_event(uuid, text, text, smallint, boolean, text) from public;
+revoke all on function public.forget_events(uuid) from public;
+grant execute on function public.log_event(uuid, text, text, smallint, boolean, text) to anon, authenticated;
+grant execute on function public.forget_events(uuid) to anon, authenticated;
