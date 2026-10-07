@@ -520,19 +520,19 @@ export const MX: Record<string, MissionX[]> = {
       twist: t2('Copy it and send it to someone who will laugh. Or film it tonight and post it.', 'Copialo e mandalo a chi riderà. Oppure giralo stasera e pubblicalo.'),
     },
     {
-      who: tag('Worst job ever, in two', 'Il peggior lavoro di sempre, in due'),
+      who: tag('Worst job ever, in two', 'Il peggior impiego di sempre, in due'),
       brief: t2(
         "Film a worst-job story in 20 seconds. One person tells it. The other directs from behind the phone with three spoken questions. Pair up, or do both parts.",
-        "Filma la storia del peggior lavoro in 20 secondi. Una persona la racconta. L’altra dirige da dietro il telefono con tre domande. In due, o fai entrambe le parti."),
+        "Filma la storia del peggior impiego in 20 secondi. Una persona la racconta. L’altra dirige da dietro il telefono con tre domande. In due, o fai entrambe le parti."),
       asset: {
         mono: false,
-        title: t2('No worst job? Borrow Tino’s', 'Nessun lavoro da incubo? Usa quello di Tino'),
+        title: t2('No worst job? Borrow Tino’s', 'Nessun impiego da incubo? Usa quello di Tino'),
         body: t2(
           'Tino handed out flyers for a gym, dressed as a banana.\nIt was 32 degrees and the costume had no air.\nNobody took a flyer. One kid asked: “Are you a lemon?”',
           'Tino distribuiva volantini di una palestra in costume da banana.\nC’erano 32 gradi e il costume non faceva passare aria.\nNessuno ha preso un volantino. Un bambino ha chiesto: “Sei un limone?”'),
       },
       steps: [
-        t2('Pick the job: yours, or Tino’s.', 'Scegli il lavoro: il tuo o quello di Tino.'),
+        t2('Pick the job: yours, or Tino’s.', 'Scegli l’impiego: il tuo o quello di Tino.'),
         t2('Director: write 3 questions to say at 0s, 7s and 14s.', 'Regia: scrivi 3 domande da dire a 0s, 7s e 14s.'),
         t2('Storyteller: answer each one in 12 words or fewer.', 'Chi racconta: rispondi a ognuna in 12 parole al massimo.'),
       ],

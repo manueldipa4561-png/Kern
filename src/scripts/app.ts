@@ -407,7 +407,7 @@ const setLvl = () => {
 // Signals: which kind of mission you light up on, from your own reflections. The kind is the mission index % 3
 // (improve what exists, start from zero, work with someone), so each round adds evidence for the same three kinds.
 const KIND_EN = ['improve what already exists', 'start from zero', 'work with someone'];
-const KIND_IT = ['migliori ciò che esiste già', 'parti da zero', 'lavori con qualcuno'];
+const KIND_IT = ['migliori ciò che esiste già', 'parti da zero', 'collabori con qualcuno'];
 const KSHORT = ['Improving things', 'Starting from zero', 'Working with others'];
 const FEEL_EN: Record<Feel, string> = { flow: 'Time flew', ok: 'It was fine', drag: 'It dragged' };
 const AGAIN_EN: Record<Again, string> = { yes: 'Yes', maybe: 'Maybe', no: 'No' };
