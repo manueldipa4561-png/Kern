@@ -1,6 +1,6 @@
 /* KERN app styles. Base and shell first, then components added in layers (v2 to v7) at the end. */
       .k-scr.light { --bg: #E8E6DA; --fg: #141A12; --acc: #2C5A3A; --on: #E8E6DA; --line: #B9B7A8; --dim: #5b6156; }
-      .k-scr { --bg: #0F140E; --fg: #E8E6DA; --acc: #C9F24A; --on: #0F140E; --line: #2a3128; --dim: #9a9d8e; position: relative; height: 600px; border-radius: 34px; overflow: hidden; contain: layout paint; background: var(--bg); color: var(--fg); }
+      .k-scr { --bg: #0F140E; --fg: #E8E6DA; --acc: #C9F24A; --on: #0F140E; --line: #2a3128; --dim: #9a9d8e; position: relative; height: 600px; border-radius: 34px; overflow: hidden; overflow: clip; contain: layout paint; background: var(--bg); color: var(--fg); }
       .k-scr h4, .k-scr h5, .k-scr p { margin: 0; }
       .k-scr button { font-family: inherit; }
       .k-app { height: 100%; display: flex; flex-direction: column; }
@@ -106,7 +106,8 @@
       .k-sheet { position: absolute; inset: 0; z-index: 4; display: flex; align-items: flex-end; background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(3px); animation: kFade .25s both; } .k-sheet[hidden] { display: none; }
       .k-sh-in { width: 100%; max-height: 92%; overflow: auto; background: var(--bg); border-top: 1px solid var(--edge); border-radius: 26px 26px 0 0; padding: 12px 20px 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -20px 50px -20px rgba(0,0,0,.5); animation: kSlide .38s cubic-bezier(.2,.9,.3,1) both; }
       @keyframes kSlide { from { transform: translateY(100%); } }
-      .k-grab { width: 38px; height: 4px; border-radius: 4px; background: var(--edge); align-self: center; }
+      .k-grab { position: relative; width: 38px; height: 4px; border-radius: 4px; background: var(--edge); align-self: center; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+      .k-grab::before { content: ''; position: absolute; inset: -14px -48px -10px; } /* a thumb-sized grip around the 4px bar */
       .k-sheet textarea { resize: none; min-height: 96px; }
       .k-sh-btns { display: flex; align-items: center; gap: 12px; }
       .k-body { scroll-behavior: smooth; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 12px), transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 12px), transparent 100%); }
@@ -143,7 +144,7 @@
       .k-rankup { padding: 10px 18px; border: 1px solid var(--gold); border-radius: 999px; animation: kUp .5s .9s both; } .k-rankup[hidden] { display: none; }
       .k-conf { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
       .k-conf span { position: absolute; top: -16px; left: var(--l); width: 9px; height: 14px; border-radius: 3px; background: var(--c); opacity: 0; animation: kFall var(--d) var(--dl) cubic-bezier(.3,.6,.6,1) forwards; }
-      @keyframes kFall { 0% { opacity: 1; transform: translate3d(0,0,0) rotate(0); } 100% { opacity: 1; transform: translate3d(var(--x), 800px, 0) rotate(var(--r)); } }
+      @keyframes kFall { 0% { opacity: 1; transform: translate3d(0,0,0) rotate(0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate3d(var(--x), 110dvh, 0) rotate(var(--r)); } } /* leaves the frame whatever its height, then stays gone */
       @media (prefers-reduced-motion: reduce) { .k-pane.on > *, .k-medal, .k-conf span, .k-rankup, .k-reward, .k-live::before { animation: none; } .k-bar-g i, .k-card, .k-tabs button::before { transition: none; } }
       .k-card .k-msg { font-size: 13px; line-height: 1.4; opacity: 1; padding: 8px 11px; border-radius: 12px; max-width: 92%; }
       .k-me { align-self: flex-end; border: 1.5px solid var(--fg); }
@@ -190,12 +191,17 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 @media (min-width: 600px) {
   .k-scr { width: 420px; height: min(880px, calc(100dvh - 24px)); border-radius: 36px; box-shadow: 0 40px 90px -30px rgba(0,0,0,.65), 0 0 0 1px color-mix(in srgb, var(--fg) 14%, transparent); }
 }
+/* A phone on its side: no frame, the whole height, still one 420px column */
+@media (min-width: 600px) and (max-height: 499px) {
+  .k-scr { height: 100dvh; border-radius: 0; box-shadow: none; }
+}
 .k-top { padding-top: max(22px, calc(env(safe-area-inset-top) + 8px)); padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
 .k-body { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
 .k-tabs { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
 .k-tabs button { min-height: 48px; }
 .k-start { padding: max(30px, env(safe-area-inset-top)) 22px max(30px, env(safe-area-inset-bottom)); overflow-y: auto; }
 .k-sh-in { padding-bottom: max(22px, env(safe-area-inset-bottom)); }
+.k-sh-in > * { flex-shrink: 0; } /* a short screen scrolls the sheet; without this the settings list (overflow hidden) and buttons squash and Delete my data is cut off */
 .k-toast { z-index: 6; bottom: calc(80px + env(safe-area-inset-bottom)); }
 .k-scr a { color: var(--acc); }
 .k-scr :focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
@@ -326,6 +332,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-main .k-l, .k-main p { color: var(--bone); }
 .k-main .k-l { opacity: .7; }
 .k-main > .k-l:first-of-type, .k-main h5 { padding-right: 104px; }
+.k-main h5 { min-height: 40px; } /* the stones reach 88px down the card: a one-line title must not let the paragraph run under them */
 .k-main p { padding-right: 18px; opacity: .88; }
 .k-obj { position: absolute; right: -12px; top: -52px; width: 140px; height: 140px; z-index: 2 !important; filter: drop-shadow(0 20px 22px rgba(0,0,0,.5)); translate: calc(var(--tx, 0) * 16px) calc(var(--ty, 0) * 12px); transition: translate .6s var(--out); }
 .k-meta { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -336,7 +343,8 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 
 /* Mission list: numbered steps, check when done */
 .k-mlist { counter-reset: m; }
-.k-mrow { counter-increment: m; grid-template-columns: 34px 1fr auto; border-radius: 12px; }
+.k-mrow { counter-increment: m; grid-template-columns: 34px 1fr auto; }
+.k-mrow:focus-visible { border-radius: 12px; } /* a rounded ring on focus; at rest a radius would curl the ends of the divider */
 .k-mdot { width: 34px; height: 34px; border: 1.5px solid var(--edge); display: grid; place-items: center; font: italic 400 18px/1 var(--ks); color: var(--dim); }
 .k-mdot::before { content: counter(m, decimal-leading-zero); }
 .k-mrow.next .k-mdot { border-color: var(--acc); color: var(--acc); animation: kHalo 2.4s ease-in-out infinite; }
@@ -420,7 +428,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 /* Settings as a grouped list */
 .k-set-list { align-items: stretch; gap: 0; border: 1px solid var(--edge); border-radius: 18px; overflow: hidden; background: var(--surf); }
 .k-set-list > * + * { border-top: 1px solid var(--edge) !important; }
-.k-set-list .k-ask-btn { align-self: stretch; display: flex; justify-content: space-between; align-items: center; min-height: 48px; padding: 13px 16px; border: 0; border-radius: 0; font-weight: 600; font-size: 14px; text-align: left; }
+.k-set-list .k-ask-btn { align-self: stretch; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; padding: 13px 16px; border: 0; border-radius: 0; font-weight: 600; font-size: 14px; text-align: left; }
 .k-set-list .k-ask-btn::after { content: '›'; font-size: 18px; color: var(--dim); }
 .k-set-list .k-ask-btn:active { transform: none; background: var(--surf); }
 .k-set-list .k-danger { border-left: 0 !important; border-right: 0 !important; border-bottom: 0 !important; }
@@ -467,7 +475,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 @media (prefers-reduced-motion: reduce) { .k-obj.arrive { animation: none; } }
 
 /* Your interests: switch path on Missions, progress per field */
-.k-fields { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -20px; padding: 2px 20px 4px; }
+.k-fields { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: -2px -20px 0; padding: 4px 20px; } /* 4px above and below: room for the 2px focus ring plus its 2px offset, which an overflow container would clip */
 .k-fields::-webkit-scrollbar { display: none; }
 .k-fchip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px 5px 5px; border-radius: 999px; border: 1px solid var(--edge); background: var(--surf); color: var(--fg); font: 700 12.5px 'Inter Tight Variable', system-ui, sans-serif; cursor: pointer; transition: transform .45s var(--spring), background-color .2s, border-color .2s; }
 .k-fchip img { width: 26px; height: 26px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.3)); }
@@ -684,8 +692,9 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
   .k-main::before { background: none; }
 }
 
-/* Kern card: keep the headline clear of the stones */
+/* Kern card: keep the headline clear of the stones, and below the "kern." wordmark however many lines it takes (same total height as before) */
 .k-kc h5 { padding-right: 104px; }
+.k-kc { padding-top: 44px; min-height: 194px; }
 
 /* Start screen: say what KERN is in one line, and make the three steps read as a list, not as buttons */
 .k-promise { max-width: 34ch; font: 500 16px/1.42 'Inter Tight Variable', system-ui, sans-serif; color: color-mix(in srgb, var(--fg) 82%, transparent); }
@@ -717,4 +726,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-scr:has(#kReward:not([hidden]))::before, .k-scr:has(#kReward:not([hidden])) .k-app *, .k-scr:has(#kReward:not([hidden])) .k-app *::before, .k-scr:has(#kReward:not([hidden])) .k-app *::after { animation-play-state: paused !important; }
 /* Narrow phones: the header must not crowd */
 .k-pill { white-space: nowrap; }
-@media (max-width: 359px) { .k-logo { font-size: 18px; } .k-demo { padding: 0 8px; } .k-pill { font-size: 9.5px; padding-inline: 5px 8px; } .k-tp { gap: 6px; } }
+.k-av { flex: none; } /* stays a 30px circle when the header is tight */
+/* Short screens (iPhone SE class, browser bars showing): the start screen drops its floating stones so both actions fit */
+@media (max-height: 600px) { .k-start .k-float { display: none; } }
+@media (max-width: 359px) { .k-logo { font-size: 18px; } .k-demo { padding: 0 6px; } .k-tp .k-demo { margin-right: 0; } .k-pill { font-size: 9.5px; padding-inline: 5px 8px; } .k-top { gap: 6px; } .k-tp { gap: 5px; } }

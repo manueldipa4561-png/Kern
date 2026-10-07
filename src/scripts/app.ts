@@ -319,6 +319,20 @@ const closeSheet = (sh: HTMLElement) => {
   sh.addEventListener('click', (e) => { if (e.target === sh) closeSheet(sh); });
   sh.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeSheet(sh); } });
 });
+// The grab handle is a handle: drag it down to close the sheet. A short drag springs back.
+const SWIPE_CLOSE_PX = 80;
+kScr.querySelectorAll<HTMLElement>('.k-sheet').forEach((sh) => {
+  const inner = sh.querySelector<HTMLElement>('.k-sh-in')!, grab = sh.querySelector<HTMLElement>('.k-grab')!;
+  let startY = 0, dy = 0;
+  const settle = () => { inner.style.translate = ''; };
+  grab.addEventListener('pointerdown', (e) => { startY = e.clientY; dy = 0; grab.setPointerCapture(e.pointerId); });
+  grab.addEventListener('pointermove', (e) => {
+    if (!grab.hasPointerCapture(e.pointerId)) return;
+    dy = Math.max(0, e.clientY - startY); inner.style.translate = `0 ${dy}px`;
+  });
+  grab.addEventListener('pointerup', (e) => { grab.releasePointerCapture(e.pointerId); settle(); if (dy >= SWIPE_CLOSE_PX) closeSheet(sh); });
+  grab.addEventListener('pointercancel', settle);
+});
 
 // Ranks
 const RANKS: [string, number][] = [['Pebble', 0], ['Stone', 100], ['Cairn', 300], ['Ridge', 700], ['Summit', 1500]];
@@ -1173,17 +1187,22 @@ const markPick = () => {
   tiles.forEach((o) => { const on = picks.includes(o.dataset.f!); o.classList.toggle('sel', on); o.setAttribute('aria-pressed', String(on)); });
   $<HTMLButtonElement>('kGo').disabled = !picks.length;
 };
-const openStart = (step2 = false) => {
+let pickerFromSettings = false; // opened from Settings (else from "+ Add"): where focus goes back to
+const openStart = (step2 = false, fromSettings = false) => {
+  pickerFromSettings = fromSettings;
   if (S.onboarded) picks = [...S.fields];
   setT($('kGo'), S.onboarded ? 'Save interests' : 'Start my first mission');
+  setT($('kS2K'), S.onboarded ? 'Your interests' : "Good. Let's find out."); // "Good. Let's find out." answers "I don't know", which an existing user never tapped
   $('kPickX').hidden = !S.onboarded; // reopened from "+ Add" or Settings: there must be a way out
   kStart.setAttribute('aria-labelledby', step2 ? 'kS2H' : 'kS1H');
   kS1.hidden = step2; kS2.hidden = !step2; markPick(); kStart.classList.add('on');
+  syncInert(); // Settings may still have left the screen inert: a focus() before this would be refused and land on the page body
   if (S.onboarded) (step2 ? document.querySelector<HTMLElement>('#kPick .k-tile') : $('kIdk'))?.focus({ preventScroll: true });
 };
 const closePicker = () => { // leave the interests screen without changing anything
   if (vtBusy) return;
-  picks = [...S.fields]; kStart.classList.remove('on'); syncInert(); kAdd.focus({ preventScroll: true });
+  picks = [...S.fields]; kStart.classList.remove('on'); syncInert();
+  (pickerFromSettings ? $('kAv') : kScr.querySelector<HTMLElement>('.k-fadd') ?? kAdd).focus({ preventScroll: true });
 };
 const renderMe = () => { $('kAv').textContent = (S.name.trim()[0] || 'K').toUpperCase(); };
 // Login screen modes: 'up' create account, 'in' log in, 'guest' local-only profile.
@@ -1496,7 +1515,7 @@ const setLang = (l: Lang) => {
 document.querySelectorAll<HTMLElement>('[data-k-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.kLang === 'it' ? 'it' : 'en')));
 $('kAv').addEventListener('click', () => openSheetEl(kSet, $('kSetX')));
 $('kSetX').addEventListener('click', () => closeSheet(kSet));
-$('kChField').addEventListener('click', () => { kSet.hidden = true; openStart(true); });
+$('kChField').addEventListener('click', () => { kSet.hidden = true; openStart(true, true); });
 $('kExp').addEventListener('click', () => download(JSON.stringify({ ...snapshot(), exportedAt: new Date().toISOString() }, null, 2), 'kern-data.json', 'application/json'));
 // Weekly calendar reminder (.ics): works in every calendar app, no notifications permission, no streaks.
 $('kRemind').addEventListener('click', () => {
