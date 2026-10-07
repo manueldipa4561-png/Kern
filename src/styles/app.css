@@ -5,8 +5,8 @@
       .k-scr button { font-family: inherit; }
       .k-app { height: 100%; display: flex; flex-direction: column; }
       .k-top { padding: 20px 18px 6px; display: flex; justify-content: space-between; align-items: center; }
-      .k-logo { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 21px; letter-spacing: -.07em; }
-      .k-logo svg { width: 22px; } .k-logo circle { fill: var(--acc); } .k-logo i { font-style: normal; color: var(--acc); letter-spacing: 0; }
+      .k-logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 21px; letter-spacing: -.07em; }
+      .k-logo img { display: block; flex: none; width: 28px; height: 28px; } .k-logo i { font-style: normal; color: var(--acc); letter-spacing: 0; }
       .k-pill { font: 400 10px var(--mono); border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; color: var(--dim); }
       .k-body { flex: 1; overflow: auto; padding: 10px 18px 12px; scrollbar-width: none; }
       .k-body::-webkit-scrollbar { display: none; }
@@ -59,7 +59,7 @@
 
       /* v3: display font (self-hosted Bricolage Grotesque), tab icons, tiles, cairn */
       .k-scr, .k-h { --kd: 'Bricolage Grotesque Variable', 'Inter Tight Variable', system-ui, sans-serif; }
-      .k-scr h4, .k-scr h5, .k-logo, .k-word, .k-tag strong, .k-stat b, .k-rank, .k-stones b, .k-gain b, .k-medal, .k-kt, .k-h { font-family: var(--kd); }
+      .k-scr h4, .k-scr h5, .k-logo, .k-tag span, .k-stat b, .k-rank, .k-stones b, .k-gain b, .k-medal, .k-kt, .k-h { font-family: var(--kd); }
       .k-scr h4 { font-size: 28px; letter-spacing: -.04em; line-height: 1.02; }
       .k-scr h5, .k-card h5 { letter-spacing: -.03em; }
       .k-main { position: relative; overflow: hidden; }
@@ -162,23 +162,21 @@
       .k-tabs button { flex: 1; background: none; border: 0; color: var(--dim); font-weight: 800; font-size: 12px; letter-spacing: -.01em; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; padding: 6px 0; }
       .k-tabs button::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: transparent; }
       .k-tabs button.on { color: var(--fg); } .k-tabs button.on::before { background: var(--acc); } .k-tabs button.on span { color: var(--acc); }
-      /* launch loader (plays once when the phone scrolls into view) */
-      .k-load { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: var(--bg); transition: opacity .5s; }
+      /* launch loader: the app icon settles in on a lime glow, then the slogan from the banner, one line at a time */
+      .k-load { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; background: var(--bg); transition: opacity .5s; }
       .k-load.off { opacity: 0; pointer-events: none; }
-      .k-load svg { width: 92px; overflow: visible; color: var(--fg); }
-      .ks, .kl { transform: translate(0,0); } .kl { fill: none; }
-      .kc { transform-box: fill-box; transform-origin: center; transform: scale(0); fill: var(--acc); }
-      .k-word { font-weight: 800; font-size: 46px; letter-spacing: -.07em; line-height: 1; opacity: 0; transform: translateY(8px); } .k-word i { font-style: normal; color: var(--acc); letter-spacing: 0; }
-      .k-tag { position: absolute; bottom: 44px; text-align: center; display: flex; flex-direction: column; gap: 6px; opacity: 0; }
-      .k-tag span { font-weight: 500; font-size: 16px; letter-spacing: -.02em; line-height: 1; opacity: .6; }
-      .k-tag strong { font-weight: 800; font-size: 27px; letter-spacing: -.06em; line-height: 1; } .k-tag b { color: var(--acc); }
-      .k-load.go .ks { animation: kS .9s .35s cubic-bezier(.65,0,.25,1) forwards; }
-      .k-load.go .kl { animation: kL .9s .35s cubic-bezier(.65,0,.25,1) forwards; }
-      .k-load.go .kc { animation: kC .5s 1.05s cubic-bezier(.3,1.6,.5,1) forwards; }
-      .k-load.go .k-word { animation: kR .6s 1.2s cubic-bezier(.2,.8,.2,1) forwards; }
-      .k-load.go .k-tag { animation: kR .6s 1.6s cubic-bezier(.2,.8,.2,1) forwards; }
-      @keyframes kS { to { transform: translate(-5px,-5px); } } @keyframes kL { to { transform: translate(5px,5px); } }
-      @keyframes kC { to { transform: scale(1); } } @keyframes kR { to { opacity: 1; transform: none; } }
+      .k-ic { position: relative; width: 108px; height: 108px; opacity: 0; transform: scale(.8); }
+      .k-ic::before { content: ''; position: absolute; inset: -54px; border-radius: 50%; background: radial-gradient(closest-side, rgba(201,242,74,.36), rgba(201,242,74,0)); opacity: 0; }
+      .k-ic img { position: relative; display: block; width: 100%; height: 100%; }
+      .k-tag { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+      .k-tag span { font-weight: 800; font-size: 25px; letter-spacing: -.05em; line-height: 1.1; opacity: 0; transform: translateY(8px); }
+      .k-tag strong { font: italic 400 46px/1 var(--ks); letter-spacing: -.01em; color: var(--acc); opacity: 0; transform: translateY(8px); }
+      .k-load.go .k-ic { animation: kIc .7s .1s cubic-bezier(.22,1,.36,1) forwards; }
+      .k-load.go .k-ic::before { animation: kGlow 1.5s .3s ease-out forwards; }
+      .k-load.go .k-tag span { animation: kR .6s .6s cubic-bezier(.2,.8,.2,1) forwards; }
+      .k-load.go .k-tag strong { animation: kR .6s .9s cubic-bezier(.2,.8,.2,1) forwards; }
+      @keyframes kIc { to { opacity: 1; transform: none; } } @keyframes kR { to { opacity: 1; transform: none; } }
+      @keyframes kGlow { 0% { opacity: 0; transform: scale(.7); } 50% { opacity: 1; } 100% { opacity: .8; transform: none; } }
       @media (prefers-reduced-motion: reduce) { .k-load { display: none; } .k-toast { transition: none; } }
 
 /* ---- standalone app shell ---- */
@@ -308,7 +306,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 
 /* Type: grotesk headlines, the accent word in italic serif */
 .k-scr h4 { font-size: 34px; line-height: .98; letter-spacing: -.045em; }
-.k-scr h4 b, .k-tag b { font-family: var(--ks); font-style: italic; font-weight: 400; font-size: 1.16em; letter-spacing: -.01em; line-height: .8; }
+.k-scr h4 b { font-family: var(--ks); font-style: italic; font-weight: 400; font-size: 1.16em; letter-spacing: -.01em; line-height: .8; }
 .k-rank { font-family: var(--ks); font-style: italic; font-weight: 400; font-size: 40px; letter-spacing: -.01em; line-height: 1; }
 .k-card h5 { font-size: 20px; }
 
@@ -754,4 +752,4 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 /* A link inside a line of text keeps its look and position; only its tap area grows (the Privacy links were 13px high) */
 .k-scr p a { position: relative; }
 .k-scr p a::after { content: ''; position: absolute; inset: -20px -8px -12px; } /* 12px below: the next control starts 12px under the text */
-@media (max-width: 359px) { .k-logo { font-size: 18px; } .k-demo { padding: 0 6px; } .k-tp .k-demo { margin-right: 0; } .k-pill { font-size: 9.5px; padding-inline: 5px 8px; } .k-top { gap: 6px; } .k-tp { gap: 5px; } }
+@media (max-width: 359px) { .k-logo { font-size: 18px; gap: 6px; } .k-logo img { width: 24px; height: 24px; } .k-demo { padding: 0 6px; } .k-tp .k-demo { margin-right: 0; } .k-pill { font-size: 9.5px; padding-inline: 5px 8px; } .k-top { gap: 6px; } .k-tp { gap: 5px; } }

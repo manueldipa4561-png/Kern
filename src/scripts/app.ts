@@ -1512,8 +1512,10 @@ const cardImage = async (): Promise<Blob | null> => {
   const g = x.createRadialGradient(920, 120, 0, 920, 120, 760); g.addColorStop(0, 'rgba(201,242,74,.28)'); g.addColorStop(1, 'rgba(201,242,74,0)');
   x.fillStyle = g; x.fillRect(0, 0, 1080, 1350);
   try { const im = new Image(); im.src = '/img/cairn.webp'; await im.decode(); x.drawImage(im, 680, 60, 340, 340); } catch { /* card works without it */ }
-  x.font = `800 110px ${D}`; x.fillStyle = '#E8E6DA'; x.fillText('kern', 90, 210);
-  x.fillStyle = '#C9F24A'; x.fillText('.', 90 + x.measureText('kern').width, 210);
+  let wx = 90; // the word moves right when the app icon fits in front of it
+  try { const ic = new Image(); ic.src = '/img/mark.webp'; await ic.decode(); x.drawImage(ic, 90, 108, 104, 104); wx = 90 + 104 + 26; } catch { /* the word alone is fine */ }
+  x.font = `800 110px ${D}`; x.fillStyle = '#E8E6DA'; x.fillText('kern', wx, 210);
+  x.fillStyle = '#C9F24A'; x.fillText('.', wx + x.measureText('kern').width, 210);
   x.font = `500 34px ${B}`; x.fillStyle = '#b4b7a9'; x.fillText($('kCardL').textContent!.toUpperCase().slice(0, 48), 90, 470);
   x.font = `800 92px ${D}`; x.fillStyle = '#E8E6DA';
   let y = 590, line = '';

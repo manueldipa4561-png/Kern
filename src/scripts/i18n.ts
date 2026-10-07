@@ -1,7 +1,7 @@
 // EN is the source text; IT maps EN strings to Italian.
 export const IT: Record<string, string> = {
-        'Follow the trail.': 'Segui la traccia.',
-        'Find your<b>KERN</b>.': 'Trova il tuo <b>KERN</b>.',
+        'Don’t guess your passion.': 'La passione non si indovina.',
+        'Test it.': 'Si prova.',
         '1 of 3 done': '1 su 3 fatte',
         'All missions open': 'Tutte le missioni aperte',
         'Pick your<br>next <b>move.</b>': 'Scegli la<br>prossima <b>mossa.</b>',

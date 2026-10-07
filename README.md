@@ -55,7 +55,7 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - EN / IT, system / dark / light theme
 - Installable and works offline after the first visit (`public/sw.js`); security headers and CSP in `netlify.toml`
 - Export and delete your data from Settings; privacy page at `/privacy/`
-- Design (v1.0): one illustrated sticker object per screen, italic serif accents (Instrument Serif), energy bars from your reflections, a 28-day rhythm grid, a floating tab bar, film grain; View Transitions slide the panes and fly the chosen field object into the mission card (plain swap where unsupported, nothing moves with reduced motion)
+- Design (v1.0): one frosted-glass 3D object per screen with a lime core (the same glass as the app icon), italic serif accents (Instrument Serif), energy bars from your reflections, a 28-day rhythm grid, a floating tab bar, film grain; View Transitions slide the panes and fly the chosen field object into the mission card (plain swap where unsupported, nothing moves with reduced motion)
 
 The classic design before v1.0 is kept on the `classic-design` branch and the `v0.4-classic` tag.
 
@@ -70,7 +70,7 @@ Real partner missions (brand missions are demos for now), peer review and rankin
 - `src/scripts/i18n.ts` Italian strings (English is the source), `src/scripts/fields.ts` missions per field
 - `src/scripts/next.ts` rounds and the next-mission rule, `src/scripts/sponsors.ts` brand missions, `src/scripts/stats.ts` opt-in usage counts, `src/scripts/demo.ts` the demo profile's sample trail (texts in both languages)
 - `scripts/` the tests run by `npm test`, and the Mission Studio
-- `public/` manifest, service worker, icons, favicons; `public/img/` illustrated sticker objects (fields, ranks, cairn, co-pilot orb)
+- `public/` manifest, service worker, icons, favicons, `og.jpg` (link preview, the banner); `public/img/` frosted-glass objects (fields, ranks, cairn, co-pilot orb)
 
 ## License
 

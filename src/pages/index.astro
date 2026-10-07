@@ -11,8 +11,6 @@ const touchIcon = 'data:image/png;base64,' + readFileSync('public/icons/apple-to
 // Link previews (chat apps, social) need a full address for the image: Netlify gives the site's main address as URL while it builds (a local build has none, so the path stays relative).
 const site = (process.env.URL ?? '').replace(/\/$/, '');
 const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music'];
-const MARK = 'M23.13 76.87A38 38 0 0 1 76.87 23.13Z';
-const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
 ---
 <!doctype html>
 <html lang="en">
@@ -35,15 +33,18 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
     <meta property="og:type" content="website" />
     <meta property="og:title" content="KERN" />
     <meta property="og:description" content="Try short missions in design, writing, code, video, selling and music, with an AI co-pilot that only asks questions. Find your passion by testing different paths. Free, no account." />
-    <meta property="og:image" content={`${site}/icons/icon-512.png`} />
+    <meta property="og:image" content={`${site}/og.jpg`} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Don't guess your passion. Test it." />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <main class="k-scr" id="kScr">
       <h1 class="k-sr">KERN</h1>
       <div class="k-load" id="kLoad" aria-hidden="true">
-        <svg viewBox="0 0 100 100"><path d={MARK} class="ks" fill="currentColor"/><path d={LINE} fill="none" stroke-width="7" stroke-linejoin="round" class="kl" stroke="currentColor"/><circle cx="66.4" cy="66.4" r="9" class="kc"/></svg>
-        <div class="k-word">kern<i>.</i></div>
-        <div class="k-tag"><span>Follow the trail.</span><strong>Find your<b>KERN</b>.</strong></div>
+        <div class="k-ic"><img src="/img/mark.webp" alt="" width="108" height="108" fetchpriority="high" /></div>
+        <div class="k-tag"><span>Don’t guess your passion.</span><strong>Test it.</strong></div>
       </div>
 
       <div class="k-sheet" id="kSheet" role="dialog" aria-modal="true" aria-labelledby="kShT" hidden>
@@ -206,7 +207,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
 
       <div class="k-app">
         <header class="k-top">
-          <div class="k-logo"><svg viewBox="0 0 100 100" aria-hidden="true"><path d={MARK} fill="currentColor" transform="translate(-5 -5)"/><path d={LINE} fill="none" stroke-width="7" stroke-linejoin="round" stroke="currentColor" transform="translate(5 5)"/><circle cx="66.4" cy="66.4" r="9"/></svg>kern<i>.</i></div>
+          <div class="k-logo"><img src="/img/mark.webp" alt="" width="28" height="28" />kern<i>.</i></div>
           <div class="k-tp"><button type="button" class="k-demo" id="kDemo" aria-label="Demo profile with sample data. Tap to leave the demo." hidden>Demo</button><span class="k-pill"><i class="k-ring" id="kRing" aria-hidden="true"></i><span id="kPill">0 of 3 done</span></span><button type="button" class="k-av" id="kAv" aria-label="Settings" aria-haspopup="dialog">K</button></div>
         </header>
         <div class="k-body">
