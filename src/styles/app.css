@@ -199,13 +199,13 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-toast { z-index: 6; bottom: calc(80px + env(safe-area-inset-bottom)); }
 .k-scr a { color: var(--acc); }
 .k-scr :focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
-.k-seg { display: inline-flex; border: 1px solid var(--edge); border-radius: 999px; overflow: hidden; }
+.k-seg { display: inline-flex; flex: none; border: 1px solid var(--edge); border-radius: 999px; overflow: hidden; }
 .k-seg button { background: none; border: 0; color: var(--fg); padding: 8px 14px; min-height: 36px; font: 600 0.8438rem 'Inter Tight Variable', system-ui, sans-serif; cursor: pointer; }
 .k-seg button[aria-pressed="true"] { background: var(--acc); color: var(--on); }
 /* Text size buttons: an A per step, drawn in px so the row itself does not grow with the setting */
 .k-txt button { padding-inline: 12px; line-height: 1; }
 .k-txt button:nth-child(1) { font-size: 12px; } .k-txt button:nth-child(2) { font-size: 15px; } .k-txt button:nth-child(3) { font-size: 19px; } .k-txt button:nth-child(4) { font-size: 24px; }
-.k-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.k-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; }
 .k-set-list { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
 .k-set-list [hidden], .k-set-list .k-ask-btn[hidden] { display: none; } /* the second selector beats .k-set-list .k-ask-btn { display: flex } below */
 .k-check { display: flex; align-items: center; gap: 10px; font-size: 1rem; cursor: pointer; }
@@ -831,7 +831,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 #kShD #kDrS { display: block; text-transform: none; letter-spacing: 0; font-size: 0.9375rem; font-weight: 500; color: var(--dim); }
 
 /* yourKERN: the Kern card leads, without a second frame around it */
-.k-scr .k-card.k-kcard { padding: 0; border: 0; border-radius: 0; overflow: visible; background: none; box-shadow: none; gap: 10px; }
+.k-scr .k-card.k-kcard { content-visibility: visible; padding: 0; border: 0; border-radius: 0; overflow: visible; background: none; box-shadow: none; gap: 10px; }
 .k-card p.k-l { font-size: 0.75rem; line-height: 1.4; } /* a small label that is a paragraph keeps the label size, not the body size */
 .k-scr.light .k-card.k-kcard { box-shadow: none; } /* beats the light theme's card shadow */
 .k-kcard > .k-l { padding-left: 4px; }
@@ -847,3 +847,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-cmp p { border-left-color: var(--acc); }
 .k-cmp .k-ask-btn { border-color: var(--acc); color: var(--acc); }
 .k-mt s { background: var(--acc); }
+
+/* Mission pictures: the asset as a real image, with the same rounded frame as the cards */
+.k-xi { display: block; width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; background: color-mix(in srgb, var(--fg) 6%, transparent); }
+.k-xi[hidden] { display: none; }

@@ -3,7 +3,9 @@ import { t2 } from './i18n';
 // One concrete practice brief per mission (6 fields x 6, in rounds of 3). Every company here is fictional and the sheet says so.
 // Shape: who (practice brief tag), brief (scenario + stakes), asset (the real material to work on),
 // steps (3 actions), mins (time box), bar (what strong answers do), twist (optional bonus).
-export type Asset = { title: string; body: string; mono: boolean };
+// img: a picture of the asset (a photo, a story, a cover) shown above the text, imgIt the Italian version when the picture has words in it.
+// only: the picture says it all, so the text is kept just as its description for a screen reader.
+export type Asset = { title: string; body: string; mono: boolean; img?: string; imgIt?: string; only?: boolean };
 export type MissionX = { who: string; brief: string; asset: Asset; steps: string[]; mins: number; bar: string[]; twist: string };
 
 const tag = (en: string, it: string) => t2('Practice brief · ' + en, 'Brief di pratica · ' + it);
@@ -17,6 +19,7 @@ export const MX: Record<string, MissionX[]> = {
         'La storia di sabato di Pomo Pizza urla 7 cose insieme e la gente scorre via. Scegli la cosa che fa venire la gente e ricostruisci tutto attorno a quella.'),
       asset: {
         mono: false,
+        img: '/img/m/story-en.webp', imgIt: '/img/m/story-it.webp', only: true,
         title: t2('The story today', 'La storia oggi'),
         body: t2(
           'PIZZA NIGHT SATURDAY!!! (huge, red, shouting letters)\n2 for 1 until 9pm (yellow sticker, tilted)\nLive DJ from 10 (blue, curly letters)\nNew menu · win a year of pizza · tag 3 friends\n12 Via Verdi (tiny, grey, on the photo)\nPhoto: a pizza, a crowd and a dog',
@@ -67,6 +70,7 @@ export const MX: Record<string, MissionX[]> = {
         'Qualcuno descrive la sua stanza dei sogni in una frase. Pianifica il suo moodboard (un collage): 6 immagini, a parole. In coppia, o fai entrambe le parti.'),
       asset: {
         mono: false,
+        img: '/img/m/room.webp',
         title: t2('Elena’s room (if you have no partner)', 'La stanza di Elena (se non hai un partner)'),
         body: t2(
           'Elena’s sentence: “A room that feels like a slow Sunday in a tiny flat by the sea.”\nThe room: 3 by 3 metres, one window facing a wall\nShe already has: a bed, a lamp, a sad plant\nBudget: very small\nYou choose: 6 pictures, no more',
@@ -92,7 +96,8 @@ export const MX: Record<string, MissionX[]> = {
         'Nonna Kicks vende sneaker di seconda mano online. Questa foto non ha avuto nessun messaggio in 5 giorni. Di’ cosa cambiare perché uno sconosciuto si fermi a guardarla.'),
       asset: {
         mono: false,
-        title: t2('The photo today (in words)', 'La foto oggi (a parole)'),
+        img: '/img/m/sneakers.webp', only: true,
+        title: t2('The photo today', 'La foto oggi'),
         body: t2(
           'Taken at 8pm under one dim ceiling light\nOn an unmade bed, a hoodie in the corner\nBoth sneakers slightly blurry\nLaces undone, toes cut off at the edge\nWhite sneakers look yellow\nYou can’t see the sole or the size',
           'Scattata alle 20 sotto una luce fioca sul soffitto\nSu un letto sfatto, con una felpa in un angolo\nEntrambe le sneaker un po’ sfocate\nLacci slacciati, punte tagliate sul bordo\nLe sneaker bianche sembrano gialle\nNon si vedono la suola né la taglia'),
@@ -142,6 +147,7 @@ export const MX: Record<string, MissionX[]> = {
         'Luca ha un video: “Ho provato Noce Bites per 7 giorni”. Pianifica 2 miniature molto diverse. Chi fa coppia con te ne sceglie una. In due, o fai entrambe le parti.'),
       asset: {
         mono: false,
+        img: '/img/m/luca.webp',
         title: t2('Luca’s video + the rules', 'Il video di Luca + le regole'),
         body: t2(
           'Video: “I tried Noce Bites for 7 days”\nThe snack: oat and hazelnut bites, orange wrapper\nLuca on day 7: tired but happy\nOn a phone the thumbnail is about 3 cm wide\nRules: 3 words max, wrapper visible, one colour that pops',
@@ -170,6 +176,7 @@ export const MX: Record<string, MissionX[]> = {
         'Il selfie in palestra di Camilla ha 3 like e nessun commento. Riscrivi la sua caption in 12 parole al massimo, così che i suoi amici abbiano voglia di risponderle.'),
       asset: {
         mono: false,
+        img: '/img/m/camilla.webp',
         title: t2('Camilla’s caption · 3 likes, 0 comments', 'La caption di Camilla · 3 like, 0 commenti'),
         body: t2(
           'Gym day 💪 Feeling good #gym #fitness\nWhat Camilla didn’t say:\n– she almost stayed home\n– her bag strap snapped on the bus\n– first time lifting 40 kg',
@@ -629,6 +636,7 @@ export const MX: Record<string, MissionX[]> = {
         'La lampada da scrivania di Giulia è su Subito da tre settimane. Zero messaggi. Riscrivi l’annuncio così che chi compra abbia voglia di scrivere. Il prezzo resta 10 €.'),
       asset: {
         mono: false,
+        img: '/img/m/lamp.webp',
         title: t2('Giulia’s listing, and what is true', 'L’annuncio di Giulia, e cosa è vero'),
         body: t2(
           'TITLE: used lamp\nPRICE: €10\nTEXT: “used lamp, 10 euro, write me”\n\nTRUE: black metal desk lamp, 40 cm tall, bulb included\nTRUE: works fine, small chip of paint on the base\nTRUE: pickup in Bologna, or she ships',
@@ -679,6 +687,7 @@ export const MX: Record<string, MissionX[]> = {
         'Al banco di Quokka Vintage qualcuno vuole una giacca di jeans a meno. Uno vende, uno tratta. Non cedere ai 30 €, resta gentile. In due, o fai le due parti.'),
       asset: {
         mono: false,
+        img: '/img/m/jacket.webp',
         title: t2('Seller card, buyer card', 'Carta di chi vende, carta di chi compra'),
         body: t2(
           'SELLER: denim jacket, size M, price €45\nSELLER ONLY: nothing under €38\nTRUE: faded blue, no stains, one button replaced\nBUYER: wants it for a festival, opens with “Can you do €30?”\nBUYER ONLY: can pay up to €40',
@@ -754,6 +763,7 @@ export const MX: Record<string, MissionX[]> = {
         'Qualcuno scrive “È ancora disponibile?” per la tua chitarra, poi sparisce. Uno scrive la risposta e una spintarella, uno fa chi compra e tace. In due, o fai le due parti.'),
       asset: {
         mono: false,
+        img: '/img/m/guitar.webp',
         title: t2('The listing and the chat', 'L’annuncio e la chat'),
         body: t2(
           'LISTING: acoustic guitar with soft case, €80, pickup in Padova\nTRUE: new tuning pegs in March, strings are old\nTRUE: small scratch on the back, no tuner\nBUYER SENT: “Is it still available?”\nYOUR REPLY: (you write it)\nTHEN: two days of silence',
@@ -857,6 +867,7 @@ export const MX: Record<string, MissionX[]> = {
         'Libro Lento mette online la playlist della libreria, ma “Shelf mix 3” ha 12 follower e una cover grigia. Rinominala e descrivi una cover che faccia premere play a chiunque.'),
       asset: {
         mono: true,
+        img: '/img/m/playlist-en.webp', imgIt: '/img/m/playlist-it.webp', only: true,
         title: t2('The playlist as it is now', 'La playlist com’è adesso'),
         body: t2(
           'Name       Shelf mix 3\nCover      grey default squares\nAbout      (empty)\nFollowers  12\nVibe       quiet piano, rainy days',

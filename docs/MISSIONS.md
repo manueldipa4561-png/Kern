@@ -8,21 +8,22 @@ People aged 18-35, on their phone, mostly with no training, trying different pat
 
 - Start from a real situation they know (a flat caption, a rude comment, a weak listing). Plain, warm, second person. Verb first, one action per step. Light self-deprecating humour is welcome.
 - Limits: brief about 30 words, step about 12, quality bar about 8, asset up to 6 short lines, 2-5 minutes.
-- No jargon (add a 5-word gloss if needed), no borrowed slang, no emoji walls. Never write "unlock your potential", "personal brand", "monetise" or "business case". No mentor voice, no guilt, no fake scarcity. Selling is honest persuasion.
-- Never assume a tool: a notes app is enough. The answer is typed text; if the task is visual or audio, the answer is the plan (a script, a described layout, a song order).
+- When the asset is a photo, a screen or a post, show it as a picture instead of describing it: put a WebP in `public/img/m/` and set `img` on the asset (`imgIt` if the picture contains text, `only: true` to hide the written version). `npm test` checks the file exists. The easy version keeps its own text.
+- No jargon (add a 5-word gloss if needed), no borrowed slang, no emoji walls. Never write `unlock your potential`, `personal brand`, `monetise` or `business case`. No mentor voice, no guilt, no fake scarcity. Selling is honest persuasion.
+- Never assume a tool: a notes app is enough. The answer is typed text. If the task is visual or audio, the answer is the plan (a script, a described layout, a song order).
 - Safe: 18+, no body-shaming, harassment, sexual content, real people or real song lyrics.
 - Italian is written natively, not translated: informal "tu", same facts and numbers, keep loanwords Italians use (bio, storie, reel, caption, post).
 - Examples look human and slightly imperfect, never polished. Hints are questions and never give the answer.
 
 ## Kinds and rounds
-Missions come in rounds of 3. The kind is the index % 3: 0 improve what exists (the asset is a flawed thing to fix), 1 start from zero (a short brief), 2 with a partner (a pair task that also works alone; the brief ends "Pair up, or do both parts."). Round 1 (indexes 0-2) is the quickest and most universal; round 2 is a notch richer.
+Missions come in rounds of 3. The kind is the index % 3: 0 improve what exists (the asset is a flawed thing to fix), 1 start from zero (a short brief), 2 with a partner (a pair task that also works alone, the brief ends "Pair up, or do both parts."). Round 1 (indexes 0-2) is the quickest and most universal. Round 2 is a notch richer.
 
 ## Brandable subjects
 Real brands will sponsor missions, so build them around a subject a brand could own (a snack, bar, stall, gym, channel). Use a short invented name marked "(fictional)", never a real company or its real features.
 <!-- /studio:rules -->
 
 ## Sponsors
-`src/scripts/sponsors.ts` maps `Field.index` to `{ name, color }`. The mission text stays brand-neutral; one line there shows "Brand mission · name" in the brand's `#rrggbb` colour. `npm test` checks the key is real.
+`src/scripts/sponsors.ts` maps `Field.index` to `{ name, color }`. The mission text stays brand-neutral. One line there shows "Brand mission · name" in the brand's `#rrggbb` colour. `npm test` checks that the key points at a real mission.
 
 ## Premium and free windows (planned)
 `src/scripts/access.ts` is planned and does not exist yet. The intent: a mission is free, premium, or premium with a free window (open to everyone for a limited time, such as a brand campaign), decided outside the mission text. Until then write every mission as free, with no flags.
@@ -58,9 +59,9 @@ e(['Greet a stranger at a snack table.', 'Saluta chi passa al banco.'], [['Read 
 A line break in a string is `\n`, the same count in EN and IT.
 
 ## Checklist
-- 3 steps, 3 bars, 3 hints, 3 easy steps; `mins` 2-5; kind matches index % 3.
-- Every EN has a different IT twin; no English reused with another Italian.
-- Label and title are new; the brand is invented, unused, marked fictional.
+- 3 steps, 3 bars, 3 hints, 3 easy steps. `mins` 2-5. Kind matches index % 3.
+- Every EN has a different IT twin. No English reused with another Italian.
+- Label and title are new. The brand is invented, unused, marked fictional.
 - `npm test` is green (same mission count in every field, in rounds of 3).
 
 ## Run the studio
@@ -69,13 +70,13 @@ read -rs ANTHROPIC_API_KEY && export ANTHROPIC_API_KEY   # type the key (it stay
 node scripts/mission-studio.mjs --field Selling --kind zero --subject "Crunchino, a chickpea snack"
 # or keep the key in .env (gitignored): node --env-file=.env scripts/mission-studio.mjs --field ...
 ```
-Options: `--notes`, `--model`, `--out drafts`, `--dry-run` (prints the prompt, no network), `--from-json file` (replays a saved answer). It prints PASS/FAIL for 29 rules and writes `<Field>-<kind>-<timestamp>.json` plus four `.txt` snippets, never overwriting. Exit 1 means any rule failed. Nine rules guard format and safety (shape, bilingual, mins, single-line, length, no-html, no-url, no-fences, no-code): if one fails, only the JSON is saved and no snippets. The rest are reported and you fix them by hand. Self-test, offline: `node scripts/check-studio.mjs`.
+Options: `--notes`, `--model`, `--out drafts`, `--dry-run` (prints the prompt, no network), `--from-json file` (replays a saved answer). It prints PASS/FAIL for 29 rules and writes `<Field>-<kind>-<timestamp>.json` plus four `.txt` snippets, never overwriting. Exit 1 means any rule failed. Nine rules guard format and safety: the shape, both languages, `mins`, one line per text, length, and no HTML, URLs, code fences or code. If one fails, only the JSON is saved and no snippets. The rest are reported and you fix them by hand. Self-test, offline: `node scripts/check-studio.mjs`.
 
 ## Review an AI draft
 1. Read it as a 24-year-old with no experience: clear in 5 seconds? A smile?
-2. Numbers agree across brief, asset and example; the example obeys its own limit.
+2. Numbers agree across brief, asset and example. The example obeys its own limit.
 3. Read the Italian aloud: natural, not a translation.
 4. No fake pressure, health promises, real people, brands or lyrics.
-5. Hints ask, never answer; the example looks human.
+5. Hints ask, never answer. The example looks human.
 6. No invisible or odd characters (the studio escapes them, so a `\u` you did not write is a red flag).
 7. Paste at the same index in all four files, run `npm test`, try it in the app, get a second reader.

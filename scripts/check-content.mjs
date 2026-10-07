@@ -68,7 +68,7 @@ for (const f of Object.keys(FIELDS)) {
     assert.ok(Number.isInteger(x.mins) && x.mins >= 2 && x.mins <= 5, `${at}: mins ${x.mins} is outside 2-5 (missions are snackable)`);
     assert.equal(typeof x.asset.mono, 'boolean', `${at}: asset.mono must be true or false`);
     for (const [k, v] of Object.entries({ who: x.who, brief: x.brief, twist: x.twist, ex: h.ex, easyBrief: e.brief, easyEx: e.ex })) assert.ok(v.trim(), `${at}: ${k} is empty`);
-    for (const s of strings([m, x, h, e])) {
+    for (const s of strings([m, x, h, e]).filter((t) => !t.startsWith('/img/m/'))) { // picture paths are files, not copy (check-design.mjs checks they exist)
       assert.ok(IT[s], `${at}: no Italian for "${s.slice(0, 60)}"`);
       assert.ok(s.length < 25 || IT[s] !== s, `${at}: Italian is the same as English for "${s.slice(0, 60)}"`);
     }

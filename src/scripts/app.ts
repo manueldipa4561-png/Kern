@@ -654,7 +654,6 @@ function renderBadges() {
   });
   if (!fresh.length) return;
   save();
-  if (booted) window.setTimeout(() => sayBadge(tr('New badge: {b}').replace('{b}', tr(fresh[0]))), 3000);
 }
 
 // Delete with Undo; stones earned by that answer are taken back so nothing can be farmed.
@@ -729,7 +728,6 @@ const aiSay = (t: string, p?: string) => {
 const startChat = () => {
   gen++;
   S.msgs = [{ who: 'ai', t: OPEN }]; S.mine = []; busy = false; inEl.value = '';
-  if (S.habit.t && !S.habit.l.some((e) => e[0] === dayN(Date.now()))) S.msgs.push({ who: 'ai', t: tr('Your tiny habit today: {h}. Done it? You can tick it on the Missions screen.').replace('{h}', hbText(S.habit.t)) });
   save(); renderChat();
 };
 // Live co-pilot: asks netlify/functions/coach.mts, which calls Claude with the rules "only ask, never answer".
@@ -882,6 +880,13 @@ const variant = (f: string, i: number) => {
   const hp = HELPS[f]?.[i], ez = S.easy ? EASY[f]?.[i] : undefined;
   return { x, brief: ez?.brief ?? x.brief, steps: ez?.steps ?? x.steps, asset: ez?.asset ?? x.asset, ex: ez?.ex ?? hp?.ex ?? '', hints: ez?.hints ?? hp?.hints ?? [] };
 };
+// The mission picture in the current language (some pictures carry words), with the asset text as its description.
+const setPic = () => {
+  const im = $<HTMLImageElement>('kXAI'); if (im.hidden) return;
+  const src = (isIt() ? im.dataset.it : im.dataset.en) || '';
+  if (im.getAttribute('src') !== src) im.src = src;
+  im.alt = tr(im.dataset.alt || '').replace(/\n/g, '. ');
+};
 function renderBrief(f: string, i: number) {
   const v = variant(f, i), x = v?.x;
   kShX.hidden = kShH.hidden = kRfBar.hidden = !v;
@@ -895,7 +900,11 @@ function renderBrief(f: string, i: number) {
   bEl.hidden = !(bo && bo.i === i && cur.edit < 0);
   if (!bEl.hidden) setD(bEl, `${boostTxt(bo!.m)} · ${tr('stones multiplied')}`);
   setX($('kXBrief'), v.brief);
-  setX($('kXAT'), v.asset.title); setX($('kXAB'), v.asset.body); $('kXAB').classList.toggle('mono', v.asset.mono);
+  // A visual asset (a photo, a story, a cover) shows as the picture itself. With `only` the text is just its description for a screen reader.
+  const pic = x.asset.img, kXAI = $<HTMLImageElement>('kXAI');
+  setX($('kXAT'), pic && x.asset.only ? x.asset.title : v.asset.title); setX($('kXAB'), v.asset.body); $('kXAB').classList.toggle('mono', v.asset.mono);
+  $('kXAB').hidden = !!(pic && x.asset.only);
+  kXAI.hidden = !pic; kXAI.dataset.en = pic ?? ''; kXAI.dataset.it = x.asset.imgIt ?? pic ?? ''; kXAI.dataset.alt = x.asset.body; setPic();
   tick(kXSteps, t2('Read the brief', 'Leggi il brief'), true, 'st', stepProg);
   v.steps.forEach((s) => tick(kXSteps, s, cur.edit >= 0, 'st', stepProg)); // an answer being edited is a finished one: its steps show as done
   stepProg();
@@ -1210,7 +1219,6 @@ kWin.addEventListener('click', () => {
   const gain = 200, before = rankIdx(S.stones), after = rankIdx(S.stones + gain);
   kRU.hidden = after === before;
   $('kRU2').textContent = rn(RANKS[after][0]);
-  $<HTMLImageElement>('kRUImg').src = `/img/r${after}.webp`;
   kRw.hidden = false;
   kConf.innerHTML = '';
   if (still) kGain.textContent = '+' + gain;
@@ -1421,8 +1429,6 @@ const closeStart = () => {
   runVT('vt-hero', async () => {
     from.style.viewTransitionName = ''; to.style.viewTransitionName = 'k-hero';
     run(); // vtBusy stays on until the flight has finished (released in `after`)
-    // Wait for the new image, but never hold the page if decoding stalls.
-    await new Promise((r) => requestAnimationFrame(r));
   }, () => { to.style.viewTransitionName = ''; vtBusy = false; });
 };
 $('kSkip').addEventListener('click', closeStart);
@@ -1602,7 +1608,7 @@ const setLang = (l: Lang) => {
   document.querySelectorAll<HTMLAnchorElement>('a[href^="/privacy/"]').forEach((a) => a.setAttribute('href', l === 'it' ? '/privacy/#it' : '/privacy/')); // after the texts above: they bring their own links back
   document.querySelectorAll<HTMLElement>('[aria-label]').forEach((e) => { const en = (e.dataset.enLabel ??= e.getAttribute('aria-label') || ''); e.setAttribute('aria-label', tr(en)); });
   if (fb.dataset.src) fb.textContent = tr(fb.dataset.src);
-  pressed('lang', l);
+  pressed('lang', l); setPic();
   setLvl(); renderProgress(); renderChat(); renderAcct();
 };
 document.querySelectorAll<HTMLElement>('[data-k-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.kLang === 'it' ? 'it' : 'en')));

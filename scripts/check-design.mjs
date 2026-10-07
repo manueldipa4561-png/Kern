@@ -1,7 +1,7 @@
 // Guards the v2 design: every font size scales with the text size setting (rem, never px), every field has an icon, the text size
 // labels are translated, and the theme has two choices. Run: npm test
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { buildSync } from 'esbuild';
 
 const css = readFileSync('src/styles/app.css', 'utf8');
@@ -29,4 +29,8 @@ const page = readFileSync('src/pages/index.astro', 'utf8');
 assert.equal((page.match(/data-k-text="\d"/g) || []).length, 4, 'index.astro: Settings needs four text size steps');
 assert.equal((page.match(/data-k-theme="/g) || []).length, 2, 'index.astro: the theme has two choices, dark and light');
 assert.equal((page.match(/data-k-tab="/g) || []).length, 3, 'index.astro: three sections');
+// Mission pictures: every img / imgIt path in missions.ts must be a file in public/.
+const pics = [...readFileSync('src/scripts/missions.ts', 'utf8').matchAll(/\bimg(?:It)?: '(\/img\/m\/[^']+)'/g)].map((m) => m[1]);
+assert.ok(pics.length >= 9, `missions.ts: expected the mission pictures, found ${pics.length}`);
+for (const p of pics) assert.ok(existsSync(`public${p}`), `missions.ts: picture ${p} is not in public/`);
 console.log('design: ok (rem text, icons for every field, 4 text sizes, 2 themes, 3 sections)');
