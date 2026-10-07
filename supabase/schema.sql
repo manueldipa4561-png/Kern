@@ -45,11 +45,14 @@ create table if not exists public.kern_signs (
   id         bigint generated always as identity primary key,
   user_id    uuid not null references auth.users (id) on delete cascade,
   field      text not null check (field in ('Design', 'Writing', 'Code', 'Video', 'Selling', 'Music')),
-  mission    smallint not null check (mission between 0 and 2),
+  mission    smallint not null check (mission between 0 and 5),
   tip        text not null check (char_length(tip) between 3 and 140 and tip !~* '(https?://|www\.|@|[0-9]{6,})'),
   created_at timestamptz not null default now(),
   hidden     boolean not null default false
 );
+-- Round 2 adds missions 3 to 5. Widens the limit on a table created before it (safe to repeat).
+alter table public.kern_signs drop constraint if exists kern_signs_mission_check;
+alter table public.kern_signs add constraint kern_signs_mission_check check (mission between 0 and 5);
 create index if not exists kern_signs_trail on public.kern_signs (field, mission, created_at desc);
 alter table public.kern_signs enable row level security;
 

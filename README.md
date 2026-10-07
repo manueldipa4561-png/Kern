@@ -8,7 +8,7 @@ Find your direction by doing real creative work. Installable web app (PWA) by Pu
 npm install
 npm run dev      # http://localhost:4322
 npm run build    # static site in dist/
-npm test         # checks the sync rules (src/scripts/sync.ts)
+npm test         # sync rules, next-mission and rounds rules, and that every mission is complete and translated
 ```
 
 ## Deploy on Netlify
@@ -20,7 +20,7 @@ Without the two Supabase variables below, KERN runs without accounts and everyth
 ## Accounts and sync (Supabase)
 
 1. Create a project at supabase.com. Pick an EU region (for example Frankfurt).
-2. SQL Editor, New query: paste `supabase/schema.sql` and Run. It creates the `kern_state` table with Row Level Security (each user reads and writes only their own row) the `delete_my_account` function, and the `kern_signs` table with `add_sign` / `delete_my_sign` for signs on the trail. Run it again after updating: every statement is safe to repeat.
+2. SQL Editor, New query: paste `supabase/schema.sql` and Run. It creates the `kern_state` table with Row Level Security (each user reads and writes only their own row) the `delete_my_account` function, and the `kern_signs` table with `add_sign` / `delete_my_sign` for signs on the trail. Run it again after updating: every statement is safe to repeat. (Round 2 needs this once: it widens the `kern_signs` mission limit from 0-2 to 0-5. Until you run it, a sign left on missions 4 to 6 is rejected by the database and just stays on the device.)
 3. Project Settings, API: copy the Project URL and the anon (publishable) key. The key is meant to be public; the database rules protect the data.
 4. Netlify, Site configuration, Environment variables: add `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY`, then redeploy. For local dev copy `.env.example` to `.env` and fill it in.
 5. Supabase, Authentication, URL Configuration: set Site URL to your Netlify address (for example `https://kern.netlify.app`) and add `https://kern.netlify.app/**` and `http://localhost:4322/**` to Redirect URLs.
@@ -35,6 +35,7 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - Or no account: local profile (first name, 18+ confirmation), everything stays in the browser
 - Onboarding: the choice first, then one or more interests (fields); on Missions you switch path in one tap and progress is kept per field, "+ Add" picks more. Missions, yourKERN, Trail, KERN.AI co-pilot (scripted: it only asks questions)
 - Home: your next mission first, then your 3 missions with status (done / next / draft)
+- Rounds: every field has 6 missions, shown 3 at a time. Round 1 unlocks your Kern card; finishing it shows a "round complete" moment on Home, with round 2 one tap away. Round 2 repeats the same three kinds (improve what exists, start from zero, work with a partner), so the card gets sharper with every round. After a reward, the button leads straight into the next mission of the round. Missions live in `fields.ts`, `missions.ts`, `helps.ts` and `easy.ts` (same order in all four); `npm test` checks they match
 - Answers with automatic drafts; edit or delete them (with Undo); +50 stones per answer, +20 for a reflection
 - Quick reflection after each answer (how it felt, would you do it again, hardest part, a sign for the next person)
 - Signs on the trail: with an account, the sign you leave is shown without your name to the next people who open that mission (`kern_signs` in `supabase/schema.sql`: public read of tip and date only, writes through `add_sign` / `delete_my_sign`, 20 a day each, no links, emails or long numbers). Deleting the answer removes its sign

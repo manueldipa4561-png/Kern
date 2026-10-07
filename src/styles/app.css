@@ -539,13 +539,22 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-dr-stage::before { content: ''; position: absolute; inset: 0; background: radial-gradient(closest-side, color-mix(in srgb, var(--tc) 38%, transparent), transparent); animation: kDrGlow 1.2s ease-out both; }
 .k-drop h5 { font-size: 30px; line-height: 1.05; }
 .k-dr-n { font: 800 22px 'Inter Tight Variable', system-ui, sans-serif; color: color-mix(in srgb, var(--tc) 75%, var(--fg)); margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+/* Home card, round complete: a quiet second action under the main button */
+.k-sk[hidden] { display: none; }
+.k-main .k-sk { color: var(--bone); opacity: .85; margin-top: 6px; }
+/* A badge toast that fires while the reward is open goes to the top, so it never covers the stones. */
+.k-scr:has(#kSheet.drop:not([hidden])) .k-toast { bottom: auto; top: max(14px, calc(env(safe-area-inset-top) + 8px)); transform: translateY(-8px); }
+.k-scr:has(#kSheet.drop:not([hidden])) .k-toast.on { transform: none; }
+.k-scr .k-dr-nx { margin: 12px 0 8px; } /* beats .k-scr p { margin: 0 } */
+.k-dr-nx { max-width: 30ch; font: 600 14px/1.35 'Inter Tight Variable', system-ui, sans-serif; color: color-mix(in srgb, var(--fg) 72%, transparent); animation: kDrNx .5s .6s ease-out both; }
+@keyframes kDrNx { from { opacity: 0; transform: translateY(6px); } }
 .k-dr-bits i { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px; border-radius: 2px; background: var(--tc); transform: rotate(var(--a)) translateX(0); opacity: 0; animation: kBurst .8s cubic-bezier(.1,.8,.3,1) forwards; }
 .k-dr-bits i:nth-child(3n) { background: var(--gold); width: 5px; height: 5px; } .k-dr-bits i:nth-child(3n+1) { background: #fff; width: 4px; height: 4px; }
 @keyframes kDrPop { from { transform: scale(0) rotate(-25deg); opacity: 0; } }
 @keyframes kDrGlow { from { opacity: 0; transform: scale(.4); } }
 @keyframes kSpinSlow { to { transform: rotate(360deg); } }
 @keyframes kBurst { 0% { opacity: 1; transform: rotate(var(--a)) translateX(0); } 100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--r)) scale(.4); } }
-@media (prefers-reduced-motion: reduce) { .k-dr-art, .k-dr-stage::before, .k-find.got, .k-streak svg, .k-dr-art .ring2, .k-dr-art .rays { animation: none; } .k-dr-bits { display: none; } }
+@media (prefers-reduced-motion: reduce) { .k-dr-art, .k-dr-nx, .k-dr-stage::before, .k-find.got, .k-streak svg, .k-dr-art .ring2, .k-dr-art .rays { animation: none; } .k-dr-bits { display: none; } }
 
 /* Reward art: fixed bright palette so it reads the same in light and dark */
 .k-drop { --tf: #C9F24A; --ts: #7FA818; }

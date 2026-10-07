@@ -7,6 +7,7 @@ import { IT, t2 } from './i18n';
 import { FIELDS } from './fields';
 import { MX } from './missions';
 import { RELICS, rollDrop, type Drop } from './loot';
+import { nextSpot, roundOf, PER_ROUND } from './next';
 import { HELPS } from './helps';
 import { EASY } from './easy';
 import * as cloud from './cloud';
@@ -49,10 +50,10 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
   try {
     if (!s || typeof s !== 'object' || s.v !== 1) return null;
     const drafts: Record<string, string> = {};
-    if (s.drafts && typeof s.drafts === 'object') for (const [k, v] of Object.entries(s.drafts)) if (/^\w+\.[0-2]$/.test(k) && typeof v === 'string' && v) drafts[k] = v.slice(0, 2000);
+    if (s.drafts && typeof s.drafts === 'object') for (const [k, v] of Object.entries(s.drafts)) { const [f, i, ...rest] = k.split('.'); if (!rest.length && FIELDS[f] && /^\d$/.test(i ?? '') && Number(i) < FIELDS[f].m.length && typeof v === 'string' && v) drafts[k] = v.slice(0, 2000); }
     const field: string = FIELDS[s.field] ? s.field : 'Design';
     const answers: Answer[] = Array.isArray(s.answers)
-      ? s.answers.filter((a: Answer) => a && FIELDS[a.f] && Number.isInteger(a.i) && a.i >= 0 && a.i < 3 && typeof a.t === 'string' && Number.isFinite(a.at))
+      ? s.answers.filter((a: Answer) => a && FIELDS[a.f] && Number.isInteger(a.i) && a.i >= 0 && a.i < FIELDS[a.f].m.length && typeof a.t === 'string' && Number.isFinite(a.at))
         .map((a: Answer) => ({ f: a.f, i: a.i, t: a.t.slice(0, 2000), at: a.at, ed: Number.isFinite(a.ed) ? a.ed : undefined, r: cleanR(a.r), x: Number.isInteger(a.x) && a.x! > 0 ? Math.min(a.x!, 600) : undefined, d: typeof a.d === 'string' && DROP_IDS.includes(a.d) ? a.d : undefined }))
       : [];
     // Interests: the fields someone chose to explore, in their order. Older saves have none: use the answered ones.
@@ -141,7 +142,13 @@ const setD = (el: Element, text: string) => { (el as HTMLElement).dataset.en = '
 const pressed = (attr: string, val: string) => document.querySelectorAll<HTMLElement>(`[data-k-${attr}]`).forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute(`data-k-${attr}`) === val)));
 const F = () => FIELDS[S.field] || FIELDS.Design;
 const day = (t: number) => new Date(t).toLocaleDateString(isIt() ? 'it-IT' : 'en-GB', { day: 'numeric', month: 'short' });
-const doneSet = () => new Set(S.answers.filter((a) => a.f === S.field).map((a) => a.i));
+const doneIn = (f: string) => new Set(S.answers.filter((a) => a.f === f).map((a) => a.i));
+const doneSet = () => doneIn(S.field);
+// Rounds: the screen shows 3 missions at a time. base() is the index of the first mission of the round in play; the
+// rows, trail and counters work on 0-2 inside that window (winDone), everything stored uses the full index.
+const total = (f = S.field) => FIELDS[f]?.m.length ?? PER_ROUND;
+const base = (f = S.field) => roundOf(doneIn(f), total(f)) * PER_ROUND;
+const winDone = () => { const d = doneSet(), b = base(); return new Set([0, 1, 2].filter((k) => d.has(b + k))); };
 
 const toast = $('kToast'), toastT = $('kToastT'), toastB = $('kToastB');
 let tT = 0, toastAct: (() => void) | null = null;
@@ -279,8 +286,8 @@ const setLvl = () => {
   });
 };
 
-// Signals: which kind of mission you light up on, from your own reflections.
-// Mission 0 = improve what exists, 1 = start from zero, 2 = work with someone (see fields.ts).
+// Signals: which kind of mission you light up on, from your own reflections. The kind is the mission index % 3
+// (improve what exists, start from zero, work with someone), so each round adds evidence for the same three kinds.
 const KIND_EN = ['improve what already exists', 'start from zero', 'work with someone'];
 const KIND_IT = ['migliori ciò che esiste già', 'parti da zero', 'lavori con qualcuno'];
 const KSHORT = ['Improving things', 'Starting from zero', 'Working with others'];
@@ -288,7 +295,7 @@ const FEEL_EN: Record<Feel, string> = { flow: 'Time flew', ok: 'It was fine', dr
 const AGAIN_EN: Record<Again, string> = { yes: 'Yes', maybe: 'Maybe', no: 'No' };
 const SCORE: Record<Feel, number> = { flow: 2, ok: 1, drag: 0 };
 const readSignals = () => {
-  const by = [0, 1, 2].map((i) => S.answers.filter((a) => a.f === S.field && a.i === i && a.r?.e));
+  const by = [0, 1, 2].map((i) => S.answers.filter((a) => a.f === S.field && a.i % PER_ROUND === i && a.r?.e)); // by kind: every round has one of each
   const rated = by.map((l, i) => ({ i, v: l.length ? l.reduce((s, a) => s + SCORE[a.r!.e!], 0) / l.length : -1 })).filter((x) => x.v >= 0).sort((a, b) => b.v - a.v);
   if (!rated.length) return null;
   const best = rated[0].i, low = rated[rated.length - 1];
@@ -314,7 +321,9 @@ const renderSignals = () => {
       ? `Perché lo pensiamo: hai segnato "${feel(sg.bestA)}" su ${title(sg.bestA)}${sg.worstA ? ` e "${feel(sg.worstA)}" su ${title(sg.worstA)}` : ''}.`
       : `Why we think so: you marked "${feel(sg.bestA)}" on ${title(sg.bestA)}${sg.worstA ? ` and "${feel(sg.worstA)}" on ${title(sg.worstA)}` : ''}.`);
     setD($('kCardH'), it ? `Ti accendi quando ${K[sg.best]}.` : `You light up when you ${K[sg.best]}.`);
-    setD($('kCardL'), done === 3 && sg.n === 3 ? tr('3 missions · first guess') : (it ? `Basata su ${sg.n} missioni su 3 · iniziale` : `Based on ${sg.n} of 3 missions · early`));
+    setD($('kCardL'), done === 3 && sg.n === 3 ? tr('3 missions · first guess')
+      : done > 3 && sg.n === 3 ? (it ? `${done} missioni · ipotesi più precisa` : `${done} missions · sharper guess`)
+      : (it ? `Basata su ${sg.n} missioni su 3 · iniziale` : `Based on ${sg.n} of 3 missions · early`));
     chips($('kDrawn'), [tr(S.field), tr(KSHORT[sg.best])]);
     chips($('kCardC'), [tr(S.field), tr(KSHORT[sg.best])]);
   }
@@ -323,7 +332,7 @@ const renderSignals = () => {
   meter.innerHTML = '';
   let any = false;
   [0, 1, 2].forEach((i) => {
-    const l = S.answers.filter((a) => a.f === S.field && a.i === i && a.r?.e);
+    const l = S.answers.filter((a) => a.f === S.field && a.i % PER_ROUND === i && a.r?.e);
     const v = l.length ? l.reduce((s, a) => s + SCORE[a.r!.e!], 0) / (l.length * 2) : 0;
     any ||= l.length > 0;
     const row = document.createElement('div'), lab = document.createElement('span'), val = document.createElement('b'), bar = document.createElement('i'), fill = document.createElement('s');
@@ -350,7 +359,7 @@ const renderFields = () => {
     b.type = 'button'; b.className = 'k-fchip' + (f === S.field ? ' on' : ''); b.setAttribute('aria-pressed', String(f === S.field));
     im.src = `/img/f-${f.toLowerCase()}.webp`; im.alt = ''; im.width = im.height = 400; im.decoding = 'async';
     t.textContent = tr(f);
-    n.textContent = `${new Set(S.answers.filter((a) => a.f === f).map((a) => a.i)).size}/3`;
+    n.textContent = `${doneIn(f).size}/${total(f)}`;
     b.append(im, t, n); b.addEventListener('click', () => switchField(f)); box.appendChild(b);
   });
   const add = document.createElement('button');
@@ -358,49 +367,60 @@ const renderFields = () => {
   add.addEventListener('click', () => openStart(true)); box.appendChild(add);
 };
 document.addEventListener('visibilitychange', () => { if (!document.hidden) renderProgress(); }); // habit button, boost, streak and dots go stale overnight otherwise
-const kAdd = $('kAdd');
+const kAdd = $('kAdd'), kAdd2 = $('kAdd2');
 const renderHome = () => {
   renderFields();
-  const f = F(), done = doneSet(), next = [0, 1, 2].find((k) => !done.has(k)), it = isIt();
+  const f = F(), b = base(), round = b / PER_ROUND, done = winDone(), next = [0, 1, 2].find((k) => !done.has(k)), it = isIt();
+  // fresh: a round was just finished and the next one is not started. Celebrate the Kern card first, then offer the new missions.
+  const fresh = round > 0 && ![0, 1, 2].some((k) => done.has(k) || S.drafts[`${S.field}.${b + k}`]);
   setD($('kHi'), S.name ? `${it ? 'Ciao' : 'Hi'} ${S.name}` : (it ? 'Ciao' : 'Hi'));
-  const img = $<HTMLImageElement>('kNxImg'), src = next === undefined ? '/img/cairn.webp' : `/img/f-${S.field.toLowerCase()}.webp`;
+  const img = $<HTMLImageElement>('kNxImg'), src = next === undefined || fresh ? '/img/cairn.webp' : `/img/f-${S.field.toLowerCase()}.webp`;
   if (img.getAttribute('src') !== src) img.src = src;
-  if (next === undefined) {
-    setT($('kNxL'), 'Your 3 missions are done'); setT($('kNxT'), 'Your Kern card is ready.');
-    setT($('kNxP'), 'See what your answers say about how you work, and share it.');
+  kAdd2.hidden = !fresh;
+  if (next === undefined || fresh) {
+    if (fresh) setD($('kNxL'), it ? `Round ${round} completato` : `Round ${round} complete`);
+    else setD($('kNxL'), it ? `Le tue ${total()} missioni sono fatte` : `Your ${total()} missions are done`);
+    setT($('kNxT'), 'Your Kern card is ready.');
+    setT($('kNxP'), fresh ? 'See what your answers say about how you work, or keep going with 3 new missions.' : 'See what your answers say about how you work, and share it.');
     setT(kAdd, 'See your Kern card'); kAdd.dataset.kAns = 'card';
+    if (fresh) { setD(kAdd2, it ? `Inizia il round ${round + 1}` : `Start round ${round + 1}`); kAdd2.dataset.kAns = String(b); }
   } else {
-    const m = f.m[next];
-    setD($('kNxL'), it ? `Prossimo passo · missione ${next + 1} di 3` : `Your next step · mission ${next + 1} of 3`);
+    const m = f.m[b + next];
+    setD($('kNxL'), round
+      ? (it ? `Round ${round + 1} · missione ${next + 1} di 3` : `Round ${round + 1} · mission ${next + 1} of 3`)
+      : (it ? `Prossimo passo · missione ${next + 1} di 3` : `Your next step · mission ${next + 1} of 3`));
     setT($('kNxT'), m[1]); setT($('kNxP'), m[2]);
-    setT(kAdd, S.drafts[`${S.field}.${next}`] ? 'Continue your draft' : 'Add your answer'); kAdd.dataset.kAns = String(next);
+    setT(kAdd, S.drafts[`${S.field}.${b + next}`] ? 'Continue your draft' : 'Add your answer'); kAdd.dataset.kAns = String(b + next);
   }
+  if (round) setD($('kMsL'), it ? `Round ${round + 1} · le tue 3 missioni` : `Round ${round + 1} · your 3 missions`); else setT($('kMsL'), 'Your 3 missions');
   const nb = boostOf(S.field), nbEl = $('kNxB');
   nbEl.hidden = !nb;
   if (nb) setD(nbEl, `${boostTxt(nb.m)} · ${tr(f.m[nb.i][1])}`);
   [0, 1, 2].forEach((i) => {
-    const row = $('kMR' + i), st = done.has(i) ? 'Done' : i === next ? 'Next' : S.drafts[`${S.field}.${i}`] ? 'Draft' : 'Not started';
+    const a = b + i, row = $('kMR' + i), st = done.has(i) ? 'Done' : i === next ? 'Next' : S.drafts[`${S.field}.${a}`] ? 'Draft' : 'Not started';
     row.classList.toggle('done', done.has(i)); row.classList.toggle('next', i === next);
-    setT(row.querySelector('b')!, f.m[i][1]);
-    const bo = boostOf(S.field), isB = !!bo && bo.i === i;
+    setT(row.querySelector('b')!, f.m[a][1]);
+    const bo = boostOf(S.field), isB = !!bo && bo.i === a;
     row.classList.toggle('boost', isB);
-    setD(row.querySelector('small')!, `${tr(f.m[i][0])} · ${tr(st)}${isB ? ' · ' + boostTxt(bo!.m) : ''}`);
+    setD(row.querySelector('small')!, `${tr(f.m[a][0])} · ${tr(st)}${isB ? ' · ' + boostTxt(bo!.m) : ''}`);
   });
 };
 
 // Progress: pill, trail, answers list, signs, real stats from saved answers.
 const renderProgress = () => {
-  const it = isIt(), done = doneSet(), n = done.size, next = [0, 1, 2].find((k) => !done.has(k));
-  $('kPill').textContent = it ? `${n} su 3 fatte` : `${n} of 3 done`;
+  const it = isIt(), b = base(), round = b / PER_ROUND, done = winDone(), n = done.size, next = [0, 1, 2].find((k) => !done.has(k));
+  $('kPill').textContent = round ? `Round ${round + 1} · ${n}/3` : it ? `${n} su 3 fatte` : `${n} of 3 done`;
   $('kRing').style.setProperty('--p', String(n / 3));
   [0, 1, 2].forEach((i) => {
+    setT($('kTr' + i), F().m[b + i][1]);
     const st = $('kTr' + i).parentElement!;
     st.className = 'k-st' + (done.has(i) ? ' fin' : i === next ? ' now' : '');
     setT(st.querySelector('p')!, done.has(i) ? 'Done' : i === next ? 'In progress' : 'Not started');
   });
   const kc = $('kTrK');
-  kc.className = 'k-st' + (n === 3 ? ' now' : '');
-  setT(kc.querySelector('p')!, n === 3 ? 'Ready to share' : 'Ready when your 3 missions are done');
+  const ready = doneSet().size >= PER_ROUND; // the Kern card unlocks with round 1 and sharpens with every round after
+  kc.className = 'k-st' + (ready ? ' now' : '');
+  setT(kc.querySelector('p')!, ready ? 'Ready to share' : 'Ready when your 3 missions are done');
   const box = $('kAns');
   box.innerHTML = '';
   if (!S.answers.length) { const p = document.createElement('p'); p.textContent = tr('No answers yet. Pick a mission and add yours.'); box.appendChild(p); }
@@ -450,7 +470,8 @@ const BADGES: { id: string; t: string; d: string; ok: () => boolean }[] = [
   { id: 'first', t: 'First step', d: 'Your first answer', ok: () => S.answers.length > 0 },
   { id: 'reflect', t: 'Honest look', d: 'Your first reflection', ok: () => S.answers.some((a) => a.r) },
   { id: 'sign', t: 'Trail marker', d: 'Left a sign for the next person', ok: () => S.answers.some((a) => a.r?.tip) },
-  { id: 'full', t: 'Full trail', d: 'All 3 missions in one field', ok: () => Object.keys(FIELDS).some((f) => new Set(S.answers.filter((a) => a.f === f).map((a) => a.i)).size === 3) },
+  { id: 'full', t: 'Full trail', d: 'All 3 missions in one field', ok: () => Object.keys(FIELDS).some((f) => { const d = doneIn(f); return [0, 1, 2].every((i) => d.has(i)); }) },
+  { id: 'deep', t: 'Deep dive', d: 'Every mission in one field', ok: () => Object.keys(FIELDS).some((f) => doneIn(f).size >= total(f)) },
   { id: 'twice', t: 'Do it twice', d: '3 versions of an idea in KERN.AI', ok: () => S.mine.length >= 3 },
   { id: 'dare', t: 'Challenger', d: 'Dared a friend', ok: () => S.dared },
   { id: 'steady', t: 'Steady', d: 'Made something in 3 different weeks', ok: () => new Set(S.answers.map((a) => WEEKNUM(a.at))).size >= 3 },
@@ -601,7 +622,6 @@ $('kToAi').addEventListener('click', () => goTab('copilot'));
 
 // Field: trail titles, progress, chat.
 const applyField = (resetChat: boolean) => {
-  F().m.forEach((m, i) => setT($('kTr' + i), m[1]));
   if (resetChat || !S.msgs.length) startChat(); else renderChat();
   renderProgress();
 };
@@ -610,6 +630,7 @@ const applyField = (resetChat: boolean) => {
 const kTa = $<HTMLTextAreaElement>('kTa'), kShA = $('kShA'), kShR = $('kShR');
 let cur: { f: string; i: number; dare: boolean; edit: number } = { f: 'Design', i: 0, dare: false, edit: -1 };
 let lastAns: Answer | null = null, inTime = false, dT = 0; // lastAns: the answer being reflected on; inTime: submitted inside the time box
+let lastBoost: { i: number; m: number } | null = null; // the daily boost as promised on screen, read before the answer moves the round (boostOf depends on progress)
 const dKey = () => `${cur.f}.${cur.i}`;
 function flushDraft() {
   clearTimeout(dT);
@@ -771,7 +792,7 @@ const trailDays = () => streakOf([...S.answers.map((a) => dayN(a.at)), ...S.habi
 const boostOf = (f: string, d = dayN(Date.now())): { i: number; m: number } | null => {
   let h = Math.imul(d ^ [...f].reduce((a, c) => (Math.imul(a, 31) + c.charCodeAt(0)) | 0, 7), 2654435761) >>> 0;
   h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; h ^= h >>> 13;
-  return h % 100 < 35 ? null : { i: (h >>> 8) % 3, m: (h >>> 16) % 10 < 3 ? 3 : 2 };
+  return h % 100 < 35 ? null : { i: base(f) + (h >>> 8) % PER_ROUND, m: (h >>> 16) % 10 < 3 ? 3 : 2 }; // always inside the round in play, so it is on screen
 };
 const boostTxt = (m: number) => `×${m} ${tr('today')}`;
 const kFinds = $('kFinds');
@@ -856,7 +877,7 @@ $('kHbDo').addEventListener('click', () => {
   else setD($('kHbMsg'), tr(HB_MSG[Math.floor(Math.random() * HB_MSG.length)]));
 });
 const DROP_T: Record<string, string> = { spark: t2('A spark', 'Una scintilla'), gem: t2('A gem', 'Una gemma'), relic: t2('A find!', 'Un ritrovamento!'), jackpot: t2('Jackpot', 'Jackpot') };
-const kShD = $('kShD');
+const kShD = $('kShD'), kDrOk = $('kDrOk'), kDrNx = $('kDrNx');
 const DEFS = '<defs><linearGradient id="kg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>';
 const hl = (d: string) => `<path d="${d}" fill="url(#kg)"/>`;
 const dropArt = (d: Drop) => {
@@ -872,9 +893,11 @@ const dropArt = (d: Drop) => {
   return `<svg viewBox="0 0 120 120" aria-hidden="true">${DEFS}<path class="a" d="${sp}"/>${hl(sp)}<circle class="b" cx="96" cy="24" r="4"/><circle class="b" cx="22" cy="94" r="3"/></svg>`;
 };
 // Reveal screen: appears the moment the reflection is saved, under a second to read, one tap to continue.
-function showDrop(d: Drop, side: number) {
+function showDrop(d: Drop, side: number, withNext = false) {
   const rel = RELICS.find((r) => r.id === d.id);
   kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = d.tier;
+  setT(kDrOk, 'Keep going'); delete kDrOk.dataset.next; kDrNx.hidden = true; kDrNx.textContent = ''; // aria-describedby reads hidden text too
+  if (withNext) offerNext(); // before the focus below, so the button is announced with its final label
   $('kDrArt').innerHTML = dropArt(d);
   setT($('kDrT'), DROP_T[d.tier]);
   if (rel) setD($('kDrN'), `${tr(rel.name)} · ${relicsOwned().length + 0}/${RELICS.length}`); else setD($('kDrN'), `+${d.stones} ${isIt() ? 'pietre' : 'stones'}`);
@@ -882,9 +905,25 @@ function showDrop(d: Drop, side: number) {
   const bits = $('kDrBits'); bits.innerHTML = '';
   if (!still) for (let i = 0; i < 18; i++) { const p = document.createElement('i'); p.style.setProperty('--a', `${(360 / 18) * i + Math.random() * 12}deg`); p.style.setProperty('--r', `${70 + Math.random() * 60}px`); bits.appendChild(p); }
   if ('vibrate' in navigator) navigator.vibrate(d.tier === 'jackpot' ? [30, 40, 30, 40, 60] : d.tier === 'relic' ? [20, 30, 40] : [18]);
-  $('kDrOk').focus();
+  kDrOk.focus();
 }
-$('kDrOk').addEventListener('click', () => { closeSheet(kSheet); setLvl(); renderProgress(); });
+// Momentum: right after a reward the button leads straight into the next open mission, and says which one.
+function offerNext() {
+  const nx = nextSpot(S.field, S.fields.filter((f) => FIELDS[f]), doneIn, total()), m = nx && FIELDS[nx.f].m[nx.i];
+  // Finishing a round lands on Home, where the Kern card is the payoff: never chain out of a completed round.
+  const start = Math.floor(cur.i / PER_ROUND) * PER_ROUND, d = doneIn(cur.f);
+  if (!nx || !m || [0, 1, 2].every((k) => d.has(start + k))) return;
+  const mins = MX[nx.f]?.[nx.i]?.mins;
+  kDrOk.dataset.next = `${nx.f}.${nx.i}`; setT(kDrOk, 'Next mission');
+  setD(kDrNx, `${tr('Next')}: ${tr(m[1])}${mins ? ` · ~${mins} min` : ''}`); kDrNx.hidden = false;
+}
+kDrOk.addEventListener('click', () => {
+  const [f, i] = (kDrOk.dataset.next || '').split('.');
+  closeSheet(kSheet); setLvl(); renderProgress();
+  if (!FIELDS[f]) return;
+  if (f !== S.field) switchField(f);
+  openAnswer(f, Number(i));
+});
 const fillSheet = (f: string, i: number) => {
   kSheet.classList.remove('drop'); kShD.hidden = true;
   const m = FIELDS[f].m[i];
@@ -928,7 +967,8 @@ groups.forEach((g) => g.querySelectorAll<HTMLElement>('[data-v]').forEach((c) =>
   c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
 }));
 kAdd.addEventListener('click', () => { if (kAdd.dataset.kAns === 'card') goTab('trail'); else openAnswer(S.field, Number(kAdd.dataset.kAns)); });
-[0, 1, 2].forEach((i) => $('kMR' + i).addEventListener('click', () => openAnswer(S.field, i)));
+kAdd2.addEventListener('click', () => openAnswer(S.field, Number(kAdd2.dataset.kAns)));
+[0, 1, 2].forEach((i) => $('kMR' + i).addEventListener('click', () => openAnswer(S.field, base() + i)));
 $('kCancel').addEventListener('click', () => closeSheet(kSheet));
 $('kSub').addEventListener('click', () => {
   const t = kTa.value.trim();
@@ -941,6 +981,7 @@ $('kSub').addEventListener('click', () => {
     return;
   }
   const na: Answer = { f: cur.f, i: cur.i, t: t.slice(0, 2000), at: Date.now() };
+  lastBoost = boostOf(cur.f); // before the push: an answer that completes a round moves base(), and with it the boost
   S.answers.push(na); lastAns = na;
   const tb = MX[cur.f]?.[cur.i];
   inTime = !!tb && openedAt > 0 && Date.now() - openedAt <= tb.mins * 60000;
@@ -968,7 +1009,7 @@ function finish(r: Refl | undefined) {
   let side = real ? bonus() : 0;
   if (real && x && inTime) { side += 15; S.stones += 15; }
   const today = dayN(Date.now());
-  const bo = boostOf(cur.f);
+  const bo = lastBoost;
   if (real && bo && bo.i === cur.i) { const bx = (50 + (r ? 20 : 0)) * (bo.m - 1); side += bx; S.stones += bx; }
   const nToday = S.answers.filter((q) => dayN(q.at) === today).length; // includes this one
   if (real && nToday > 1) { const cx = Math.min(30, (nToday - 1) * 10); side += cx; S.stones += cx; } // combo: 2nd mission of the day +10, 3rd +20, 4th+ +30
@@ -985,7 +1026,7 @@ function finish(r: Refl | undefined) {
   }
   save(); if (a && r) shareSign(a);
   openedAt = 0;
-  if (drop.tier !== 'none') { showDrop(drop, side); return; }
+  if (drop.tier !== 'none') { showDrop(drop, side, true); return; }
   closeSheet(kSheet); setLvl(); renderProgress();
   say((r ? tr('Reflection saved. +20 stones.') : tr('+50 stones. Your answer is saved on this device.')) + (side ? ` +${side} bonus` : ''));
 }
@@ -1324,7 +1365,7 @@ let dare: { f: string; i: number } | null = null;
 const dp = new URLSearchParams(location.search).get('dare');
 if (dp) {
   const [f, i] = dp.split('.'); const n = Number(i);
-  if (FIELDS[f] && Number.isInteger(n) && n >= 0 && n < 3) dare = { f, i: n };
+  if (FIELDS[f] && Number.isInteger(n) && n >= 0 && n < total(f)) dare = { f, i: n };
   history.replaceState(null, '', location.pathname);
 }
 function renderDare() { $('kDare').hidden = !dare; if (dare) setT($('kDareT'), FIELDS[dare.f].m[dare.i][1]); }
