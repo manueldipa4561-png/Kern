@@ -25,7 +25,23 @@ type Lang = 'en' | 'it';
 type Habit = { t: string; c: string; l: [number, string][] }; // t: the tiny habit, c: the cue (after I...), l: [day number, relic id found that day or ''] per day done
 type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit; easy: boolean };
 
-const KEY = 'kern:v1';
+// Demo profile (open /?demo, switch off with /?demo=off): a lived-in trail to show KERN in a minute. It has its own storage key,
+// never syncs, never publishes a sign and is never counted, so it cannot touch real data.
+try {
+  const q = new URLSearchParams(location.search), d = q.get('demo');
+  if (d !== null) {
+    const v = d.trim().toLowerCase();
+    if (['off', '0', 'false', 'no'].includes(v)) localStorage.removeItem('kern:mode'); // anything else unknown leaves the mode as it is
+    else if (['', '1', 'true', 'on', 'yes', 'demo'].includes(v)) localStorage.setItem('kern:mode', 'demo');
+    q.delete('demo'); // keep other parameters, such as a dare link
+    const rest = q.toString();
+    history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
+  }
+} catch { /* storage blocked: no demo */ }
+const DEMO = (() => { try { return localStorage.getItem('kern:mode') === 'demo'; } catch { return false; } })();
+const CLOUD = cloud.enabled && !DEMO;
+const KEY = DEMO ? 'kern:demo' : 'kern:v1';
+const eraseStats = () => (DEMO ? Promise.resolve() : stats.erase()); // the demo must never touch the real usage-count record
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
 const FEELS: Feel[] = ['flow', 'ok', 'drag'];
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
@@ -84,8 +100,22 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
     };
   } catch { return null; }
 };
+// Sample trail for the demo: 6 answers in 3 fields, all reflected, about 500 stones (rank Cairn), badges earned from the answers themselves.
+const demoState = (): State => {
+  const it = fresh().lang === 'it', L = (en: string, ti: string) => (it ? ti : en), day = 864e5, now = Date.now();
+  const ans = (f: string, i: number, ago: number, t: string, r: Refl, x?: number, d?: string) => ({ f, i, t, at: now - ago * day, r, x, d });
+  const answers = [
+    ans('Design', 0, 16, L('Keep one thing: “Saturday · 2 for 1 pizza till 9”. Cut the DJ, the new menu, the contest and the dog. One colour: red letters on cream. Big words in the middle, a tiny “Pomo Pizza” at the bottom.', 'Ne tengo una sola: “Sabato · 2x1 fino alle 21”. Taglio DJ, menu nuovo, concorso e cane. Un solo colore: lettere rosse su crema. Parole grandi al centro, “Pomo Pizza” piccolo in basso.'), { e: 'flow', again: 'yes', hard: L('Deleting things I liked', 'Togliere cose che mi piacevano'), tip: L('Pick the one word people must remember, then cut the rest.', 'Scegli la parola da ricordare, poi taglia il resto.') }, 25, 'spark'),
+    ans('Design', 1, 15, L('A round sticker with a fig leaf and “Bar Ficus” on one curved line, dark green on white so it reads on the glass door from three metres.', 'Un adesivo tondo con una foglia di fico e “Bar Ficus” su una riga curva, verde scuro su bianco: si legge sul vetro della porta da tre metri.'), { e: 'flow', again: 'yes', hard: L('Keeping it simple', 'Restare semplice') }),
+    ans('Design', 2, 8, L('Feeling: a slow Sunday morning. Six pictures: warm light on a wall, linen, one green plant, a low wooden table, a worn rug, a mug. No people.', 'Sensazione: una domenica mattina lenta. Sei immagini: luce calda su un muro, lino, una pianta verde, un tavolo basso di legno, un tappeto consumato, una tazza. Nessuna persona.'), { e: 'ok', again: 'yes' }, 40, 'gem'),
+    ans('Writing', 0, 6, L('Missed my train for this mirror. Worth it? One word.', 'Ho perso il treno per questo specchio. Ne è valsa la pena? Una parola.'), { e: 'flow', again: 'maybe', hard: L('Sounding natural', 'Suonare naturale') }, 15, 'spark'),
+    ans('Writing', 1, 2, L('Leo, your streak misses you. Two minutes today?', 'Leo, la tua serie ti aspetta. Due minuti oggi?'), { e: 'ok', again: 'yes' }),
+    ans('Video', 0, 1, L('Open on the cheese pull at 0:00, then cut to the van. The walk to the van goes at the end, or it goes.', 'Apro sul filo di formaggio a 0:00, poi stacco sul furgone. La camminata verso il furgone va in fondo, o sparisce.'), { e: 'flow', again: 'yes' }),
+  ];
+  return sanitize({ v: 1, name: 'Giulia', field: 'Design', fields: ['Design', 'Writing', 'Video'], onboarded: true, stones: answers.reduce((s, a) => s + 50 + (a.r ? 20 : 0) + (a.x || 0), 0), answers, dared: true, lang: fresh().lang, guess: L('You seemed to light up when you started from a blank page, and to slow down on the polish.', 'Sembravi accenderti quando partivi da zero, e rallentare sulla rifinitura.') }) || fresh();
+};
 const load = (): State => {
-  try { return sanitize(JSON.parse(localStorage.getItem(KEY) || 'null')) || fresh(); } catch { return fresh(); }
+  try { return sanitize(JSON.parse(localStorage.getItem(KEY) || 'null')) || (DEMO ? demoState() : fresh()); } catch { return DEMO ? demoState() : fresh(); }
 };
 const S = load();
 const snapshot = () => ({ ...S, msgs: S.msgs.filter((m) => !m.typing).slice(-60) });
@@ -179,7 +209,7 @@ const SAMPLE = { guess: $('kGuess').dataset.en!, why: $('kWhy').dataset.en!, ai:
 // Launch loader
 const kLoad = $('kLoad');
 if (still) kLoad.classList.add('off');
-else { kLoad.classList.add('go'); window.setTimeout(() => kLoad.classList.add('off'), S.name ? 1900 : 3200); }
+else { kLoad.classList.add('go'); window.setTimeout(() => kLoad.classList.add('off'), S.name ? 1900 : 2600); }
 
 // Theme
 const mqLight = matchMedia('(prefers-color-scheme: light)');
@@ -383,10 +413,10 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) { re
 const kAdd = $('kAdd'), kAdd2 = $('kAdd2');
 // Usage counts without names (stats.ts): asked once on Home, switchable in Settings. Off until yes. Without Supabase there is nowhere to send them, so neither control shows.
 const kStat = $('kStat'), kStatSet = $('kStatSet');
-const track = (ev: stats.Ev, f?: string, i?: number) => stats.track(ev, f, i, S.lang);
+const track = (ev: stats.Ev, f?: string, i?: number) => { if (!DEMO) stats.track(ev, f, i, S.lang); }; // a demo is never counted
 function renderStat() {
-  kStat.hidden = !(stats.available && S.onboarded && !stats.decided());
-  kStatSet.hidden = !stats.available;
+  kStat.hidden = DEMO || !(stats.available && S.onboarded && !stats.decided());
+  kStatSet.hidden = DEMO || !stats.available;
   setT(kStatSet, stats.isOn() ? 'Usage counts: on' : 'Usage counts: off');
 }
 // The card hides itself when answered, so focus moves to the main button instead of falling to the page.
@@ -688,6 +718,7 @@ function flushDraft() {
   const v = kTa.value.trim() ? kTa.value.slice(0, 2000) : '';
   if (v) S.drafts[dKey()] = v; else delete S.drafts[dKey()];
   save(); renderHome();
+  if (v) { setT(kSaved, 'Draft saved on this device'); kSaved.hidden = false; } else kSaved.hidden = true;
 }
 kTa.addEventListener('input', () => { clearTimeout(dT); dT = window.setTimeout(flushDraft, 500); });
 // Signs on the trail: the tip each person leaves after a mission is shown, without a name, to the next
@@ -718,7 +749,7 @@ let signReq = 0;
 const renderTrailSigns = (f: string, i: number) => {
   const req = ++signReq;
   const note = (en: string) => { kShS.innerHTML = ''; const p = document.createElement('p'); p.className = 'k-sign-empty'; setT(p, en); kShS.appendChild(p); };
-  if (!cloud.enabled) return note('When people finish this mission, the signs they leave for you appear here.');
+  if (!CLOUD) return note('When people finish this mission, the signs they leave for you appear here.');
   note('Loading signs…');
   cloud.signs(f, i).then((list) => {
     if (req !== signReq) return;
@@ -734,11 +765,11 @@ const renderTrailSigns = (f: string, i: number) => {
   }).catch(() => { if (req === signReq) note("Couldn't load signs right now."); });
 };
 const setRfNote = () => setT($('kRfN'), user ? 'Shared without your name with the next people on this trail.'
-  : cloud.enabled ? 'Stays on this device. Log in to share it, without your name, with the next people on this trail.'
+  : CLOUD ? 'Stays on this device. Log in to share it, without your name, with the next people on this trail.'
   : 'Stays on this device for now.');
 // Practice brief (missions.ts): scenario, material to work on, tick-off steps with a progress bar
 // (first step pre-ticked), and after submitting a self-check that pays bonus stones.
-const kShX = $('kShX'), kXSteps = $('kXSteps'), kRfBar = $('kRfBar'), kRfBI = $('kRfBI');
+const kShX = $('kShX'), kShH = $('kShH'), kSaved = $('kSaved'), kXSteps = $('kXSteps'), kRfBar = $('kRfBar'), kRfBI = $('kRfBI');
 const setX = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.textContent = tr(en); }; // textContent: briefs contain code like <button>
 const tick = (host: HTMLElement, en: string, on: boolean, cls: string, change?: () => void) => {
   const d = document.createElement('div');
@@ -762,7 +793,7 @@ const variant = (f: string, i: number) => {
 };
 function renderBrief(f: string, i: number) {
   const v = variant(f, i), x = v?.x;
-  kShX.hidden = kRfBar.hidden = !v;
+  kShX.hidden = kShH.hidden = kRfBar.hidden = !v;
   kXSteps.innerHTML = ''; kRfBI.innerHTML = '';
   if (!v || !x) return;
   setX($('kXWho'), x.who); setD($('kXMin'), `~${x.mins} min`);
@@ -985,7 +1016,7 @@ const fillSheet = (f: string, i: number) => {
   setT($('kShL'), m[0]); setT($('kShT'), m[1]);
   setT($('kShQ'), FIELDS[f].qs[i % FIELDS[f].qs.length]);
   renderBrief(f, i);
-  kShA.hidden = false; kShR.hidden = true;
+  kShA.hidden = false; kShR.hidden = true; kSaved.hidden = true;
   renderTrailSigns(f, i);
 };
 // No clock on a mission: "~3 min" is a soft estimate shown by renderBrief, never a countdown or a speed bonus (quality over speed).
@@ -1129,7 +1160,7 @@ const renderMe = () => { $('kAv').textContent = (S.name.trim()[0] || 'K').toUppe
 // Login screen modes: 'up' create account, 'in' log in, 'guest' local-only profile.
 // Without Supabase keys only 'guest' exists and the screen looks like before.
 type Mode = 'guest' | 'up' | 'in';
-let mode: Mode = cloud.enabled ? 'up' : 'guest';
+let mode: Mode = CLOUD ? 'up' : 'guest';
 const kEm = $<HTMLInputElement>('kEm'), kPw = $<HTMLInputElement>('kPw'), kOk = $('kOk');
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) && v.length <= 254;
 const fail = (en: string) => { setT(kErr, en); kErr.hidden = false; kOk.hidden = true; };
@@ -1137,13 +1168,13 @@ const note = (en: string) => { setT(kOk, en); kOk.hidden = false; kErr.hidden = 
 function setMode(m: Mode) {
   mode = m;
   pressed('mode', m);
-  $('kAuthSeg').hidden = !cloud.enabled;
+  $('kAuthSeg').hidden = !CLOUD;
   $('kFName').hidden = m === 'in';
   $('kFEmail').hidden = m === 'guest'; $('kFPw').hidden = m === 'guest';
   $('kFAge').hidden = m === 'in';
   kPw.autocomplete = m === 'in' ? 'current-password' : 'new-password';
   $('kForgot').hidden = m !== 'in';
-  $('kGuest').hidden = !cloud.enabled || m === 'guest';
+  $('kGuest').hidden = !CLOUD || m === 'guest';
   setT($('kGuest'), S.name ? 'Not now' : 'Continue without an account');
   $('kNoteLocal').hidden = m !== 'guest'; $('kNoteCloud').hidden = m === 'guest';
   setT(kLog, m === 'up' ? 'Create account' : m === 'in' ? 'Log in' : 'Start');
@@ -1185,8 +1216,8 @@ $('kForgot').addEventListener('click', async () => {
 
 // Account state from Supabase: first sign-in on a device merges the synced trail with the local one.
 function renderAcct() {
-  $('kAcct').hidden = !cloud.enabled;
-  if (!cloud.enabled) return;
+  $('kAcct').hidden = !CLOUD;
+  if (!CLOUD) return;
   setD($('kAcctE'), user ? `${user.email} · ${tr(syncOk ? 'synced' : 'sync paused')}` : tr('Not signed in · your trail is only on this device'));
   $('kAcctUp').hidden = !!user; $('kLogout').hidden = !user;
   $('kDelAcc').hidden = !user; $('kDel').hidden = !!user;
@@ -1210,14 +1241,14 @@ const onUser = async (u: cloud.User | null, ev: string) => {
   save(); renderMe(); applyField(false); setLang(S.lang); renderAcct(); flushSigns();
   if (kLogin.classList.contains('on')) { kLogin.classList.remove('on'); if (!S.onboarded) openStart(); else arrive(); }
 };
-if (cloud.enabled) void cloud.onAuth(onUser).catch(() => { /* SDK failed to load: stay local-only */ });
+if (CLOUD) void cloud.onAuth(onUser).catch(() => { /* SDK failed to load: stay local-only */ });
 $('kAcctUp').addEventListener('click', () => { closeSheet(kSet); setMode('up'); kNmI.value = S.name; kLogin.classList.add('on'); kEm.focus(); });
 $('kLogout').addEventListener('click', async () => {
   if (!confirm(tr('Log out? Your trail stays in your account and is removed from this device.'))) return;
   clearTimeout(pushT);
   if (user && pulled) { try { await cloud.push(user.id, snapshot()); } catch { /* best effort before leaving */ } }
   try { await cloud.signOut(); } catch { /* still clear the device */ }
-  await stats.erase(); // the next person on this device is asked again
+  await eraseStats(); // the next person on this device is asked again
   try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
   location.replace('/');
 });
@@ -1225,7 +1256,7 @@ $('kDelAcc').addEventListener('click', async () => {
   if (!confirm(tr('Delete your account and your whole trail? This cannot be undone.'))) return;
   clearTimeout(pushT); // a pending sync must not race the deletion
   try { await cloud.deleteAccount(); } catch (err) { say(cloud.why(err)); return; }
-  await stats.erase();
+  await eraseStats();
   try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
   location.replace('/');
 });
@@ -1449,7 +1480,7 @@ $('kRemind').addEventListener('click', () => {
 });
 $('kDel').addEventListener('click', async () => {
   if (!confirm(tr('This deletes your trail on this device. Continue?'))) return;
-  await stats.erase(); // also deletes what was counted for this device
+  await eraseStats(); // also deletes what was counted for this device
   try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
   location.replace('/');
 });
@@ -1487,6 +1518,7 @@ moveInd(onTab(), false);
 setMode(mode);
 renderAcct();
 booted = true;
+if (DEMO) { const kDemo = $('kDemo'); kDemo.hidden = false; kDemo.addEventListener('click', () => { location.href = '/?demo=off'; }); }
 track('visit'); // once a day per device, only for people who said yes
 if (!S.onboarded) openStart(); // the choice comes first, right after the loader
 else if (!S.name) kLogin.classList.add('on');

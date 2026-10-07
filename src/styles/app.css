@@ -635,3 +635,69 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-av { position: relative; }
 .k-av::after { content: ''; position: absolute; inset: -7px; }
 @media (prefers-reduced-motion: reduce) { .k-typing i { animation: none; opacity: .7; } }
+
+/* Demo profile marker: always visible, tap to leave */
+.k-demo { border: 1px solid color-mix(in srgb, var(--gold) 60%, transparent); background: color-mix(in srgb, var(--gold) 14%, transparent); color: var(--gold); border-radius: 999px; padding: 0 12px; min-height: 28px; font: 800 11px/1 'Inter Tight Variable', system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.k-demo[hidden] { display: none; }
+.k-tp .k-demo { margin-right: 4px; }
+
+/* ---- v7: ambient aurora, travelling light edge, button shine, rank halo, readable micro-type ---- */
+@property --ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.k-app { position: relative; z-index: 1; }
+/* Slow aurora behind everything: transform-only, so it costs almost nothing */
+.k-scr::before { content: ''; position: absolute; left: -30%; right: -30%; top: -22%; height: 78%; z-index: 0; pointer-events: none; opacity: .6; filter: blur(30px); will-change: transform;
+  background: radial-gradient(38% 48% at 24% 42%, color-mix(in srgb, var(--acc) 34%, transparent), transparent 72%), radial-gradient(34% 44% at 76% 56%, color-mix(in srgb, var(--ai) 24%, transparent), transparent 72%), radial-gradient(28% 38% at 54% 18%, color-mix(in srgb, var(--gold) 18%, transparent), transparent 72%);
+  animation: kAurora 24s ease-in-out infinite alternate; }
+.k-scr.light::before { opacity: .32; }
+@keyframes kAurora { 0% { transform: translate3d(-4%, -2%, 0) scale(1); } 50% { transform: translate3d(5%, 4%, 0) scale(1.12) rotate(3deg); } 100% { transform: translate3d(-2%, 6%, 0) scale(1.06); } }
+
+/* The hero mission card: a thin light travels around its edge */
+.k-main::before { content: ''; position: absolute; inset: 0; z-index: 2; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: conic-gradient(from var(--ang), transparent 0 52%, rgba(201,242,74,.95) 72%, rgba(245,192,75,.9) 86%, transparent 96%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: kEdge 7s linear infinite; }
+@keyframes kEdge { to { --ang: 360deg; } }
+
+/* Primary buttons catch the light every few seconds */
+.k-main .k-btn, .k-go { position: relative; overflow: hidden; }
+.k-main .k-btn::before, .k-go:not(:disabled)::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(108deg, transparent 32%, rgba(255,255,255,.6) 50%, transparent 68%); transform: translateX(-130%); animation: kBtnShine 5s 1.4s ease-in-out infinite; }
+@keyframes kBtnShine { 0% { transform: translateX(-130%); } 22%, 100% { transform: translateX(130%); } }
+
+/* yourKERN: a pulsing halo and a few twinkles behind the rank object */
+.k-lvl { position: relative; overflow: hidden; }
+.k-lvl > * { position: relative; z-index: 1; }
+.k-lvl::before { content: ''; position: absolute; left: 50%; top: 28px; width: 250px; height: 250px; margin-left: -125px; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, color-mix(in srgb, var(--gold) 40%, transparent), transparent); animation: kHaloPulse 4.6s ease-in-out infinite; }
+.k-lvl::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: radial-gradient(circle at 22% 24%, #fff 0 1.6px, transparent 2.4px), radial-gradient(circle at 78% 18%, #fff 0 1.4px, transparent 2.2px), radial-gradient(circle at 70% 46%, var(--gold) 0 1.6px, transparent 2.4px), radial-gradient(circle at 30% 50%, var(--gold) 0 1.3px, transparent 2.1px), radial-gradient(circle at 86% 36%, #fff 0 1.2px, transparent 2px);
+  animation: kTwinkle 3.4s ease-in-out infinite; }
+@keyframes kHaloPulse { 50% { transform: scale(1.16); opacity: .72; } }
+@keyframes kTwinkle { 0%, 100% { opacity: .15; } 50% { opacity: .95; } }
+
+/* Micro-type: nothing under 11px, so it reads in sunlight at an event */
+.k-l, .k-mrow small, .k-fchip small, .k-nx, .k-done small { font-size: 11.5px; }
+.k-ladder span { font-size: 10.5px; }
+.k-find b { font-size: 10.5px; }
+.k-xm .k-l:last-child, .k-tk.bar::after, .k-tk.tw::after { font-size: 11px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .k-scr::before, .k-main::before, .k-main .k-btn::before, .k-go::before, .k-go:not(:disabled)::before, .k-lvl::before, .k-lvl::after { animation: none; }
+  .k-main::before { background: none; }
+}
+
+/* Kern card: keep the headline clear of the stones */
+.k-kc h5 { padding-right: 104px; }
+
+/* Start screen: say what KERN is in one line, and make the three steps read as a list, not as buttons */
+.k-promise { max-width: 34ch; font: 500 16px/1.42 'Inter Tight Variable', system-ui, sans-serif; color: color-mix(in srgb, var(--fg) 82%, transparent); }
+.k-how { gap: 2px; }
+.k-how li { padding: 6px 0; border: 0; border-radius: 0; background: none; }
+.k-how li + li { border-top: 1px solid var(--edge); }
+
+/* Answer sheet: brief first, then the answer box, then the help (example, hints, steps, signs) */
+.k-compose { display: flex; flex-direction: column; gap: 10px; }
+.k-compose textarea { min-height: 88px; }
+
+/* Loader exit: the mark and the words fade first, then the dark ground dissolves, so the logo never sits on top of the home screen */
+@keyframes kLoadOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: none; } }
+.k-load.off > * { animation: kLoadOut .2s ease forwards !important; }
+.k-load.off { transition: opacity .35s .12s; }

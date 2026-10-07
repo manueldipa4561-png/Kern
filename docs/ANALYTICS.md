@@ -16,7 +16,7 @@ When someone says yes (a card on Home, or Settings), their device makes a random
 | `share` | Share or dare link is tapped |
 | `ask_ai` | KERN.AI is asked for help inside a mission |
 
-Each line also has the field, the mission number, whether it is a brand mission, the language and the time. Never a name, an email, an answer, a draft, a chat message or an account. Nobody can read the table from the app, even signed in. Switching off, Delete my data, Log out and Delete my account all delete that device's lines. The privacy page promises to delete lines after 12 months: see "Keeping the 12-month promise" below.
+The demo profile (`/?demo`) is never counted, and Delete my data inside it does not touch your real opt-in. Each line also has the field, the mission number, whether it is a brand mission, the language and the time. Never a name, an email, an answer, a draft, a chat message or an account. Nobody can read the table from the app, even signed in. Switching off, Delete my data, Log out and Delete my account all delete that device's lines. The privacy page promises to delete lines after 12 months: see "Keeping the 12-month promise" below.
 
 ## Set up (once)
 

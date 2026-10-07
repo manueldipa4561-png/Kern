@@ -54,7 +54,16 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
               <div class="k-boost-chip" id="kXBoost" hidden></div>
               <p class="k-xb" id="kXBrief"></p>
               <div class="k-xa"><div class="k-l" id="kXAT"></div><pre id="kXAB"></pre></div>
-              <p class="k-msg k-ai" id="kXFirst" hidden>First time here? Read the example, tick the steps, then write yours. Too hard? Tap “Make it easier”. Your first finish always pays something.</p>
+            </div>
+            <div class="k-compose" id="kCompose">
+              <p class="k-msg k-ai" id="kShQ">What would make the first step easier for someone brand new?</p>
+              <label class="k-l" for="kTa">Your answer</label>
+              <textarea id="kTa" rows="4" maxlength="2000"></textarea>
+              <p class="k-rf-note" id="kSaved" aria-live="polite" hidden></p>
+              <div class="k-sh-btns"><button type="button" class="k-go" id="kSub">Submit answer</button><button type="button" class="k-sk" id="kCancel">Not now</button></div>
+            </div>
+            <div class="k-x" id="kShH">
+              <p class="k-msg k-ai" id="kXFirst" hidden>First time here? Write yours above, or use the example, the hints and the steps below. Too hard? Tap “Make it easier”. Your first finish always pays something.</p>
               <div class="k-xbtns" id="kXBtns"><button type="button" class="k-chipb" id="kXEx">Show an example</button><button type="button" class="k-chipb" id="kXHint">Need a hint?</button><button type="button" class="k-chipb k-ai-btn" id="kXAsk">Ask KERN.AI</button><button type="button" class="k-chipb" id="kXEasy">Make it easier</button></div>
               <div class="k-xex" id="kXExB" hidden><div class="k-l">A strong answer, for inspiration</div><pre id="kXExT"></pre></div>
               <div id="kXHints" aria-live="polite"></div>
@@ -62,11 +71,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
               <div class="k-xp" aria-hidden="true"><i id="kXPb"></i></div>
               <div id="kXSteps" role="group"></div>
             </div>
-            <p class="k-msg k-ai" id="kShQ">What would make the first step easier for someone brand new?</p>
             <div class="k-trailsigns"><div class="k-l">Signs from people before you</div><div id="kShS" aria-live="polite"></div></div>
-            <label class="k-l" for="kTa">Your answer</label>
-            <textarea id="kTa" rows="5" maxlength="2000"></textarea>
-            <div class="k-sh-btns"><button type="button" class="k-go" id="kSub">Submit answer</button><button type="button" class="k-sk" id="kCancel">Not now</button></div>
           </div>
           <div class="k-step k-drop" id="kShD" hidden>
             <div class="k-dr-stage"><div class="k-dr-bits" id="kDrBits" aria-hidden="true"></div><div class="k-dr-art" id="kDrArt"></div></div>
@@ -175,6 +180,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
           <div class="k-float" aria-hidden="true"><img src="/img/f-design.webp" alt="" width="400" height="400" /><img src="/img/f-music.webp" alt="" width="400" height="400" /><img src="/img/f-code.webp" alt="" width="400" height="400" /></div>
           <div class="k-l">Start here</div>
           <h4>What do you want<br>to <b>do?</b></h4>
+          <p class="k-promise">Try short, real tasks from real jobs. Find out what you enjoy and how you work. Free, no account.</p>
           <ol class="k-how">
             <li><b>01</b><p>Try a real mission</p></li>
             <li><b>02</b><p>Reflect in 20 seconds</p></li>
@@ -197,7 +203,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
       <div class="k-app">
         <header class="k-top">
           <div class="k-logo"><svg viewBox="0 0 100 100" aria-hidden="true"><path d={MARK} fill="currentColor" transform="translate(-5 -5)"/><path d={LINE} fill="none" stroke-width="7" stroke-linejoin="round" stroke="currentColor" transform="translate(5 5)"/><circle cx="66.4" cy="66.4" r="9"/></svg>kern<i>.</i></div>
-          <div class="k-tp"><span class="k-pill"><i class="k-ring" id="kRing" aria-hidden="true"></i><span id="kPill">0 of 3 done</span></span><button type="button" class="k-av" id="kAv" aria-label="Settings" aria-haspopup="dialog">K</button></div>
+          <div class="k-tp"><button type="button" class="k-demo" id="kDemo" aria-label="Demo profile with sample data. Tap to leave the demo." hidden>Demo</button><span class="k-pill"><i class="k-ring" id="kRing" aria-hidden="true"></i><span id="kPill">0 of 3 done</span></span><button type="button" class="k-av" id="kAv" aria-label="Settings" aria-haspopup="dialog">K</button></div>
         </header>
         <div class="k-body">
           <section class="k-pane on" id="k-missions">

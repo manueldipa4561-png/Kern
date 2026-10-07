@@ -12,6 +12,10 @@ npm test         # sync rules, next-mission and rounds rules, every mission comp
 npm run stats    # usage numbers from people who opted in (see docs/ANALYTICS.md)
 ```
 
+## Show it in a minute (demo profile)
+
+Open the app address followed by `/?demo` once on a phone. It opens a labelled sample profile (rank Cairn, six sample answers, a Kern card ready, round 2 waiting) so the app can be shown without playing through the first run. A gold DEMO marker in the header leaves it, or open `/?demo=off`. The demo has its own storage (`kern:demo`), never syncs, never publishes a sign and is never counted, and it does not touch the real trail. The answers and numbers in it are sample data, not users.
+
 ## Deploy on Netlify
 
 Add new site, Import from Git, pick this repository. Settings come from `netlify.toml` (build `npm run build`, publish `dist`, Node 22). Every push to `main` redeploys.
