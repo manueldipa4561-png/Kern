@@ -503,6 +503,7 @@ const openAbout = () => {
   $('kFlI').innerHTML = icon(S.field);
   setD($('kFlT'), tr(S.field)); setD($('kFlD'), tr(info.day));
   listOf('kFlL', info.like); listOf('kFlH', info.hard);
+  setT($('kFlGo'), kAdd.dataset.kAns === 'card' ? 'See your Kern card' : 'Try the next mission'); // a finished round has no next mission: the button leads where kAdd leads
   openSheetEl(kFld, $('kFlGo'));
 };
 $('kAbout').addEventListener('click', openAbout);
@@ -1722,6 +1723,7 @@ document.addEventListener('keydown', (e) => {
   if (!kPwS.hidden) closeSheet(kPwS);
   else if (!kRw.hidden) closeWin();
   else if (!kSet.hidden) closeSheet(kSet);
+  else if (!kFld.hidden) closeSheet(kFld);
   else if (!kSheet.hidden) closeSheet(kSheet);
   else if (kStart.classList.contains('on') && S.onboarded) closePicker();
 });
