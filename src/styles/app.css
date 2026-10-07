@@ -394,7 +394,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 
 /* Trail: the Kern card as a dark collectible, in both themes */
 .k-kc { position: relative; overflow: hidden; min-height: 220px; justify-content: flex-end; border: 1px solid rgba(201,242,74,.35); border-radius: 22px; padding: 18px; color: var(--bone); background: radial-gradient(90% 70% at 100% 0%, rgba(201,242,74,.22), transparent 60%), linear-gradient(165deg, #1D2E21, #0F140E); }
-.k-kc-img { position: absolute; right: -16px; top: -10px; width: 150px; height: 150px; rotate: 8deg; filter: drop-shadow(0 18px 22px rgba(0,0,0,.5)); pointer-events: none; }
+.k-kc-img { position: absolute; right: -6px; top: 8px; width: 142px; height: 142px; rotate: 8deg; filter: drop-shadow(0 18px 22px rgba(0,0,0,.5)); pointer-events: none; }
 .k-kc .k-kt { position: absolute; left: 18px; top: 16px; color: var(--bone); }
 .k-kc .k-kt i { color: #C9F24A; }
 .k-kc h5 { position: relative; font: italic 400 27px/1.04 var(--ks); letter-spacing: -.01em; color: var(--bone); padding-right: 36px; }
@@ -599,7 +599,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 /* Speed and feel: skip rendering off-screen cards, instant taps, GPU-only float */
 .k-scr { -webkit-tap-highlight-color: transparent; }
 .k-scr button, .k-scr [role="button"], .k-scr .k-mrow, .k-scr .k-tk { touch-action: manipulation; }
-.k-pane > .k-card { content-visibility: auto; contain-intrinsic-size: auto 170px; }
+.k-pane > .k-card:not(.k-main) { content-visibility: auto; contain-intrinsic-size: auto 170px; } /* .k-main stays out: its object breaks out of the card and content-visibility would clip it */
 .k-obj, .k-hd-img, .k-rank-img, .k-hero-img, .k-float img { will-change: transform; }
 .k-sh-in { animation-duration: .28s; }
 .k-pane.leaving { animation-duration: .1s; }
