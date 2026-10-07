@@ -8,3 +8,8 @@ dist/
 .DS_Store
 drafts/
 .claude/
+
+# KERN.AI coach eval
+evals/coach/**/traces/
+evals/coach/report.html
+evals/coach/trajectory/

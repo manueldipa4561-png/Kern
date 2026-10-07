@@ -2,11 +2,15 @@
 // Without a key, or on any error, it answers 503 and the app falls back to its scripted coach.
 import type { Config, Context } from '@netlify/functions';
 
-const MODEL = process.env.COACH_MODEL || 'claude-haiku-4-5-20251001';
+const MODEL = process.env.COACH_MODEL || 'claude-haiku-5-5';
+// Claude Haiku 5.5 thinks unless told not to (thinking would eat the reply's token cap) and answers 400 to any temperature but its default.
+// Haiku 4.5 takes a temperature. COACH_MODEL=claude-haiku-4-5-20251001 still works for comparisons (evals/coach).
+const tuning = (model: string) => (/^claude-haiku-5/.test(model) ? { thinking: { type: 'disabled' } } : { temperature: 0.8 });
 const FIELDS = new Set(['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music']);
 const MAX_MSGS = 14, MAX_LEN = 400, MAX_TOTAL = 6500;
 // Keep in sync with HEAVY in src/scripts/app.ts (scripts/check-heavy.mjs fails npm test when they differ). Heavy words are answered here with a pause and never sent to the model.
 const HEAVY = /(kill(ing)? myself|kill me\b|suicid|self.?harm|hurt(ing)? myself|end (my life|it all)|take my (own )?life|hopeless|want(ed)? to die|wish i (was|were) (dead|gone)|better off dead|(no|any) reason to live|don['’]?t want to (live|be here|wake up)|cut(ting)? myself|voglio morire|vorrei morire|farla finita|mi (voglio |vorrei |devo )?(uccid|ammazz|impicc)|uccider(mi|e me)|ammazzar(mi|e me)|impiccar(mi|e me)|tagliarmi le vene|mi taglio le vene|togliermi la vita|togliermi di mezzo|farmi del male|mi faccio del male|autolesion|non (voglio|riesco) pi[uù]['’]? (a )?vivere|non voglio pi[uù]['’]? stare qui|meglio morto|meglio morta|non ce la faccio pi[uù]|senza speranza|non vedo (una )?via d['’]?uscita|vorrei sparire|voglio sparire)/i;
+const PAUSED = /paus\w* (the |la )?mission/i; // "pausing the mission", "metto in pausa la missione"
 const PAUSE = { en: "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.", it: 'Sembra una cosa pesante, quindi metto in pausa la missione. Parlane con una persona di cui ti fidi o con un servizio di ascolto locale. Se sei in pericolo, chiama il numero di emergenza.' };
 
 const SYSTEM = (lang: string, field: string, versions: number, mission: string) => `You are KERN.AI, the co-pilot inside KERN, an app where people test different paths with small missions to find their passion.
@@ -87,14 +91,16 @@ export default async (req: Request, context: Context) => {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 180, temperature: 0.8, system: SYSTEM(lang, field, versions, mission), messages: turns }),
+      body: JSON.stringify({ model: MODEL, max_tokens: 240, ...tuning(MODEL), system: SYSTEM(lang, field, versions, mission), messages: turns }),
       signal: AbortSignal.timeout(8000),
     });
     if (!r.ok) { console.error('coach upstream status', r.status); return json({ error: 'upstream' }, 502); } // status only, never the key or text
     const data: any = await r.json(); // eslint-disable-line @typescript-eslint/no-explicit-any
     const reply = (Array.isArray(data?.content) ? data.content.filter((c: any) => c?.type === 'text').map((c: any) => c.text).join(' ') : '') // eslint-disable-line @typescript-eslint/no-explicit-any
       .replace(/\s+/g, ' ').trim().slice(0, 500);
-    if (!reply || !reply.includes('?')) return json({ error: 'empty' }, 502); // a coach that does not ask a question is off-script: let the app fall back
+    // A coach that does not ask a question is off-script: let the app fall back. The one exception is the model's own pause for a distressed
+    // message the word list missed (the rules say "say nothing else", so it has no question): drop it and the person gets scripted questions.
+    if (!reply || (!reply.includes('?') && !PAUSED.test(reply))) return json({ error: 'empty' }, 502);
     return json({ reply });
   } catch { return json({ error: 'upstream' }, 502); }
 };

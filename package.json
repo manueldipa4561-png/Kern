@@ -11,7 +11,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "stats": "node scripts/stats.mjs",
-    "test": "node --experimental-strip-types scripts/check-sync.ts && node scripts/check-content.mjs && node scripts/check-heavy.mjs && node scripts/check-studio.mjs && node scripts/check-stats.mjs && node scripts/check-design.mjs"
+    "test": "node --experimental-strip-types scripts/check-sync.ts && node scripts/check-content.mjs && node scripts/check-heavy.mjs && node scripts/check-studio.mjs && node scripts/check-stats.mjs && node scripts/check-design.mjs && npm run --silent eval:coach:selftest",
+    "eval:coach:selftest": "node --experimental-strip-types evals/coach/run.mjs --mock",
+    "eval:coach": "node --experimental-strip-types evals/coach/run.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",

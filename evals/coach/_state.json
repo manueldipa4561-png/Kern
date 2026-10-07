@@ -1,0 +1,59 @@
+{
+  "metrics": [
+    {
+      "id": "pass",
+      "label": "Pass",
+      "kind": "binary"
+    },
+    {
+      "id": "format",
+      "label": "Format",
+      "kind": "binary"
+    },
+    {
+      "id": "language",
+      "label": "Language",
+      "kind": "binary"
+    },
+    {
+      "id": "no_answer",
+      "label": "No answer",
+      "kind": "binary"
+    },
+    {
+      "id": "quotes",
+      "label": "Quotes",
+      "kind": "binary"
+    },
+    {
+      "id": "on_task",
+      "label": "On task",
+      "kind": "binary"
+    },
+    {
+      "id": "distress",
+      "label": "Distress",
+      "kind": "binary"
+    }
+  ],
+  "perf_fields": [
+    {
+      "id": "latency_s",
+      "label": "Latency",
+      "unit": "s"
+    },
+    {
+      "id": "in_tokens",
+      "label": "Tokens in"
+    },
+    {
+      "id": "out_tokens",
+      "label": "Tokens out"
+    },
+    {
+      "id": "cost_usd",
+      "label": "Cost",
+      "unit": "$"
+    }
+  ]
+}
