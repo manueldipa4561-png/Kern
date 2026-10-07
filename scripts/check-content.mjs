@@ -5,9 +5,9 @@ import { buildSync } from 'esbuild';
 import { PER_ROUND as STATS_PER_ROUND } from './stats-core.mjs';
 
 // The data files import each other without extensions, so bundle them in memory instead of importing directly.
-const entry = ['fields', 'missions', 'helps', 'easy', 'i18n', 'next', 'sponsors'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
+const entry = ['fields', 'missions', 'helps', 'easy', 'i18n', 'next', 'sponsors', 'loot', 'demo'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
 const { text } = buildSync({ stdin: { contents: entry, resolveDir: process.cwd(), loader: 'ts' }, bundle: true, format: 'esm', platform: 'node', write: false }).outputFiles[0];
-const { FIELDS, MX, HELPS, EASY, IT, CLASHES, PER_ROUND, SPONSORS } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
+const { FIELDS, MX, HELPS, EASY, IT, CLASHES, PER_ROUND, SPONSORS, RELICS, SAMPLE_ANSWERS, SAMPLE_IDEA, sampleChat, swapSample } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
 
 const strings = (v) => (typeof v === 'string' ? [v] : Array.isArray(v) ? v.flatMap(strings) : v && typeof v === 'object' ? Object.values(v).flatMap(strings) : []);
 // supabase/schema.sql limits kern_signs.mission and kern_events.mission to 0..MAX_MISSIONS-1: widen both there before adding a round.
@@ -18,9 +18,30 @@ for (const [key, s] of Object.entries(SPONSORS)) {
   const [f, i] = key.split('.');
   assert.ok(FIELDS[f] && /^\d$/.test(i) && Number(i) < FIELDS[f].m.length, `sponsors.ts: "${key}" is not a mission`);
   assert.ok(s.name?.trim() && /^#[0-9a-f]{6}$/i.test(s.color), `sponsors.ts: "${key}" needs a name and a #rrggbb colour`);
-  const brand = s.name.replace(/\s*\(demo\)$/, '');
+  assert.ok(!/demo/i.test(s.name), `sponsors.ts: "${key}" says demo, which a real user would take for the demo profile: use (sample)`);
+  const brand = s.name.replace(/\s*\(sample\)$/, '');
   assert.ok(MX[f][i].who.includes(brand), `sponsors.ts: "${key}" names ${brand}, but that mission is about "${MX[f][i].who}"`);
 }
+// The demo profile's sample trail (src/scripts/demo.ts): real missions and drops, both languages, inside the field limits, and a language switch swaps it back and forth.
+const DROPS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)], taken = new Set();
+for (const d of SAMPLE_ANSWERS) {
+  const at = `demo.ts: ${d.f}.${d.i}`;
+  assert.ok(FIELDS[d.f]?.m[d.i], `${at} is not a mission`);
+  assert.ok(!taken.has(`${d.f}.${d.i}`), `${at} appears twice`);
+  taken.add(`${d.f}.${d.i}`);
+  assert.ok(!d.d || DROPS.includes(d.d), `${at}: "${d.d}" is not a drop`);
+  for (const [name, pair, max] of [['t', d.t, 2000], ['hard', d.hard, 140], ['tip', d.tip, 140]]) {
+    if (!pair) continue;
+    assert.ok(pair[0].trim() && pair[1].trim() && pair[0] !== pair[1], `${at}.${name}: needs an English and a different Italian text`);
+    assert.ok(pair[0].length <= max && pair[1].length <= max, `${at}.${name}: over ${max} characters`);
+    assert.equal(swapSample(pair[0], pair, true), pair[1]);
+    assert.equal(swapSample(pair[1], pair, false), pair[0]);
+    assert.equal(swapSample('a visitor wrote this', pair, true), 'a visitor wrote this', `${at}.${name}: a text of the visitor's own must stay`);
+  }
+}
+for (const [en, it] of SAMPLE_IDEA) assert.ok(en.trim() && it.trim() && en !== it && en.length <= 140 && it.length <= 140, `demo.ts: an idea version needs two different texts of at most 140 characters ("${en.slice(0, 30)}")`);
+for (const m of sampleChat(true)) if (m.who === 'ai') assert.ok(IT[m.t], `demo.ts: no Italian for the coach line "${m.t.slice(0, 50)}"`);
+assert.equal(sampleChat(false).length, SAMPLE_IDEA.length * 2, 'demo.ts: every idea version is followed by one coach line');
 assert.equal(STATS_PER_ROUND, PER_ROUND, 'scripts/stats-core.mjs counts finished rounds with its own PER_ROUND: update it to match src/scripts/next.ts');
 assert.deepEqual(CLASHES, [],'the same English text has two different Italian versions, one overwrites the other');
 

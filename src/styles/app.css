@@ -215,7 +215,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-check input { width: 20px; height: 20px; margin: 0; accent-color: var(--acc); }
 .k-err { color: #ff9a8a; font-size: 13px; } .k-scr.light .k-err { color: #a3241a; }
 .k-danger { border-color: #ff9a8a !important; color: #ff9a8a !important; } .k-scr.light .k-danger { border-color: #a3241a !important; color: #a3241a !important; }
-.k-err[hidden], .k-dare[hidden], .k-note[hidden], .k-stat[hidden] { display: none; }
+.k-err[hidden], .k-dare[hidden], .k-note[hidden], .k-stat[hidden], .k-pilot[hidden] { display: none; }
 .k-an { display: flex; flex-direction: column; gap: 4px; padding: 10px 0; border-bottom: 1px solid var(--edge); }
 .k-an:last-child { border-bottom: 0; }
 .k-an p { font-size: 13.5px; line-height: 1.4; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -644,10 +644,14 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-av::after { content: ''; position: absolute; inset: -7px; }
 @media (prefers-reduced-motion: reduce) { .k-typing i { animation: none; opacity: .7; } }
 
-/* Demo profile marker: always visible, tap to leave */
+/* Demo profile marker: always visible, two taps to leave */
 .k-demo { border: 1px solid color-mix(in srgb, var(--gold) 60%, transparent); background: color-mix(in srgb, var(--gold) 14%, transparent); color: var(--gold); border-radius: 999px; padding: 0 12px; min-height: 28px; font: 800 11px/1 'Inter Tight Variable', system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
 .k-demo[hidden] { display: none; }
 .k-tp .k-demo { margin-right: 4px; }
+.k-demo { position: relative; }
+.k-demo::after { content: ''; position: absolute; inset: -9px -5px; } /* a 44px target around the 28px marker, like .k-av */
+/* A sheet or the reward screen covers the header marker with its scrim: repeat it above them, top right and below a notch, so a screenshot of any of them says demo. app.ts sets --demo-label (translated). */
+.k-scr.demo .k-sheet::before, .k-scr.demo .k-reward::before { content: var(--demo-label); position: absolute; z-index: 1; top: max(8px, calc(env(safe-area-inset-top) + 4px)); right: max(16px, calc(env(safe-area-inset-right) + 8px)); padding: 4px 10px; border: 1px solid color-mix(in srgb, var(--gold) 60%, transparent); border-radius: 999px; background: var(--bg); color: var(--gold); font: 800 10px/1 'Inter Tight Variable', system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; pointer-events: none; }
 
 /* ---- v7: ambient aurora, travelling light edge, button shine, rank halo, readable micro-type ---- */
 @property --ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }

@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { nextSpot, roundOf } from '../src/scripts/next.ts';
 import { akey, mergeAnswers, stamp, type Tomb } from '../src/scripts/sync.ts';
+import { MAX_COUNT, MAX_TIME, clampCount, inTime } from '../src/scripts/valid.ts';
 
 const x = { f: 'Design', i: 0, at: 1000, t: 'x' };
 const y = { f: 'Design', i: 1, at: 2000, t: 'y' };
@@ -49,5 +50,16 @@ assert.equal(roundOf(some(0, 1, 2, 3), 6), 1);
 assert.equal(roundOf(some(0, 1, 2, 3, 4, 5), 6), 1);
 assert.equal(roundOf(some(1, 2, 3, 4, 5), 6), 0); // a gap in round 1 keeps round 1 in play
 assert.equal(roundOf(some(0, 1, 2), 3), 0); // a field with a single round stays on it
+
+// Stored numbers: a time must be one a Date can hold (else "Invalid Date" and a NaN streak), a count is a whole number up to a ceiling.
+assert.ok(inTime(Date.now()) && inTime(0) && inTime(-1e12) && inTime(MAX_TIME));
+assert.ok(!Number.isNaN(new Date(MAX_TIME).getTime()), 'the limit itself is a real date');
+for (const bad of [1e20, MAX_TIME + 1e4, NaN, Infinity, -Infinity, '1700000000000', null, undefined, {}]) assert.ok(!inTime(bad), `inTime(${String(bad)})`);
+assert.equal(clampCount(335), 335);
+assert.equal(clampCount(12.9), 12);
+assert.equal(clampCount(-5), 0);
+assert.equal(clampCount(1e308), MAX_COUNT);
+assert.equal(clampCount(1e21), MAX_COUNT);
+for (const bad of [NaN, Infinity, '9', null, undefined]) assert.equal(clampCount(bad), 0, `clampCount(${String(bad)})`);
 
 console.log('sync rules: ok');

@@ -14,7 +14,7 @@ npm run stats    # usage numbers from people who opted in (see docs/ANALYTICS.md
 
 ## Show it in a minute (demo profile)
 
-Open the app address followed by `/?demo` once on a phone. It opens a labelled sample profile (rank Cairn, six sample answers, a Kern card ready, round 2 waiting) so the app can be shown without playing through the first run. A gold DEMO marker in the header leaves it, or open `/?demo=off`. The demo has its own storage (`kern:demo`), never syncs, never publishes a sign and is never counted, and it does not touch the real trail. The answers and numbers in it are sample data, not users.
+Open the app address followed by `/?demo` once on a phone. It opens a labelled sample profile (rank Cairn, six sample answers, two finds, three versions of an idea in KERN.AI, a Kern card ready, round 2 waiting) so the app can be shown without playing through the first run. Tap the gold DEMO marker in the header twice to leave it (the first tap only asks), or open `/?demo=off` (`off`, `0`, `false` and `no` leave it; the flag only works on the app page, not on `/privacy/`). A sheet or the reward screen repeats a Demo tag at the top right, and Delete my data inside the demo only resets the sample, and leaving the demo throws it away (what a visitor typed in it too), so the next visitor gets a fresh one. The demo has its own storage (`kern:demo`), never syncs, never publishes a sign and is never counted, and it does not touch the real trail. The answers and numbers in it are sample data, not users.
 
 ## Deploy on Netlify
 
@@ -41,7 +41,7 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - Onboarding: the choice first, then one or more interests (fields); on Missions you switch path in one tap and progress is kept per field, "+ Add" picks more. Missions, yourKERN, Trail, KERN.AI co-pilot (it only asks questions: live through Claude via a Netlify function when online, with a scripted fallback)
 - Home: your next mission first, then your 3 missions with status (done / next / draft)
 - Rounds: every field has 6 missions, shown 3 at a time. Round 1 unlocks your Kern card; finishing it shows a "round complete" moment on Home. Round 2 is never locked: a "Round 2" link under the list shows it from day one. Round 2 repeats the same three kinds (improve what exists, start from zero, work with a partner), so the card gets sharper with every round. After a reward, the button leads straight into the next mission of the round. Missions live in `fields.ts`, `missions.ts`, `helps.ts` and `easy.ts` (same order in all four); `npm test` checks they match
-- Brand missions: a mission can be presented by a brand, shown as "Brand mission · name" in the brand colour. The mission text stays brand-neutral (a made-up subject), so a deal is one line in `src/scripts/sponsors.ts`. The three in the app are demos
+- Brand missions: a mission can be presented by a brand, shown as "Brand mission · name" in the brand colour. The mission text stays brand-neutral (a made-up subject), so a deal is one line in `src/scripts/sponsors.ts`. The three in the app are samples, marked "(sample)", not real partners
 - Mission Studio: `node scripts/mission-studio.mjs` has Claude draft a new English and Italian mission from a field, a kind and a subject, 29 automatic rules check it, and a person approves it. It needs `ANTHROPIC_API_KEY` for a live run and is covered offline by `npm test`. The authoring guide is `docs/MISSIONS.md`
 - Usage counts without names: off until a person says yes (one card on Home, a switch in Settings). A random code plus the kind of event, field, mission, language and time, never a name or anything they wrote; deleted when they switch off, delete their data, or at 12 months. `npm run stats` turns it into pilot numbers, with small samples shown as counts, not percentages. Needs the Supabase variables. Guide: `docs/ANALYTICS.md`
 - Answers with automatic drafts; edit or delete them (with Undo); +50 stones per answer, +20 for a reflection
@@ -68,7 +68,7 @@ Real partner missions (brand missions are demos for now), peer review and rankin
 - `src/pages/index.astro` markup, `src/styles/app.css` styles, `src/scripts/app.ts` logic
 - `src/scripts/cloud.ts` accounts and sync (loaded only when the Supabase variables are set), `supabase/schema.sql` database setup
 - `src/scripts/i18n.ts` Italian strings (English is the source), `src/scripts/fields.ts` missions per field
-- `src/scripts/next.ts` rounds and the next-mission rule, `src/scripts/sponsors.ts` brand missions, `src/scripts/stats.ts` opt-in usage counts
+- `src/scripts/next.ts` rounds and the next-mission rule, `src/scripts/sponsors.ts` brand missions, `src/scripts/stats.ts` opt-in usage counts, `src/scripts/demo.ts` the demo profile's sample trail (texts in both languages)
 - `scripts/` the tests run by `npm test`, and the Mission Studio
 - `public/` manifest, service worker, icons, favicons; `public/img/` 3D objects (fields, ranks, cairn, co-pilot orb)
 

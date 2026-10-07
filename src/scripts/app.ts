@@ -11,9 +11,11 @@ import { nextSpot, roundOf, PER_ROUND } from './next';
 import { SPONSORS } from './sponsors';
 import { HELPS } from './helps';
 import { EASY } from './easy';
+import { SAMPLE_ANSWERS, SAMPLE_IDEA, sampleAnswers, sampleChat, sampleMine, swapSample, type Pair } from './demo';
 import * as cloud from './cloud';
 import * as stats from './stats';
 import { akey, ver, stamp, mergeAnswers, type Tomb } from './sync';
+import { inTime, clampCount } from './valid';
 
 type Feel = 'flow' | 'ok' | 'drag';
 type Again = 'yes' | 'maybe' | 'no';
@@ -37,7 +39,7 @@ try {
   const q = new URLSearchParams(location.search), d = q.get('demo');
   if (d !== null) {
     const v = d.trim().toLowerCase();
-    if (['off', '0', 'false', 'no'].includes(v)) localStorage.removeItem('kern:mode'); // anything else unknown leaves the mode as it is
+    if (['off', '0', 'false', 'no'].includes(v)) { localStorage.removeItem('kern:mode'); localStorage.removeItem('kern:demo'); } // leaving throws the sample away, whatever a visitor typed in it; anything else unknown leaves the mode as it is
     else if (['', '1', 'true', 'on', 'yes', 'demo'].includes(v)) localStorage.setItem('kern:mode', 'demo');
     dropParam(q, 'demo'); // keeps other parameters, such as a dare link
   }
@@ -45,8 +47,12 @@ try {
 const DEMO = (() => { try { return localStorage.getItem('kern:mode') === 'demo'; } catch { return false; } })();
 const CLOUD = cloud.enabled && !DEMO;
 const KEY = DEMO ? 'kern:demo' : 'kern:v1';
-const wipeDemo = () => { if (DEMO) return; try { localStorage.removeItem('kern:demo'); localStorage.removeItem('kern:mode'); } catch { /* nothing stored */ } }; // deleting the real trail removes the demo too
+const PEND = 'kern:rm-signs'; // ids of signs still to be removed from the trail
+// Delete my data, Log out and Delete my account also clear what sits beside the trail: the demo and the copy set aside when a trail could not be read.
+// Once the account is gone so is the list of signs still to be removed (a plain Log out or Delete keeps it: those signs must still go at the next sign-in). The demo never touches any of it.
+const wipeExtras = (accountGone = false) => { if (DEMO) return; try { for (const k of ['kern:demo', 'kern:mode', 'kern:v1:unreadable', ...(accountGone ? [PEND] : [])]) localStorage.removeItem(k); } catch { /* nothing stored */ } };
 const eraseStats = () => (DEMO ? Promise.resolve() : stats.erase()); // the demo must never touch the real usage-count record
+const OPEN = "What is your idea? Write it in your own words first. I won't suggest one."; // the co-pilot's first line (the demo chat starts with it too)
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
 const FEELS: Feel[] = ['flow', 'ok', 'drag'];
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
@@ -76,8 +82,8 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
     if (s.drafts && typeof s.drafts === 'object') for (const [k, v] of Object.entries(s.drafts)) { const [f, i, ...rest] = k.split('.'); if (!rest.length && FIELDS[f] && /^\d$/.test(i ?? '') && Number(i) < FIELDS[f].m.length && typeof v === 'string' && v) drafts[k] = v.slice(0, 2000); }
     const field: string = FIELDS[s.field] ? s.field : 'Design';
     const answers: Answer[] = Array.isArray(s.answers)
-      ? s.answers.filter((a: Answer) => a && FIELDS[a.f] && Number.isInteger(a.i) && a.i >= 0 && a.i < FIELDS[a.f].m.length && typeof a.t === 'string' && Number.isFinite(a.at))
-        .map((a: Answer) => ({ f: a.f, i: a.i, t: a.t.slice(0, 2000), at: a.at, ed: Number.isFinite(a.ed) ? a.ed : undefined, r: cleanR(a.r), x: Number.isInteger(a.x) && a.x! > 0 ? Math.min(a.x!, 600) : undefined, d: typeof a.d === 'string' && DROP_IDS.includes(a.d) ? a.d : undefined }))
+      ? s.answers.filter((a: Answer) => a && FIELDS[a.f] && Number.isInteger(a.i) && a.i >= 0 && a.i < FIELDS[a.f].m.length && typeof a.t === 'string' && inTime(a.at))
+        .map((a: Answer) => ({ f: a.f, i: a.i, t: a.t.slice(0, 2000), at: a.at, ed: inTime(a.ed) ? a.ed : undefined, r: cleanR(a.r), x: Number.isInteger(a.x) && a.x! > 0 ? Math.min(a.x!, 600) : undefined, d: typeof a.d === 'string' && DROP_IDS.includes(a.d) ? a.d : undefined }))
       : [];
     // Interests: the fields someone chose to explore, in their order. Older saves have none: use the answered ones.
     const fields = [...new Set([...(Array.isArray(s.fields) ? s.fields : answers.map((a) => a.f)), ...(s.onboarded ? [field] : [])])]
@@ -88,7 +94,7 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
       field,
       fields,
       onboarded: !!s.onboarded,
-      stones: Number.isFinite(s.stones) ? Math.max(0, s.stones) : 0,
+      stones: clampCount(s.stones),
       answers,
       drafts,
       msgs: Array.isArray(s.msgs) ? s.msgs.filter((m: Msg) => m && (m.who === 'ai' || m.who === 'me') && typeof m.t === 'string').map((m: Msg) => ({ who: m.who, t: m.t.slice(0, 500) })) : [],
@@ -96,48 +102,62 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
       lang: s.lang === 'it' || s.lang === 'en' ? s.lang : d.lang,
       theme: s.theme === 'dark' || s.theme === 'light' ? s.theme : 'system',
       guess: str(s.guess, 200),
-      saves: Number.isFinite(s.saves) ? s.saves : 0,
+      saves: clampCount(s.saves),
       badges: Array.isArray(s.badges) ? s.badges.filter((b: unknown) => typeof b === 'string' && b.length < 20).slice(0, 50) : [],
       dared: !!s.dared,
       habit: cleanHabit(s.habit),
       easy: !!s.easy,
-      gone: Array.isArray(s.gone) ? s.gone.filter((g: unknown) => Array.isArray(g) && typeof g[0] === 'string' && g[0].length < 40 && Number.isFinite(g[1])).map((g: Tomb): Tomb => [g[0], g[1]]).slice(-200) : [],
+      gone: Array.isArray(s.gone) ? s.gone.filter((g: unknown) => Array.isArray(g) && typeof g[0] === 'string' && g[0].length < 40 && inTime(g[1])).map((g: Tomb): Tomb => [g[0], g[1]]).slice(-200) : [],
     };
   } catch { return null; }
 };
-// Sample trail for the demo: 6 answers in 3 fields, all reflected, about 500 stones (rank Cairn), badges earned from the answers themselves.
+// Sample trail for the demo (texts in demo.ts): 6 answers in 3 fields, all reflected, about 530 stones (rank Cairn), a few finds, three versions of an idea in KERN.AI. Badges are earned from the answers themselves.
 const demoState = (): State => {
   let real: { lang?: string; theme?: string } = {};
   try { real = JSON.parse(localStorage.getItem('kern:v1') || '{}') || {}; } catch { /* no real profile to read */ }
   const lang: Lang = real.lang === 'it' || real.lang === 'en' ? real.lang : fresh().lang, theme: Theme = real.theme === 'dark' || real.theme === 'light' ? real.theme : 'system';
-  const it = lang === 'it', L = (en: string, ti: string) => (it ? ti : en), day = 864e5, now = Date.now();
-  const ans = (f: string, i: number, ago: number, t: string, r: Refl, x?: number, d?: string) => ({ f, i, t, at: now - ago * day, r, x, d });
-  const answers = [
-    ans('Design', 0, 16, L('Keep one thing: “Saturday · 2 for 1 pizza till 9”. Cut the DJ, the new menu, the contest and the dog. One colour: red letters on cream. Big words in the middle, a tiny “Pomo Pizza” at the bottom.', 'Ne tengo una sola: “Sabato · 2x1 fino alle 21”. Taglio DJ, menu nuovo, concorso e cane. Un solo colore: lettere rosse su crema. Parole grandi al centro, “Pomo Pizza” piccolo in basso.'), { e: 'flow', again: 'yes', hard: L('Deleting things I liked', 'Togliere cose che mi piacevano'), tip: L('Pick the one word people must remember, then cut the rest.', 'Scegli la parola da ricordare, poi taglia il resto.') }, 25, 'spark'),
-    ans('Design', 1, 15, L('A round sticker with a fig leaf and “Bar Ficus” on one curved line, dark green on white so it reads on the glass door from three metres.', 'Un adesivo tondo con una foglia di fico e “Bar Ficus” su una riga curva, verde scuro su bianco: si legge sul vetro della porta da tre metri.'), { e: 'flow', again: 'yes', hard: L('Keeping it simple', 'Restare semplice') }),
-    ans('Design', 2, 8, L('Feeling: a slow Sunday morning. Six pictures: warm light on a wall, linen, one green plant, a low wooden table, a worn rug, a mug. No people.', 'Sensazione: una domenica mattina lenta. Sei immagini: luce calda su un muro, lino, una pianta verde, un tavolo basso di legno, un tappeto consumato, una tazza. Nessuna persona.'), { e: 'ok', again: 'yes' }, 40, 'gem'),
-    ans('Writing', 0, 6, L('Missed my train for this mirror. Worth it? One word.', 'Ho perso il treno per questo specchio. Ne è valsa la pena? Una parola.'), { e: 'flow', again: 'maybe', hard: L('Sounding natural', 'Suonare naturale') }, 15, 'spark'),
-    ans('Writing', 1, 2, L('Leo, your streak misses you. Two minutes today?', 'Leo, la tua serie ti aspetta. Due minuti oggi?'), { e: 'ok', again: 'yes' }),
-    ans('Video', 0, 1, L('Open on the cheese pull at 0:00, then cut to the van. The walk to the van goes at the end, or it goes.', 'Apro sul filo di formaggio a 0:00, poi stacco sul furgone. La camminata verso il furgone va in fondo, o sparisce.'), { e: 'flow', again: 'yes' }),
-  ];
-  return sanitize({ v: 1, name: 'Giulia', field: 'Design', fields: ['Design', 'Writing', 'Video'], onboarded: true, stones: answers.reduce((s, a) => s + 50 + (a.r ? 20 : 0) + (a.x || 0), 0), answers, dared: true, lang, theme, guess: L('You seemed to light up when you started from a blank page, and to slow down on the polish.', 'Sembravi accenderti quando partivi da zero, e rallentare sulla rifinitura.') }) || fresh();
+  const it = lang === 'it', answers = sampleAnswers(it, Date.now());
+  return sanitize({ v: 1, name: 'Giulia', field: 'Design', fields: ['Design', 'Writing', 'Video'], onboarded: true, stones: answers.reduce((s, a) => s + 50 + (a.r ? 20 : 0) + (a.x || 0), 0), answers, msgs: [{ who: 'ai', t: OPEN }, ...sampleChat(it)], mine: sampleMine(it), dared: true, lang, theme, guess: 'Saved. This sharpens your KERN.' }) || fresh(); // guess: the reply to "A first guess" (That feels right), not a sentence of its own
 };
-let recovered = false; // an unreadable saved trail was set aside at start-up (a notice is shown once the app is up)
+let recovered = ''; // set when a saved trail could not be read in full at start-up: the notice to show once the app is up
+let seen: string | null = null; // the trail as storage held it when this page last read or wrote it (absorb)
 const load = (): State => {
-  let raw: string | null = null;
+  let raw: string | null = null, saved: any = null, ok: State | null = null; // eslint-disable-line @typescript-eslint/no-explicit-any
   try { raw = localStorage.getItem(KEY); } catch { /* storage blocked */ }
-  try { const ok = sanitize(JSON.parse(raw || 'null')); if (ok) return ok; } catch { /* unreadable: kept below */ }
-  if (raw) { recovered = true; try { localStorage.setItem(KEY + ':unreadable', raw.slice(0, 400000)); } catch { /* no room for the copy */ } }
-  return DEMO ? demoState() : fresh();
+  seen = raw;
+  try { saved = JSON.parse(raw || 'null'); ok = sanitize(saved); } catch { /* unreadable: kept below */ }
+  const lost = ok && Array.isArray(saved?.answers) ? saved.answers.length - ok.answers.length : 0; // answers of a mission this build does not know, or damaged ones
+  if (ok && !lost) return ok;
+  if (raw && !DEMO) { // the next save would replace it: keep what was there (the demo is only a sample, nothing to keep)
+    recovered = ok ? "Some of your saved answers couldn't be read. A copy was kept on this device." : "We couldn't read your saved trail, so you are starting fresh. A copy was kept on this device.";
+    try { localStorage.setItem(KEY + ':unreadable', raw.slice(0, 400000)); } catch { /* no room for the copy */ }
+  }
+  return ok ?? (DEMO ? demoState() : fresh());
 };
 const S = load();
 const snapshot = () => ({ ...S, msgs: S.msgs.filter((m) => !m.typing).slice(-60) });
 let saveFailed = false;
-function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(snapshot())); saveFailed = false; }
-  catch { if (!saveFailed) { saveFailed = true; say("Couldn't save on this device. Check your browser storage settings."); } }
+const UNSAVED = "Couldn't save on this device. Copy your answer somewhere safe.";
+// Returns whether the browser kept the write. A failure is said once from here (drafts save while typing and must not nag);
+// every moment that would claim "saved" checks the result and says it again.
+function save(): boolean {
+  if (absorb()) queueMicrotask(refresh);
+  let kept = true;
+  try { const json = JSON.stringify(snapshot()); localStorage.setItem(KEY, json); seen = json; saveFailed = false; }
+  catch { kept = false; if (!saveFailed) { saveFailed = true; say("Couldn't save on this device. Check your browser storage settings."); } }
   schedulePush();
+  return kept;
 }
+// Another tab may have saved since this page last looked (it was busy with a sheet open, or frozen, or restored from the back/forward cache and
+// missed the event): take that copy in before this page writes, so the write cannot replace it. Same merge as a synced copy (newest answer wins, deletes stick).
+function absorb(): boolean {
+  let now: string | null = null;
+  try { now = localStorage.getItem(KEY); } catch { return false; }
+  if (!now || now === seen) return false;
+  seen = now;
+  try { mergeIn(JSON.parse(now)); return true; } catch { return false; }
+}
+const refresh = () => { setLvl(); renderProgress(); renderChat(); };
 
 // Cloud sync (only when signed in): debounced upload of the whole state; retried on the next save or when back online.
 let user: cloud.User | null = null, pushT = 0, syncOk = true, pulled = false; // pulled: this device has seen the cloud copy; never push before that, or an empty device would overwrite the trail
@@ -298,8 +318,9 @@ const kSheet = $('kSheet'), kSet = $('kSet');
 // Whatever layer is on top (sheet, reward, login, onboarding) makes everything behind it inert:
 // no Tab, clicks or screen reader reaching the page under a dialog.
 const LAYERS = ['kReward', 'kPwS', 'kSet', 'kSheet', 'kStart', 'kLogin'].map((id) => $(id)); // top first
+const topLayer = () => LAYERS.find((l) => !l.hidden && (!l.classList.contains('k-start') || l.classList.contains('on')));
 const syncInert = () => {
-  const top = LAYERS.find((l) => !l.hidden && (!l.classList.contains('k-start') || l.classList.contains('on')));
+  const top = topLayer();
   for (const c of kScr.children) (c as HTMLElement).inert = !!top && c !== top && c.id !== 'kToast' && c.id !== 'kLoad';
 };
 const layerWatch = new MutationObserver(syncInert);
@@ -366,14 +387,16 @@ const KSHORT = ['Improving things', 'Starting from zero', 'Working with others']
 const FEEL_EN: Record<Feel, string> = { flow: 'Time flew', ok: 'It was fine', drag: 'It dragged' };
 const AGAIN_EN: Record<Again, string> = { yes: 'Yes', maybe: 'Maybe', no: 'No' };
 const SCORE: Record<Feel, number> = { flow: 2, ok: 1, drag: 0 };
+const DRAGGED = 0.5; // a kind is only called a drag when its average is this low: a lone "It was fine" scores 1 and is not one
 const readSignals = () => {
   const by = [0, 1, 2].map((i) => S.answers.filter((a) => a.f === S.field && a.i % PER_ROUND === i && a.r?.e)); // by kind: every round has one of each
   const rated = by.map((l, i) => ({ i, v: l.length ? l.reduce((s, a) => s + SCORE[a.r!.e!], 0) / l.length : -1 })).filter((x) => x.v >= 0).sort((a, b) => b.v - a.v);
   if (!rated.length) return null;
   const best = rated[0].i, low = rated[rated.length - 1];
-  const worst = rated.length > 1 && low.v < rated[0].v ? low.i : -1;
+  const worst = rated.length > 1 && low.v < rated[0].v && low.v <= DRAGGED ? low.i : -1;
   const last = (i: number) => by[i][by[i].length - 1];
-  return { best, worst, n: rated.length, bestA: last(best), worstA: worst >= 0 ? last(worst) : null };
+  const lowest = (i: number) => by[i].reduce((m, a) => (SCORE[a.r!.e!] <= SCORE[m.r!.e!] ? a : m)); // the answer behind a drag: the latest one with the lowest mark
+  return { best, worst, n: rated.length, bestA: last(best), worstA: worst >= 0 ? lowest(worst) : null };
 };
 const chips = (box: HTMLElement, list: string[]) => { box.innerHTML = ''; list.forEach((t) => { const s = document.createElement('span'); s.textContent = t; box.appendChild(s); }); };
 const renderSignals = () => {
@@ -438,7 +461,7 @@ const renderFields = () => {
   add.type = 'button'; add.className = 'k-fchip k-fadd'; add.textContent = `+ ${tr('Add')}`; add.setAttribute('aria-label', tr('Add interests'));
   add.addEventListener('click', () => openStart(true)); box.appendChild(add);
 };
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { renderProgress(); track('visit'); } }); // habit button, boost, streak and dots go stale overnight otherwise
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (absorb()) setLvl(); renderProgress(); track('visit'); } }); // habit button, boost, streak and dots go stale overnight otherwise
 const kAdd = $('kAdd'), kAdd2 = $('kAdd2');
 // Usage counts without names (stats.ts): asked once on Home, switchable in Settings. Off until yes. Without Supabase there is nowhere to send them, so neither control shows.
 const kStat = $('kStat'), kStatSet = $('kStatSet');
@@ -636,7 +659,6 @@ function deleteAnswer(idx: number) {
 // Co-pilot chat (scripted: it only asks, never proposes the idea)
 const chatEl = $('kChat'), inEl = $<HTMLInputElement>('kIn'), cmp = $('kCmp');
 let busy = false, gen = 0; // gen: bumped by startChat, so a reply that was in flight when the chat restarted is dropped
-const OPEN = "What is your idea? Write it in your own words first. I won't suggest one.";
 const HEAVY = /(kill(ing)? myself|kill me\b|suicid|self.?harm|hurt(ing)? myself|end (my life|it all)|take my (own )?life|hopeless|want(ed)? to die|wish i (was|were) (dead|gone)|better off dead|(no|any) reason to live|don'?t want to (live|be here|wake up)|cut(ting)? myself|voglio morire|vorrei morire|farla finita|mi (voglio |vorrei |devo )?(uccid|ammazz|impicc)|uccider(mi|e me)|ammazzar(mi|e me)|impiccar(mi|e me)|tagliarmi le vene|mi taglio le vene|togliermi la vita|togliermi di mezzo|farmi del male|mi faccio del male|autolesion|non (voglio|riesco) più (a )?vivere|non voglio più stare qui|meglio morto|meglio morta|non ce la faccio più|vorrei sparire|voglio sparire)/i;
 const HEAVY_REPLY = "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.";
 const ASKED = /(give me|tell me|what should|write it for me|any ideas|dammi|dimmi|che idea|scrivilo tu|cosa dovrei)/i;
@@ -728,7 +750,7 @@ document.querySelectorAll<HTMLElement>('#kEx span').forEach((c, i) => {
   c.addEventListener('click', go);
   c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
 });
-$('kSaveV').addEventListener('click', () => { S.saves++; save(); say('Saved to yourKERN. Every version counts as evidence.'); });
+$('kSaveV').addEventListener('click', () => { S.saves++; say(save() ? 'Saved to yourKERN. Every version counts as evidence.' : UNSAVED); });
 $('kToAi').addEventListener('click', () => goTab('copilot'));
 
 // Field: trail titles, progress, chat.
@@ -749,7 +771,10 @@ function flushDraft() {
   const v = kTa.value.trim() ? kTa.value.slice(0, 2000) : '';
   if (v) S.drafts[dKey()] = v; else delete S.drafts[dKey()];
   save(); renderHome();
-  setT(kSaved, !v ? NOTE_DEFAULT : saveFailed ? "Couldn't save on this device" : 'Draft saved on this device'); kSaved.hidden = false;
+  const note = !v ? NOTE_DEFAULT : saveFailed ? "Couldn't save on this device" : 'Draft saved on this device';
+  // The browser cuts a longer paste or stops the typing at the limit without a word: say so, so the end of the text is not lost unseen.
+  if (kTa.value.length >= kTa.maxLength) setD(kSaved, `${tr(note)} · ${tr('Limit reached: {n} characters.').replace('{n}', String(kTa.maxLength))}`); else setT(kSaved, note);
+  kSaved.hidden = false;
 }
 kTa.addEventListener('input', () => { clearTimeout(dT); dT = window.setTimeout(flushDraft, 500); });
 // Signs on the trail: the tip each person leaves after a mission is shown, without a name, to the next
@@ -766,7 +791,6 @@ function shareSign(a: Answer) {
     if (a.r && id > 0) { a.r.sid = id; save(); }
   }).catch(() => { sharing.delete(a); /* stays on this device */ });
 }
-const PEND = 'kern:rm-signs'; // ids of signs still to be removed from the trail
 const pend = (): number[] => { try { const v = JSON.parse(localStorage.getItem(PEND) || '[]'); return Array.isArray(v) ? v.filter((n) => Number.isSafeInteger(n) && n > 0).slice(0, 50) : []; } catch { return []; } };
 const setPend = (l: number[]) => { try { localStorage.setItem(PEND, JSON.stringify(l.slice(0, 50))); } catch { /* storage blocked */ } };
 const flushSigns = () => { if (!user) return; for (const id of pend()) cloud.removeSign(id).then(() => setPend(pend().filter((x) => x !== id))).catch(() => { /* retried on the next sign-in or when back online */ }); };
@@ -831,14 +855,14 @@ function renderBrief(f: string, i: number) {
   setX($('kXWho'), x.who); setD($('kXMin'), `~${x.mins} min`);
   const who = $('kXWho'), sp = SPONSORS[`${f}.${i}`]; // a brand mission shows who presents it, in their colour (sponsors.ts)
   who.classList.toggle('brand', !!sp);
-  if (sp) { setD(who, `${tr('Brand mission')} · ${sp.name}`); who.style.setProperty('--brand', sp.color); } else who.style.removeProperty('--brand');
+  if (sp) { setD(who, `${tr('Brand mission')} · ${tr(sp.name)}`); who.style.setProperty('--brand', sp.color); } else who.style.removeProperty('--brand');
   const bo = boostOf(f), bEl = $('kXBoost');
   bEl.hidden = !(bo && bo.i === i && cur.edit < 0);
   if (!bEl.hidden) setD(bEl, `${boostTxt(bo!.m)} · ${tr('stones multiplied')}`);
   setX($('kXBrief'), v.brief);
   setX($('kXAT'), v.asset.title); setX($('kXAB'), v.asset.body); $('kXAB').classList.toggle('mono', v.asset.mono);
   tick(kXSteps, t2('Read the brief', 'Leggi il brief'), true, 'st', stepProg);
-  v.steps.forEach((s) => tick(kXSteps, s, false, 'st', stepProg));
+  v.steps.forEach((s) => tick(kXSteps, s, cur.edit >= 0, 'st', stepProg)); // an answer being edited is a finished one: its steps show as done
   stepProg();
   x.bar.forEach((b) => tick(kRfBI, b, false, 'bar'));
   tick(kRfBI, x.twist, false, 'tw');
@@ -1090,7 +1114,7 @@ $('kSub').addEventListener('click', once(() => {
   if (cur.edit >= 0) {
     const a = S.answers[cur.edit];
     if (a && a.f === cur.f && a.i === cur.i) { a.t = t.slice(0, 2000); a.ed = stamp(ver(a)); }
-    save(); closeSheet(kSheet); renderProgress(); say('Answer updated.');
+    const kept = save(); closeSheet(kSheet); renderProgress(); say(kept ? 'Answer updated.' : UNSAVED);
     return;
   }
   const na: Answer = { f: cur.f, i: cur.i, t: t.slice(0, 2000), at: Date.now() };
@@ -1098,7 +1122,8 @@ $('kSub').addEventListener('click', once(() => {
   S.answers.push(na); lastAns = na;
   track('answer', cur.f, cur.i);
   delete S.drafts[dKey()];
-  S.stones += 50; save();
+  S.stones += 50;
+  if (!save()) say(UNSAVED); // the reflection step comes next: do not let it look like the answer is safe
   if (cur.dare) { dare = null; renderDare(); }
   setLvl(); renderProgress();
   groups.forEach((g) => { g.dataset.val = ''; g.querySelectorAll('[data-v]').forEach((o) => { o.classList.remove('sel'); o.setAttribute('aria-pressed', 'false'); }); });
@@ -1136,10 +1161,10 @@ function finish(r: Refl | undefined) {
     if (drop.id) a.d = drop.id;
     a.ed = stamp(ver(a));
   }
-  save(); if (a && r) shareSign(a);
-  if (drop.tier !== 'none') { showDrop(drop, side, true); return; }
+  const kept = save(); if (a && r) shareSign(a);
+  if (drop.tier !== 'none') { showDrop(drop, side, true); if (!kept) say(UNSAVED); return; }
   closeSheet(kSheet); setLvl(); renderProgress();
-  say((saveFailed ? tr("Couldn't save on this device. Copy your answer somewhere safe.") : r ? tr('Reflection saved. +20 stones.') : tr('+50 stones. Your answer is saved on this device.')) + (side ? ` +${side} bonus` : ''));
+  say((!kept ? tr(UNSAVED) : r ? tr('Reflection saved. +20 stones.') : tr('+50 stones. Your answer is saved on this device.')) + (side ? ` +${side} bonus` : ''));
 }
 
 // Reward preview: shows what winning feels like without changing your stones.
@@ -1297,7 +1322,7 @@ $('kLogout').addEventListener('click', async () => {
   if (user && pulled) { try { await cloud.push(user.id, snapshot()); } catch { /* best effort before leaving */ } }
   try { await cloud.signOut(); } catch { /* still clear the device */ }
   await eraseStats(); // the next person on this device is asked again
-  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ } wipeDemo();
+  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ } wipeExtras();
   location.replace('/');
 });
 $('kDelAcc').addEventListener('click', async () => {
@@ -1305,7 +1330,7 @@ $('kDelAcc').addEventListener('click', async () => {
   clearTimeout(pushT); // a pending sync must not race the deletion
   try { await cloud.deleteAccount(); } catch (err) { say(cloud.why(err)); return; }
   await eraseStats();
-  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ } wipeDemo();
+  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ } wipeExtras(true);
   location.replace('/');
 });
 const kPwS = $('kPwS');
@@ -1495,15 +1520,29 @@ let dare: { f: string; i: number } | null = null;
 const dp = new URLSearchParams(location.search).get('dare');
 if (dp) {
   const [f, i] = dp.split('.'); const n = Number(i);
-  if (FIELDS[f] && Number.isInteger(n) && n >= 0 && n < total(f)) dare = { f, i: n };
+  if (!DEMO && FIELDS[f] && Number.isInteger(n) && n >= 0 && n < total(f)) dare = { f, i: n }; // a dare is for the real trail: the sample profile never shows one
   dropParam(new URLSearchParams(location.search), 'dare');
 }
 function renderDare() { $('kDare').hidden = !dare; if (dare) setT($('kDareT'), FIELDS[dare.f].m[dare.i][1]); }
 $('kDareGo').addEventListener('click', () => { if (dare) openAnswer(dare.f, dare.i, true); });
 
 // Settings
+// A language switch inside the demo: the sample texts nobody edited follow it (demo.ts), so the trail never reads half in each language.
+const rewriteSample = (toIt: boolean) => {
+  const sw = (cur: string, pair?: Pair) => swapSample(cur, pair, toIt);
+  const idea = (cur: string) => sw(cur, SAMPLE_IDEA.find((p) => p[toIt ? 0 : 1] === cur));
+  S.answers = S.answers.map((a) => {
+    const s = SAMPLE_ANSWERS.find((x) => x.f === a.f && x.i === a.i);
+    if (!s) return a;
+    return { ...a, t: sw(a.t, s.t), r: a.r && { ...a.r, ...(a.r.hard !== undefined ? { hard: sw(a.r.hard, s.hard) } : {}), ...(a.r.tip !== undefined ? { tip: sw(a.r.tip, s.tip) } : {}) } };
+  });
+  S.mine = S.mine.map(idea);
+  S.msgs = S.msgs.map((m) => (m.who === 'me' ? { ...m, t: idea(m.t) } : m));
+};
 const setLang = (l: Lang) => {
+  if (DEMO) rewriteSample(l === 'it'); // before the save: the stored demo follows the language too
   S.lang = l; save(); document.documentElement.lang = l;
+  if (DEMO) kScr.style.setProperty('--demo-label', JSON.stringify(tr('Demo profile'))); // the tag over every sheet (app.css)
   document.title = tr('KERN · Find your direction by doing real work');
   document.querySelectorAll<HTMLAnchorElement>('a[href^="/privacy/"]').forEach((a) => a.setAttribute('href', l === 'it' ? '/privacy/#it' : '/privacy/'));
   kTxt.forEach((e) => { const en = e.dataset.en; if (!en) return; if (e.classList.contains('k-xb')) e.textContent = tr(en); else e.innerHTML = tr(en); });
@@ -1533,9 +1572,9 @@ $('kRemind').addEventListener('click', () => {
   say('Open the file to add the reminder to your calendar.');
 });
 $('kDel').addEventListener('click', async () => {
-  if (!confirm(tr('This deletes your trail on this device. Continue?'))) return;
-  await eraseStats(); // also deletes what was counted for this device
-  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ } wipeDemo();
+  if (!confirm(tr(DEMO ? 'This resets the demo to its sample trail. Continue?' : 'This deletes your trail on this device. Continue?'))) return;
+  await eraseStats(); // also deletes what was counted for this device (never from the demo)
+  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ } wipeExtras();
   location.replace('/');
 });
 
@@ -1550,7 +1589,11 @@ addEventListener('appinstalled', () => say('KERN is installed.'));
 $('kIos').hidden = !(/iphone|ipad|ipod/i.test(navigator.userAgent) && !standalone);
 addEventListener('offline', () => say('You are offline. Your trail is saved on this device.'));
 // Other tab changed the data: pick it up instead of overwriting it later.
-addEventListener('storage', (e) => { if (e.key === KEY) location.reload(); });
+// Idle: start over from its copy (a reload). Something open (a sheet, a text box): leave the screen and the typed text alone; the next save merges the other copy first (absorb).
+// A copy that was removed (Delete my data in the other tab) always reloads: this page must not write the trail back.
+const typing = () => document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement;
+addEventListener('storage', (e) => { if (e.key === KEY && (e.newValue === null || !(topLayer() || typing()))) location.reload(); });
+addEventListener('pageshow', (e) => { if (e.persisted && absorb()) refresh(); }); // back from another page: the cached screen may be older than storage
 
 // Offline support (production only, so dev reloads never serve stale files)
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
@@ -1583,10 +1626,16 @@ setMode(mode);
 renderAcct();
 booted = true;
 if (DEMO) {
-  const kDemo = $('kDemo'); kDemo.hidden = false; kDemo.addEventListener('click', () => { location.href = '/?demo=off'; });
-  document.querySelectorAll<HTMLElement>('[data-k-send], #kExp').forEach((e) => { e.hidden = true; }); // sample data is not sent or exported as if it were a real trail
+  const LEAVE_ARM_MS = 4000, kDemo = $('kDemo'); let armed = 0;
+  kDemo.hidden = false; kScr.classList.add('demo'); // app.css repeats a Demo tag over every sheet, where the scrim covers this marker
+  // The first tap says what the marker does, a second one within a few seconds leaves: a stray tap mid-pitch must not drop the sample trail.
+  kDemo.addEventListener('click', () => {
+    if (Date.now() - armed > LEAVE_ARM_MS) { armed = Date.now(); say('Tap again to leave the demo.'); return; }
+    location.href = '/?demo=off';
+  });
+  document.querySelectorAll<HTMLElement>('[data-k-send], #kExp, .k-pilot').forEach((e) => { e.hidden = true; }); // sample data is not sent or exported as if it were a real trail (.k-pilot: the card that asks for it)
 }
-if (recovered) say("We couldn't read your saved trail, so you are starting fresh. A copy was kept on this device.");
+if (recovered) say(recovered);
 track('visit'); // once a day per device, only for people who said yes
 if (!S.onboarded) openStart(); // the choice comes first, right after the loader
 else if (!S.name) kLogin.classList.add('on');

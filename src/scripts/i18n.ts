@@ -278,6 +278,10 @@ export const IT: Record<string, string> = {
         'Usage counts are off. What was counted is deleted.': 'Conteggi di utilizzo disattivati. Quello che era stato contato è stato cancellato.',
         "Counts are off. We couldn't reach the server to delete the earlier ones: they expire after 12 months.": 'Conteggi disattivati. Non siamo riusciti a raggiungere il server per cancellare i precedenti: scadono dopo 12 mesi.',
         'Write it your way. It stays on this device unless you ask KERN.AI.': 'Scrivila a modo tuo. Resta su questo dispositivo, a meno che tu non chieda a KERN.AI.', 'Send': 'Invia', 'Your idea': 'La tua idea',
+        "Some of your saved answers couldn't be read. A copy was kept on this device.": 'Alcune risposte salvate non si sono potute leggere. Una copia è rimasta su questo dispositivo.',
+        'Tap again to leave the demo.': 'Tocca di nuovo per uscire dalla demo.', 'Demo profile': 'Profilo demo',
+        'This resets the demo to its sample trail. Continue?': 'Questo riporta la demo alla sua traccia di esempio. Vuoi continuare?',
+        'Limit reached: {n} characters.': 'Limite raggiunto: {n} caratteri.',
 };
 // English texts registered twice with different Italian: the last one silently wins. npm test fails if this list is not empty.
 export const CLASHES: string[] = [];
