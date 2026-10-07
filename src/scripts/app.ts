@@ -1610,7 +1610,7 @@ const setLang = (l: Lang) => {
   if (DEMO) rewriteSample(l === 'it'); // before the save: the stored demo follows the language too
   S.lang = l; save(); document.documentElement.lang = l;
   if (DEMO) kScr.style.setProperty('--demo-label', JSON.stringify(tr('Demo profile'))); // the tag over every sheet (app.css)
-  document.title = tr('KERN · Train with real work');
+  document.title = tr("KERN · Don't guess your passion. Test it.");
   kDesc?.setAttribute('content', tr(descEn));
   kTxt.forEach((e) => { const en = e.dataset.en; if (!en) return; if (e.classList.contains('k-xb')) e.textContent = tr(en); else e.innerHTML = tr(en); });
   document.querySelectorAll<HTMLAnchorElement>('a[href^="/privacy/"]').forEach((a) => a.setAttribute('href', l === 'it' ? '/privacy/#it' : '/privacy/')); // after the texts above: they bring their own links back

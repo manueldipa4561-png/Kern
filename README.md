@@ -1,6 +1,6 @@
 # KERN
 
-Missions of real work in design, writing, code, video, selling and music, for people who want to practise and start freelancing. Installable web app (PWA) by Manuel Di Paolo.
+Don't guess your passion, test it. Try short missions in design, writing, code, video, selling and music, free. Installable web app (PWA) by Manuel Di Paolo.
 
 ## Run it
 

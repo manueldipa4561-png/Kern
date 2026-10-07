@@ -4,7 +4,7 @@ For people and for the Mission Studio AI. A mission is one tiny, real task, done
 
 <!-- studio:rules -->
 ## Audience and tone
-People aged 18-35, on their phone, mostly with no training, practising real work to build skills and proof, for example to start freelancing.
+People aged 18-35, on their phone, mostly with no training, trying different paths to find what they love.
 
 - Start from a real situation they know (a flat caption, a rude comment, a weak listing). Plain, warm, second person. Verb first, one action per step. Light self-deprecating humour is welcome.
 - Limits: brief about 30 words, step about 12, quality bar about 8, asset up to 6 short lines, 2-5 minutes.
