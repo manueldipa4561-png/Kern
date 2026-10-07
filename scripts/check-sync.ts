@@ -63,3 +63,14 @@ assert.equal(clampCount(1e21), MAX_COUNT);
 for (const bad of [NaN, Infinity, '9', null, undefined]) assert.equal(clampCount(bad), 0, `clampCount(${String(bad)})`);
 
 console.log('sync rules: ok');
+
+// Fields side by side: average energy per field, fields with enough reflections first, and a leader only on a clear gap when both sides have at least two.
+import { rowsOf, verdict } from '../src/scripts/compare.ts';
+const ans = (f: string, ...e: ('flow' | 'ok' | 'drag' | undefined)[]) => e.map((x) => ({ f, r: x ? { e: x } : undefined }));
+const rows = rowsOf([...ans('Design', 'flow', 'flow'), ...ans('Writing', 'drag', undefined), ...ans('Code', undefined)], ['Design', 'Writing', 'Code']);
+assert.deepEqual(rows, [{ f: 'Design', n: 2, v: 1 }, { f: 'Writing', n: 1, v: 0 }]); // a field with no reflection is left out
+assert.equal(verdict(rows), 'early'); // one reflection on Writing is not enough to compare it
+assert.equal(verdict(rows.slice(0, 1)), 'none'); // nothing to compare yet
+assert.equal(verdict(rowsOf([...ans('Design', 'flow', 'flow'), ...ans('Code', 'drag', 'drag')], ['Design', 'Code'])), 'lead');
+assert.equal(verdict(rowsOf([...ans('Design', 'flow', 'ok'), ...ans('Code', 'flow', 'ok')], ['Design', 'Code'])), 'close'); // no gap, no leader
+assert.deepEqual(rowsOf([...ans('Video', 'flow'), ...ans('Design', 'flow', 'flow', 'ok')], ['Video', 'Design']).map((r) => r.f), ['Design', 'Video']); // 100% on one beats nothing, but does not top 83% on three

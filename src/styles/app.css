@@ -160,17 +160,14 @@
       .k-load { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; background: var(--bg); transition: opacity .5s; }
       .k-load.off { opacity: 0; pointer-events: none; }
       .k-ic { position: relative; width: 108px; height: 108px; opacity: 0; transform: scale(.8); }
-      .k-ic::before { content: ''; position: absolute; inset: -54px; border-radius: 50%; background: radial-gradient(closest-side, rgba(201,242,74,.36), rgba(201,242,74,0)); opacity: 0; }
       .k-ic img { position: relative; display: block; width: 100%; height: 100%; }
       .k-tag { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; }
       .k-tag span { font-weight: 800; font-size: 1.6562rem; letter-spacing: -.05em; line-height: 1.1; opacity: 0; transform: translateY(8px); }
       .k-tag strong { font: italic 400 3.0625rem/1 var(--ks); letter-spacing: -.01em; color: var(--acc); opacity: 0; transform: translateY(8px); }
       .k-load.go .k-ic { animation: kIc .7s .1s cubic-bezier(.22,1,.36,1) forwards; }
-      .k-load.go .k-ic::before { animation: kGlow 1.5s .3s ease-out forwards; }
       .k-load.go .k-tag span { animation: kR .6s .6s cubic-bezier(.2,.8,.2,1) forwards; }
       .k-load.go .k-tag strong { animation: kR .6s .9s cubic-bezier(.2,.8,.2,1) forwards; }
       @keyframes kIc { to { opacity: 1; transform: none; } } @keyframes kR { to { opacity: 1; transform: none; } }
-      @keyframes kGlow { 0% { opacity: 0; transform: scale(.7); } 50% { opacity: 1; } 100% { opacity: .8; transform: none; } }
       @media (prefers-reduced-motion: reduce) { .k-load { display: none; } .k-toast { transition: none; } }
 
 /* ---- standalone app shell ---- */
@@ -851,3 +848,17 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 /* Mission pictures: the asset as a real image, with the same rounded frame as the cards */
 .k-xi { display: block; width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; background: color-mix(in srgb, var(--fg) 6%, transparent); }
 .k-xi[hidden] { display: none; }
+
+/* What to expect (field sheet) and Take it further (yourKERN) */
+.k-about { align-self: flex-start; min-height: 44px; padding: 0 2px; margin-top: -6px; font: 600 0.875rem 'Inter Tight Variable', system-ui, sans-serif; color: var(--acc); text-decoration: underline; text-underline-offset: 3px; }
+.k-fl-h { display: flex; align-items: center; gap: 12px; }
+.k-fl-i { flex: none; width: 52px; height: 52px; }
+.k-fl-i .k-i { display: block; width: 100%; height: 100%; }
+.k-fl-day { margin: 0; font-size: 1.0625rem; line-height: 1.45; }
+.k-fl-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 16px; }
+.k-fl-cols ul { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 0.9375rem; line-height: 1.35; }
+.k-fl-cols li::marker { color: var(--acc); }
+.k-fu { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.k-fu li { display: flex; gap: 12px; align-items: baseline; }
+.k-fu b { flex: none; min-width: 3.6rem; font: 700 0.75rem var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--acc); }
+.k-fu span { font-size: 0.9688rem; line-height: 1.4; }

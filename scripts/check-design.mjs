@@ -13,9 +13,9 @@ const px = [...rest.matchAll(/font-size:\s*[\d.]+px|font:[^;{}]*?\d+(?:\.\d+)?px
 assert.deepEqual(px, [], `app.css: font sizes must be rem so the text size setting scales them, found ${px.slice(0, 3).join(' | ')}`);
 assert.match(css, /html \{ font-size: calc\(16px \* var\(--kts, 1\)\)/, 'app.css: the root font size must follow --kts');
 
-const entry = ['fields', 'icons', 'i18n'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
+const entry = ['fields', 'icons', 'i18n', 'fieldinfo'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
 const { text } = buildSync({ stdin: { contents: entry, resolveDir: process.cwd(), loader: 'ts' }, bundle: true, format: 'esm', platform: 'node', write: false }).outputFiles[0];
-const { FIELDS, ICONS, IT } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
+const { FIELDS, ICONS, IT, FIELD_INFO } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
 
 for (const f of Object.keys(FIELDS)) assert.ok(ICONS[f], `icons.ts: field ${f} has no icon`);
 for (const n of ['missions', 'yourkern', 'copilot', 'done']) assert.ok(ICONS[n], `icons.ts: no icon named ${n}`);
@@ -23,12 +23,28 @@ for (const [name, body] of Object.entries(ICONS)) {
   assert.equal((body.match(/</g) || []).length, (body.match(/>/g) || []).length, `icons.ts: ${name} has unbalanced tags`);
   assert.ok(/class="b[ps]?"|class="gb"/.test(body), `icons.ts: ${name} has no lime bead`);
 }
-for (const k of ['Text size', 'Small', 'Default', 'Large', 'Larger', 'Done.']) assert.ok(IT[k], `i18n.ts: no Italian for "${k}"`);
+for (const k of ['Text size', 'Small', 'Default', 'Large', 'Larger', 'Done.', 'What to expect', 'A day in it', 'People like', 'People find hard', 'Try the next mission', 'Take it further', 'Three steps outside the app', 'Ask', 'Make', 'Learn', 'Send feedback', 'Terms']) assert.ok(IT[k], `i18n.ts: no Italian for "${k}"`);
+
+// What to expect + Take it further: every field has all of it, in both languages, and none of the words the brand never uses.
+const BANNED = /lavor|career|freelance|real work|real job|choose a job/i;
+for (const f of Object.keys(FIELDS)) {
+  const info = FIELD_INFO[f];
+  assert.ok(info, `fieldinfo.ts: field ${f} has no info`);
+  assert.ok(info.like.length === 2 && info.hard.length === 2, `fieldinfo.ts: ${f} needs 2 things people like and 2 they find hard`);
+  const all = [info.day, ...info.like, ...info.hard, info.steps.ask, info.steps.make, info.steps.learn];
+  for (const en of all) {
+    assert.ok(IT[en] && IT[en] !== en, `fieldinfo.ts: ${f} has no Italian for "${en.slice(0, 50)}"`);
+    assert.ok(!BANNED.test(en) && !BANNED.test(IT[en]), `fieldinfo.ts: ${f} uses a banned word in "${en.slice(0, 50)}"`);
+  }
+}
+
 
 const page = readFileSync('src/pages/index.astro', 'utf8');
 assert.equal((page.match(/data-k-text="\d"/g) || []).length, 4, 'index.astro: Settings needs four text size steps');
 assert.equal((page.match(/data-k-theme="/g) || []).length, 2, 'index.astro: the theme has two choices, dark and light');
 assert.equal((page.match(/data-k-tab="/g) || []).length, 3, 'index.astro: three sections');
+for (const id of ['kFld', 'kAbout', 'kFurther', 'kFeed']) assert.ok(page.includes(`id="${id}"`), `index.astro: missing #${id}`);
+assert.ok(existsSync('src/pages/terms.astro'), 'terms.astro: the Terms page is missing');
 // Mission pictures: every img / imgIt path in missions.ts must be a file in public/.
 const pics = [...readFileSync('src/scripts/missions.ts', 'utf8').matchAll(/\bimg(?:It)?: '(\/img\/m\/[^']+)'/g)].map((m) => m[1]);
 assert.ok(pics.length >= 9, `missions.ts: expected the mission pictures, found ${pics.length}`);

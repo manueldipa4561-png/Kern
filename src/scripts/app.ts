@@ -6,6 +6,8 @@
 import { IT, t2 } from './i18n';
 import { icon } from './icons';
 import { FIELDS } from './fields';
+import { FIELD_INFO } from './fieldinfo';
+import { SCORE, rowsOf, verdict } from './compare';
 import { MX } from './missions';
 import { RELICS, rollDrop, type Drop } from './loot';
 import { nextSpot, roundOf, PER_ROUND } from './next';
@@ -343,10 +345,10 @@ const onTab = () => kScr.querySelector<HTMLElement>('.k-tabs button.on')!;
 new ResizeObserver(() => moveInd(onTab(), false)).observe(nav);
 
 // Sheets (answer + settings): backdrop tap and Escape close them, focus returns where it was.
-const kSheet = $('kSheet'), kSet = $('kSet');
+const kSheet = $('kSheet'), kSet = $('kSet'), kFld = $('kFld');
 // Whatever layer is on top (sheet, reward, login, onboarding) makes everything behind it inert:
 // no Tab, clicks or screen reader reaching the page under a dialog.
-const LAYERS = ['kReward', 'kPwS', 'kSet', 'kSheet', 'kStart', 'kLogin'].map((id) => $(id)); // top first
+const LAYERS = ['kReward', 'kPwS', 'kSet', 'kFld', 'kSheet', 'kStart', 'kLogin'].map((id) => $(id)); // top first
 const topLayer = () => LAYERS.find((l) => !l.hidden && (!l.classList.contains('k-start') || l.classList.contains('on')));
 const syncInert = () => {
   const top = topLayer();
@@ -365,7 +367,7 @@ const closeSheet = (sh: HTMLElement) => {
   sh.hidden = true; syncInert(); if (sh === kSheet) flushDraft(); lastFocus?.focus();
   if (reveal) { setLvl(); renderProgress(); }
 };
-[kSheet, kSet].forEach((sh) => {
+[kSheet, kSet, kFld].forEach((sh) => {
   sh.addEventListener('click', (e) => { if (e.target === sh) closeSheet(sh); });
   sh.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeSheet(sh); } });
 });
@@ -399,7 +401,6 @@ const KIND_IT = ['migliori ciò che esiste già', 'parti da zero', 'collabori co
 const KSHORT = ['Improving things', 'Starting from zero', 'Working with others'];
 const FEEL_EN: Record<Feel, string> = { flow: 'Time flew', ok: 'It was fine', drag: 'It dragged' };
 const AGAIN_EN: Record<Again, string> = { yes: 'Yes', maybe: 'Maybe', no: 'No' };
-const SCORE: Record<Feel, number> = { flow: 2, ok: 1, drag: 0 };
 const DRAGGED = 0.5; // a kind is only called a drag when its average is this low: a lone "It was fine" scores 1 and is not one
 const readSignals = () => {
   const by = [0, 1, 2].map((i) => S.answers.filter((a) => a.f === S.field && a.i % PER_ROUND === i && a.r?.e)); // by kind: every round has one of each
@@ -451,6 +452,21 @@ const renderSignals = () => {
   const n = S.mine.length;
   if (n >= 2) setD($('kAiSig'), it ? `Hai riscritto la tua idea ${n} volte in KERN.AI. Confronta la versione 1 con l’ultima.` : `You rewrote your idea ${n} times in KERN.AI. Compare version 1 with your latest one.`);
   else setT($('kAiSig'), 'Write your idea in KERN.AI. Your versions show up here.'); // never a made-up insight shown as if it were yours
+  renderCompare();
+};
+// Fields side by side: once two fields have a reflection, each one's average energy next to how many reflections it rests on (compare.ts).
+const renderCompare = () => {
+  const card = $('kFcmp'), it = isIt(), rows = rowsOf(S.answers, Object.keys(FIELDS)), v = verdict(rows);
+  card.hidden = v === 'none';
+  if (card.hidden) return;
+  setD($('kFcmpT'), v === 'early' ? (it ? 'Siamo all’inizio. Prova una seconda missione in ognuno.' : 'Early days. Try a second mission in each.')
+    : v === 'close' ? (it ? 'Ancora troppo vicini per dire.' : 'Too close to call yet.')
+    : it ? `${tr(rows[0].f)} ti ha dato più energia finora.` : `${tr(rows[0].f)} gave you the most energy so far.`);
+  $('kFcmpM').replaceChildren(...rows.map((r) => {
+    const row = document.createElement('div'), lab = document.createElement('span'), val = document.createElement('b'), bar = document.createElement('i'), fill = document.createElement('s');
+    row.className = 'k-mt'; lab.textContent = tr(r.f); val.textContent = `${Math.round(r.v * 100)}% · ${r.n}`;
+    fill.style.width = `${r.v * 100}%`; bar.append(fill); row.append(lab, val, bar); return row;
+  }));
 };
 
 // Home: greeting, next mission, the three missions with status.
@@ -474,6 +490,35 @@ const renderFields = () => {
   add.type = 'button'; add.className = 'k-fchip k-fadd'; add.textContent = `+ ${tr('Add')}`; add.setAttribute('aria-label', tr('Add interests'));
   add.addEventListener('click', () => openStart(true)); box.appendChild(add);  const on = box.querySelector<HTMLElement>('.on'); // with more paths than fit, the one in play stays in view
   if (on) box.scrollTo({ left: Math.max(0, on.getBoundingClientRect().left - box.getBoundingClientRect().left + box.scrollLeft - 20), behavior: 'instant' as ScrollBehavior });
+};
+// What to expect in the field on show (a day in it, what people like and find hard) and three steps outside the app (fieldinfo.ts).
+const listOf = (id: string, items: string[]) => $(id).replaceChildren(...items.map((t) => Object.assign(document.createElement('li'), { textContent: tr(t) })));
+const renderAbout = () => {
+  const f = tr(S.field);
+  setD($('kAbout'), isIt() ? `Cosa aspettarsi: ${f}` : `What to expect: ${f}`);
+};
+const openAbout = () => {
+  const info = FIELD_INFO[S.field];
+  if (!info) return;
+  $('kFlI').innerHTML = icon(S.field);
+  setD($('kFlT'), tr(S.field)); setD($('kFlD'), tr(info.day));
+  listOf('kFlL', info.like); listOf('kFlH', info.hard);
+  openSheetEl(kFld, $('kFlGo'));
+};
+$('kAbout').addEventListener('click', openAbout);
+$('kFlX').addEventListener('click', () => closeSheet(kFld));
+$('kFlGo').addEventListener('click', () => { closeSheet(kFld); kAdd.click(); });
+// Take it further: shown once the field on show has an answer, so it follows something the person did.
+const renderFurther = () => {
+  const info = FIELD_INFO[S.field], card = $('kFurther');
+  card.hidden = !info || !doneIn(S.field).size;
+  if (card.hidden) return;
+  setD($('kFuL'), `${tr('Take it further')} · ${tr(S.field)}`);
+  $('kFuO').replaceChildren(...(['ask', 'make', 'learn'] as const).map((k) => {
+    const li = document.createElement('li'), b = document.createElement('b'), t = document.createElement('span');
+    b.textContent = tr({ ask: 'Ask', make: 'Make', learn: 'Learn' }[k]); t.textContent = tr(info.steps[k]);
+    li.append(b, t); return li;
+  }));
 };
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (absorb()) setLvl(); renderProgress(); track('visit'); } }); // habit button, boost, streak and dots go stale overnight otherwise
 const kAdd = $('kAdd'), kAdd2 = $('kAdd2');
@@ -511,7 +556,7 @@ const roundJustDone = () => { const b = base(), d = winDone(); return b > 0 && !
 const stateWord = (done: boolean, next: boolean, draft: boolean) => (done ? 'Done' : next ? 'Next' : draft ? 'Draft' : 'Not started');
 const renderHome = () => {
   renderStat();
-  renderFields();
+  renderFields(); renderAbout(); renderFurther();
   const f = F(), b = base(), round = b / PER_ROUND, done = winDone(), next = [0, 1, 2].find((k) => !done.has(k)), it = isIt();
   // fresh: a round was just finished and the next one is not started. Celebrate the Kern card first, then offer the new missions.
   const fresh = roundJustDone();
@@ -1605,7 +1650,7 @@ const setLang = (l: Lang) => {
   document.title = tr("KERN · Don't guess your passion. Test it.");
   kDesc?.setAttribute('content', tr(descEn));
   kTxt.forEach((e) => { const en = e.dataset.en; if (!en) return; if (e.classList.contains('k-xb')) e.textContent = tr(en); else e.innerHTML = tr(en); });
-  document.querySelectorAll<HTMLAnchorElement>('a[href^="/privacy/"]').forEach((a) => a.setAttribute('href', l === 'it' ? '/privacy/#it' : '/privacy/')); // after the texts above: they bring their own links back
+  for (const page of ['privacy', 'terms']) document.querySelectorAll<HTMLAnchorElement>(`a[href^="/${page}/"]`).forEach((a) => a.setAttribute('href', `/${page}/${l === 'it' ? '#it' : ''}`)); // after the texts above: they bring their own links back
   document.querySelectorAll<HTMLElement>('[aria-label]').forEach((e) => { const en = (e.dataset.enLabel ??= e.getAttribute('aria-label') || ''); e.setAttribute('aria-label', tr(en)); });
   if (fb.dataset.src) fb.textContent = tr(fb.dataset.src);
   pressed('lang', l); setPic();
@@ -1615,6 +1660,12 @@ document.querySelectorAll<HTMLElement>('[data-k-lang]').forEach((b) => b.addEven
 $('kAv').addEventListener('click', () => openSheetEl(kSet, $('kSetX')));
 $('kSetX').addEventListener('click', () => closeSheet(kSet));
 $('kChField').addEventListener('click', () => { kSet.hidden = true; openStart(true, true); });
+// Feedback goes to the founder's inbox through the person's own mail app; nothing is sent by KERN.
+const CONTACT = 'manuel@trykern.it';
+$('kFeed').addEventListener('click', () => {
+  location.href = `mailto:${CONTACT}?subject=${encodeURIComponent('KERN feedback')}&body=${encodeURIComponent(`\n\n---\nKERN 1.0 · ${S.lang.toUpperCase()}`)}`;
+  say(isIt() ? `Si apre la tua app di posta. Oppure scrivi a ${CONTACT}` : `Opening your email app. Or write to ${CONTACT}`);
+});
 $('kExp').addEventListener('click', () => download(JSON.stringify({ ...snapshot(), exportedAt: new Date().toISOString() }, null, 2), 'kern-data.json', 'application/json'));
 // Weekly calendar reminder (.ics): works in every calendar app, no notifications permission, no streaks.
 $('kRemind').addEventListener('click', () => {

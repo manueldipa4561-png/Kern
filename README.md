@@ -46,6 +46,9 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - Mission Studio: `node scripts/mission-studio.mjs` has Claude draft a new English and Italian mission from a field, a kind and a subject, 29 automatic rules check it, and a person approves it. It needs `ANTHROPIC_API_KEY` for a live run and is covered offline by `npm test`. The authoring guide is `docs/MISSIONS.md`
 - Usage counts without names: off until a person says yes (one card on Home, a switch in Settings). A random code plus the kind of event, field, mission, language and time, never a name or anything they wrote. Deleted when they switch off, delete their data, or at 12 months. `npm run stats` turns it into pilot numbers, with small samples shown as counts, not percentages. Needs the Supabase variables. Guide: `docs/ANALYTICS.md`
 - Answers with automatic drafts. Edit or delete them (with Undo)
+- What to expect: under the field chips, a sheet with a day in the field, what people like and what they find hard, from `src/scripts/fieldinfo.ts` (EN and IT, no numbers or partners claimed)
+- Fields side by side: once two fields have a reflection, yourKERN compares their average energy and says who leads only on a clear gap with two reflections each (`src/scripts/compare.ts`, covered by `npm test`)
+- Take it further: three steps outside the app (ask, make, learn) for the field you are in, once it has an answer
 - Quick reflection after each answer (how it felt, would you do it again, hardest part, a sign for the next person)
 - Signs on the trail: with an account, the sign you leave is shown without your name to the next people who open that mission (`kern_signs` in `supabase/schema.sql`: public read of tip and date only, writes through `add_sign` / `delete_my_sign`, 20 a day each, no links, emails or long numbers). Deleting the answer removes its sign
 - Real "first guess" and Kern card built from your reflections. Kern card shared as a 1080x1350 image
@@ -54,7 +57,7 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - Pilot: "Share my trail with the KERN team" sends answers and reflections as plain text
 - EN / IT, dark / light theme, and a text size setting (four steps, every font size is in rem, `npm test` checks it)
 - Installable and works offline after the first visit (`public/sw.js`). Security headers and CSP in `netlify.toml`
-- Export and delete your data from Settings. Privacy page at `/privacy/`
+- Export and delete your data from Settings. Privacy page at `/privacy/`, Terms at `/terms/` (EN and IT), and a feedback button that opens your own mail app
 - Design (v2): one icon family (`src/scripts/icons.ts`: a frosted body and a lime bead, the core of the app icon), a floating glass tab bar, italic serif accents (Instrument Serif), bigger type, one calm confirmation after each mission (no points or random rewards). View Transitions slide the panes (plain swap where unsupported, nothing moves with reduced motion)
 
 **Cut from the interface in v2** (the code is still there, hidden with the `k-cut` class, so each piece can come back): points and ranks, finds, badges, trail days, the habit builder, the review teaser, daily boosts and the random drops. The Trail section moved into yourKERN. The classic design before v1.0 is kept on the `classic-design` branch and the `v0.4-classic` tag.
@@ -70,7 +73,7 @@ Real partner missions (brand missions are demos for now), peer review and rankin
 - `src/scripts/i18n.ts` Italian strings (English is the source), `src/scripts/fields.ts` missions per field
 - `src/scripts/next.ts` rounds and the next-mission rule, `src/scripts/sponsors.ts` brand missions, `src/scripts/stats.ts` opt-in usage counts, `src/scripts/demo.ts` the demo profile's sample trail (texts in both languages)
 - `scripts/` the tests run by `npm test`, and the Mission Studio
-- `public/` manifest, service worker, icons, favicons, `og.jpg` (link preview, the banner). `public/img/` the app icon mark (header and launch screen) and the cairn on the Kern card
+- `public/` manifest (with install screenshots in `public/screenshots/`), service worker, icons, favicons, `og.jpg` (link preview, the banner). `public/img/` the app icon mark (header and launch screen) and the cairn on the Kern card
 
 ## License
 
