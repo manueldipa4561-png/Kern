@@ -76,7 +76,6 @@ export const IT: Record<string, string> = {
         'Brand mission': 'Missione di un brand',
         'Bonus stones and finds start from 20 characters. This answer is a bit short.': 'Gli stone bonus e i ritrovamenti partono da 20 caratteri. Questa risposta è un po’ corta.',
         'Write your idea in KERN.AI. Your versions show up here.': 'Scrivi la tua idea in KERN.AI. Le tue versioni compaiono qui.',
-        'No more hints. Write one rough line first, then ask again.': 'Hint finiti. Scrivi prima una riga anche grezza, poi richiedi.',
         'Welcome back': 'Ci rivediamo', 'Log in to<br>your <b>trail.</b>': 'Entra nella<br>tua <b>traccia.</b>',
         'Name': 'Nome', 'Email': 'Email', 'Password': 'Password', 'Log in': 'Accedi', 'Create an account': 'Crea un account',
         'New here?': 'Nuovo qui?', 'Create your<br><b>account.</b>': 'Crea il tuo<br><b>account.</b>', 'Create account': 'Crea account',

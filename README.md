@@ -8,7 +8,7 @@ Find your direction by doing real creative work. Installable web app (PWA) by Ma
 npm install
 npm run dev      # http://localhost:4322
 npm run build    # static site in dist/
-npm test         # sync rules, next-mission and rounds rules, every mission complete and translated, the Studio and the usage report maths
+npm test         # sync rules, next-mission and rounds rules, every mission complete and translated, the distress screen (same in app and server), the Studio and the usage report maths
 npm run stats    # usage numbers from people who opted in (see docs/ANALYTICS.md)
 ```
 

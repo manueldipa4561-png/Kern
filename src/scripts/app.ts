@@ -21,7 +21,7 @@ type Feel = 'flow' | 'ok' | 'drag';
 type Again = 'yes' | 'maybe' | 'no';
 type Refl = { e?: Feel; again?: Again; hard?: string; tip?: string; sid?: number }; // sid: the tip's shared sign, if published
 type Answer = { f: string; i: number; t: string; at: number; ed?: number; r?: Refl; x?: number; d?: string }; // x: extra stones (bonuses, drop), d: drop id (loot.ts)
-type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean };
+type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean; p?: string }; // p: the person's own words quoted in front of a scripted question, kept apart so a language switch still translates the question
 type Theme = 'system' | 'dark' | 'light';
 type Lang = 'en' | 'it';
 type Habit = { t: string; c: string; l: [number, string][] }; // t: the tiny habit, c: the cue (after I...), l: [day number, relic id found that day or ''] per day done
@@ -58,6 +58,8 @@ const FEELS: Feel[] = ['flow', 'ok', 'drag'];
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
 const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'system', guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false });
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
+// A name is cut by whole characters (never half an emoji) and holds no text-direction controls (U+202A-202E, U+2066-2069): they flip the text around them and leave the avatar empty.
+const cleanName = (v: unknown) => (typeof v === 'string' ? [...v.replace(/[\u202A-\u202E\u2066-\u2069]/g, '')].slice(0, 40).join('') : '');
 const cleanR = (r: unknown): Refl | undefined => {
   if (!r || typeof r !== 'object') return undefined;
   const o = r as Record<string, unknown>, out: Refl = {};
@@ -90,14 +92,14 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
       .filter((f): f is string => typeof f === 'string' && !!FIELDS[f]);
     return {
       ...d,
-      name: str(s.name, 40),
+      name: cleanName(s.name),
       field,
       fields,
       onboarded: !!s.onboarded,
       stones: clampCount(s.stones),
       answers,
       drafts,
-      msgs: Array.isArray(s.msgs) ? s.msgs.filter((m: Msg) => m && (m.who === 'ai' || m.who === 'me') && typeof m.t === 'string').map((m: Msg) => ({ who: m.who, t: m.t.slice(0, 500) })) : [],
+      msgs: Array.isArray(s.msgs) ? s.msgs.filter((m: Msg) => m && (m.who === 'ai' || m.who === 'me') && typeof m.t === 'string').map((m: Msg): Msg => ({ who: m.who, t: m.t.slice(0, 500), ...(m.who === 'ai' && typeof m.p === 'string' && m.p ? { p: m.p.slice(0, 200) } : {}) })) : [],
       mine: Array.isArray(s.mine) ? s.mine.filter((m: unknown) => typeof m === 'string').map((m: string) => m.slice(0, 140)) : [],
       lang: s.lang === 'it' || s.lang === 'en' ? s.lang : d.lang,
       theme: s.theme === 'dark' || s.theme === 'light' ? s.theme : 'system',
@@ -221,20 +223,32 @@ const viewBase = () => base() + (peeking() ? PER_ROUND : 0); // first mission of
 
 const toast = $('kToast'), toastT = $('kToastT'), toastB = $('kToastB');
 let tT = 0, toastAct: (() => void) | null = null;
+const hideToast = () => { toast.classList.remove('on', 'act'); toastAct = null; toastB.hidden = true; };
 // Short message at the bottom; with `undo`, shows an Undo button for a few seconds (Gmail-style).
 function say(en: string, undo?: () => void) {
   toastT.textContent = tr(en);
   toastAct = undo || null; toastB.hidden = !undo; toastB.textContent = tr('Undo');
   toast.classList.toggle('act', !!undo); toast.classList.add('on');
   if (undo) toastB.focus({ preventScroll: true }); // keyboard and screen-reader users land on Undo
-  clearTimeout(tT); tT = window.setTimeout(() => { toast.classList.remove('on', 'act'); toastAct = null; toastB.hidden = true; }, undo ? 8000 : 2800);
+  clearTimeout(tT); tT = window.setTimeout(hideToast, undo ? 8000 : 2800);
 }
+// A badge is news nobody asked for, so it never takes the place of an Undo that is still on screen: it waits its turn.
+const sayBadge = (text: string) => {
+  if (toastAct) { window.setTimeout(() => sayBadge(text), 1000); return; }
+  say(text); if ('vibrate' in navigator) navigator.vibrate([20, 40, 20]);
+};
 const reveal = (el: Element) => el.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' });
+// A screen or state swaps under the user's finger: focus its heading, or keyboard and screen-reader focus falls to the page body.
+// syncInert first: a layer that was just closed may still hold the screen behind it inert, and a focus() there is refused.
+const land = (el: HTMLElement) => { syncInert(); el.tabIndex = -1; el.focus({ preventScroll: true }); };
 // A step swap (answer, reflection, reward, next mission) puts a different button under the same thumb: ignore a second tap within 450 ms.
 let tapLockUntil = 0;
 const once = (fn: () => void) => () => { if (performance.now() < tapLockUntil) return; tapLockUntil = performance.now() + 450; fn(); };
 kScr.appendChild(toast); // a direct child of the screen, so a screen reader still hears it while a sheet makes the app shell inert
-toastB.addEventListener('click', () => { const f = toastAct; toastAct = null; toast.classList.remove('on', 'act'); toastB.hidden = true; if (f) f(); });
+toastB.addEventListener('click', () => { const f = toastAct; hideToast(); if (f) f(); });
+// An Undo waits while the pointer rests on it, and gets a few more seconds once the pointer leaves.
+toast.addEventListener('pointerenter', () => clearTimeout(tT));
+toast.addEventListener('pointerleave', () => { if (toastAct) tT = window.setTimeout(hideToast, 4000); });
 
 // Static text: remember the English source so language switches are lossless.
 const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs button:not(:nth-child(2)), #kXAsk, .k-streak small, .k-finds-h span');
@@ -276,11 +290,13 @@ const runVT = (cls: string, cb: () => unknown, after?: () => void) => {
 // Tabs
 const tabs = kScr.querySelectorAll<HTMLElement>('[data-k-tab]');
 const tabIds = [...tabs].map((x) => 'k-' + x.dataset.kTab);
+let wanted = ''; // the pane the latest tap asked for: a swap runs a frame after its tap, and must show this one, so an earlier swap can never overrule a later tap
 tabs.forEach((t) => t.addEventListener('click', () => {
   const next = 'k-' + t.dataset.kTab, cur = kScr.querySelector<HTMLElement>('.k-pane.on');
+  wanted = next;
   tabs.forEach((x) => { x.classList.toggle('on', x === t); x.setAttribute('aria-current', String(x === t)); });
   const swap = () => {
-    kScr.querySelectorAll('.k-pane').forEach((p) => { p.classList.remove('leaving'); p.classList.toggle('on', p.id === next); });
+    kScr.querySelectorAll('.k-pane').forEach((p) => { p.classList.remove('leaving'); p.classList.toggle('on', p.id === wanted); });
     kScr.querySelector<HTMLElement>('.k-body')!.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
   moveInd(t, true);
@@ -626,7 +642,7 @@ function renderBadges() {
   });
   if (!fresh.length) return;
   save();
-  if (booted) window.setTimeout(() => { say(tr('New badge: {b}').replace('{b}', tr(fresh[0]))); if ('vibrate' in navigator) navigator.vibrate([20, 40, 20]); }, 3000);
+  if (booted) window.setTimeout(() => sayBadge(tr('New badge: {b}').replace('{b}', tr(fresh[0]))), 3000);
 }
 
 // Delete with Undo; stones earned by that answer are taken back so nothing can be farmed.
@@ -659,7 +675,8 @@ function deleteAnswer(idx: number) {
 // Co-pilot chat (scripted: it only asks, never proposes the idea)
 const chatEl = $('kChat'), inEl = $<HTMLInputElement>('kIn'), cmp = $('kCmp');
 let busy = false, gen = 0; // gen: bumped by startChat, so a reply that was in flight when the chat restarted is dropped
-const HEAVY = /(kill(ing)? myself|kill me\b|suicid|self.?harm|hurt(ing)? myself|end (my life|it all)|take my (own )?life|hopeless|want(ed)? to die|wish i (was|were) (dead|gone)|better off dead|(no|any) reason to live|don'?t want to (live|be here|wake up)|cut(ting)? myself|voglio morire|vorrei morire|farla finita|mi (voglio |vorrei |devo )?(uccid|ammazz|impicc)|uccider(mi|e me)|ammazzar(mi|e me)|impiccar(mi|e me)|tagliarmi le vene|mi taglio le vene|togliermi la vita|togliermi di mezzo|farmi del male|mi faccio del male|autolesion|non (voglio|riesco) più (a )?vivere|non voglio più stare qui|meglio morto|meglio morta|non ce la faccio più|vorrei sparire|voglio sparire)/i;
+// Distress words (English and Italian, with or without accents and curly apostrophes). The same line sits in netlify/functions/coach.mts: scripts/check-heavy.mjs fails npm test when they differ.
+const HEAVY = /(kill(ing)? myself|kill me\b|suicid|self.?harm|hurt(ing)? myself|end (my life|it all)|take my (own )?life|hopeless|want(ed)? to die|wish i (was|were) (dead|gone)|better off dead|(no|any) reason to live|don['’]?t want to (live|be here|wake up)|cut(ting)? myself|voglio morire|vorrei morire|farla finita|mi (voglio |vorrei |devo )?(uccid|ammazz|impicc)|uccider(mi|e me)|ammazzar(mi|e me)|impiccar(mi|e me)|tagliarmi le vene|mi taglio le vene|togliermi la vita|togliermi di mezzo|farmi del male|mi faccio del male|autolesion|non (voglio|riesco) pi[uù]['’]? (a )?vivere|non voglio pi[uù]['’]? stare qui|meglio morto|meglio morta|non ce la faccio pi[uù]|senza speranza|non vedo (una )?via d['’]?uscita|vorrei sparire|voglio sparire)/i;
 const HEAVY_REPLY = "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.";
 const ASKED = /(give me|tell me|what should|write it for me|any ideas|dammi|dimmi|che idea|scrivilo tu|cosa dovrei)/i;
 const STUCK = /(stuck|don'?t know|do not know|no idea|not sure|blank|boh|non so|bloccat|nessuna idea)/i;
@@ -670,14 +687,18 @@ const Q_MORE = [[t2('What would make that clearer for someone brand new?', 'Cosa
 // Echo the user's own opening words back, so the question is clearly about their idea.
 const echo = (v: string) => { const w = v.split(/\s+/); return `“${w.slice(0, 6).join(' ')}${w.length > 6 ? '…' : ''}” `; };
 let announced = '';
+// A line as it reads now. The coach's scripted lines are stored as English keys (with the person's own quoted words in front) and the chips they tapped too,
+// so a language switch translates them; everything else the person typed stays as typed.
+const chipKeys = [...document.querySelectorAll<HTMLElement>('#kEx span')].map((c) => c.dataset.en);
+const said = (m: Msg) => (m.who === 'ai' ? (m.p ?? '') + tr(m.t) : chipKeys.includes(m.t) ? tr(m.t) : m.t);
 const renderChat = () => {
   const lastAi = [...S.msgs].reverse().find((m) => !m.typing);
-  if (lastAi && lastAi.who === 'ai' && lastAi.t !== announced) { announced = lastAi.t; $('kSr').textContent = tr(lastAi.t); }
+  if (lastAi && lastAi.who === 'ai' && said(lastAi) !== announced) { announced = said(lastAi); $('kSr').textContent = announced; }
   chatEl.innerHTML = '';
   S.msgs.forEach((m) => {
     const p = document.createElement('p'); p.className = 'k-msg ' + (m.who === 'me' ? 'k-me' : 'k-ai');
     if (m.typing) { p.classList.add('k-typing'); p.innerHTML = '<i></i><i></i><i></i>'; }
-    else p.textContent = m.who === 'ai' ? tr(m.t) : m.t;
+    else p.textContent = said(m);
     chatEl.appendChild(p);
   });
   chatEl.scrollTop = chatEl.scrollHeight;
@@ -686,10 +707,10 @@ const renderChat = () => {
   cmp.hidden = !show;
   if (show) { $('kV1').textContent = S.mine[0]; $('kV3').textContent = S.mine[S.mine.length - 1]; }
 };
-const aiSay = (t: string) => {
+const aiSay = (t: string, p?: string) => {
   S.msgs.push({ who: 'ai', t: '', typing: true }); renderChat();
   const g = gen;
-  window.setTimeout(() => { if (g !== gen) return; S.msgs.pop(); S.msgs.push({ who: 'ai', t }); busy = false; save(); renderChat(); renderSignals(); renderBadges(); }, still ? 0 : 750);
+  window.setTimeout(() => { if (g !== gen) return; S.msgs.pop(); S.msgs.push(p ? { who: 'ai', t, p } : { who: 'ai', t }); busy = false; save(); renderChat(); renderSignals(); renderBadges(); }, still ? 0 : 750);
 };
 const startChat = () => {
   gen++;
@@ -710,7 +731,7 @@ async function askAI(extra?: { mission?: { title: string; brief: string }; messa
   try {
     const r = await fetch('/api/coach', {
       method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal,
-      body: JSON.stringify({ lang: S.lang, field: extra?.mission ? cur.f : S.field, versions: extra ? 0 : S.mine.length, mission: extra?.mission, messages: extra?.messages ?? S.msgs.filter((m) => !m.typing).slice(-12).map((m) => ({ who: m.who, t: m.t })) }),
+      body: JSON.stringify({ lang: S.lang, field: extra?.mission ? cur.f : S.field, versions: extra ? 0 : S.mine.length, mission: extra?.mission, messages: extra?.messages ?? S.msgs.filter((m) => !m.typing).slice(-12).map((m) => ({ who: m.who, t: said(m) })) }),
     });
     if (!r.ok) return null;
     const j = await r.json();
@@ -719,9 +740,9 @@ async function askAI(extra?: { mission?: { title: string; brief: string }; messa
 }
 const scripted = (v: string) => {
   if (ASKED.test(v)) return aiSay("I won't hand you the idea. What is the first thing that comes to mind, even if it's rough?");
-  if (STUCK.test(v)) return aiSay(tr(pick(Q_STUCK)));
+  if (STUCK.test(v)) return aiSay(pick(Q_STUCK));
   S.mine.push(v);
-  if (S.mine.length < 3) return aiSay(echo(v) + tr(pick([F().qs[S.mine.length - 1], ...Q_MORE[S.mine.length - 1]])));
+  if (S.mine.length < 3) return aiSay(pick([F().qs[S.mine.length - 1], ...Q_MORE[S.mine.length - 1]]), echo(v));
   if (S.mine.length === 3) return aiSay('You wrote it 3 times and each version changed. That is your evidence. Compare the first and the last.');
   aiSay('Save it to yourKERN, or start over with a new idea.');
 };
@@ -741,11 +762,11 @@ const sendChat = () => {
   });
 };
 $('kSend').addEventListener('click', sendChat);
-inEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendChat(); } });
+inEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); sendChat(); } }); // the Enter that confirms an IME word (Japanese, Chinese, Korean) is not "send"; Safari reports it as keyCode 229
 document.querySelectorAll<HTMLElement>('#kEx span').forEach((c, i) => {
   const go = () => {
     if (i === 1) return startChat();
-    if (i >= 2) { if (busy) return; S.msgs.push({ who: 'me', t: c.textContent || '' }); busy = true; renderChat(); return aiSay(tr(pick(i === 2 ? Q_STUCK : Q_SMALL))); }
+    if (i >= 2) { if (busy) return; S.msgs.push({ who: 'me', t: c.dataset.en || '' }); busy = true; renderChat(); return aiSay(pick(i === 2 ? Q_STUCK : Q_SMALL)); }
     inEl.value = tr(F().idea).replace(/^[^:]+:\s*/, ''); inEl.focus(); };
   c.addEventListener('click', go);
   c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
@@ -871,11 +892,14 @@ function renderBrief(f: string, i: number) {
   hintN = 0; $('kXHints').innerHTML = '';
   $('kXFirst').hidden = !first; $('kXExB').hidden = !(first && v.ex);
   setX($('kXExT'), v.ex); setT($('kXEx'), first ? 'Hide the example' : 'Show an example');
-  setT($('kXHint'), 'Need a hint?'); $<HTMLButtonElement>('kXHint').disabled = !v.hints.length;
+  setT($('kXHint'), 'Need a hint?'); hold($('kXHint'), !v.hints.length);
   setT($('kXEasy'), S.easy ? 'Back to the full version' : 'Make it easier');
-  $<HTMLButtonElement>('kXAsk').disabled = false;
+  hold($('kXAsk'), false);
 }
 let hintN = 0;
+// Busy or spent buttons are dimmed but stay focusable: a disabled button drops keyboard focus to the page body.
+const hold = (b: Element, on: boolean) => b.setAttribute('aria-disabled', String(on));
+const held = (b: Element) => b.getAttribute('aria-disabled') === 'true';
 $('kXEx').addEventListener('click', () => {
   const b = $('kXExB'); b.hidden = !b.hidden;
   setT($('kXEx'), b.hidden ? 'Show an example' : 'Hide the example');
@@ -884,21 +908,21 @@ const nextHint = () => {
   const v = variant(cur.f, cur.i); if (!v || hintN >= v.hints.length) return;
   const p = document.createElement('p'); p.className = 'k-msg k-ai'; setX(p, v.hints[hintN]); $('kXHints').appendChild(p); reveal(p);
   hintN++;
-  const b = $<HTMLButtonElement>('kXHint');
-  if (hintN >= v.hints.length) { setT(b, 'No more hints'); b.disabled = true; } else setD(b, `${tr('Another hint')} (${hintN}/${v.hints.length})`);
+  const b = $('kXHint');
+  if (hintN >= v.hints.length) { setT(b, 'No more hints'); hold(b, true); } else setD(b, `${tr('Another hint')} (${hintN}/${v.hints.length})`);
 };
 $('kXHint').addEventListener('click', nextHint);
 $('kXEasy').addEventListener('click', () => { S.easy = !S.easy; save(); renderBrief(cur.f, cur.i); });
 // KERN.AI inside the task: reads the mission and what you have written so far, and asks one question. Live when online;
-// offline it falls back to a question about your own words, or the next hint.
+// offline it falls back to a question about your own words, or the "stuck" question of the KERN.AI tab. Hints stay on their own button.
 $('kXAsk').addEventListener('click', async () => {
-  const btn = $<HTMLButtonElement>('kXAsk'), v = variant(cur.f, cur.i);
-  if (btn.disabled || !v) return;
-  btn.disabled = true;
+  const btn = $('kXAsk'), v = variant(cur.f, cur.i);
+  if (held(btn) || !v) return;
+  hold(btn, true);
   track('ask_ai', cur.f, cur.i);
   const draft = kTa.value.trim().slice(0, 400);
   if (HEAVY.test(draft)) { // heavy words in the draft: nothing is sent or echoed, the mission pauses
-    const m = document.createElement('p'); m.className = 'k-msg k-ai'; m.textContent = tr(HEAVY_REPLY); $('kXHints').appendChild(m); reveal(m); btn.disabled = false; return;
+    const m = document.createElement('p'); m.className = 'k-msg k-ai'; m.textContent = tr(HEAVY_REPLY); $('kXHints').appendChild(m); reveal(m); hold(btn, false); return;
   }
   const p = document.createElement('p'); p.className = 'k-msg k-ai k-typing'; p.innerHTML = '<i></i><i></i><i></i>'; p.setAttribute('aria-label', 'typing');
   $('kXHints').appendChild(p); reveal(p);
@@ -908,11 +932,9 @@ $('kXAsk').addEventListener('click', async () => {
   p.classList.remove('k-typing'); p.removeAttribute('aria-label'); p.textContent = '';
   setLive(!!reply);
   if (reply) p.textContent = reply;
-  else if (draft.length >= 10) p.textContent = echo(draft) + tr(pick(Q_MORE[0]));
-  else if (hintN < v.hints.length) { p.remove(); nextHint(); }
-  else p.textContent = tr('No more hints. Write one rough line first, then ask again.'); // never a button that does nothing
-  if (p.isConnected) reveal(p);
-  btn.disabled = false;
+  else p.textContent = draft.length >= 10 ? echo(draft) + tr(pick(Q_MORE[0])) : tr(pick(Q_STUCK)); // never a button that does nothing, and never a hint in disguise
+  reveal(p);
+  hold(btn, false);
 });
 // Self-check after submitting: +10 per quality bar met, +25 for the twist. Returns the bonus (not saved here).
 const bonus = () => {
@@ -1008,9 +1030,10 @@ $('kHbSave').addEventListener('click', () => {
   const t = kHbT.value.trim();
   if (!t) { say('Pick or write your tiny habit first.'); kHbT.focus(); return; }
   S.habit.t = t.slice(0, 60); S.habit.c = kHbC.value.trim().slice(0, 60); hbEditing = false; save(); renderHabit();
+  land($('kHbName')); // the form this button sat in is gone: focus the habit that replaced it
   say('Habit set. Make it so small you cannot fail.');
 });
-$('kHbEdit').addEventListener('click', () => { kHbT.value = S.habit.t; kHbC.value = S.habit.c; hbEditing = true; renderHabit(); }); // the old habit stays saved until the new one is
+$('kHbEdit').addEventListener('click', () => { kHbT.value = S.habit.t; kHbC.value = S.habit.c; hbEditing = true; renderHabit(); land(kHbSet.querySelector<HTMLElement>('h5')!); }); // the old habit stays saved until the new one is
 $('kHbDo').addEventListener('click', () => {
   const today = dayN(Date.now());
   if (S.habit.l.some((e) => e[0] === today)) return;
@@ -1229,7 +1252,8 @@ const closePicker = () => { // leave the interests screen without changing anyth
   picks = [...S.fields]; kStart.classList.remove('on'); syncInert();
   (pickerFromSettings ? $('kAv') : kScr.querySelector<HTMLElement>('.k-fadd') ?? kAdd).focus({ preventScroll: true });
 };
-const renderMe = () => { $('kAv').textContent = (S.name.trim()[0] || 'K').toUpperCase(); };
+// The avatar shows the first whole letter, digit or emoji of the name, else K.
+const renderMe = () => { $('kAv').textContent = ([...S.name].find((c) => /[\p{L}\p{N}\p{Extended_Pictographic}]/u.test(c)) ?? 'K').toUpperCase(); };
 // Login screen modes: 'up' create account, 'in' log in, 'guest' local-only profile.
 // Without Supabase keys only 'guest' exists and the screen looks like before.
 type Mode = 'guest' | 'up' | 'in';
@@ -1259,11 +1283,11 @@ let authBusy = false;
 $('kProf').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (authBusy) return;
-  const n = kNmI.value.trim(), em = kEm.value.trim().toLowerCase(), pw = kPw.value;
+  const n = cleanName(kNmI.value.trim()).trim(), em = kEm.value.trim().toLowerCase(), pw = kPw.value;
   if (mode === 'guest') {
     if (!n || !kAge.checked) { fail('Add your name and confirm your age to continue.'); (n ? kAge : kNmI).focus(); return; }
     kErr.hidden = true; kLog.classList.add('busy');
-    window.setTimeout(() => { S.name = n.slice(0, 40); save(); renderMe(); renderHome(); kLog.classList.remove('busy'); kLogin.classList.remove('on'); if (S.onboarded) arrive(); else openStart(); }, still ? 0 : 600);
+    window.setTimeout(() => { S.name = n; save(); renderMe(); renderHome(); kLog.classList.remove('busy'); kLogin.classList.remove('on'); if (S.onboarded) arrive(); else openStart(); }, still ? 0 : 600);
     return;
   }
   if (mode === 'up' && !n) { fail('Add your name.'); kNmI.focus(); return; }
@@ -1273,8 +1297,8 @@ $('kProf').addEventListener('submit', async (e) => {
   authBusy = true; kLog.classList.add('busy');
   try {
     if (mode === 'up') {
-      const r = await cloud.signUp(em, pw, n.slice(0, 40));
-      if (!S.name) { S.name = n.slice(0, 40); save(); renderMe(); }
+      const r = await cloud.signUp(em, pw, n);
+      if (!S.name) { S.name = n; save(); renderMe(); }
       if (r.needsConfirm) { setMode('in'); kEm.value = em; note('Check your email to confirm your account, then log in. Already have one? Just log in.'); }
     } else await cloud.signIn(em, pw);
     kPw.value = '';
@@ -1310,7 +1334,7 @@ const onUser = async (u: cloud.User | null, ev: string) => {
   user = u; pulled = false;
   try { const remote = await cloud.pull(u.id); if (remote) mergeIn(remote); syncOk = true; pulled = true; }
   catch { syncOk = false; say("Couldn't load your synced trail. We'll try again."); }
-  if (!S.name) S.name = u.name;
+  if (!S.name) S.name = cleanName(u.name);
   save(); renderMe(); applyField(false); setLang(S.lang); renderAcct(); flushSigns();
   if (kLogin.classList.contains('on')) { kLogin.classList.remove('on'); if (!S.onboarded) openStart(); else arrive(); }
 };
@@ -1343,7 +1367,7 @@ $('kPwF').addEventListener('submit', async (e) => {
   try { await cloud.setPassword(p); $<HTMLInputElement>('kPwN').value = ''; closeSheet(kPwS); say('Password updated.'); }
   catch (err) { setT(er, cloud.why(err)); er.hidden = false; }
 });
-$('kIdk').addEventListener('click', () => { kS1.hidden = true; kS2.hidden = false; kStart.setAttribute('aria-labelledby', 'kS2H'); });
+$('kIdk').addEventListener('click', () => { kS1.hidden = true; kS2.hidden = false; kStart.setAttribute('aria-labelledby', 'kS2H'); land($('kS2H')); });
 $('kPickX').addEventListener('click', closePicker);
 // First visit: loader > choice > interests > profile (name + 18+, or an account) > missions.
 const pop = () => { // the field's object drops into the mission card
@@ -1351,7 +1375,8 @@ const pop = () => { // the field's object drops into the mission card
   const o = $('kNxImg');
   o.classList.remove('arrive'); void o.offsetWidth; o.classList.add('arrive');
 };
-const arrive = () => { goTab('missions'); pop(); };
+const landHome = () => land(kScr.querySelector<HTMLElement>('#k-missions h4')!);
+const arrive = () => { goTab('missions'); pop(); landHome(); };
 const closeStart = () => {
   if (vtBusy) return; // a flight is still playing: ignore the double tap
   const pick = (S.onboarded && picks.includes(S.field) ? S.field : picks[0]) || S.field;
@@ -1362,7 +1387,7 @@ const closeStart = () => {
     kStart.classList.remove('on'); kLogin.classList.add('on'); syncInert(); (mode === 'in' ? kEm : kNmI).focus();
     return;
   }
-  const run = () => { commit(); kStart.classList.remove('on'); applyField(changed); goTab('missions'); };
+  const run = () => { commit(); kStart.classList.remove('on'); applyField(changed); goTab('missions'); landHome(); };
   // Shared element: the picked field's object flies from its tile into the mission card.
   const from = kS2.hidden ? null : kStart.querySelector<HTMLElement>(`#kPick [data-f="${pick}"] img`), to = $<HTMLImageElement>('kNxImg');
   if (still || !startVT || !from) return run();
