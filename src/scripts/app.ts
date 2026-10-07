@@ -27,20 +27,25 @@ type State = { v: 1; name: string; field: string; fields: string[]; onboarded: b
 
 // Demo profile (open /?demo, switch off with /?demo=off): a lived-in trail to show KERN in a minute. It has its own storage key,
 // never syncs, never publishes a sign and is never counted, so it cannot touch real data.
+// Rewrites the address without one query parameter. An odd path such as // must never throw (it would stop the app half-way).
+function dropParam(q: URLSearchParams, name: string) {
+  q.delete(name);
+  const rest = q.toString();
+  try { history.replaceState(null, '', location.pathname.replace(/^\/{2,}/, '/') + (rest ? '?' + rest : '') + location.hash); } catch { /* leave the address as it is */ }
+}
 try {
   const q = new URLSearchParams(location.search), d = q.get('demo');
   if (d !== null) {
     const v = d.trim().toLowerCase();
     if (['off', '0', 'false', 'no'].includes(v)) localStorage.removeItem('kern:mode'); // anything else unknown leaves the mode as it is
     else if (['', '1', 'true', 'on', 'yes', 'demo'].includes(v)) localStorage.setItem('kern:mode', 'demo');
-    q.delete('demo'); // keep other parameters, such as a dare link
-    const rest = q.toString();
-    history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
+    dropParam(q, 'demo'); // keeps other parameters, such as a dare link
   }
 } catch { /* storage blocked: no demo */ }
 const DEMO = (() => { try { return localStorage.getItem('kern:mode') === 'demo'; } catch { return false; } })();
 const CLOUD = cloud.enabled && !DEMO;
 const KEY = DEMO ? 'kern:demo' : 'kern:v1';
+const wipeDemo = () => { if (DEMO) return; try { localStorage.removeItem('kern:demo'); localStorage.removeItem('kern:mode'); } catch { /* nothing stored */ } }; // deleting the real trail removes the demo too
 const eraseStats = () => (DEMO ? Promise.resolve() : stats.erase()); // the demo must never touch the real usage-count record
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
 const FEELS: Feel[] = ['flow', 'ok', 'drag'];
@@ -102,7 +107,10 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
 };
 // Sample trail for the demo: 6 answers in 3 fields, all reflected, about 500 stones (rank Cairn), badges earned from the answers themselves.
 const demoState = (): State => {
-  const it = fresh().lang === 'it', L = (en: string, ti: string) => (it ? ti : en), day = 864e5, now = Date.now();
+  let real: { lang?: string; theme?: string } = {};
+  try { real = JSON.parse(localStorage.getItem('kern:v1') || '{}') || {}; } catch { /* no real profile to read */ }
+  const lang: Lang = real.lang === 'it' || real.lang === 'en' ? real.lang : fresh().lang, theme: Theme = real.theme === 'dark' || real.theme === 'light' ? real.theme : 'system';
+  const it = lang === 'it', L = (en: string, ti: string) => (it ? ti : en), day = 864e5, now = Date.now();
   const ans = (f: string, i: number, ago: number, t: string, r: Refl, x?: number, d?: string) => ({ f, i, t, at: now - ago * day, r, x, d });
   const answers = [
     ans('Design', 0, 16, L('Keep one thing: “Saturday · 2 for 1 pizza till 9”. Cut the DJ, the new menu, the contest and the dog. One colour: red letters on cream. Big words in the middle, a tiny “Pomo Pizza” at the bottom.', 'Ne tengo una sola: “Sabato · 2x1 fino alle 21”. Taglio DJ, menu nuovo, concorso e cane. Un solo colore: lettere rosse su crema. Parole grandi al centro, “Pomo Pizza” piccolo in basso.'), { e: 'flow', again: 'yes', hard: L('Deleting things I liked', 'Togliere cose che mi piacevano'), tip: L('Pick the one word people must remember, then cut the rest.', 'Scegli la parola da ricordare, poi taglia il resto.') }, 25, 'spark'),
@@ -112,10 +120,15 @@ const demoState = (): State => {
     ans('Writing', 1, 2, L('Leo, your streak misses you. Two minutes today?', 'Leo, la tua serie ti aspetta. Due minuti oggi?'), { e: 'ok', again: 'yes' }),
     ans('Video', 0, 1, L('Open on the cheese pull at 0:00, then cut to the van. The walk to the van goes at the end, or it goes.', 'Apro sul filo di formaggio a 0:00, poi stacco sul furgone. La camminata verso il furgone va in fondo, o sparisce.'), { e: 'flow', again: 'yes' }),
   ];
-  return sanitize({ v: 1, name: 'Giulia', field: 'Design', fields: ['Design', 'Writing', 'Video'], onboarded: true, stones: answers.reduce((s, a) => s + 50 + (a.r ? 20 : 0) + (a.x || 0), 0), answers, dared: true, lang: fresh().lang, guess: L('You seemed to light up when you started from a blank page, and to slow down on the polish.', 'Sembravi accenderti quando partivi da zero, e rallentare sulla rifinitura.') }) || fresh();
+  return sanitize({ v: 1, name: 'Giulia', field: 'Design', fields: ['Design', 'Writing', 'Video'], onboarded: true, stones: answers.reduce((s, a) => s + 50 + (a.r ? 20 : 0) + (a.x || 0), 0), answers, dared: true, lang, theme, guess: L('You seemed to light up when you started from a blank page, and to slow down on the polish.', 'Sembravi accenderti quando partivi da zero, e rallentare sulla rifinitura.') }) || fresh();
 };
+let recovered = false; // an unreadable saved trail was set aside at start-up (a notice is shown once the app is up)
 const load = (): State => {
-  try { return sanitize(JSON.parse(localStorage.getItem(KEY) || 'null')) || (DEMO ? demoState() : fresh()); } catch { return DEMO ? demoState() : fresh(); }
+  let raw: string | null = null;
+  try { raw = localStorage.getItem(KEY); } catch { /* storage blocked */ }
+  try { const ok = sanitize(JSON.parse(raw || 'null')); if (ok) return ok; } catch { /* unreadable: kept below */ }
+  if (raw) { recovered = true; try { localStorage.setItem(KEY + ':unreadable', raw.slice(0, 400000)); } catch { /* no room for the copy */ } }
+  return DEMO ? demoState() : fresh();
 };
 const S = load();
 const snapshot = () => ({ ...S, msgs: S.msgs.filter((m) => !m.typing).slice(-60) });
@@ -193,8 +206,10 @@ function say(en: string, undo?: () => void) {
   toastT.textContent = tr(en);
   toastAct = undo || null; toastB.hidden = !undo; toastB.textContent = tr('Undo');
   toast.classList.toggle('act', !!undo); toast.classList.add('on');
-  clearTimeout(tT); tT = window.setTimeout(() => { toast.classList.remove('on', 'act'); toastAct = null; toastB.hidden = true; }, undo ? 5000 : 2800);
+  if (undo) toastB.focus({ preventScroll: true }); // keyboard and screen-reader users land on Undo
+  clearTimeout(tT); tT = window.setTimeout(() => { toast.classList.remove('on', 'act'); toastAct = null; toastB.hidden = true; }, undo ? 8000 : 2800);
 }
+const reveal = (el: Element) => el.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' });
 // A step swap (answer, reflection, reward, next mission) puts a different button under the same thumb: ignore a second tap within 450 ms.
 let tapLockUntil = 0;
 const once = (fn: () => void) => () => { if (performance.now() < tapLockUntil) return; tapLockUntil = performance.now() + 450; fn(); };
@@ -285,7 +300,7 @@ const kSheet = $('kSheet'), kSet = $('kSet');
 const LAYERS = ['kReward', 'kPwS', 'kSet', 'kSheet', 'kStart', 'kLogin'].map((id) => $(id)); // top first
 const syncInert = () => {
   const top = LAYERS.find((l) => !l.hidden && (!l.classList.contains('k-start') || l.classList.contains('on')));
-  for (const c of kScr.children) (c as HTMLElement).inert = !!top && c !== top && c.id !== 'kToast';
+  for (const c of kScr.children) (c as HTMLElement).inert = !!top && c !== top && c.id !== 'kToast' && c.id !== 'kLoad';
 };
 const layerWatch = new MutationObserver(syncInert);
 LAYERS.forEach((l) => layerWatch.observe(l, { attributes: true, attributeFilter: ['hidden', 'class'] }));
@@ -302,7 +317,7 @@ const closeSheet = (sh: HTMLElement) => {
 };
 [kSheet, kSet].forEach((sh) => {
   sh.addEventListener('click', (e) => { if (e.target === sh) closeSheet(sh); });
-  sh.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(sh); });
+  sh.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeSheet(sh); } });
 });
 
 // Ranks
@@ -312,7 +327,7 @@ const rn = (n: string) => (isIt() && RIT[n]) || n;
 const rankIdx = (s: number) => RANKS.reduce((a, r, i) => (s >= r[1] ? i : a), 0);
 const setLvl = () => {
   const i = rankIdx(S.stones), nx = RANKS[i + 1], it = isIt();
-  $<HTMLTextAreaElement>('kTa').placeholder = tr('Write it your way. It stays on this device unless you ask KERN.AI.');
+  $<HTMLTextAreaElement>('kTa').placeholder = tr('Write it your way.');
   $('kRank').textContent = rn(RANKS[i][0]);
   $<HTMLImageElement>('kRankImg').src = `/img/r${i}.webp`;
   $('kSt').textContent = String(S.stones);
@@ -366,7 +381,7 @@ const renderSignals = () => {
     setD($('kCardH'), it ? `Ti accendi quando ${K[sg.best]}.` : `You light up when you ${K[sg.best]}.`);
     setD($('kCardL'), done === 3 && sg.n === 3 ? tr('3 missions · first guess')
       : done > 3 && sg.n === 3 ? (it ? `${done} missioni · ipotesi più precisa` : `${done} missions · sharper guess`)
-      : (it ? `Basata su ${sg.n} missioni su 3 · iniziale` : `Based on ${sg.n} of 3 missions · early`));
+      : (it ? `Basata su ${sg.n} ${sg.n === 1 ? 'riflessione' : 'riflessioni'} su 3 · iniziale` : `Based on ${sg.n} of 3 reflections · early`));
     chips($('kDrawn'), [tr(S.field), tr(KSHORT[sg.best])]);
     chips($('kCardC'), [tr(S.field), tr(KSHORT[sg.best])]);
   }
@@ -512,7 +527,7 @@ const renderProgress = () => {
     const p = document.createElement('p'); p.textContent = a.t;
     const acts = document.createElement('div'); acts.className = 'k-an-act';
     const ed = document.createElement('button'); ed.type = 'button'; ed.textContent = tr('Edit'); ed.addEventListener('click', () => openEdit(idx));
-    const del = document.createElement('button'); del.type = 'button'; del.textContent = tr('Delete'); del.addEventListener('click', () => deleteAnswer(idx));
+    const del = document.createElement('button'); del.type = 'button'; del.textContent = tr('Delete'); del.addEventListener('click', once(() => deleteAnswer(idx)));
     acts.append(ed, del);
     row.append(l, p, acts); box.appendChild(row);
   });
@@ -608,7 +623,8 @@ function deleteAnswer(idx: number) {
 const chatEl = $('kChat'), inEl = $<HTMLInputElement>('kIn'), cmp = $('kCmp');
 let busy = false, gen = 0; // gen: bumped by startChat, so a reply that was in flight when the chat restarted is dropped
 const OPEN = "What is your idea? Write it in your own words first. I won't suggest one.";
-const HEAVY = /(kill myself|suicid|self.?harm|hopeless|want to die|voglio morire|farla finita|non ce la faccio più)/i;
+const HEAVY = /(kill(ing)? myself|kill me\b|suicid|self.?harm|hurt(ing)? myself|end (my life|it all)|take my (own )?life|hopeless|want(ed)? to die|wish i (was|were) (dead|gone)|better off dead|(no|any) reason to live|don'?t want to (live|be here|wake up)|cut(ting)? myself|voglio morire|vorrei morire|farla finita|mi (voglio |vorrei |devo )?(uccid|ammazz|impicc)|uccider(mi|e me)|ammazzar(mi|e me)|impiccar(mi|e me)|tagliarmi le vene|mi taglio le vene|togliermi la vita|togliermi di mezzo|farmi del male|mi faccio del male|autolesion|non (voglio|riesco) più (a )?vivere|non voglio più stare qui|meglio morto|meglio morta|non ce la faccio più|vorrei sparire|voglio sparire)/i;
+const HEAVY_REPLY = "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.";
 const ASKED = /(give me|tell me|what should|write it for me|any ideas|dammi|dimmi|che idea|scrivilo tu|cosa dovrei)/i;
 const STUCK = /(stuck|don'?t know|do not know|no idea|not sure|blank|boh|non so|bloccat|nessuna idea)/i;
 const pick = <T,>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
@@ -653,6 +669,7 @@ const setLive = (ok: boolean) => {
   liveOk = ok; setT($('kAiLbl'), ok ? 'You are talking to an AI · live replies' : 'You are talking to an AI · offline preview');
 };
 async function askAI(extra?: { mission?: { title: string; brief: string }; messages?: { who: string; t: string }[] }): Promise<string | null> {
+  if (DEMO) return null; // a demo never sends what is typed anywhere: the scripted coach answers
   const ctl = new AbortController(), to = window.setTimeout(() => ctl.abort(), 10000);
   try {
     const r = await fetch('/api/coach', {
@@ -675,7 +692,7 @@ const scripted = (v: string) => {
 const sendChat = () => {
   const v = inEl.value.trim(); if (!v || busy) return;
   inEl.value = ''; S.msgs.push({ who: 'me', t: v }); busy = true; renderChat();
-  if (HEAVY.test(v)) return aiSay("This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.");
+  if (HEAVY.test(v)) return aiSay(HEAVY_REPLY);
   S.msgs.push({ who: 'ai', t: '', typing: true }); renderChat();
   const g = gen;
   askAI().then((reply) => {
@@ -718,7 +735,7 @@ function flushDraft() {
   const v = kTa.value.trim() ? kTa.value.slice(0, 2000) : '';
   if (v) S.drafts[dKey()] = v; else delete S.drafts[dKey()];
   save(); renderHome();
-  if (v) { setT(kSaved, 'Draft saved on this device'); kSaved.hidden = false; } else kSaved.hidden = true;
+  setT(kSaved, !v ? NOTE_DEFAULT : saveFailed ? "Couldn't save on this device" : 'Draft saved on this device'); kSaved.hidden = false;
 }
 kTa.addEventListener('input', () => { clearTimeout(dT); dT = window.setTimeout(flushDraft, 500); });
 // Signs on the trail: the tip each person leaves after a mission is shown, without a name, to the next
@@ -769,6 +786,7 @@ const setRfNote = () => setT($('kRfN'), user ? 'Shared without your name with th
   : 'Stays on this device for now.');
 // Practice brief (missions.ts): scenario, material to work on, tick-off steps with a progress bar
 // (first step pre-ticked), and after submitting a self-check that pays bonus stones.
+const NOTE_DEFAULT = 'It stays on this device unless you ask KERN.AI.';
 const kShX = $('kShX'), kShH = $('kShH'), kSaved = $('kSaved'), kXSteps = $('kXSteps'), kRfBar = $('kRfBar'), kRfBI = $('kRfBI');
 const setX = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.textContent = tr(en); }; // textContent: briefs contain code like <button>
 const tick = (host: HTMLElement, en: string, on: boolean, cls: string, change?: () => void) => {
@@ -826,7 +844,7 @@ $('kXEx').addEventListener('click', () => {
 });
 const nextHint = () => {
   const v = variant(cur.f, cur.i); if (!v || hintN >= v.hints.length) return;
-  const p = document.createElement('p'); p.className = 'k-msg k-ai'; setX(p, v.hints[hintN]); $('kXHints').appendChild(p);
+  const p = document.createElement('p'); p.className = 'k-msg k-ai'; setX(p, v.hints[hintN]); $('kXHints').appendChild(p); reveal(p);
   hintN++;
   const b = $<HTMLButtonElement>('kXHint');
   if (hintN >= v.hints.length) { setT(b, 'No more hints'); b.disabled = true; } else setD(b, `${tr('Another hint')} (${hintN}/${v.hints.length})`);
@@ -841,8 +859,11 @@ $('kXAsk').addEventListener('click', async () => {
   btn.disabled = true;
   track('ask_ai', cur.f, cur.i);
   const draft = kTa.value.trim().slice(0, 400);
+  if (HEAVY.test(draft)) { // heavy words in the draft: nothing is sent or echoed, the mission pauses
+    const m = document.createElement('p'); m.className = 'k-msg k-ai'; m.textContent = tr(HEAVY_REPLY); $('kXHints').appendChild(m); reveal(m); btn.disabled = false; return;
+  }
   const p = document.createElement('p'); p.className = 'k-msg k-ai k-typing'; p.innerHTML = '<i></i><i></i><i></i>'; p.setAttribute('aria-label', 'typing');
-  $('kXHints').appendChild(p);
+  $('kXHints').appendChild(p); reveal(p);
   const f0 = cur.f, i0 = cur.i;
   const reply = await askAI({ mission: { title: FIELDS[cur.f].m[cur.i][1], brief: v.brief }, messages: [{ who: 'me', t: draft ? `My answer so far: ${draft}` : 'I am about to start this mission. Help me begin.' }] });
   if (cur.f !== f0 || cur.i !== i0 || kSheet.hidden) return; // another mission was opened meanwhile
@@ -852,6 +873,7 @@ $('kXAsk').addEventListener('click', async () => {
   else if (draft.length >= 10) p.textContent = echo(draft) + tr(pick(Q_MORE[0]));
   else if (hintN < v.hints.length) { p.remove(); nextHint(); }
   else p.textContent = tr('No more hints. Write one rough line first, then ask again.'); // never a button that does nothing
+  if (p.isConnected) reveal(p);
   btn.disabled = false;
 });
 // Self-check after submitting: +10 per quality bar met, +25 for the twist. Returns the bonus (not saved here).
@@ -1016,7 +1038,7 @@ const fillSheet = (f: string, i: number) => {
   setT($('kShL'), m[0]); setT($('kShT'), m[1]);
   setT($('kShQ'), FIELDS[f].qs[i % FIELDS[f].qs.length]);
   renderBrief(f, i);
-  kShA.hidden = false; kShR.hidden = true; kSaved.hidden = true;
+  kShA.hidden = false; kShR.hidden = true; setT(kSaved, NOTE_DEFAULT); kSaved.hidden = false;
   renderTrailSigns(f, i);
 };
 // No clock on a mission: "~3 min" is a soft estimate shown by renderBrief, never a countdown or a speed bonus (quality over speed).
@@ -1103,7 +1125,7 @@ function finish(r: Refl | undefined) {
   save(); if (a && r) shareSign(a);
   if (drop.tier !== 'none') { showDrop(drop, side, true); return; }
   closeSheet(kSheet); setLvl(); renderProgress();
-  say((r ? tr('Reflection saved. +20 stones.') : tr('+50 stones. Your answer is saved on this device.')) + (side ? ` +${side} bonus` : ''));
+  say((saveFailed ? tr("Couldn't save on this device. Copy your answer somewhere safe.") : r ? tr('Reflection saved. +20 stones.') : tr('+50 stones. Your answer is saved on this device.')) + (side ? ` +${side} bonus` : ''));
 }
 
 // Reward preview: shows what winning feels like without changing your stones.
@@ -1133,7 +1155,7 @@ kWin.addEventListener('click', () => {
   $('kRwOk').focus();
 });
 $('kRwOk').addEventListener('click', closeWin);
-kRw.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeWin(); });
+kRw.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeWin(); } });
 
 // "A first guess" feedback
 const fb = $('kFb');
@@ -1154,7 +1176,14 @@ const markPick = () => {
 const openStart = (step2 = false) => {
   if (S.onboarded) picks = [...S.fields];
   setT($('kGo'), S.onboarded ? 'Save interests' : 'Start my first mission');
+  $('kPickX').hidden = !S.onboarded; // reopened from "+ Add" or Settings: there must be a way out
+  kStart.setAttribute('aria-labelledby', step2 ? 'kS2H' : 'kS1H');
   kS1.hidden = step2; kS2.hidden = !step2; markPick(); kStart.classList.add('on');
+  if (S.onboarded) (step2 ? document.querySelector<HTMLElement>('#kPick .k-tile') : $('kIdk'))?.focus({ preventScroll: true });
+};
+const closePicker = () => { // leave the interests screen without changing anything
+  if (vtBusy) return;
+  picks = [...S.fields]; kStart.classList.remove('on'); syncInert(); kAdd.focus({ preventScroll: true });
 };
 const renderMe = () => { $('kAv').textContent = (S.name.trim()[0] || 'K').toUpperCase(); };
 // Login screen modes: 'up' create account, 'in' log in, 'guest' local-only profile.
@@ -1249,7 +1278,7 @@ $('kLogout').addEventListener('click', async () => {
   if (user && pulled) { try { await cloud.push(user.id, snapshot()); } catch { /* best effort before leaving */ } }
   try { await cloud.signOut(); } catch { /* still clear the device */ }
   await eraseStats(); // the next person on this device is asked again
-  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
+  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ } wipeDemo();
   location.replace('/');
 });
 $('kDelAcc').addEventListener('click', async () => {
@@ -1257,12 +1286,12 @@ $('kDelAcc').addEventListener('click', async () => {
   clearTimeout(pushT); // a pending sync must not race the deletion
   try { await cloud.deleteAccount(); } catch (err) { say(cloud.why(err)); return; }
   await eraseStats();
-  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
+  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ } wipeDemo();
   location.replace('/');
 });
 const kPwS = $('kPwS');
 kPwS.addEventListener('click', (e) => { if (e.target === kPwS) closeSheet(kPwS); });
-kPwS.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(kPwS); });
+kPwS.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeSheet(kPwS); } });
 $('kPwF').addEventListener('submit', async (e) => {
   e.preventDefault();
   const p = $<HTMLInputElement>('kPwN').value, er = $('kPwErr');
@@ -1270,7 +1299,8 @@ $('kPwF').addEventListener('submit', async (e) => {
   try { await cloud.setPassword(p); $<HTMLInputElement>('kPwN').value = ''; closeSheet(kPwS); say('Password updated.'); }
   catch (err) { setT(er, cloud.why(err)); er.hidden = false; }
 });
-$('kIdk').addEventListener('click', () => { kS1.hidden = true; kS2.hidden = false; });
+$('kIdk').addEventListener('click', () => { kS1.hidden = true; kS2.hidden = false; kStart.setAttribute('aria-labelledby', 'kS2H'); });
+$('kPickX').addEventListener('click', closePicker);
 // First visit: loader > choice > interests > profile (name + 18+, or an account) > missions.
 const pop = () => { // the field's object drops into the mission card
   if (still) return;
@@ -1340,9 +1370,10 @@ kScr.querySelectorAll<HTMLElement>('[data-k-copy]').forEach((b) => b.addEventLis
   if (b.dataset.kCopy === 'dare') { markDared(); track('share'); }
   if (!(await copy(url))) { say(url); return; }
   say('Link copied.');
-  const en = b.dataset.en!;
+  b.dataset.orig ??= b.dataset.en!; // the first label, so a second tap cannot make "Copied" the label for good
+  const en = b.dataset.orig;
   setT(b, 'Copied'); b.classList.add('ok');
-  window.setTimeout(() => { setT(b, en); b.classList.remove('ok'); }, 1600);
+  clearTimeout(Number(b.dataset.t)); b.dataset.t = String(window.setTimeout(() => { setT(b, en); b.classList.remove('ok'); }, 1600));
 }));
 
 function markDared() { if (!S.dared) { S.dared = true; save(); renderBadges(); } }
@@ -1392,7 +1423,9 @@ const cardImage = async (): Promise<Blob | null> => {
   x.font = `700 38px ${B}`; x.fillStyle = '#C9F24A'; x.fillText(`${tr('Find yours at')} ${location.host}`, 90, 1250);
   return new Promise((res) => c.toBlob(res, 'image/png'));
 };
-const shareCard = async () => {
+let cardBusy = false; // one tap, one download
+const shareCard = async () => { if (cardBusy) return; cardBusy = true; try { await shareCardNow(); } finally { window.setTimeout(() => { cardBusy = false; }, 900); } };
+const shareCardNow = async () => {
   const blob = await cardImage();
   const text = tr('My KERN so far: {s}').replace('{s}', $('kCardH').textContent || '');
   if (!blob) return shareText('KERN', text, `${location.origin}/`, 'Link copied.');
@@ -1444,7 +1477,7 @@ const dp = new URLSearchParams(location.search).get('dare');
 if (dp) {
   const [f, i] = dp.split('.'); const n = Number(i);
   if (FIELDS[f] && Number.isInteger(n) && n >= 0 && n < total(f)) dare = { f, i: n };
-  history.replaceState(null, '', location.pathname);
+  dropParam(new URLSearchParams(location.search), 'dare');
 }
 function renderDare() { $('kDare').hidden = !dare; if (dare) setT($('kDareT'), FIELDS[dare.f].m[dare.i][1]); }
 $('kDareGo').addEventListener('click', () => { if (dare) openAnswer(dare.f, dare.i, true); });
@@ -1452,6 +1485,8 @@ $('kDareGo').addEventListener('click', () => { if (dare) openAnswer(dare.f, dare
 // Settings
 const setLang = (l: Lang) => {
   S.lang = l; save(); document.documentElement.lang = l;
+  document.title = tr('KERN · Find your direction by doing real work');
+  document.querySelectorAll<HTMLAnchorElement>('a[href^="/privacy/"]').forEach((a) => a.setAttribute('href', l === 'it' ? '/privacy/#it' : '/privacy/'));
   kTxt.forEach((e) => { const en = e.dataset.en; if (!en) return; if (e.classList.contains('k-xb')) e.textContent = tr(en); else e.innerHTML = tr(en); });
   document.querySelectorAll<HTMLElement>('[aria-label]').forEach((e) => { const en = (e.dataset.enLabel ??= e.getAttribute('aria-label') || ''); e.setAttribute('aria-label', tr(en)); });
   if (fb.dataset.src) fb.textContent = tr(fb.dataset.src);
@@ -1481,7 +1516,7 @@ $('kRemind').addEventListener('click', () => {
 $('kDel').addEventListener('click', async () => {
   if (!confirm(tr('This deletes your trail on this device. Continue?'))) return;
   await eraseStats(); // also deletes what was counted for this device
-  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ }
+  try { localStorage.removeItem(KEY); } catch { /* nothing stored */ } wipeDemo();
   location.replace('/');
 });
 
@@ -1508,6 +1543,16 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   });
 }
 
+// Escape closes the top layer even when focus has dropped to the page (after a swap, or a button that disappeared).
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape' || e.defaultPrevented) return;
+  if (!kPwS.hidden) closeSheet(kPwS);
+  else if (!kRw.hidden) closeWin();
+  else if (!kSet.hidden) closeSheet(kSet);
+  else if (!kSheet.hidden) closeSheet(kSheet);
+  else if (kStart.classList.contains('on') && S.onboarded) closePicker();
+});
+
 // Start
 renderMe();
 applyTheme();
@@ -1518,7 +1563,11 @@ moveInd(onTab(), false);
 setMode(mode);
 renderAcct();
 booted = true;
-if (DEMO) { const kDemo = $('kDemo'); kDemo.hidden = false; kDemo.addEventListener('click', () => { location.href = '/?demo=off'; }); }
+if (DEMO) {
+  const kDemo = $('kDemo'); kDemo.hidden = false; kDemo.addEventListener('click', () => { location.href = '/?demo=off'; });
+  document.querySelectorAll<HTMLElement>('[data-k-send], #kExp').forEach((e) => { e.hidden = true; }); // sample data is not sent or exported as if it were a real trail
+}
+if (recovered) say("We couldn't read your saved trail, so you are starting fresh. A copy was kept on this device.");
 track('visit'); // once a day per device, only for people who said yes
 if (!S.onboarded) openStart(); // the choice comes first, right after the loader
 else if (!S.name) kLogin.classList.add('on');

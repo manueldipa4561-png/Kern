@@ -37,6 +37,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
   </head>
   <body>
     <main class="k-scr" id="kScr">
+      <h1 class="k-sr">KERN</h1>
       <div class="k-load" id="kLoad" aria-hidden="true">
         <svg viewBox="0 0 100 100"><path d={MARK} class="ks" fill="currentColor"/><path d={LINE} fill="none" stroke-width="7" stroke-linejoin="round" class="kl" stroke="currentColor"/><circle cx="66.4" cy="66.4" r="9" class="kc"/></svg>
         <div class="k-word">kern<i>.</i></div>
@@ -59,7 +60,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
               <p class="k-msg k-ai" id="kShQ">What would make the first step easier for someone brand new?</p>
               <label class="k-l" for="kTa">Your answer</label>
               <textarea id="kTa" rows="4" maxlength="2000"></textarea>
-              <p class="k-rf-note" id="kSaved" aria-live="polite" hidden></p>
+              <p class="k-rf-note" id="kSaved" aria-live="polite">It stays on this device unless you ask KERN.AI.</p>
               <div class="k-sh-btns"><button type="button" class="k-go" id="kSub">Submit answer</button><button type="button" class="k-sk" id="kCancel">Not now</button></div>
             </div>
             <div class="k-x" id="kShH">
@@ -175,11 +176,11 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
         </form>
       </div>
 
-      <div class="k-start" id="kStart">
+      <div class="k-start" id="kStart" role="dialog" aria-modal="true" aria-labelledby="kS1H">
         <div id="kS1" class="k-sp">
           <div class="k-float" aria-hidden="true"><img src="/img/f-design.webp" alt="" width="400" height="400" /><img src="/img/f-music.webp" alt="" width="400" height="400" /><img src="/img/f-code.webp" alt="" width="400" height="400" /></div>
           <div class="k-l">Start here</div>
-          <h4>What do you want<br>to <b>do?</b></h4>
+          <h4 id="kS1H">What do you want<br>to <b>do?</b></h4>
           <p class="k-promise">Try short, real tasks from real jobs. Find out what you enjoy and how you work. Free, no account.</p>
           <ol class="k-how">
             <li><b>01</b><p>Try a real mission</p></li>
@@ -191,12 +192,13 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
         </div>
         <div id="kS2" class="k-sp" hidden>
           <div class="k-l">Good. Let's find out.</div>
-          <h4>What are you<br>curious about <b>right now?</b></h4>
+          <h4 id="kS2H">What are you<br>curious about <b>right now?</b></h4>
           <p class="k-l">Pick one or more. You can add others anytime.</p>
           <div class="k-tiles" id="kPick" role="group">
             {FIELDS.map((f) => <button type="button" class="k-tile" data-f={f} aria-pressed="false"><img src={`/img/f-${f.toLowerCase()}.webp`} alt="" width="400" height="400" decoding="async" /><span>{f}</span></button>)}
           </div>
           <button type="button" class="k-go" id="kGo">Start my first mission</button>
+          <button type="button" class="k-sk" id="kPickX" hidden>Not now</button>
         </div>
       </div>
 

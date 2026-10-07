@@ -5,6 +5,9 @@ import type { Config, Context } from '@netlify/functions';
 const MODEL = process.env.COACH_MODEL || 'claude-haiku-4-5-20251001';
 const FIELDS = new Set(['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music']);
 const MAX_MSGS = 14, MAX_LEN = 400, MAX_TOTAL = 6500;
+// Keep in sync with HEAVY in src/scripts/app.ts. Heavy words are answered here with a pause and never sent to the model.
+const HEAVY = /(kill(ing)? myself|kill me\b|suicid|self.?harm|hurt(ing)? myself|end (my life|it all)|take my (own )?life|hopeless|want(ed)? to die|wish i (was|were) (dead|gone)|better off dead|(no|any) reason to live|don'?t want to (live|be here|wake up)|cut(ting)? myself|voglio morire|vorrei morire|farla finita|mi (voglio |vorrei |devo )?(uccid|ammazz|impicc)|uccider(mi|e me)|ammazzar(mi|e me)|impiccar(mi|e me)|tagliarmi le vene|mi taglio le vene|togliermi la vita|togliermi di mezzo|farmi del male|mi faccio del male|autolesion|non (voglio|riesco) più (a )?vivere|non voglio più stare qui|meglio morto|meglio morta|non ce la faccio più|vorrei sparire|voglio sparire)/i;
+const PAUSE = { en: "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.", it: 'Sembra una cosa pesante, quindi metto in pausa la missione. Parlane con una persona di cui ti fidi o con un servizio di ascolto locale. Se sei in pericolo, chiama il numero di emergenza.' };
 
 const SYSTEM = (lang: string, field: string, versions: number, mission: string) => `You are KERN.AI, the co-pilot inside KERN, an app where people try small real missions to find out what they enjoy doing.
 
@@ -78,6 +81,7 @@ export default async (req: Request, context: Context) => {
   // Too long: drop the oldest turns (keeping the first one a user turn) instead of failing the whole chat.
   while (total > MAX_TOTAL && turns.length > 1) { total -= turns.shift()!.content.length; if (turns[0]?.role === 'assistant') total -= turns.shift()!.content.length; }
   if (!turns.length || turns[turns.length - 1].role !== 'user' || total > MAX_TOTAL) return json({ error: 'input' }, 400);
+  if (HEAVY.test(turns[turns.length - 1].content)) return json({ reply: PAUSE[lang] });
 
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
