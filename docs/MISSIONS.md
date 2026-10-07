@@ -1,6 +1,6 @@
 # KERN missions: authoring guide
 
-For people and for the Mission Studio AI. A mission is one tiny, real task, done in 2-5 minutes on a phone, that can be posted or sent tonight. English and Italian always.
+For people and for the Mission Studio AI. A mission is one tiny, concrete task, done in 2-5 minutes on a phone, that can be posted or sent tonight. English and Italian always.
 
 <!-- studio:rules -->
 ## Audience and tone
