@@ -1,0 +1,78 @@
+{
+  "brand": "Pallino Pops",
+  "labelTag": { "en": "sample stand", "it": "banchetto assaggi" },
+  "title": { "en": "Sell a snack in 10 seconds", "it": "Vendi uno snack in 10 secondi" },
+  "blurb": {
+    "en": "Pallino Pops has a free-sample table at a student fair. Say what makes a stranger take one.",
+    "it": "Pallino Pops ha un tavolo di assaggi gratis a una fiera per studenti. Di’ cosa fa prendere un assaggio a chi passa."
+  },
+  "who": {
+    "en": "Pallino Pops, a popped-lentil snack (fictional)",
+    "it": "Pallino Pops, snack di lenticchie soffiate (fittizio)"
+  },
+  "brief": {
+    "en": "Pallino Pops has a free-sample table at a student fair. Strangers walk past in a hurry. Write the 3 short lines you say to get one person to taste.",
+    "it": "Pallino Pops ha un tavolo di assaggi gratis a una fiera per studenti. Gli sconosciuti passano di corsa. Scrivi le 3 frasi brevi che dici per far assaggiare una persona."
+  },
+  "asset": {
+    "title": { "en": "The sample table", "it": "Il tavolo degli assaggi" },
+    "body": {
+      "en": "PRODUCT: Pallino Pops, popped lentils with sea salt, 30 g bag, €1.20\nTRUE: baked, not fried, and they crunch like crisps\nTRUE: two flavours today, sea salt and rosemary\nTRUE: free samples fit in a small paper cup\nPEOPLE: students in a hurry, headphones on, phone in hand\nNEVER: “best ever”, pressure, health promises",
+      "it": "PRODOTTO: Pallino Pops, lenticchie soffiate al sale marino, sacchetto da 30 g, 1,20 €\nVERO: al forno, non fritte, e fanno crunch come le patatine\nVERO: oggi due gusti, sale marino e rosmarino\nVERO: gli assaggi gratis stanno in un bicchierino di carta\nPERSONE: studenti di fretta, cuffie nelle orecchie, telefono in mano\nMAI: “il migliore di sempre”, pressione, promesse sulla salute"
+    },
+    "mono": false
+  },
+  "steps": [
+    { "en": "Write a first line that makes someone slow down.", "it": "Scrivi una prima frase che fa rallentare chi passa." },
+    { "en": "Add one true fact about the snack, in 8 words or fewer.", "it": "Aggiungi un fatto vero sullo snack, in 8 parole o meno." },
+    { "en": "Write the question that gets them to take a cup.", "it": "Scrivi la domanda che li fa prendere un bicchierino." }
+  ],
+  "mins": 3,
+  "bar": [
+    { "en": "The first line fits in one breath", "it": "La prima frase sta in un solo respiro" },
+    { "en": "Every fact is true, no health promises", "it": "Ogni fatto è vero, niente promesse sulla salute" },
+    { "en": "A “no thanks” feels easy", "it": "Dire “no grazie” è facile" }
+  ],
+  "twist": {
+    "en": "Copy it and say it out loud to a friend. Or use it at a real stall.",
+    "it": "Copialo e dillo a voce alta a qualcuno. Oppure usalo a un banchetto vero."
+  },
+  "help": {
+    "ex": {
+      "en": "Line 1: “Free crunch, no catch.” Fact: “Baked lentils, two flavours.” Question: “Salt or rosemary?” Three lines, one breath each.",
+      "it": "Frase 1: “Crunch gratis, senza fregature.” Fatto: “Lenticchie al forno, due gusti.” Domanda: “Sale o rosmarino?” Tre frasi, un respiro ciascuna."
+    },
+    "hints": [
+      { "en": "What makes someone slow down when they are in a hurry?", "it": "Cosa fa rallentare qualcuno che ha fretta?" },
+      { "en": "What can you say about the snack that is true and easy to picture?", "it": "Cosa puoi dire dello snack che sia vero e facile da immaginare?" },
+      { "en": "What is the easiest question that ends with a cup in their hand?", "it": "Qual è la domanda più facile che finisce con un bicchierino in mano?" }
+    ]
+  },
+  "easy": {
+    "brief": {
+      "en": "A snack table at a student fair gives away free samples. What would you say to someone walking past?",
+      "it": "Il tavolo di uno snack a una fiera per studenti regala assaggi. Cosa diresti a chi passa?"
+    },
+    "steps": [
+      { "en": "Read the table card and pick one true fact.", "it": "Leggi la scheda del tavolo e scegli un fatto vero." },
+      { "en": "Write one friendly sentence with that fact.", "it": "Scrivi una frase gentile con quel fatto." },
+      { "en": "Add a question like “Want to try one?”", "it": "Aggiungi una domanda come “Ti va di assaggiare?”" }
+    ],
+    "ex": {
+      "en": "Baked lentils, two flavours. Salt or rosemary? Take one.",
+      "it": "Lenticchie al forno, due gusti. Sale o rosmarino? Assaggia."
+    },
+    "asset": {
+      "title": { "en": "The table card", "it": "La scheda del tavolo" },
+      "body": {
+        "en": "Pallino Pops, popped lentils\nBaked, not fried\nTwo flavours: sea salt and rosemary\nFree samples in paper cups",
+        "it": "Pallino Pops, lenticchie soffiate\nAl forno, non fritte\nDue gusti: sale marino e rosmarino\nAssaggi gratis in bicchierini di carta"
+      }
+    },
+    "hints": [
+      { "en": "What would make you stop if you were in a hurry?", "it": "Cosa ti farebbe fermare se avessi fretta?" },
+      { "en": "Which fact on the card is easy to picture?", "it": "Quale fatto della scheda è facile da immaginare?" },
+      { "en": "What easy question ends with them taking a cup?", "it": "Quale domanda facile finisce con loro che prendono un bicchierino?" }
+    ]
+  }
+}

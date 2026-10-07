@@ -33,9 +33,11 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 
 - Optional account: sign up, log in, forgot password, log out, delete account; the trail syncs across devices and merges with what was on the device
 - Or no account: local profile (first name, 18+ confirmation), everything stays in the browser
-- Onboarding: the choice first, then one or more interests (fields); on Missions you switch path in one tap and progress is kept per field, "+ Add" picks more. Missions, yourKERN, Trail, KERN.AI co-pilot (scripted: it only asks questions)
+- Onboarding: the choice first, then one or more interests (fields); on Missions you switch path in one tap and progress is kept per field, "+ Add" picks more. Missions, yourKERN, Trail, KERN.AI co-pilot (it only asks questions: live through Claude via a Netlify function when online, with a scripted fallback)
 - Home: your next mission first, then your 3 missions with status (done / next / draft)
-- Rounds: every field has 6 missions, shown 3 at a time. Round 1 unlocks your Kern card; finishing it shows a "round complete" moment on Home, with round 2 one tap away. Round 2 repeats the same three kinds (improve what exists, start from zero, work with a partner), so the card gets sharper with every round. After a reward, the button leads straight into the next mission of the round. Missions live in `fields.ts`, `missions.ts`, `helps.ts` and `easy.ts` (same order in all four); `npm test` checks they match
+- Rounds: every field has 6 missions, shown 3 at a time. Round 1 unlocks your Kern card; finishing it shows a "round complete" moment on Home. Round 2 is never locked: a "Round 2" link under the list shows it from day one. Round 2 repeats the same three kinds (improve what exists, start from zero, work with a partner), so the card gets sharper with every round. After a reward, the button leads straight into the next mission of the round. Missions live in `fields.ts`, `missions.ts`, `helps.ts` and `easy.ts` (same order in all four); `npm test` checks they match
+- Brand missions: a mission can be presented by a brand, shown as "Brand mission · name" in the brand colour. The mission text stays brand-neutral (a made-up subject), so a deal is one line in `src/scripts/sponsors.ts`. The three in the app are demos
+- Mission Studio: `node scripts/mission-studio.mjs` has Claude draft a new English and Italian mission from a field, a kind and a subject, 29 automatic rules check it, and a person approves it. It needs `ANTHROPIC_API_KEY` for a live run and is covered offline by `npm test`. The authoring guide is `docs/MISSIONS.md`
 - Answers with automatic drafts; edit or delete them (with Undo); +50 stones per answer, +20 for a reflection
 - Quick reflection after each answer (how it felt, would you do it again, hardest part, a sign for the next person)
 - Signs on the trail: with an account, the sign you leave is shown without your name to the next people who open that mission (`kern_signs` in `supabase/schema.sql`: public read of tip and date only, writes through `add_sign` / `delete_my_sign`, 20 a day each, no links, emails or long numbers). Deleting the answer removes its sign
@@ -53,13 +55,15 @@ The classic design before v1.0 is kept on the `classic-design` branch and the `v
 
 ## Not built yet
 
-Real partner missions, peer review and ranking, a real AI co-pilot, push notifications.
+Real partner missions (brand missions are demos for now), peer review and ranking, push notifications, payments, premium missions with free windows, usage analytics.
 
 ## Structure
 
 - `src/pages/index.astro` markup, `src/styles/app.css` styles, `src/scripts/app.ts` logic
 - `src/scripts/cloud.ts` accounts and sync (loaded only when the Supabase variables are set), `supabase/schema.sql` database setup
 - `src/scripts/i18n.ts` Italian strings (English is the source), `src/scripts/fields.ts` missions per field
+- `src/scripts/next.ts` rounds and the next-mission rule, `src/scripts/sponsors.ts` brand missions
+- `scripts/` the tests run by `npm test`, and the Mission Studio
 - `public/` manifest, service worker, icons, favicons; `public/img/` 3D objects (fields, ranks, cairn, co-pilot orb)
 
 ## License

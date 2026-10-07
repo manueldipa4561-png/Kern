@@ -8,6 +8,7 @@ import { FIELDS } from './fields';
 import { MX } from './missions';
 import { RELICS, rollDrop, type Drop } from './loot';
 import { nextSpot, roundOf, PER_ROUND } from './next';
+import { SPONSORS } from './sponsors';
 import { HELPS } from './helps';
 import { EASY } from './easy';
 import * as cloud from './cloud';
@@ -149,6 +150,10 @@ const doneSet = () => doneIn(S.field);
 const total = (f = S.field) => FIELDS[f]?.m.length ?? PER_ROUND;
 const base = (f = S.field) => roundOf(doneIn(f), total(f)) * PER_ROUND;
 const winDone = () => { const d = doneSet(), b = base(); return new Set([0, 1, 2].filter((k) => d.has(b + k))); };
+let peek = ''; // "field:base()" of the round whose NEXT round is on show in the list: a look ahead, never a lock. Keyed by field too, so it cannot leak to another field
+const peekKey = () => `${S.field}:${base()}`;
+const peeking = () => peek === peekKey() && base() + PER_ROUND < total();
+const viewBase = () => base() + (peeking() ? PER_ROUND : 0); // first mission of the three rows on screen
 
 const toast = $('kToast'), toastT = $('kToastT'), toastB = $('kToastB');
 let tT = 0, toastAct: (() => void) | null = null;
@@ -159,11 +164,14 @@ function say(en: string, undo?: () => void) {
   toast.classList.toggle('act', !!undo); toast.classList.add('on');
   clearTimeout(tT); tT = window.setTimeout(() => { toast.classList.remove('on', 'act'); toastAct = null; toastB.hidden = true; }, undo ? 5000 : 2800);
 }
+// A step swap (answer, reflection, reward, next mission) puts a different button under the same thumb: ignore a second tap within 450 ms.
+let tapLockUntil = 0;
+const once = (fn: () => void) => () => { if (performance.now() < tapLockUntil) return; tapLockUntil = performance.now() + 450; fn(); };
 kScr.appendChild(toast); // a direct child of the screen, so a screen reader still hears it while a sheet makes the app shell inert
 toastB.addEventListener('click', () => { const f = toastAct; toastAct = null; toast.classList.remove('on', 'act'); toastB.hidden = true; if (f) f(); });
 
 // Static text: remember the English source so language switches are lossless.
-const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l, h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs button:not(:nth-child(2))');
+const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs button:not(:nth-child(2)), #kXAsk, .k-streak small, .k-finds-h span');
 kTxt.forEach((e) => { e.dataset.en = e.innerHTML.trim(); });
 const SAMPLE = { guess: $('kGuess').dataset.en!, why: $('kWhy').dataset.en!, ai: $('kAiSig').dataset.en!, card: $('kCardH').dataset.en!, cardL: $('kCardL').dataset.en!, drawn: ['Shaping ideas', 'Writing', 'Solo work'], cardC: ['Shaping ideas', 'Writing'] };
 
@@ -251,7 +259,11 @@ const syncInert = () => {
 const layerWatch = new MutationObserver(syncInert);
 LAYERS.forEach((l) => layerWatch.observe(l, { attributes: true, attributeFilter: ['hidden', 'class'] }));
 let lastFocus: HTMLElement | null = null;
-const openSheetEl = (sh: HTMLElement, focus: HTMLElement) => { lastFocus = document.activeElement as HTMLElement; sh.hidden = false; syncInert(); focus.focus(); };
+const openSheetEl = (sh: HTMLElement, focus: HTMLElement) => {
+  lastFocus = document.activeElement as HTMLElement; sh.hidden = false; syncInert();
+  sh.querySelector('.k-sh-in')?.scrollTo(0, 0); // start at the top, whatever the last sheet was scrolled to
+  focus.focus({ preventScroll: true });
+};
 const closeSheet = (sh: HTMLElement) => {
   const reveal = sh === kSheet && !$('kShD').hidden; // closed from the drop screen (Escape or backdrop): refresh stones and rank like Continue does
   sh.hidden = true; syncInert(); if (sh === kSheet) flushDraft(); lastFocus?.focus();
@@ -342,14 +354,14 @@ const renderSignals = () => {
   setT($('kMeterN'), any ? 'From your reflections. Not a test.' : 'Reflect after a mission to fill this.');
   const n = S.mine.length;
   if (n >= 2) setD($('kAiSig'), it ? `Hai riscritto la tua idea ${n} volte in KERN.AI. Confronta la versione 1 con l'ultima.` : `You rewrote your idea ${n} times in KERN.AI. Compare version 1 with your latest one.`);
-  else setT($('kAiSig'), SAMPLE.ai);
+  else setT($('kAiSig'), 'Write your idea in KERN.AI. Your versions show up here.'); // never a made-up insight shown as if it were yours
 };
 
 // Home: greeting, next mission, the three missions with status.
 // Your interests on Missions: switch path in one tap (progress is kept per field), or add more.
 const switchField = (f: string) => {
   if (f === S.field || !FIELDS[f]) return;
-  S.field = f; save(); applyField(false); pop();
+  peek = ''; S.field = f; save(); applyField(false); pop();
 };
 const renderFields = () => {
   const box = $('kFields');
@@ -392,13 +404,21 @@ const renderHome = () => {
     setT($('kNxT'), m[1]); setT($('kNxP'), m[2]);
     setT(kAdd, S.drafts[`${S.field}.${b + next}`] ? 'Continue your draft' : 'Add your answer'); kAdd.dataset.kAns = String(b + next);
   }
-  if (round) setD($('kMsL'), it ? `Round ${round + 1} · le tue 3 missioni` : `Round ${round + 1} · your 3 missions`); else setT($('kMsL'), 'Your 3 missions');
+  const finished = next === undefined || fresh; // the card is about the Kern card now, so no reward chips
+  $('kNxM').style.display = finished ? 'none' : '';
+  // The list shows the round in play, or a look at the next one (never a lock: every round is open).
+  const looking = peeking(), vb = viewBase(), vr = vb / PER_ROUND, vdone = new Set([0, 1, 2].filter((k) => doneSet().has(vb + k)));
+  if (vr) setD($('kMsL'), it ? `Round ${vr + 1} · le tue 3 missioni` : `Round ${vr + 1} · your 3 missions`); else setT($('kMsL'), 'Your 3 missions');
+  const more = b + PER_ROUND < total(), peekBtn = $('kPeek');
+  peekBtn.hidden = !more;
+  if (more) setD(peekBtn, looking ? (it ? `‹ Torna al round ${round + 1}` : `‹ Back to round ${round + 1}`) : (it ? `Round ${round + 2} · altre 3 missioni ›` : `Round ${round + 2} · 3 more missions ›`));
   const nb = boostOf(S.field), nbEl = $('kNxB');
-  nbEl.hidden = !nb;
+  nbEl.hidden = !nb || finished;
   if (nb) setD(nbEl, `${boostTxt(nb.m)} · ${tr(f.m[nb.i][1])}`);
   [0, 1, 2].forEach((i) => {
-    const a = b + i, row = $('kMR' + i), st = done.has(i) ? 'Done' : i === next ? 'Next' : S.drafts[`${S.field}.${a}`] ? 'Draft' : 'Not started';
-    row.classList.toggle('done', done.has(i)); row.classList.toggle('next', i === next);
+    const a = vb + i, row = $('kMR' + i), isNext = !looking && i === next;
+    const st = vdone.has(i) ? 'Done' : isNext ? 'Next' : S.drafts[`${S.field}.${a}`] ? 'Draft' : 'Not started';
+    row.classList.toggle('done', vdone.has(i)); row.classList.toggle('next', isNext);
     setT(row.querySelector('b')!, f.m[a][1]);
     const bo = boostOf(S.field), isB = !!bo && bo.i === a;
     row.classList.toggle('boost', isB);
@@ -629,7 +649,7 @@ const applyField = (resetChat: boolean) => {
 // Answer sheet: step 1 answer (draft autosaved), step 2 quick reflection.
 const kTa = $<HTMLTextAreaElement>('kTa'), kShA = $('kShA'), kShR = $('kShR');
 let cur: { f: string; i: number; dare: boolean; edit: number } = { f: 'Design', i: 0, dare: false, edit: -1 };
-let lastAns: Answer | null = null, inTime = false, dT = 0; // lastAns: the answer being reflected on; inTime: submitted inside the time box
+let lastAns: Answer | null = null, dT = 0; // lastAns: the answer being reflected on
 let lastBoost: { i: number; m: number } | null = null; // the daily boost as promised on screen, read before the answer moves the round (boostOf depends on progress)
 const dKey = () => `${cur.f}.${cur.i}`;
 function flushDraft() {
@@ -716,6 +736,9 @@ function renderBrief(f: string, i: number) {
   kXSteps.innerHTML = ''; kRfBI.innerHTML = '';
   if (!v || !x) return;
   setX($('kXWho'), x.who); setD($('kXMin'), `~${x.mins} min`);
+  const who = $('kXWho'), sp = SPONSORS[`${f}.${i}`]; // a brand mission shows who presents it, in their colour (sponsors.ts)
+  who.classList.toggle('brand', !!sp);
+  if (sp) { setD(who, `${tr('Brand mission')} · ${sp.name}`); who.style.setProperty('--brand', sp.color); } else who.style.removeProperty('--brand');
   const bo = boostOf(f), bEl = $('kXBoost');
   bEl.hidden = !(bo && bo.i === i && cur.edit < 0);
   if (!bEl.hidden) setD(bEl, `${boostTxt(bo!.m)} · ${tr('stones multiplied')}`);
@@ -765,7 +788,8 @@ $('kXAsk').addEventListener('click', async () => {
   setLive(!!reply);
   if (reply) p.textContent = reply;
   else if (draft.length >= 10) p.textContent = echo(draft) + tr(pick(Q_MORE[0]));
-  else { p.remove(); nextHint(); }
+  else if (hintN < v.hints.length) { p.remove(); nextHint(); }
+  else p.textContent = tr('No more hints. Write one rough line first, then ask again.'); // never a button that does nothing
   btn.disabled = false;
 });
 // Self-check after submitting: +10 per quality bar met, +25 for the twist. Returns the bonus (not saved here).
@@ -917,13 +941,13 @@ function offerNext() {
   kDrOk.dataset.next = `${nx.f}.${nx.i}`; setT(kDrOk, 'Next mission');
   setD(kDrNx, `${tr('Next')}: ${tr(m[1])}${mins ? ` · ~${mins} min` : ''}`); kDrNx.hidden = false;
 }
-kDrOk.addEventListener('click', () => {
+kDrOk.addEventListener('click', once(() => {
   const [f, i] = (kDrOk.dataset.next || '').split('.');
   closeSheet(kSheet); setLvl(); renderProgress();
   if (!FIELDS[f]) return;
   if (f !== S.field) switchField(f);
   openAnswer(f, Number(i));
-});
+}));
 const fillSheet = (f: string, i: number) => {
   kSheet.classList.remove('drop'); kShD.hidden = true;
   const m = FIELDS[f].m[i];
@@ -933,25 +957,13 @@ const fillSheet = (f: string, i: number) => {
   kShA.hidden = false; kShR.hidden = true;
   renderTrailSigns(f, i);
 };
-// Beat the clock: a gentle countdown from the mission's time box; finishing inside it pays +15. After it, no pressure.
-let openedAt = 0, clockT = 0;
-const runClock = () => {
-  clearInterval(clockT);
-  const x = MX[cur.f]?.[cur.i]; if (!x || cur.edit >= 0) return;
-  const el = $('kXMin');
-  const tick = () => {
-    if (kSheet.hidden || kShA.hidden) { clearInterval(clockT); return; }
-    const left = x.mins * 60 - Math.round((Date.now() - openedAt) / 1000);
-    setD(el, left > 0 ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')} · +15` : tr('Take your time'));
-  };
-  tick(); clockT = window.setInterval(tick, 1000);
-};
+// No clock on a mission: "~3 min" is a soft estimate shown by renderBrief, never a countdown or a speed bonus (quality over speed).
 const openAnswer = (f: string, i: number, dare = false) => {
   cur = { f, i, dare, edit: -1 };
   fillSheet(f, i); setT($('kSub'), 'Submit answer');
   kTa.value = S.drafts[dKey()] || '';
-  openedAt = Date.now(); runClock();
-  openSheetEl(kSheet, kTa);
+  const title = $('kShT'); title.tabIndex = -1; // focus the title, not the answer box: the brief stays in view and no keyboard pops up before it is read
+  openSheetEl(kSheet, title);
 };
 function openEdit(idx: number) {
   const a = S.answers[idx]; if (!a) return;
@@ -959,6 +971,7 @@ function openEdit(idx: number) {
   fillSheet(a.f, a.i); setT($('kSub'), 'Save changes');
   kTa.value = a.t;
   openSheetEl(kSheet, kTa);
+  kTa.scrollIntoView({ block: 'nearest' }); // editing: the answer box is what matters, so bring it into view
 }
 const groups = ['kRfE', 'kRfA'].map((id) => $(id));
 groups.forEach((g) => g.querySelectorAll<HTMLElement>('[data-v]').forEach((c) => {
@@ -968,9 +981,10 @@ groups.forEach((g) => g.querySelectorAll<HTMLElement>('[data-v]').forEach((c) =>
 }));
 kAdd.addEventListener('click', () => { if (kAdd.dataset.kAns === 'card') goTab('trail'); else openAnswer(S.field, Number(kAdd.dataset.kAns)); });
 kAdd2.addEventListener('click', () => openAnswer(S.field, Number(kAdd2.dataset.kAns)));
-[0, 1, 2].forEach((i) => $('kMR' + i).addEventListener('click', () => openAnswer(S.field, base() + i)));
+[0, 1, 2].forEach((i) => $('kMR' + i).addEventListener('click', () => openAnswer(S.field, viewBase() + i)));
+$('kPeek').addEventListener('click', () => { peek = peeking() ? '' : peekKey(); renderHome(); });
 $('kCancel').addEventListener('click', () => closeSheet(kSheet));
-$('kSub').addEventListener('click', () => {
+$('kSub').addEventListener('click', once(() => {
   const t = kTa.value.trim();
   if (!t) { say('Write something first.'); kTa.focus(); return; }
   clearTimeout(dT);
@@ -983,8 +997,6 @@ $('kSub').addEventListener('click', () => {
   const na: Answer = { f: cur.f, i: cur.i, t: t.slice(0, 2000), at: Date.now() };
   lastBoost = boostOf(cur.f); // before the push: an answer that completes a round moves base(), and with it the boost
   S.answers.push(na); lastAns = na;
-  const tb = MX[cur.f]?.[cur.i];
-  inTime = !!tb && openedAt > 0 && Date.now() - openedAt <= tb.mins * 60000;
   delete S.drafts[dKey()];
   S.stones += 50; save();
   if (cur.dare) { dare = null; renderDare(); }
@@ -992,22 +1004,21 @@ $('kSub').addEventListener('click', () => {
   groups.forEach((g) => { g.dataset.val = ''; g.querySelectorAll('[data-v]').forEach((o) => { o.classList.remove('sel'); o.setAttribute('aria-pressed', 'false'); }); });
   $<HTMLInputElement>('kRfH').value = ''; $<HTMLInputElement>('kRfT').value = '';
   kShA.hidden = true; kShR.hidden = false; setRfNote();
+  $('kRfShort').hidden = na.t.length >= 20; // say why a short answer earns no bonus, instead of silently skipping it
   groups[0].querySelector<HTMLElement>('[data-v]')!.focus();
-});
-$('kRfOk').addEventListener('click', () => {
+}));
+$('kRfOk').addEventListener('click', once(() => {
   const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value });
   finish(r);
-});
-$('kRfSkip').addEventListener('click', () => finish(undefined));
-// Finishing a mission: self-check bonus, speed bonus, then the random drop. Everything extra is stored on the answer
+}));
+$('kRfSkip').addEventListener('click', once(() => finish(undefined)));
+// Finishing a mission: self-check bonus, combo, daily boost, then the random drop. Everything extra is stored on the answer
 // (a.x, a.d) so sync, delete and undo keep stones exact.
 function finish(r: Refl | undefined) {
   const a = lastAns && S.answers.includes(lastAns) ? lastAns : undefined;
-  const x = MX[cur.f]?.[cur.i];
   // Bonuses and drops only reward a real attempt (20+ characters), so one-letter answers cannot farm them.
   const real = (a?.t.length || 0) >= 20;
   let side = real ? bonus() : 0;
-  if (real && x && inTime) { side += 15; S.stones += 15; }
   const today = dayN(Date.now());
   const bo = lastBoost;
   if (real && bo && bo.i === cur.i) { const bx = (50 + (r ? 20 : 0)) * (bo.m - 1); side += bx; S.stones += bx; }
@@ -1025,7 +1036,6 @@ function finish(r: Refl | undefined) {
     a.ed = stamp(ver(a));
   }
   save(); if (a && r) shareSign(a);
-  openedAt = 0;
   if (drop.tier !== 'none') { showDrop(drop, side, true); return; }
   closeSheet(kSheet); setLvl(); renderProgress();
   say((r ? tr('Reflection saved. +20 stones.') : tr('+50 stones. Your answer is saved on this device.')) + (side ? ` +${side} bonus` : ''));
@@ -1395,7 +1405,7 @@ $('kRemind').addEventListener('click', () => {
   const title = esc(tr('KERN: make one small thing'));
   const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Punto Due Studio//KERN//EN', 'BEGIN:VEVENT',
     `UID:kern-${Date.now()}@${location.host}`, `DTSTAMP:${stamp}`, `DTSTART:${start}`, 'DURATION:PT20M', 'RRULE:FREQ=WEEKLY',
-    `SUMMARY:${title}`, `DESCRIPTION:${esc(tr('No streaks, no pressure. Open KERN when you feel like it.'))} ${location.origin}/`, `URL:${location.origin}/`,
+    `SUMMARY:${title}`, `DESCRIPTION:${esc(tr('No pressure. Open KERN when you feel like it.'))} ${location.origin}/`, `URL:${location.origin}/`,
     'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:PT0M', `DESCRIPTION:${title}`, 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
   download(ics, 'kern-reminder.ics', 'text/calendar');
   say('Open the file to add the reminder to your calendar.');

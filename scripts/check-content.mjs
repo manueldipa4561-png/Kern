@@ -4,13 +4,23 @@ import assert from 'node:assert/strict';
 import { buildSync } from 'esbuild';
 
 // The data files import each other without extensions, so bundle them in memory instead of importing directly.
-const entry = ['fields', 'missions', 'helps', 'easy', 'i18n', 'next'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
+const entry = ['fields', 'missions', 'helps', 'easy', 'i18n', 'next', 'sponsors'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
 const { text } = buildSync({ stdin: { contents: entry, resolveDir: process.cwd(), loader: 'ts' }, bundle: true, format: 'esm', platform: 'node', write: false }).outputFiles[0];
-const { FIELDS, MX, HELPS, EASY, IT, PER_ROUND } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
+const { FIELDS, MX, HELPS, EASY, IT, CLASHES, PER_ROUND, SPONSORS } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
 
 const strings = (v) => (typeof v === 'string' ? [v] : Array.isArray(v) ? v.flatMap(strings) : v && typeof v === 'object' ? Object.values(v).flatMap(strings) : []);
 // supabase/schema.sql limits kern_signs.mission to 0..MAX_MISSIONS-1: widen it there before adding a round.
 const MAX_MISSIONS = 6;
+
+// A brand deal points at a real mission and has a name and a #rrggbb colour.
+for (const [key, s] of Object.entries(SPONSORS)) {
+  const [f, i] = key.split('.');
+  assert.ok(FIELDS[f] && /^\d$/.test(i) && Number(i) < FIELDS[f].m.length, `sponsors.ts: "${key}" is not a mission`);
+  assert.ok(s.name?.trim() && /^#[0-9a-f]{6}$/i.test(s.color), `sponsors.ts: "${key}" needs a name and a #rrggbb colour`);
+  const brand = s.name.replace(/\s*\(demo\)$/, '');
+  assert.ok(MX[f][i].who.includes(brand), `sponsors.ts: "${key}" names ${brand}, but that mission is about "${MX[f][i].who}"`);
+}
+assert.deepEqual(CLASHES, [], 'the same English text has two different Italian versions, one overwrites the other');
 
 // The app counts rounds from the current field and searches the other fields with that count, so all fields must match.
 const counts = [...new Set(Object.values(FIELDS).map((f) => f.m.length))];
@@ -30,7 +40,7 @@ for (const f of Object.keys(FIELDS)) {
     assert.equal(x.bar.length, 3, `${at}: needs 3 quality bars`);
     assert.equal(h.hints.length, 3, `${at}: needs 3 hints`);
     assert.equal(e.steps.length, 3, `${at}: easy version needs 3 steps`);
-    assert.ok(Number.isInteger(x.mins) && x.mins >= 3 && x.mins <= 10, `${at}: mins ${x.mins} is outside 3-10`);
+    assert.ok(Number.isInteger(x.mins) && x.mins >= 2 && x.mins <= 5, `${at}: mins ${x.mins} is outside 2-5 (missions are snackable)`);
     assert.equal(typeof x.asset.mono, 'boolean', `${at}: asset.mono must be true or false`);
     for (const [k, v] of Object.entries({ who: x.who, brief: x.brief, twist: x.twist, ex: h.ex, easyBrief: e.brief, easyEx: e.ex })) assert.ok(v.trim(), `${at}: ${k} is empty`);
     for (const s of strings([m, x, h, e])) {

@@ -204,7 +204,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-seg button[aria-pressed="true"] { background: var(--acc); color: var(--on); }
 .k-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .k-set-list { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-.k-set-list [hidden] { display: none; }
+.k-set-list [hidden], .k-set-list .k-ask-btn[hidden] { display: none; } /* the second selector beats .k-set-list .k-ask-btn { display: flex } below */
 .k-check { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
 .k-check input { width: 20px; height: 20px; margin: 0; accent-color: var(--acc); }
 .k-err { color: #ff9a8a; font-size: 13px; } .k-scr.light .k-err { color: #a3241a; }
@@ -457,6 +457,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-trailsigns > .k-l { color: var(--gold); }
 .k-sign-empty, .k-rf-note { margin: 0; font-size: 12.5px; line-height: 1.4; color: var(--dim); }
 .k-rf-note { margin-top: -6px !important; }
+.k-rf-note[hidden] { display: none; }
 .k-signs-card > p { margin-bottom: 2px; }
 
 /* First arrival on Missions: the chosen field's object drops into the card with a spring */
@@ -539,6 +540,14 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-dr-stage::before { content: ''; position: absolute; inset: 0; background: radial-gradient(closest-side, color-mix(in srgb, var(--tc) 38%, transparent), transparent); animation: kDrGlow 1.2s ease-out both; }
 .k-drop h5 { font-size: 30px; line-height: 1.05; }
 .k-dr-n { font: 800 22px 'Inter Tight Variable', system-ui, sans-serif; color: color-mix(in srgb, var(--tc) 75%, var(--fg)); margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+/* A brand mission: the presenting brand in its own colour (a dot plus a text colour that stays readable on any background) */
+#kXWho.brand { color: color-mix(in srgb, var(--brand) 62%, var(--fg)); font-weight: 700; }
+#kXWho.brand::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--brand); vertical-align: 0; }
+/* The list's look-ahead to the next round */
+.k-peek { margin-top: 4px; }
+/* Tap targets: 44px at least (QA: chips were 38px high, the Skip link 25px wide) */
+.k-fchip { min-height: 44px; }
+.k-sk { min-width: 44px; justify-content: center; }
 /* Home card, round complete: a quiet second action under the main button */
 .k-sk[hidden] { display: none; }
 .k-main .k-sk { color: var(--bone); opacity: .85; margin-top: 6px; }

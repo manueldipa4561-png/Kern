@@ -87,6 +87,7 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             <label class="k-l" for="kRfT">Leave a sign for the next person (optional)</label><input id="kRfT" type="text" maxlength="140" autocomplete="off" aria-describedby="kRfN" /><p class="k-rf-note" id="kRfN"></p>
             <div id="kRfBar" hidden>
               <div class="k-l">Check your answer · +10 stones each</div>
+              <p class="k-rf-note" id="kRfShort" hidden>Bonus stones and finds start from 20 characters. This answer is a bit short.</p>
               <div id="kRfBI" role="group"></div>
             </div>
             <div class="k-sh-btns"><button type="button" class="k-go" id="kRfOk">Save</button><button type="button" class="k-sk" id="kRfSkip">Skip</button></div>
@@ -203,13 +204,14 @@ const LINE = 'M23.13 76.87A38 38 0 0 0 76.87 23.13Z';
             <div class="k-streak" id="kStreak" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg><b id="kStreakT"></b><small>A missed day is forgiven.</small></div>
             <div class="k-fields" id="kFields" role="group" aria-label="Your interests"></div>
             <div class="k-card k-dare" id="kDare" hidden><div class="k-l">A friend dared you</div><h5 id="kDareT"></h5><button type="button" class="k-go" id="kDareGo">Answer the dare</button></div>
-            <div class="k-card k-main" id="kNext"><img class="k-obj" id="kNxImg" src="/img/f-design.webp" alt="" width="400" height="400" decoding="async" fetchpriority="high" /><div class="k-l" id="kNxL">Your next step</div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><div class="k-meta"><span class="k-l">+50 stones</span><span class="k-l">+20 if you reflect</span><span class="k-l">Chance of a find</span></div><div class="k-boost-chip" id="kNxB" hidden></div><button type="button" class="k-btn" id="kAdd">Add your answer</button><button type="button" class="k-sk" id="kAdd2" hidden></button></div>
+            <div class="k-card k-main" id="kNext"><img class="k-obj" id="kNxImg" src="/img/f-design.webp" alt="" width="400" height="400" decoding="async" fetchpriority="high" /><div class="k-l" id="kNxL">Your next step</div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><div class="k-meta" id="kNxM"><span class="k-l">+50 stones</span><span class="k-l">+20 if you reflect</span><span class="k-l">Chance of a find</span></div><div class="k-boost-chip" id="kNxB" hidden></div><button type="button" class="k-btn" id="kAdd">Add your answer</button><button type="button" class="k-sk" id="kAdd2" hidden></button></div>
             <div class="k-card"><div class="k-l" id="kMsL">Your 3 missions</div>
               <div class="k-mlist">
                 <button type="button" class="k-mrow" id="kMR0"><i class="k-mdot" aria-hidden="true"></i><span><b>Fix what already exists</b><small></small></span><em aria-hidden="true">›</em></button>
                 <button type="button" class="k-mrow" id="kMR1"><i class="k-mdot" aria-hidden="true"></i><span><b>Rewrite a confusing email</b><small></small></span><em aria-hidden="true">›</em></button>
                 <button type="button" class="k-mrow" id="kMR2"><i class="k-mdot" aria-hidden="true"></i><span><b>Work with a partner</b><small></small></span><em aria-hidden="true">›</em></button>
               </div>
+              <button type="button" class="k-sk k-peek" id="kPeek" hidden></button>
             </div>
             <div class="k-card k-habit" id="kHabit">
               <div class="k-l k-finds-h"><span>Daily habit · tiny on purpose</span><span id="kHbN"></span></div>

@@ -73,6 +73,10 @@ export const IT: Record<string, string> = {
         'Your answer<br>won <b>#1.</b>': 'La tua risposta<br>è <b>#1.</b>',
         'Keep going': 'Continua',
         'Next mission': 'Prossima missione',
+        'Brand mission': 'Missione di un brand',
+        'Bonus stones and finds start from 20 characters. This answer is a bit short.': 'Gli stone bonus e i ritrovamenti partono da 20 caratteri. Questa risposta è un po’ corta.',
+        'Write your idea in KERN.AI. Your versions show up here.': 'Scrivi la tua idea in KERN.AI. Le tue versioni compaiono qui.',
+        'No more hints. Write one rough line first, then ask again.': 'Hint finiti. Scrivi prima una riga anche grezza, poi richiedi.',
         'Welcome back': 'Ci rivediamo', 'Log in to<br>your <b>trail.</b>': 'Entra nella<br>tua <b>traccia.</b>',
         'Name': 'Nome', 'Email': 'Email', 'Password': 'Password', 'Log in': 'Accedi', 'Create an account': 'Crea un account',
         'New here?': 'Nuovo qui?', 'Create your<br><b>account.</b>': 'Crea il tuo<br><b>account.</b>', 'Create account': 'Crea account',
@@ -80,7 +84,7 @@ export const IT: Record<string, string> = {
         'Signing in…': 'Accesso in corso…', 'Creating your account…': 'Creazione account…',
         'Your answer': 'La tua risposta', 'Submit answer': 'Invia la risposta', 'Not now': 'Non ora',
         'Write it your way. Nothing is sent.': 'Scrivila a modo tuo. Non viene inviato nulla.',
-        'KERN.AI · your co-pilot': 'KERN.AI ·il tuo co-pilota',
+        'KERN.AI · your co-pilot': 'KERN.AI · il tuo co-pilota',
         'Your idea.<br>My <b>questions.</b>': 'La tua idea.<br>Le mie <b>domande.</b>',
         'You are talking to an AI · replies are a scripted preview': "Stai parlando con un'AI · le risposte sono un'anteprima scritta",
         'Use an example': 'Usa un esempio', 'Start over': 'Ricomincia',
@@ -222,7 +226,7 @@ export const IT: Record<string, string> = {
         "Couldn't load your synced trail. We'll try again.": 'Impossibile caricare la traccia sincronizzata. Riproveremo.',
         'Add a weekly reminder to my calendar': 'Aggiungi un promemoria settimanale al calendario',
         'KERN: make one small thing': 'KERN: crea una piccola cosa',
-        'No streaks, no pressure. Open KERN when you feel like it.': 'Niente serie da mantenere, nessuna pressione. Apri KERN quando ti va.',
+        'No pressure. Open KERN when you feel like it.': 'Nessuna pressione. Apri KERN quando ti va.',
         'Open the file to add the reminder to your calendar.': 'Apri il file per aggiungere il promemoria al calendario.',
         'Coming with partner missions': 'In arrivo con le missioni dei partner',
         'Anonymous review': 'Revisione anonima',
@@ -265,4 +269,6 @@ export const IT: Record<string, string> = {
         'Last 7 days': 'Ultimi 7 giorni',
         'Write it your way. It stays on this device unless you ask KERN.AI.': 'Scrivila a modo tuo. Resta su questo dispositivo, a meno che tu non chieda a KERN.AI.', 'Send': 'Invia', 'Your idea': 'La tua idea',
 };
-export const t2 =(en: string, it: string) => { IT[en] = it; return en; };
+// English texts registered twice with different Italian: the last one silently wins. npm test fails if this list is not empty.
+export const CLASHES: string[] = [];
+export const t2 = (en: string, it: string) => { if (IT[en] !== undefined && IT[en] !== it) CLASHES.push(en); IT[en] = it; return en; };
