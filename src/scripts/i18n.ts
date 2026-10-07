@@ -1,5 +1,11 @@
 // EN is the source text; IT maps EN strings to Italian.
 export const IT: Record<string, string> = {
+        'Done.': 'Fatto.',
+        'Text size': 'Dimensione del testo',
+        'Small': 'Piccolo',
+        'Default': 'Normale',
+        'Large': 'Grande',
+        'Larger': 'Più grande',
         'Don’t guess your passion.': 'La passione non si indovina.',
         'Test it.': 'Si prova.',
         '1 of 3 done': '1 su 3 fatte',

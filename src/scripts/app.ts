@@ -4,6 +4,7 @@
 //                           ^            │ (draft autosaved)      │
 //                           └────────────┴── yourKERN / Trail ◄───┘
 import { IT, t2 } from './i18n';
+import { icon } from './icons';
 import { FIELDS } from './fields';
 import { MX } from './missions';
 import { RELICS, rollDrop, type Drop } from './loot';
@@ -22,10 +23,10 @@ type Again = 'yes' | 'maybe' | 'no';
 type Refl = { e?: Feel; again?: Again; hard?: string; tip?: string; sid?: number }; // sid: the tip's shared sign, if published
 type Answer = { f: string; i: number; t: string; at: number; ed?: number; r?: Refl; x?: number; d?: string }; // x: extra stones (bonuses, drop), d: drop id (loot.ts)
 type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean; p?: string }; // p: the person's own words quoted in front of a scripted question, kept apart so a language switch still translates the question
-type Theme = 'system' | 'dark' | 'light';
+type Theme = 'dark' | 'light';
 type Lang = 'en' | 'it';
 type Habit = { t: string; c: string; l: [number, string][] }; // t: the tiny habit, c: the cue (after I...), l: [day number, relic id found that day or ''] per day done
-type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit; easy: boolean };
+type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; text: number; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit; easy: boolean }; // text: the text size step in Settings (0 small, 1 default, 2 large, 3 larger)
 
 // Demo profile (open /?demo, switch off with /?demo=off): a lived-in trail to show KERN in a minute. It has its own storage key,
 // never syncs, never publishes a sign and is never counted, so it cannot touch real data.
@@ -56,7 +57,7 @@ const OPEN = "What is your idea? Write it in your own words first. I won't sugge
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
 const FEELS: Feel[] = ['flow', 'ok', 'drag'];
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
-const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'system', guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false });
+const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'dark', text: 1, guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false });
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
 // A name is cut by whole characters (never half an emoji) and holds no text-direction controls (U+202A-202E, U+2066-2069): they flip the text around them and leave the avatar empty.
 const cleanName = (v: unknown) => (typeof v === 'string' ? [...v.replace(/[\u202A-\u202E\u2066-\u2069]/g, '')].slice(0, 40).join('') : '');
@@ -102,7 +103,8 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
       msgs: Array.isArray(s.msgs) ? s.msgs.filter((m: Msg) => m && (m.who === 'ai' || m.who === 'me') && typeof m.t === 'string').map((m: Msg): Msg => ({ who: m.who, t: m.t.slice(0, 500), ...(m.who === 'ai' && typeof m.p === 'string' && m.p ? { p: m.p.slice(0, 200) } : {}) })) : [],
       mine: Array.isArray(s.mine) ? s.mine.filter((m: unknown) => typeof m === 'string').map((m: string) => m.slice(0, 140)) : [],
       lang: s.lang === 'it' || s.lang === 'en' ? s.lang : d.lang,
-      theme: s.theme === 'dark' || s.theme === 'light' ? s.theme : 'system',
+      theme: s.theme === 'light' ? 'light' : 'dark', // two themes, dark first (a profile saved with the old "system" choice becomes dark)
+      text: s.text === 0 || s.text === 2 || s.text === 3 ? s.text : 1,
       guess: str(s.guess, 200),
       saves: clampCount(s.saves),
       badges: Array.isArray(s.badges) ? s.badges.filter((b: unknown) => typeof b === 'string' && b.length < 20).slice(0, 50) : [],
@@ -115,11 +117,11 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
 };
 // Sample trail for the demo (texts in demo.ts): 6 answers in 3 fields, all reflected, about 530 stones (rank Cairn), a few finds, three versions of an idea in KERN.AI. Badges are earned from the answers themselves.
 const demoState = (): State => {
-  let real: { lang?: string; theme?: string } = {};
+  let real: { lang?: string; theme?: string; text?: number } = {};
   try { real = JSON.parse(localStorage.getItem('kern:v1') || '{}') || {}; } catch { /* no real profile to read */ }
-  const lang: Lang = real.lang === 'it' || real.lang === 'en' ? real.lang : fresh().lang, theme: Theme = real.theme === 'dark' || real.theme === 'light' ? real.theme : 'system';
+  const lang: Lang = real.lang === 'it' || real.lang === 'en' ? real.lang : fresh().lang, theme: Theme = real.theme === 'light' ? 'light' : 'dark', text = real.text;
   const it = lang === 'it', answers = sampleAnswers(it, Date.now());
-  return sanitize({ v: 1, name: 'Giulia', field: 'Design', fields: ['Design', 'Writing', 'Video'], onboarded: true, stones: answers.reduce((s, a) => s + 50 + (a.r ? 20 : 0) + (a.x || 0), 0), answers, msgs: [{ who: 'ai', t: OPEN }, ...sampleChat(it)], mine: sampleMine(it), dared: true, lang, theme, guess: 'Saved. This sharpens your KERN.' }) || fresh(); // guess: the reply to "A first guess" (That feels right), not a sentence of its own
+  return sanitize({ v: 1, name: 'Giulia', field: 'Design', fields: ['Design', 'Writing', 'Video'], onboarded: true, stones: answers.reduce((s, a) => s + 50 + (a.r ? 20 : 0) + (a.x || 0), 0), answers, msgs: [{ who: 'ai', t: OPEN }, ...sampleChat(it)], mine: sampleMine(it), dared: true, lang, theme, text, guess: 'Saved. This sharpens your KERN.' }) || fresh(); // guess: the reply to "A first guess" (That feels right), not a sentence of its own
 };
 let recovered = ''; // set when a saved trail could not be read in full at start-up: the notice to show once the app is up
 let seen: string | null = null; // the trail as storage held it when this page last read or wrote it (absorb)
@@ -256,7 +258,7 @@ toast.addEventListener('pointerenter', () => clearTimeout(tT));
 toast.addEventListener('pointerleave', () => { if (toastAct) tT = window.setTimeout(hideToast, 4000); });
 
 // Static text: remember the English source so language switches are lossless.
-const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs button:not(:nth-child(2)), #kXAsk, .k-streak small, .k-finds-h span');
+const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs .tt, #kXAsk, .k-streak small, .k-finds-h span');
 kTxt.forEach((e) => { e.dataset.en = e.innerHTML.trim(); });
 // Headings: the page is an h1 (screen-reader only), panes (h4) and cards (h5). Levels 2 and 3 are what a screen reader announces; the tags keep the look.
 kScr.querySelectorAll('h4').forEach((h) => h.setAttribute('aria-level', '2'));
@@ -269,16 +271,19 @@ if (still) kLoad.classList.add('off');
 else { kLoad.classList.add('go'); window.setTimeout(() => kLoad.classList.add('off'), S.name ? 1900 : 2600); }
 
 // Theme
-const mqLight = matchMedia('(prefers-color-scheme: light)');
 const applyTheme = () => {
-  const light = S.theme === 'light' || (S.theme === 'system' && mqLight.matches);
+  const light = S.theme === 'light';
   kScr.classList.toggle('light', light);
   document.documentElement.classList.toggle('light', light);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#E8E6DA' : '#0F140E');
   pressed('theme', S.theme);
 };
-mqLight.addEventListener('change', applyTheme);
 document.querySelectorAll<HTMLElement>('[data-k-theme]').forEach((b) => b.addEventListener('click', () => { S.theme = b.dataset.kTheme as Theme; save(); applyTheme(); }));
+
+// Text size: every font size in app.css is in rem, so the root size scales all the text. One button per step in Settings.
+const TEXT_SCALE = [0.92, 1, 1.14, 1.3];
+const applyText = () => { document.documentElement.style.setProperty('--kts', String(TEXT_SCALE[S.text] ?? 1)); pressed('text', String(S.text)); };
+document.querySelectorAll<HTMLElement>('[data-k-text]').forEach((b) => b.addEventListener('click', () => { S.text = Number(b.dataset.kText); save(); applyText(); }));
 
 // View Transitions (Chrome, Safari 18+, Firefox 144+): tab panes slide in the direction you move,
 // the chosen field object flies into the mission card. Older browsers get the plain swap.
@@ -384,25 +389,8 @@ const RANKS: [string, number][] = [['Pebble', 0], ['Stone', 100], ['Cairn', 300]
 const RIT: Record<string, string> = { Pebble: 'Ciottolo', Stone: 'Pietra', Cairn: 'Cairn', Ridge: 'Cresta', Summit: 'Vetta' };
 const rn = (n: string) => (isIt() && RIT[n]) || n;
 const rankIdx = (s: number) => RANKS.reduce((a, r, i) => (s >= r[1] ? i : a), 0);
-const setLvl = () => {
-  const i = rankIdx(S.stones), nx = RANKS[i + 1], it = isIt();
-  $<HTMLTextAreaElement>('kTa').placeholder = tr('Write it your way.');
-  $('kRank').textContent = rn(RANKS[i][0]);
-  $<HTMLImageElement>('kRankImg').src = `/img/r${i}.webp`;
-  $('kSt').textContent = String(S.stones);
-  $('kBar').style.width = (nx ? ((S.stones - RANKS[i][1]) / (nx[1] - RANKS[i][1])) * 100 : 100) + '%';
-  const left = nx ? nx[1] - S.stones : 0;
-  $('kNx').textContent = nx ? (it ? `${left} ${left === 1 ? 'pietra' : 'pietre'} al grado ${rn(nx[0])}` : `${left} ${left === 1 ? 'stone' : 'stones'} to ${rn(nx[0])}`) : (it ? 'Grado massimo' : 'Top rank');
-  const lad = $('kLad');
-  lad.innerHTML = '';
-  RANKS.forEach((r, k) => {
-    const s = document.createElement('span'), im = document.createElement('img'), b = document.createElement('b');
-    im.src = `/img/r${k}.webp`; im.alt = ''; im.width = im.height = 400; im.decoding = 'async';
-    b.textContent = rn(r[0]); s.append(im, b);
-    if (k < i) s.className = 'done'; if (k === i) { s.className = 'on'; s.setAttribute('aria-current', 'true'); }
-    lad.appendChild(s);
-  });
-};
+// Points and ranks are cut from the interface; this only keeps the answer box placeholder in step with the language.
+const setLvl = () => { $<HTMLTextAreaElement>('kTa').placeholder = tr('Write it your way.'); };
 
 // Signals: which kind of mission you light up on, from your own reflections. The kind is the mission index % 3
 // (improve what exists, start from zero, work with someone), so each round adds evidence for the same three kinds.
@@ -475,16 +463,17 @@ const renderFields = () => {
   const box = $('kFields');
   box.innerHTML = '';
   S.fields.forEach((f) => {
-    const b = document.createElement('button'), im = document.createElement('img'), t = document.createElement('span'), n = document.createElement('small');
+    const b = document.createElement('button'), im = document.createElement('span'), t = document.createElement('span'), n = document.createElement('small');
     b.type = 'button'; b.className = 'k-fchip' + (f === S.field ? ' on' : ''); b.setAttribute('aria-pressed', String(f === S.field));
-    im.src = `/img/f-${f.toLowerCase()}.webp`; im.alt = ''; im.width = im.height = 400; im.decoding = 'async';
+    im.className = 'k-fi'; im.setAttribute('aria-hidden', 'true'); im.innerHTML = icon(f);
     t.textContent = tr(f);
     n.textContent = `${doneIn(f).size}/${total(f)}`;
     b.append(im, t, n); b.addEventListener('click', () => switchField(f)); box.appendChild(b);
   });
   const add = document.createElement('button');
   add.type = 'button'; add.className = 'k-fchip k-fadd'; add.textContent = `+ ${tr('Add')}`; add.setAttribute('aria-label', tr('Add interests'));
-  add.addEventListener('click', () => openStart(true)); box.appendChild(add);
+  add.addEventListener('click', () => openStart(true)); box.appendChild(add);  const on = box.querySelector<HTMLElement>('.on'); // with more paths than fit, the one in play stays in view
+  if (on) box.scrollTo({ left: Math.max(0, on.getBoundingClientRect().left - box.getBoundingClientRect().left + box.scrollLeft - 20), behavior: 'instant' as ScrollBehavior });
 };
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (absorb()) setLvl(); renderProgress(); track('visit'); } }); // habit button, boost, streak and dots go stale overnight otherwise
 const kAdd = $('kAdd'), kAdd2 = $('kAdd2');
@@ -527,8 +516,8 @@ const renderHome = () => {
   // fresh: a round was just finished and the next one is not started. Celebrate the Kern card first, then offer the new missions.
   const fresh = roundJustDone();
   setD($('kHi'), S.name ? `${it ? 'Ciao' : 'Hi'} ${S.name}` : (it ? 'Ciao' : 'Hi'));
-  const img = $<HTMLImageElement>('kNxImg'), src = next === undefined || fresh ? '/img/cairn.webp' : `/img/f-${S.field.toLowerCase()}.webp`;
-  if (img.getAttribute('src') !== src) img.src = src;
+  const glyph = next === undefined || fresh ? 'yourkern' : S.field, kNxIc = $('kNxIc');
+  if (kNxIc.dataset.g !== glyph) { kNxIc.dataset.g = glyph; kNxIc.innerHTML = icon(glyph); }
   kAdd2.hidden = !fresh;
   if (next === undefined || fresh) {
     if (fresh) setD($('kNxL'), it ? `Round ${round} completato` : `Round ${round} complete`);
@@ -545,8 +534,9 @@ const renderHome = () => {
     setT($('kNxT'), m[1]); setT($('kNxP'), m[2]);
     setT(kAdd, S.drafts[`${S.field}.${b + next}`] ? 'Continue your draft' : 'Add your answer'); kAdd.dataset.kAns = String(b + next);
   }
-  const finished = next === undefined || fresh; // the card is about the Kern card now, so no reward chips
-  $('kNxM').style.display = finished ? 'none' : '';
+  const finished = next === undefined || fresh; // the card is about the Kern card now, so no time chip
+  const mins = finished ? 0 : MX[S.field]?.[b + (next ?? 0)]?.mins;
+  $('kNxM').innerHTML = mins ? `<span class="k-l">~${mins} min</span>` : '';
   // The list shows the round in play, or a look at the next one (never a lock: every round is open).
   const looking = peeking(), vb = viewBase(), vr = vb / PER_ROUND, vdone = new Set([0, 1, 2].filter((k) => doneSet().has(vb + k)));
   if (vr) setD($('kMsL'), it ? `Round ${vr + 1} · le tue 3 missioni` : `Round ${vr + 1} · your 3 missions`); else setT($('kMsL'), 'Your 3 missions');
@@ -981,9 +971,11 @@ const streakOf = (list: number[]) => {
   return n;
 };
 const trailDays = () => streakOf([...S.answers.map((a) => dayN(a.at)), ...S.habit.l.map((e) => e[0])]);
+const BOOSTS = false; // cut with the points: no daily x2 / x3 on a mission
 // Daily boost: each day, each field gets a random answer (about 2 days in 3) that pays x2 or x3. Seeded by the date, so it is the
 // same on every device but cannot be guessed ahead; done missions can be replayed for it.
 const boostOf = (f: string, d = dayN(Date.now())): { i: number; m: number } | null => {
+  if (!BOOSTS) return null;
   let h = Math.imul(d ^ [...f].reduce((a, c) => (Math.imul(a, 31) + c.charCodeAt(0)) | 0, 7), 2654435761) >>> 0;
   h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; h ^= h >>> 13;
   return h % 100 < 35 ? null : { i: base(f) + (h >>> 8) % PER_ROUND, m: (h >>> 16) % 10 < 3 ? 3 : 2 }; // always inside the round in play, so it is on screen
@@ -1154,7 +1146,7 @@ groups.forEach((g) => g.querySelectorAll<HTMLElement>('[data-v]').forEach((c) =>
   c.addEventListener('click', pick);
   c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
 }));
-kAdd.addEventListener('click', () => { if (kAdd.dataset.kAns === 'card') goTab('trail'); else openAnswer(S.field, Number(kAdd.dataset.kAns)); });
+kAdd.addEventListener('click', () => { if (kAdd.dataset.kAns === 'card') goTab('yourkern'); else openAnswer(S.field, Number(kAdd.dataset.kAns)); });
 kAdd2.addEventListener('click', () => openAnswer(S.field, Number(kAdd2.dataset.kAns)));
 [0, 1, 2].forEach((i) => $('kMR' + i).addEventListener('click', () => openAnswer(S.field, viewBase() + i)));
 $('kPeek').addEventListener('click', () => { peek = peeking() ? '' : peekKey(); renderHome(); });
@@ -1190,33 +1182,25 @@ $('kRfOk').addEventListener('click', once(() => {
   finish(r);
 }));
 $('kRfSkip').addEventListener('click', once(() => finish(undefined)));
-// Finishing a mission: self-check bonus, combo, daily boost, then the random drop. Everything extra is stored on the answer
-// (a.x, a.d) so sync, delete and undo keep stones exact.
+// Finishing a mission: keep the reflection, then one calm confirmation. No bonus points, combos or random rewards.
 function finish(r: Refl | undefined) {
   const a = lastAns && S.answers.includes(lastAns) ? lastAns : undefined;
-  // Bonuses and drops only reward a real attempt (20+ characters), so one-letter answers cannot farm them.
-  const real = (a?.t.length || 0) >= 20;
-  let side = real ? bonus() : 0;
-  const today = dayN(Date.now());
-  const bo = lastBoost;
-  if (real && bo && bo.i === cur.i) { const bx = (50 + (r ? 20 : 0)) * (bo.m - 1); side += bx; S.stones += bx; }
-  const nToday = S.answers.filter((q) => dayN(q.at) === today).length; // includes this one
-  if (real && nToday > 1) { const cx = Math.min(30, (nToday - 1) * 10); side += cx; S.stones += cx; } // combo: 2nd mission of the day +10, 3rd +20, 4th+ +30
-  const lucky = S.answers.filter((q) => dayN(q.at) === today).length <= 1;
-  let drop: Drop = real ? rollDrop(Math.max(0, dropStreak() - 1), relicsOwned(), lucky, Math.min(0.999, Math.random() + 0.012 * Math.min(trailDays(), 7))) : { tier: 'none', id: '', stones: 0 };
-  if (real && S.answers.length === 1 && drop.tier === 'none') drop = rollDrop(0, relicsOwned(), false, 0.5); // the first finish always pays something
-  S.stones += drop.stones;
-  if (a) {
-    if (r) { a.r = r; S.stones += 20; }
-    const extra = side + drop.stones;
-    if (extra) a.x = (a.x || 0) + extra;
-    if (drop.id) a.d = drop.id;
-    a.ed = stamp(ver(a));
-  }
+  if (a) { if (r) a.r = r; a.ed = stamp(ver(a)); }
   const kept = save(); if (a && r) shareSign(a);
-  if (drop.tier !== 'none') { showDrop(drop, side, true); if (!kept) say(UNSAVED); return; }
-  closeSheet(kSheet); setLvl(); renderProgress();
-  say((!kept ? tr(UNSAVED) : r ? tr('Reflection saved. +20 stones.') : tr('+50 stones. Your answer is saved on this device.')) + (side ? ` +${side} bonus` : ''));
+  showDone();
+  if (!kept) say(UNSAVED);
+}
+// The screen after a finished mission: where you are in this field, and one button to go on.
+function showDone() {
+  const f = cur.f, it = isIt();
+  kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = 'done';
+  setT(kDrOk, 'Keep going'); delete kDrOk.dataset.next; kDrNx.hidden = true; kDrNx.textContent = ''; // aria-describedby reads hidden text too
+  offerNext(); // before the focus below, so the button is announced with its final label
+  $('kDrArt').innerHTML = icon('done', 'k-i k-done-i');
+  setT($('kDrT'), 'Done.');
+  setD($('kDrN'), it ? `${doneIn(f).size} su ${total(f)} fatte in ${tr(f)}` : `${doneIn(f).size} of ${total(f)} done in ${tr(f)}`);
+  setD($('kDrS'), it ? 'Salvata su questo dispositivo.' : 'Saved on this device.');
+  kDrOk.focus();
 }
 
 // Reward preview: shows what winning feels like without changing your stones.
@@ -1413,7 +1397,7 @@ $('kPickX').addEventListener('click', closePicker);
 // First visit: loader > choice > interests > profile (name + 18+, or an account) > missions.
 const pop = () => { // the field's object drops into the mission card
   if (still) return;
-  const o = $('kNxImg');
+  const o = $('kNxIc');
   o.classList.remove('arrive'); void o.offsetWidth; o.classList.add('arrive');
 };
 const landHome = () => land(kScr.querySelector<HTMLElement>('#k-missions h4')!);
@@ -1430,7 +1414,7 @@ const closeStart = () => {
   }
   const run = () => { commit(); kStart.classList.remove('on'); applyField(changed); goTab('missions'); landHome(); };
   // Shared element: the picked field's object flies from its tile into the mission card.
-  const from = kS2.hidden ? null : kStart.querySelector<HTMLElement>(`#kPick [data-f="${pick}"] img`), to = $<HTMLImageElement>('kNxImg');
+  const from = kS2.hidden ? null : kStart.querySelector<HTMLElement>(`#kPick [data-f="${pick}"] .k-ti`), to = $('kNxIc');
   if (still || !startVT || !from) return run();
   to.style.viewTransitionName = ''; from.style.viewTransitionName = 'k-hero'; vtBusy = true;
   // vt-hero: the pane joins the page crossfade, so it never paints over the onboarding screen.
@@ -1438,7 +1422,7 @@ const closeStart = () => {
     from.style.viewTransitionName = ''; to.style.viewTransitionName = 'k-hero';
     run(); // vtBusy stays on until the flight has finished (released in `after`)
     // Wait for the new image, but never hold the page if decoding stalls.
-    await Promise.race([to.decode().catch(() => { /* shows when loaded */ }), new Promise((r) => setTimeout(r, 300))]);
+    await new Promise((r) => requestAnimationFrame(r));
   }, () => { to.style.viewTransitionName = ''; vtBusy = false; });
 };
 $('kSkip').addEventListener('click', closeStart);
@@ -1688,6 +1672,7 @@ document.addEventListener('keydown', (e) => {
 // Start
 renderMe();
 applyTheme();
+applyText();
 applyField(false);
 setLang(S.lang);
 renderDare();
