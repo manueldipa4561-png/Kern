@@ -759,6 +759,8 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-i .bp { fill: var(--bead, var(--acc)); stroke: var(--bead, var(--acc)); stroke-width: 1.5; }
 .k-i .bs { stroke: var(--bead, var(--acc)); }
 .k-i .gb { fill: var(--bead, var(--acc)); fill-opacity: .9; stroke: var(--bead, var(--acc)); }
+.k-i .pf { fill: currentColor; stroke: none; } /* Phosphor duotone: the outline is a filled shape */
+.k-i .pd { fill: var(--bead, var(--acc)); fill-opacity: .55; stroke: none; } /* the frosted lime body */
 
 /* Header: the icon, the name, the demo marker and settings. Progress lives on Home. */
 .k-top .k-pill { display: none; }

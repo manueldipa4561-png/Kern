@@ -58,7 +58,7 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - EN / IT, dark / light theme, and a text size setting (four steps, every font size is in rem, `npm test` checks it)
 - Installable and works offline after the first visit (`public/sw.js`). Security headers and CSP in `netlify.toml`
 - Export and delete your data from Settings. Privacy page at `/privacy/`, Terms at `/terms/` (EN and IT), and a feedback button that opens your own mail app
-- Design (v2): one icon family (`src/scripts/icons.ts`: a frosted body and a lime bead, the core of the app icon), a floating glass tab bar, italic serif accents (Instrument Serif), bigger type, one calm confirmation after each mission (no points or random rewards). View Transitions slide the panes (plain swap where unsupported, nothing moves with reduced motion)
+- Design (v2): one icon family (`src/scripts/icons.ts`: Phosphor Icons duotone, MIT, changed so the body takes the brand lime, plus the app's own yourKERN mark), a floating glass tab bar, italic serif accents (Instrument Serif), bigger type, one calm confirmation after each mission (no points or random rewards). View Transitions slide the panes (plain swap where unsupported, nothing moves with reduced motion)
 
 **Cut from the interface in v2** (the code is still there, hidden with the `k-cut` class, so each piece can come back): points and ranks, finds, badges, trail days, the habit builder, the review teaser, daily boosts and the random drops. The Trail section moved into yourKERN. The classic design before v1.0 is kept on the `classic-design` branch and the `v0.4-classic` tag.
 
