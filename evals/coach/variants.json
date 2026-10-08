@@ -1,0 +1,22 @@
+{
+  "baseline": {
+    "model": "claude-haiku-4-5-20251001",
+    "prompt": "v0",
+    "note": "production before 2026-10-08: Haiku 4.5, original prompt"
+  },
+  "v1": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v0",
+    "note": "Haiku 5.5, same prompt"
+  },
+  "v2": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v2",
+    "note": "Haiku 5.5, one question as last sentence, always quote, no menus of options"
+  },
+  "v3": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v3",
+    "note": "v2 plus: never help with off-topic requests, no explaining rules, stuck step without examples"
+  }
+}
