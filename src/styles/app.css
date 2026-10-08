@@ -864,3 +864,14 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-fu li { display: flex; gap: 12px; align-items: baseline; }
 .k-fu b { flex: none; min-width: 3.6rem; font: 700 0.75rem var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--acc); }
 .k-fu span { font-size: 0.9688rem; line-height: 1.4; }
+
+/* Co-op with a friend (the friend's request, and the pairs in yourKERN) */
+.k-coop-hint { margin: 0; }
+.k-coq { border-left: 3px solid var(--acc); padding: 2px 0 2px 12px; display: flex; flex-direction: column; gap: 4px; }
+.k-coq p { margin: 0; font-size: 1.0312rem; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+.k-coop textarea { width: 100%; box-sizing: border-box; font: 500 1rem/1.4 'Inter Tight Variable', system-ui, sans-serif; color: var(--fg); background: var(--surf); border: 1px solid var(--edge); border-radius: 12px; padding: 12px 14px; resize: vertical; }
+.k-coop textarea:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+.k-coopr { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 14px 0; border-top: 1px solid var(--edge); }
+.k-coopr:first-child { border-top: 0; padding-top: 4px; }
+.k-coopr .k-coq { align-self: stretch; }
+.k-coopst { margin: 0; font-size: 0.9375rem; }

@@ -74,3 +74,53 @@ assert.equal(verdict(rows.slice(0, 1)), 'none'); // nothing to compare yet
 assert.equal(verdict(rowsOf([...ans('Design', 'flow', 'flow'), ...ans('Code', 'drag', 'drag')], ['Design', 'Code'])), 'lead');
 assert.equal(verdict(rowsOf([...ans('Design', 'flow', 'ok'), ...ans('Code', 'flow', 'ok')], ['Design', 'Code'])), 'close'); // no gap, no leader
 assert.deepEqual(rowsOf([...ans('Video', 'flow'), ...ans('Design', 'flow', 'flow', 'ok')], ['Video', 'Design']).map((r) => r.f), ['Design', 'Video']); // 100% on one beats nothing, but does not top 83% on three
+
+// Co-op with a friend: a link carries one answer (and later the friend's reply) after the #, so it needs no server.
+// The link is untrusted input: only the 12 co-op missions (index 2 and 5 of each field), capped text, no control or text-direction characters.
+import { COOP_KEYS, MAX_ANSWER, MAX_REPLY, coopUrl, decodeCoop, settleReply, type Coop, type CoopRec } from '../src/scripts/coop.ts';
+import { PER_ROUND } from '../src/scripts/next.ts';
+const enc = (o: unknown) => '#coop=' + Buffer.from(JSON.stringify(o)).toString('base64url');
+const hashOf = (c: Coop) => new URL(coopUrl('https://kern.test', c)).hash;
+const out: Coop = { v: 1, f: 'Writing', i: 2, n: 'Giulia', a: 'Tre versioni: 🎉 «divertente», calda, minuscola.' };
+assert.deepEqual(decodeCoop(hashOf(out)), out); // accents, quotes and emoji survive the trip
+const back: Coop = { ...out, r: 'Terrei la calda, perché è vera.', m: 'Marco' };
+assert.deepEqual(decodeCoop(hashOf(back)), back); // the reply link keeps both halves
+assert.equal(COOP_KEYS.length, 12);
+assert.equal(new Set(COOP_KEYS.map((k) => k.split('.')[0])).size, 6); // two in every field
+for (const k of COOP_KEYS) assert.equal(Number(k.split('.')[1]) % PER_ROUND, 2, `${k} is not a with-a-partner mission`);
+assert.equal(decodeCoop(enc({ v: 2 })), null); // unknown version
+assert.equal(decodeCoop(enc({ ...out, i: 0 })), null); // not a co-op mission
+assert.equal(decodeCoop(enc({ ...out, f: '__proto__' })), null);
+assert.equal(decodeCoop(enc({ ...out, a: '   ' })), null); // nothing to answer
+for (const junk of ['', '#', '#coop=', '#coop=%%%', '#coop=!!!!', '#other=abc', '#coop=' + 'A'.repeat(5000)]) assert.equal(decodeCoop(junk), null);
+const dirty = decodeCoop(enc({ ...out, n: 'Mar\u202Eco\u0007', a: 'x'.repeat(MAX_ANSWER + 200), r: 'y'.repeat(MAX_REPLY + 50), m: 'z'.repeat(60) }));
+assert.ok(dirty);
+assert.equal(dirty.n, 'Marco'); // text-direction and control characters are dropped
+assert.equal([...dirty.a].length, MAX_ANSWER);
+assert.equal([...dirty.r!].length, MAX_REPLY);
+assert.equal([...dirty.m!].length, 20);
+assert.equal(decodeCoop(enc({ ...out, n: '\u200B\u200E\u061C' }))!.n, ''); // invisible characters are not a name
+assert.equal(decodeCoop(enc({ ...out, a: 'a' + '\n'.repeat(498) + 'b' }))!.a, 'a\n\nb'); // a wall of line breaks cannot stretch the card
+assert.ok(coopUrl('https://kern.test', { ...out, a: '🎉'.repeat(MAX_ANSWER), r: '🎉'.repeat(MAX_REPLY) }).length < 4000); // short enough for any chat app
+
+// A reply link arrives for an answer I sent (settleReply never changes the list it is given).
+const rec = (o: Partial<CoopRec> = {}): CoopRec => ({ role: 'out', f: 'Writing', i: 2, at: 1000, with: '', mine: out.a, theirs: '', ...o });
+const reply = (r: string, m = 'Marco', a = out.a): Coop => ({ ...out, a, r, m });
+const wait = [rec()], waitCopy = JSON.stringify(wait);
+const done = settleReply(wait, reply('La calda.'), 5000);
+assert.equal(done.status, 'done');
+assert.deepEqual(done.coops, [rec({ with: 'Marco', theirs: 'La calda.' })]);
+assert.equal(JSON.stringify(wait), waitCopy); // the input is untouched
+assert.equal(settleReply(done.coops, reply('La calda.'), 6000).status, 'same'); // opening the same link twice changes nothing
+const second = settleReply(done.coops, reply('La buffa.', 'Anna'), 7000); // a second friend answers the same text: its own row, the first reply stays
+assert.equal(second.status, 'again');
+assert.deepEqual(second.coops.map((r) => [r.with, r.theirs]), [['Marco', 'La calda.'], ['Anna', 'La buffa.']]);
+const edited = settleReply([rec({ mine: 'old text' })], reply('Ok.'), 8000); // the answer was edited after it was sent: the waiting row takes the reply and shows what was really sent
+assert.equal(edited.status, 'done');
+assert.equal(edited.coops[0].mine, out.a);
+assert.equal(settleReply([], reply('Ciao.'), 9000).status, 'stranger'); // nothing of mine is waiting: nothing is stored
+assert.equal(settleReply([rec({ i: 5 })], reply('Ciao.'), 9000).status, 'stranger'); // a reply about another mission does not fill this one
+const mineBack = [rec({ role: 'in', mine: 'La calda.', theirs: out.a, with: 'Giulia' })];
+assert.equal(settleReply(mineBack, reply('La calda.', 'Io'), 9000).status, 'own'); // the reply link I sent, opened on my own device
+const crowd = Array.from({ length: 30 }, (_, k) => rec({ at: k + 1, theirs: 'x', mine: 'm' + k }));
+assert.equal(settleReply([...crowd.slice(0, 29), rec({ at: 99, theirs: 'x' })], reply('Y', 'Z'), 1).coops.length <= 30, true); // the list stays capped

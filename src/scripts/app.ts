@@ -7,6 +7,8 @@ import { IT, t2 } from './i18n';
 import { icon } from './icons';
 import { FIELDS } from './fields';
 import { FIELD_INFO } from './fieldinfo';
+import { COOP_KEYS, MAX_ANSWER, MAX_NAME, MAX_REPLY, clip, coopUrl, decodeCoop, settleReply, type Coop, type CoopRec } from './coop';
+import { ASK } from './coopask';
 import { SCORE, rowsOf, verdict } from './compare';
 import { MX } from './missions';
 import { RELICS, rollDrop, type Drop } from './loot';
@@ -28,7 +30,7 @@ type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean; p?: string }; // p: 
 type Theme = 'dark' | 'light';
 type Lang = 'en' | 'it';
 type Habit = { t: string; c: string; l: [number, string][] }; // t: the tiny habit, c: the cue (after I...), l: [day number, relic id found that day or ''] per day done
-type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; text: number; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit; easy: boolean }; // text: the text size step in Settings (0 small, 1 default, 2 large, 3 larger)
+type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; text: number; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit; easy: boolean; coops: CoopRec[] }; // text: the text size step in Settings (0 small, 1 default, 2 large, 3 larger)
 
 // Demo profile (open /?demo, switch off with /?demo=off): a lived-in trail to show KERN in a minute. It has its own storage key,
 // never syncs, never publishes a sign and is never counted, so it cannot touch real data.
@@ -59,7 +61,7 @@ const OPEN = "What is your idea? Write it in your own words first. I won't sugge
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
 const FEELS: Feel[] = ['flow', 'ok', 'drag'];
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
-const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'dark', text: 1, guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false });
+const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'dark', text: 1, guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false, coops: [] });
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
 // A name is cut by whole characters (never half an emoji) and holds no text-direction controls (U+202A-202E, U+2066-2069): they flip the text around them and leave the avatar empty.
 const cleanName = (v: unknown) => (typeof v === 'string' ? [...v.replace(/[\u202A-\u202E\u2066-\u2069]/g, '')].slice(0, 40).join('') : '');
@@ -78,6 +80,10 @@ const cleanHabit = (h: unknown): Habit => {
   const l: [number, string][] = Array.isArray(o.l) ? o.l.filter((e): e is [number, string] => Array.isArray(e) && Number.isInteger(e[0]) && e[0] > 0 && typeof e[1] === 'string' && (e[1] === '' || DROP_IDS.includes(e[1]))).map((e): [number, string] => [e[0], e[1]]).slice(-90) : [];
   return { t: str(o.t, 60).trim(), c: str(o.c, 60).trim(), l };
 };
+const cleanCoops = (v: unknown): CoopRec[] => (Array.isArray(v)
+  ? v.filter((c) => c && (c.role === 'out' || c.role === 'in') && typeof c.f === 'string' && Number.isInteger(c.i) && COOP_KEYS.includes(`${c.f}.${c.i}`) && inTime(c.at) && typeof c.mine === 'string' && c.mine.trim())
+    .map((c): CoopRec => ({ role: c.role, f: c.f, i: c.i, at: c.at, with: str(c.with, MAX_NAME), mine: str(c.mine, MAX_ANSWER), theirs: str(c.theirs, MAX_ANSWER) })).slice(-30)
+  : []);
 // Stored or synced data is untrusted input: keep only well-formed values.
 const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-eslint/no-explicit-any
   const d = fresh();
@@ -113,6 +119,7 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
       dared: !!s.dared,
       habit: cleanHabit(s.habit),
       easy: !!s.easy,
+      coops: cleanCoops(s.coops),
       gone: Array.isArray(s.gone) ? s.gone.filter((g: unknown) => Array.isArray(g) && typeof g[0] === 'string' && g[0].length < 40 && inTime(g[1])).map((g: Tomb): Tomb => [g[0], g[1]]).slice(-200) : [],
     };
   } catch { return null; }
@@ -196,6 +203,9 @@ const mergeIn = (raw: unknown) => {
   if (!S.guess) S.guess = r.guess;
   S.badges = [...new Set([...S.badges, ...r.badges])];
   S.dared = S.dared || r.dared;
+  const ck = (c: CoopRec) => `${c.role}.${c.f}.${c.i}.${c.at}`, cm = new Map(S.coops.map((c) => [ck(c), c])); // co-ops from every device; a reply that arrived on one fills the other
+  for (const c of r.coops) { const o = cm.get(ck(c)); if (!o) cm.set(ck(c), c); else if (!o.theirs && c.theirs) { o.theirs = c.theirs; o.with = o.with || c.with; } }
+  S.coops = [...cm.values()].sort((a, b) => a.at - b.at).slice(-30);
   if (!S.habit.t && r.habit.t) { S.habit.t = r.habit.t; S.habit.c = r.habit.c; }
   const hl = new Map<number, string>(); // days done on any device; a day that found something keeps it
   for (const [d, id] of [...S.habit.l, ...r.habit.l]) if (!hl.get(d)) hl.set(d, id);
@@ -557,7 +567,7 @@ const roundJustDone = () => { const b = base(), d = winDone(); return b > 0 && !
 const stateWord = (done: boolean, next: boolean, draft: boolean) => (done ? 'Done' : next ? 'Next' : draft ? 'Draft' : 'Not started');
 const renderHome = () => {
   renderStat();
-  renderFields(); renderAbout(); renderFurther();
+  renderFields(); renderAbout(); renderFurther(); renderCoopIn();
   const f = F(), b = base(), round = b / PER_ROUND, done = winDone(), next = [0, 1, 2].find((k) => !done.has(k)), it = isIt();
   // fresh: a round was just finished and the next one is not started. Celebrate the Kern card first, then offer the new missions.
   const fresh = roundJustDone();
@@ -599,7 +609,7 @@ const renderHome = () => {
     setT(row.querySelector('b')!, f.m[a][1]);
     const bo = boostOf(S.field), isB = !!bo && bo.i === a;
     row.classList.toggle('boost', isB);
-    setD(row.querySelector('small')!, `${tr(f.m[a][0])} · ${tr(st)}${isB ? ' · ' + boostTxt(bo!.m) : ''}`);
+    setD(row.querySelector('small')!, `${tr(f.m[a][0])} · ${tr(st)}${isCoop(S.field, a) ? ' · Co-op' : ''}${isB ? ' · ' + boostTxt(bo!.m) : ''}`);
   });
 };
 
@@ -643,7 +653,7 @@ const renderProgress = () => {
   });
   const signs = $('kSigns'), tips = S.answers.filter((a) => a.r?.tip);
   signs.innerHTML = '';
-  if (!tips.length) { const p = document.createElement('p'); p.textContent = tr('After each mission, leave one short tip for the next person.'); signs.appendChild(p); }
+  if (!tips.length) { const p = document.createElement('p'); p.textContent = tr('After each mission, leave a short review for the next person.'); signs.appendChild(p); }
   tips.slice(-3).reverse().forEach((a) => {
     const d = document.createElement('div'); d.className = 'k-sign';
     const q = document.createElement('p'); q.textContent = `“${a.r!.tip}”`;
@@ -666,7 +676,7 @@ const renderProgress = () => {
   }
   const w = weeks.filter(Boolean).length;
   $('kRhy').textContent = it ? `In ${w} delle ultime 4 settimane hai creato qualcosa.` : `${w} of the last 4 weeks you made something.`;
-  renderHome(); renderSignals(); renderBadges(); renderLoot();
+  renderHome(); renderSignals(); renderBadges(); renderLoot(); renderCoops();
 };
 
 // Badges (Duolingo/Strava style): earned once, kept even if an answer is later deleted.
@@ -674,7 +684,7 @@ const WEEKNUM = (t: number) => Math.floor(t / 6048e5);
 const BADGES: { id: string; t: string; d: string; ok: () => boolean }[] = [
   { id: 'first', t: 'First step', d: 'Your first answer', ok: () => S.answers.length > 0 },
   { id: 'reflect', t: 'Honest look', d: 'Your first reflection', ok: () => S.answers.some((a) => a.r) },
-  { id: 'sign', t: 'Trail marker', d: 'Left a sign for the next person', ok: () => S.answers.some((a) => a.r?.tip) },
+  { id: 'sign', t: 'Trail marker', d: 'Left a review for the next person', ok: () => S.answers.some((a) => a.r?.tip) },
   { id: 'full', t: 'Full trail', d: 'All 3 missions in one field', ok: () => Object.keys(FIELDS).some((f) => { const d = doneIn(f); return [0, 1, 2].every((i) => d.has(i)); }) },
   { id: 'deep', t: 'Deep dive', d: 'Every mission in one field', ok: () => Object.keys(FIELDS).some((f) => doneIn(f).size >= total(f)) },
   { id: 'twice', t: 'Do it twice', d: '3 versions of an idea in KERN.AI', ok: () => S.mine.length >= 3 },
@@ -706,12 +716,14 @@ function renderBadges() {
 // Deletes made while the Undo toast is up join one batch, and Undo brings them all back.
 // Each delete leaves a tombstone so it also sticks on the user's other synced devices.
 const worth = (a: Answer) => 50 + (a.r ? 20 : 0) + (a.x || 0);
-let binned: Answer[] = [];
+let binned: Answer[] = [], binnedCoops: CoopRec[] = []; // answers just deleted (Undo puts them back) and the co-op rows that went with them
 function deleteAnswer(idx: number) {
   const a = S.answers[idx]; if (!a) return;
-  if (!toastAct) binned = [];
+  if (!toastAct) { binned = []; binnedCoops = []; }
   binned.push(a);
   S.answers.splice(idx, 1);
+  const mineCoops = S.coops.filter((r) => r.role === 'out' && r.f === a.f && r.i === a.i && (r.at === a.at || r.mine.trim() === clip(a.t, MAX_ANSWER).trim())); // the answer, and with it what it sent and what came back
+  binnedCoops.push(...mineCoops); S.coops = S.coops.filter((r) => !mineCoops.includes(r));
   unshareSign(a); // its sign leaves the trail too; Undo shares it again
   S.gone = [...S.gone, [akey(a), stamp(ver(a))] as Tomb].slice(-200);
   S.stones = Math.max(0, S.stones - worth(a)); save(); setLvl(); renderProgress();
@@ -725,7 +737,8 @@ function deleteAnswer(idx: number) {
       S.answers.splice(i < 0 ? S.answers.length : i, 0, b); S.stones += worth(b);
       shareSign(b);
     });
-    binned = []; save(); setLvl(); renderProgress();
+    S.coops = [...S.coops, ...binnedCoops].sort((x, y) => x.at - y.at).slice(-30);
+    binned = []; binnedCoops = []; save(); setLvl(); renderProgress();
   });
 }
 
@@ -883,12 +896,12 @@ let signReq = 0;
 const renderTrailSigns = (f: string, i: number) => {
   const req = ++signReq;
   const note = (en: string) => { kShS.innerHTML = ''; const p = document.createElement('p'); p.className = 'k-sign-empty'; setT(p, en); kShS.appendChild(p); };
-  if (!CLOUD) return note('When people finish this mission, the signs they leave for you appear here.');
-  note('Loading signs…');
+  if (!CLOUD) return note('When people finish this mission, the reviews they leave for you appear here.');
+  note('Loading reviews…');
   cloud.signs(f, i).then((list) => {
     if (req !== signReq) return;
     const ok = list.filter((s) => shareable(s.tip));
-    if (!ok.length) return note('No signs on this trail yet. Finish it and leave the first one.');
+    if (!ok.length) return note('No reviews on this mission yet. Finish it and leave the first one.');
     kShS.innerHTML = '';
     ok.forEach((s) => {
       const d = document.createElement('div'), q = document.createElement('p'), w = document.createElement('span');
@@ -896,7 +909,7 @@ const renderTrailSigns = (f: string, i: number) => {
       setD(w, `${tr('Someone who finished it')} · ${day(Date.parse(s.at) || Date.now())}`);
       d.append(q, w); kShS.appendChild(d);
     });
-  }).catch(() => { if (req === signReq) note("Couldn't load signs right now."); });
+  }).catch(() => { if (req === signReq) note("Couldn't load reviews right now."); });
 };
 const setRfNote = () => setT($('kRfN'), user ? 'Shared without your name with the next people on this trail.'
   : CLOUD ? 'Stays on this device. Log in to share it, without your name, with the next people on this trail.'
@@ -1141,6 +1154,7 @@ const dropArt = (d: Drop) => {
 function showDrop(d: Drop, side: number, withNext = false) {
   const rel = RELICS.find((r) => r.id === d.id);
   kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = d.tier;
+  $('kDrCoop').hidden = true; $('kDrCoN').hidden = true;
   setT(kDrOk, 'Keep going'); delete kDrOk.dataset.next; kDrNx.hidden = true; kDrNx.textContent = ''; // aria-describedby reads hidden text too
   if (withNext) offerNext(); // before the focus below, so the button is announced with its final label
   $('kDrArt').innerHTML = dropArt(d);
@@ -1177,6 +1191,7 @@ const fillSheet = (f: string, i: number) => {
   renderBrief(f, i);
   kShA.hidden = false; kShR.hidden = true; setT(kSaved, NOTE_DEFAULT); kSaved.hidden = false;
   renderTrailSigns(f, i);
+  $('kCoopHint').hidden = !isCoop(f, i);
 };
 // No clock on a mission: "~3 min" is a soft estimate shown by renderBrief, never a countdown or a speed bonus (quality over speed).
 const openAnswer = (f: string, i: number, dare = false) => {
@@ -1252,6 +1267,8 @@ function showDone() {
   setT(kDrOk, 'Keep going'); delete kDrOk.dataset.next; kDrNx.hidden = true; kDrNx.textContent = ''; // aria-describedby reads hidden text too
   offerNext(); // before the focus below, so the button is announced with its final label
   $('kDrArt').innerHTML = icon('done', 'k-i k-done-i');
+  const co = isCoop(cur.f, cur.i) && !!lastAns && S.answers.includes(lastAns); // a co-op mission can go on to a friend from here
+  $('kDrCoop').hidden = !co; $('kDrCoN').hidden = !co;
   setT($('kDrT'), 'Done.');
   setD($('kDrN'), it ? `${doneIn(f).size} su ${total(f)} fatte in ${tr(f)}` : `${doneIn(f).size} of ${total(f)} done in ${tr(f)}`);
   setD($('kDrS'), it ? 'Salvata su questo dispositivo.' : 'Saved on this device.');
@@ -1590,7 +1607,7 @@ kScr.querySelectorAll<HTMLElement>('[data-k-share]').forEach((b) => b.addEventLi
   track('share'); // counts the tap on Share (card or dare), not whether the person finished sending it
   if (b.dataset.kShare === 'card') { void shareCard(); return; }
   markDared();
-  void shareText('KERN', tr('I dare you: {m}. Answer it on KERN, then we compare.').replace('{m}', tr(F().m[0][1])), `${location.origin}/?dare=${encodeURIComponent(S.field)}.0`, 'Link copied.');
+  void shareText('KERN', tr('I dare you: {m}. Answer it on KERN.').replace('{m}', tr(F().m[0][1])), `${location.origin}/?dare=${encodeURIComponent(S.field)}.0`, 'Link copied.');
 }));
 
 // Pilot: send your trail (answers + reflections) to the KERN team as plain text.
@@ -1603,7 +1620,7 @@ const trailText = () => {
       if (a.r.e) p.push(tr(FEEL_EN[a.r.e]));
       if (a.r.again) p.push(`${it ? 'Di nuovo' : 'Again'}: ${tr(AGAIN_EN[a.r.again])}`);
       if (a.r.hard) p.push(`${it ? 'Più difficile' : 'Hardest'}: ${a.r.hard}`);
-      if (a.r.tip) p.push(`${it ? 'Segno' : 'Sign'}: ${a.r.tip}`);
+      if (a.r.tip) p.push(`${it ? 'Recensione' : 'Review'}: ${a.r.tip}`);
       L.push(p.join(' | '));
     }
     L.push('');
@@ -1629,6 +1646,100 @@ if (dp) {
 }
 function renderDare() { $('kDare').hidden = !dare; if (dare) setT($('kDareT'), FIELDS[dare.f].m[dare.i][1]); }
 $('kDareGo').addEventListener('click', () => { if (dare) openAnswer(dare.f, dare.i, true); });
+
+// Co-op with a friend (coop.ts): two missions in every field are finished by two people through links, with no server. A link carries one answer
+// after the #; the friend's reply comes back the same way. The pair lives in S.coops, so it survives a reload and syncs with the trail.
+function isCoop(f: string, i: number) { return COOP_KEYS.includes(`${f}.${i}`); }
+const myName = () => [...cleanName(S.name)].slice(0, MAX_NAME).join('') || (isIt() ? 'Un amico' : 'A friend');
+const coopAsk = (f: string, i: number) => tr(ASK[`${f}.${i}`]);
+const keepCoops = () => { S.coops = S.coops.slice(-30); };
+let coopIn: Coop | null = null, coopNote = '', coopGo = false; // the friend's request waiting to be answered; a one-line notice (and whether to open yourKERN) after a link was opened
+function receiveCoopReply(c: Coop) { // someone answered my co-op: keep both halves (coop.ts decides which row it belongs to, or that it is not for me)
+  const res = settleReply(S.coops, c, Date.now()), it = isIt(), who = c.m || (it ? 'Un amico' : 'A friend');
+  if (res.status === 'stranger') { coopNote = it ? 'Questa risposta non è per una tua missione.' : 'This reply is not for one of your missions.'; return; }
+  if (res.status === 'own') { coopNote = it ? 'Questa è la risposta che hai mandato tu.' : 'This is the reply you sent.'; return; }
+  if (res.status !== 'same') { S.coops = res.coops; keepCoops(); save(); }
+  coopNote = it ? `${who} ha risposto. La trovi in yourKERN.` : `${who} replied. It is in yourKERN.`; coopGo = true;
+}
+// The link stays in the address bar until the request is answered or dismissed, so a reload, "Open in Safari" from a chat app's browser or a bookmark still finds it.
+function dropCoopHash() { if (location.hash.startsWith('#coop=')) try { history.replaceState(null, '', location.pathname.replace(/^\/{2,}/, '/') + location.search); } catch { /* leave the address as it is */ } }
+function readCoopLink() {
+  const c = decodeCoop(location.hash);
+  if (c?.r) { receiveCoopReply(c); dropCoopHash(); } // a reply is kept in the trail at once
+  else if (c) coopIn = c;
+  else if (location.hash.startsWith('#coop=')) { coopNote = isIt() ? 'Questo link non funziona: chiedi all’amico di rimandarlo.' : 'This link is broken: ask your friend to send it again.'; dropCoopHash(); } // a chat app may cut or add characters to a link
+}
+readCoopLink();
+addEventListener('hashchange', () => { if (location.hash.startsWith('#coop=')) location.reload(); }); // a link opened while KERN is already open changes only the fragment
+function sendCoop(a: Answer) { // my answer goes to a friend, with the task they will do
+  if (!isCoop(a.f, a.i)) return; // only the 12 co-op missions have a friend's task
+  const c: Coop = { v: 1, f: a.f, i: a.i, n: myName(), a: a.t }, mine = clip(a.t, MAX_ANSWER);
+  const had = S.coops.find((r) => r.role === 'out' && r.f === a.f && r.i === a.i && r.at === a.at);
+  if (had) had.mine = mine; // the answer may have been edited since the last send: the row keeps what goes out now
+  else S.coops.push({ role: 'out', f: a.f, i: a.i, at: a.at, with: '', mine, theirs: '' });
+  keepCoops(); save(); renderCoops(); track('share');
+  const text = tr('{n} wants your take on “{m}”: {ask} Open the link, it takes a minute.').replace('{n}', c.n).replace('{m}', tr(FIELDS[a.f].m[a.i][1])).replace('{ask}', coopAsk(a.f, a.i));
+  void shareText('KERN', text, coopUrl(location.origin, c), 'Link copied. Send it to your friend.');
+}
+function sendCoopReply(r: CoopRec) { // my reply goes back, with the answer it is about, so the first person sees both
+  const c: Coop = { v: 1, f: r.f, i: r.i, n: r.with, a: r.theirs, r: r.mine, m: myName() };
+  const text = tr('{n} answered “{m}”. Open the link to read it.').replace('{n}', c.m!).replace('{m}', tr(FIELDS[r.f].m[r.i][1]));
+  void shareText('KERN', text, coopUrl(location.origin, c), 'Link copied. Send it back to your friend.');
+}
+function renderCoopIn() { // the card for a friend's request
+  const c = coopIn, card = $('kCoop');
+  card.hidden = !c;
+  if (!c) return;
+  const who = c.n || (isIt() ? 'Un amico' : 'A friend');
+  setD($('kCoL'), `Co-op · ${who}`); setD($('kCoT'), tr(FIELDS[c.f].m[c.i][1]));
+  setD($('kCoQL'), isIt() ? `La risposta di ${who}` : `${who}’s answer`); setD($('kCoQ'), c.a);
+  setD($('kCoAsk'), coopAsk(c.f, c.i));
+  setT(kScr.querySelector<HTMLElement>('label[for="kCoTa"]')!, 'Your reply'); // the label only a screen reader sees
+}
+const afterCoopCard = () => land(kScr.querySelector<HTMLElement>('#k-missions h4')!); // the card held the focus and is gone
+$('kCoNo').addEventListener('click', () => { coopIn = null; dropCoopHash(); renderCoopIn(); afterCoopCard(); });
+$('kCoSelf').addEventListener('click', () => {
+  const c = coopIn; if (!c) return;
+  if (!S.fields.includes(c.f)) S.fields.push(c.f);
+  if (c.f !== S.field) switchField(c.f);
+  openAnswer(c.f, c.i);
+});
+$('kCoSend').addEventListener('click', once(() => {
+  const c = coopIn, ta = $<HTMLTextAreaElement>('kCoTa'), t = ta.value.trim();
+  if (!c) return;
+  if (!t) { say('Write something first.'); ta.focus(); return; }
+  const rec: CoopRec = { role: 'in', f: c.f, i: c.i, at: Date.now(), with: c.n, mine: clip(t, MAX_REPLY), theirs: c.a };
+  S.coops.push(rec); keepCoops(); save();
+  ta.value = ''; coopIn = null; dropCoopHash(); renderCoopIn(); renderCoops(); afterCoopCard();
+  sendCoopReply(rec);
+}));
+$('kDrCoop').addEventListener('click', () => { if (lastAns && S.answers.includes(lastAns)) sendCoop(lastAns); });
+function renderCoops() { // yourKERN: every co-op mission answered, sent, or replied to, with both halves once they are in
+  const card = $('kCoops'), box = $('kCoopL'), it = isIt();
+  const mk = (tag: string, cls = '', text = '') => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
+  const row = (title: string, status: string, quotes: [string, string][], act?: [string, () => void]) => {
+    const r = mk('div', 'k-coopr'); r.append(mk('div', 'k-l', title), mk('p', 'k-coopst', status));
+    for (const [who, text] of quotes) { const q = mk('div', 'k-coq'); q.append(mk('div', 'k-l', who), mk('p', '', text)); r.append(q); }
+    if (act) { const b = mk('button', 'k-ask-btn', act[0]) as HTMLButtonElement; b.type = 'button'; b.setAttribute('aria-label', `${act[0]}: ${title}`); b.addEventListener('click', act[1]); r.append(b); } // the same two words repeat on every row
+    return r;
+  };
+  const rows: { pri: number; el: HTMLElement }[] = [], used = new Set<CoopRec>(), seen = new Set<string>(), me = tr('You'), unknown = it ? 'Un amico' : 'A friend';
+  for (const a of [...S.answers].reverse()) {
+    if (!isCoop(a.f, a.i) || seen.has(`${a.f}.${a.i}`)) continue;
+    seen.add(`${a.f}.${a.i}`);
+    const rec = S.coops.find((r) => r.role === 'out' && r.f === a.f && r.i === a.i && (r.at === a.at || r.mine.trim() === clip(a.t, MAX_ANSWER).trim()));
+    if (rec) used.add(rec);
+    const friend = rec?.with || (it ? 'un amico' : 'a friend');
+    rows.push({ pri: rec?.theirs ? 0 : rec ? 1 : 2, el: row(tr(FIELDS[a.f].m[a.i][1]), !rec ? tr('Not sent yet') : rec.theirs ? (it ? `Fatta con ${friend}` : `Done with ${friend}`) : tr('Sent. Waiting for a reply.'),
+      rec?.theirs ? [[me, clip(a.t, MAX_ANSWER)], [friend, rec.theirs]] : [], [tr(rec ? 'Send again' : 'Send to a friend'), () => sendCoop(a)]) });
+  }
+  for (const r of [...S.coops].reverse()) {
+    if (r.role === 'out' && !used.has(r)) rows.push({ pri: r.theirs ? 0 : 1, el: row(tr(FIELDS[r.f].m[r.i][1]), r.theirs ? (it ? `Fatta con ${r.with || 'un amico'}` : `Done with ${r.with || 'a friend'}`) : tr('Sent. Waiting for a reply.'), r.theirs ? [[me, r.mine], [r.with || unknown, r.theirs]] : []) }); // a second friend's reply, or an answer deleted since
+    if (r.role === 'in') rows.push({ pri: 0, el: row(tr(FIELDS[r.f].m[r.i][1]), it ? `Hai risposto a ${r.with || 'un amico'}` : `You replied to ${r.with || 'a friend'}`, [[r.with || unknown, r.theirs], [me, r.mine]], [tr('Send again'), () => sendCoopReply(r)]) });
+  }
+  card.hidden = !rows.length;
+  box.replaceChildren(...rows.sort((x, y) => x.pri - y.pri).slice(0, 12).map((x) => x.el)); // finished pairs first, so a reply that just arrived is never past the cut
+}
 
 // Settings
 // A language switch inside the demo: the sample texts nobody edited follow it (demo.ts), so the trail never reads half in each language.
@@ -1735,6 +1846,7 @@ applyText();
 applyField(false);
 setLang(S.lang);
 renderDare();
+renderCoopIn(); renderCoops();
 moveInd(onTab(), false);
 setMode(mode);
 renderAcct();
@@ -1750,6 +1862,7 @@ if (DEMO) {
   document.querySelectorAll<HTMLElement>('[data-k-send], #kExp, .k-pilot').forEach((e) => { e.hidden = true; }); // sample data is not sent or exported as if it were a real trail (.k-pilot: the card that asks for it)
 }
 if (recovered) say(recovered);
+if (coopNote) { say(coopNote); if (coopGo && S.onboarded) goTab('yourkern'); }
 track('visit'); // once a day per device, only for people who said yes
 if (!S.onboarded) openStart(); // the choice comes first, right after the loader
 else if (!S.name) kLogin.classList.add('on');

@@ -50,8 +50,9 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - Fields side by side: once two fields have a reflection, yourKERN compares their average energy and says who leads only on a clear gap with two reflections each (`src/scripts/compare.ts`, covered by `npm test`)
 - Take it further: three steps outside the app (ask, make, learn) for the field you are in, once it has an answer
 - Quick reflection after each answer (how it felt, would you do it again, hardest part, a sign for the next person)
-- Signs on the trail: with an account, the sign you leave is shown without your name to the next people who open that mission (`kern_signs` in `supabase/schema.sql`: public read of tip and date only, writes through `add_sign` / `delete_my_sign`, 20 a day each, no links, emails or long numbers). Deleting the answer removes its sign
+- Reviews for the next person (called signs in the code): with an account, the review you leave is shown without your name to the next people who open that mission (`kern_signs` in `supabase/schema.sql`: public read of tip and date only, writes through `add_sign` / `delete_my_sign`, 20 a day each, no links, emails or long numbers). Deleting the answer removes its sign
 - Real "first guess" and Kern card built from your reflections. Kern card shared as a 1080x1350 image
+- Co-op with a friend, without a server: two missions in every field (the "with a partner" kind, index 2 and 5) can be finished by two people through links. The first sends a link that carries their answer after the `#` (`src/scripts/coop.ts`, the friend's task per mission in `coopask.ts`), the friend answers on a card at the top of Missions and sends a link back, and both answers sit side by side in yourKERN. The link stays in the address bar until it is answered or dismissed. Covered by `npm test`; the Privacy page says what a link carries
 - Share your Kern card, dare a friend, copy links (native share sheet, clipboard fallback). Dare links open the same mission
 - Weekly reminder as a calendar file (no notifications permission, no streaks)
 - Pilot: "Share my trail with the KERN team" sends answers and reflections as plain text
