@@ -73,7 +73,8 @@ const PAUSE_EN = /pausing the mission/i, PAUSE_IT = /metto in pausa la missione/
 const unquote = (s) => s.replace(/[“"«][^”"»]*[”"»]/g, 'Q'); // a quoted phrase may hold its own punctuation
 const sentences = (s) => (unquote(s).match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g) || []).filter((x) => x.trim()).length;
 const EMOJI = /\p{Extended_Pictographic}/u;
-const formatOk = (r) => (!!r && r.trim().endsWith('?') && (unquote(r).match(/\?/g) || []).length === 1 && sentences(r) <= 3 && !EMOJI.test(r) && !/^\s*([-*•]|\d+[.)]|#)/m.test(r) ? 1 : 0);
+const formatOk = (r) => (!!r && r.trim().endsWith('?') && (unquote(r).match(/\?/g) || []).length === 1 && sentences(r) <= 3 && !EMOJI.test(unquote(r)) && // an emoji the coach quotes from the person's message is theirs, not the coach's
+     !/^\s*([-*•]|\d+[.)]|#)/m.test(r) ? 1 : 0);
 const IT_W = /\b(il|la|di|che|non|per|una|un|è|come|cosa|con|sono|hai|ti|tua|tuo|più|quale|prima|ho|da|del|nel)\b/gi, EN_W = /\b(the|and|what|you|your|is|to|of|a|how|which|first|it|that|for|are|with|one)\b/gi;
 const langOk = (r, lang) => { if (!r) return 0; const it = (r.match(IT_W) || []).length, en = (r.match(EN_W) || []).length; return (lang === 'it' ? it > en : en > it) ? 1 : 0; };
 

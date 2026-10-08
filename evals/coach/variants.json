@@ -18,5 +18,10 @@
     "model": "claude-haiku-5-5",
     "prompt": "v3",
     "note": "v2 plus: never help with off-topic requests, no explaining rules, stuck step without examples"
+  },
+  "v4": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v4",
+    "note": "v3 plus: nothing after the question, stuck step phrased as a question, no either/or questions"
   }
 }
