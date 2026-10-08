@@ -378,25 +378,34 @@ const closeSheet = (sh: HTMLElement) => {
   if (reveal) { setLvl(); renderProgress(); }
 };
 [kSheet, kSet, kFld].forEach((sh) => {
-  sh.addEventListener('click', (e) => { if (e.target === sh) closeSheet(sh); });
-  sh.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeSheet(sh); } });
+  sh.addEventListener('click', (e) => { if (e.target === sh) dismiss(sh); });
+  sh.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); dismiss(sh); } });
 });
+// Closing a sheet moves like the finger that drags it: the sheet slides the rest of the way down while the scrim fades, then it is really closed (closeSheet).
+// The close button, Escape, the scrim and a drag all use it; code that closes a sheet to open something else keeps calling closeSheet at once.
+const EXIT_MS = 190;
+const dismiss = (sh: HTMLElement) => {
+  if (sh.hidden || sh.dataset.leaving) return;
+  if (still) return closeSheet(sh);
+  const inner = sh.querySelector<HTMLElement>('.k-sh-in')!;
+  sh.dataset.leaving = '1'; inner.classList.remove('drag'); inner.classList.add('out'); inner.style.translate = '0 100%'; sh.style.setProperty('--drag', '1');
+  window.setTimeout(() => { delete sh.dataset.leaving; inner.classList.remove('out'); inner.style.translate = ''; sh.style.removeProperty('--drag'); closeSheet(sh); }, EXIT_MS);
+};
 // Drag a sheet down from its top to close it: the handle area and, on a mission, the bar and header. Those parts have touch-action: none (app.css), so a finger's
 // drag arrives as pointer events and the page never has to wait for a script before it scrolls. A short drag springs back; buttons in the zone keep working.
 const SWIPE_CLOSE_PX = 80, INTERACTIVE = 'button, a, input, textarea, select, [role="button"]';
 kScr.querySelectorAll<HTMLElement>('.k-sheet').forEach((sh) => {
   const inner = sh.querySelector<HTMLElement>('.k-sh-in')!;
   let startY = 0, dy = 0, live = false;
-  const end = (cancel = false) => { if (!live) return; live = false; inner.classList.remove('drag'); inner.style.translate = ''; inner.style.userSelect = ''; if (!cancel && dy >= SWIPE_CLOSE_PX) closeSheet(sh); };
+  const follow = (d: number) => { dy = d; inner.classList.add('drag'); inner.style.translate = d ? `0 ${d}px` : ''; sh.style.setProperty('--drag', String(Math.min(1, d / 320))); };
+  const settle = () => { inner.classList.remove('drag'); inner.style.translate = ''; sh.style.removeProperty('--drag'); };
+  const end = (cancel = false) => { if (!live) return; live = false; inner.style.userSelect = ''; if (!cancel && dy >= SWIPE_CLOSE_PX) dismiss(sh); else settle(); };
   inner.addEventListener('pointerdown', (e) => {
     const t = e.target as HTMLElement;
-    if (e.button !== 0 || t.closest(INTERACTIVE) || !t.closest('.k-grab, .k-shbar, .k-top-zone')) return;
+    if (sh.dataset.leaving || e.button !== 0 || t.closest(INTERACTIVE) || !t.closest('.k-grab, .k-shbar, .k-top-zone')) return;
     startY = e.clientY; dy = 0; live = true; inner.setPointerCapture(e.pointerId); inner.style.userSelect = 'none';
   });
-  inner.addEventListener('pointermove', (e) => {
-    if (!live || !inner.hasPointerCapture(e.pointerId)) return;
-    dy = Math.max(0, e.clientY - startY); inner.classList.add('drag'); inner.style.translate = dy ? `0 ${dy}px` : '';
-  });
+  inner.addEventListener('pointermove', (e) => { if (live && inner.hasPointerCapture(e.pointerId)) follow(Math.max(0, e.clientY - startY)); });
   const up = (e: PointerEvent, cancel = false) => { if (live && inner.hasPointerCapture(e.pointerId)) inner.releasePointerCapture(e.pointerId); end(cancel); };
   inner.addEventListener('pointerup', (e) => up(e));
   inner.addEventListener('pointercancel', (e) => up(e, true));
@@ -404,21 +413,24 @@ kScr.querySelectorAll<HTMLElement>('.k-sheet').forEach((sh) => {
   if (sh.id !== 'kSet' && sh.id !== 'kFld') return;
   let ty = 0, tt = 0, pulling = false, armed = false;
   // (the handle and the header have their own pointer drag above, so a touch there is left out)
-  inner.addEventListener('touchstart', (e) => { armed = inner.scrollTop <= 0 && !(e.target as HTMLElement).closest('textarea, input, .k-grab, .k-top-zone'); pulling = false; ty = e.touches[0].clientY; tt = e.timeStamp; dy = 0; }, { passive: true });
+  inner.addEventListener('touchstart', (e) => { armed = !sh.dataset.leaving && inner.scrollTop <= 0 && !(e.target as HTMLElement).closest('textarea, input, .k-grab, .k-top-zone'); pulling = false; ty = e.touches[0].clientY; tt = e.timeStamp; dy = 0; }, { passive: true });
   inner.addEventListener('touchmove', (e) => {
     if (!armed) return;
     const d = e.touches[0].clientY - ty;
-    if (d <= 0 || inner.scrollTop > 0) { if (pulling) { pulling = false; inner.classList.remove('drag'); inner.style.translate = ''; } if (inner.scrollTop > 0 || d < -6) armed = false; return; }
-    pulling = true; dy = d; inner.classList.add('drag'); inner.style.translate = `0 ${d}px`;
+    if (d <= 0 || inner.scrollTop > 0) { if (pulling) { pulling = false; settle(); } if (inner.scrollTop > 0 || d < -6) armed = false; return; }
+    pulling = true; follow(d);
   }, { passive: true });
   const release = (e: TouchEvent, cancel: boolean) => {
-    if (!pulling) return; pulling = false; armed = false; inner.classList.remove('drag'); inner.style.translate = '';
+    if (!pulling) return; pulling = false; armed = false;
     const fast = dy / Math.max(1, e.timeStamp - tt) > 0.6; // a quick flick closes it even when short
-    if (!cancel && (dy >= SWIPE_CLOSE_PX || (fast && dy >= 36))) closeSheet(sh);
+    if (!cancel && (dy >= SWIPE_CLOSE_PX || (fast && dy >= 36))) dismiss(sh); else settle();
   };
   inner.addEventListener('touchend', (e) => release(e, false));
   inner.addEventListener('touchcancel', (e) => release(e, true));
 });
+// The Settings header gets a soft shadow once the list slides under it.
+const kSetIn = kSet.querySelector<HTMLElement>('.k-sh-in')!, kSetHd = kSet.querySelector<HTMLElement>('.k-sethd')!;
+kSetIn.addEventListener('scroll', () => kSetHd.classList.toggle('scrolled', kSetIn.scrollTop > 2), { passive: true });
 
 // Ranks
 const RANKS: [string, number][] = [['Pebble', 0], ['Stone', 100], ['Cairn', 300], ['Ridge', 700], ['Summit', 1500]];
@@ -541,7 +553,7 @@ const openAbout = () => {
   openSheetEl(kFld, $('kFlGo'));
 };
 $('kAbout').addEventListener('click', openAbout);
-$('kFlX').addEventListener('click', () => closeSheet(kFld));
+$('kFlX').addEventListener('click', () => dismiss(kFld));
 $('kFlGo').addEventListener('click', () => { closeSheet(kFld); kAdd.click(); });
 // Take it further: shown once the field on show has an answer, so it follows something the person did.
 const renderFurther = () => {
@@ -1815,7 +1827,7 @@ const setLang = (l: Lang) => {
 };
 document.querySelectorAll<HTMLElement>('[data-k-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.kLang === 'it' ? 'it' : 'en')));
 $('kAv').addEventListener('click', () => openSheetEl(kSet, $('kSetX')));
-$('kSetX').addEventListener('click', () => closeSheet(kSet));
+$('kSetX').addEventListener('click', () => dismiss(kSet));
 $('kChField').addEventListener('click', () => { kSet.hidden = true; openStart(true, true); });
 // Feedback goes to the founder's inbox through the person's own mail app; nothing is sent by KERN.
 const CONTACT = 'manuel@trykern.it';

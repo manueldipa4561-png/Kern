@@ -814,9 +814,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-tabs button { gap: 4px; min-height: 60px; font-size: 0.8125rem; }
 .k-tabs .ti { display: grid; place-items: center; width: 30px; height: 30px; }
 .k-tabs .ti .k-i { width: 30px; height: 30px; }
-.k-tabs .ti .k-on, .k-tabs button.on .ti .k-i:not(.k-on) { display: none; } /* a tab shows an outline icon, and the filled one while it is the tab in play */
-.k-tabs button.on .ti .k-on { display: block; }
-/* The yourKERN tab is a glass picture: dimmed while idle; on the lime capsule it sits on a night plate so the pale glass does not vanish. */
+/* The three tabs are glass pictures: dimmed while idle; on the lime capsule it sits on a night plate so the pale glass does not vanish. */
 .k-tabs .ti .k-fp { width: 30px; height: 30px; opacity: .6; transition: opacity .2s; }
 .k-tabs button.on .ti:has(.k-fp) { background: rgba(15, 20, 14, .86); border-radius: 11px; }
 .k-tabs button.on .ti .k-fp { opacity: 1; filter: none; }
@@ -964,3 +962,29 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .k-set-list #kDelAcc, .k-acct #kDelAcc { --ic: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2Ij48cGF0aCBkPSJNMjE2LDQ4SDE3NlY0MGEyNCwyNCwwLDAsMC0yNC0yNEgxMDRBMjQsMjQsMCwwLDAsODAsNDB2OEg0MGE4LDgsMCwwLDAsMCwxNmg4VjIwOGExNiwxNiwwLDAsMCwxNiwxNkgxOTJhMTYsMTYsMCwwLDAsMTYtMTZWNjRoOGE4LDgsMCwwLDAsMC0xNlpNOTYsNDBhOCw4LDAsMCwxLDgtOGg0OGE4LDgsMCwwLDEsOCw4djhIOTZabTk2LDE2OEg2NFY2NEgxOTJaTTExMiwxMDR2NjRhOCw4LDAsMCwxLTE2LDBWMTA0YTgsOCwwLDAsMSwxNiwwWm00OCwwdjY0YTgsOCwwLDAsMS0xNiwwVjEwNGE4LDgsMCwwLDEsMTYsMFoiLz48L3N2Zz4="); }
 .k-set-list #kAcctUp, .k-acct #kAcctUp { --ic: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2Ij48cGF0aCBkPSJNMjU2LDEzNmE4LDgsMCwwLDEtOCw4SDIzMnYxNmE4LDgsMCwwLDEtMTYsMFYxNDRIMjAwYTgsOCwwLDAsMSwwLTE2aDE2VjExMmE4LDgsMCwwLDEsMTYsMHYxNmgxNkE4LDgsMCwwLDEsMjU2LDEzNlptLTU3Ljg3LDU4Ljg1YTgsOCwwLDAsMS0xMi4yNiwxMC4zQzE2NS43NSwxODEuMTksMTM4LjA5LDE2OCwxMDgsMTY4cy01Ny43NSwxMy4xOS03Ny44NywzNy4xNWE4LDgsMCwwLDEtMTIuMjUtMTAuM2MxNC45NC0xNy43OCwzMy41Mi0zMC40MSw1NC4xNy0zNy4xN2E2OCw2OCwwLDEsMSw3MS45LDBDMTY0LjYsMTY0LjQ0LDE4My4xOCwxNzcuMDcsMTk4LjEzLDE5NC44NVpNMTA4LDE1MmE1Miw1MiwwLDEsMC01Mi01MkE1Mi4wNiw1Mi4wNiwwLDAsMCwxMDgsMTUyWiIvPjwvc3ZnPg=="); }
 .k-set-list #kLogout, .k-acct #kLogout { --ic: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2Ij48cGF0aCBkPSJNMTIwLDIxNmE4LDgsMCwwLDEtOCw4SDQ4YTgsOCwwLDAsMS04LThWNDBhOCw4LDAsMCwxLDgtOGg2NGE4LDgsMCwwLDEsMCwxNkg1NlYyMDhoNTZBOCw4LDAsMCwxLDEyMCwyMTZabTEwOS42Ni05My42Ni00MC00MGE4LDgsMCwwLDAtMTEuMzIsMTEuMzJMMjA0LjY5LDEyMEgxMTJhOCw4LDAsMCwwLDAsMTZoOTIuNjlsLTI2LjM1LDI2LjM0YTgsOCwwLDAsMCwxMS4zMiwxMS4zMmw0MC00MEE4LDgsMCwwLDAsMjI5LjY2LDEyMi4zNFoiLz48L3N2Zz4="); }
+
+/* Settings, smoother: the sheet slides out the way it came in, the scrim fades with the drag, the segmented controls slide their highlight, rows answer a tap,
+   the header gets a soft shadow once the list slides under it. */
+.k-sh-in.out { transition: translate .19s cubic-bezier(.4, 0, 1, 1); }
+.k-sheet { transition: background-color .19s; }
+#kSet, #kFld { background: color-mix(in srgb, var(--bg) calc(55% * (1 - var(--drag, 0))), transparent); }
+.k-seg { position: relative; display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; --n: 2; }
+.k-seg.k-txt { --n: 4; }
+.k-seg::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: calc(100% / var(--n)); border-radius: 999px; background: var(--acc); transform: translateX(calc(var(--i, 0) * 100%)); transition: transform .3s var(--out); }
+.k-seg button { position: relative; z-index: 1; text-align: center; }
+.k-seg button[aria-pressed="true"] { background: none; transition: color .2s; }
+.k-seg:has(button:nth-child(2)[aria-pressed="true"]) { --i: 1; }
+.k-seg:has(button:nth-child(3)[aria-pressed="true"]) { --i: 2; }
+.k-seg:has(button:nth-child(4)[aria-pressed="true"]) { --i: 3; }
+#kSet .k-set-list .k-ask-btn { transition: background-color .15s; }
+#kSet .k-set-list .k-ask-btn:active { background: color-mix(in srgb, var(--fg) 9%, var(--surf)); }
+.k-sethd { transition: box-shadow .2s; }
+.k-sethd.scrolled { box-shadow: 0 10px 14px -12px rgba(0, 0, 0, .55); }
+@media (prefers-reduced-motion: reduce) { .k-seg::before, .k-sheet, .k-sh-in.out { transition: none; } }
+
+/* The tab bar sits at the very bottom, edge to edge and solid: nothing peeks out beneath or beside it, and the content stops above it. */
+.k-tabs { left: 0; right: 0; bottom: 0; border-radius: 0; border-width: 1px 0 0; padding: 6px 10px max(8px, env(safe-area-inset-bottom)); background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: 0 -10px 24px -18px rgba(0, 0, 0, .55); }
+.lite .k-tabs { background: var(--bg); }
+.k-ind { top: 6px; bottom: max(8px, env(safe-area-inset-bottom)); width: calc((100% - 20px) / 3); }
+.k-body { padding-bottom: calc(92px + env(safe-area-inset-bottom)); -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px); mask-image: linear-gradient(to bottom, transparent 0, #000 16px); }
+.k-toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
