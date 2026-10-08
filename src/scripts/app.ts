@@ -215,6 +215,9 @@ const mergeIn = (raw: unknown) => {
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const kScr = $('kScr');
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Phones (touch, no hover) get a lighter look: no moving aurora, noise, blur or mask behind the content, no View Transitions, no endless animations (app.css .lite). ?lite shows it on a computer.
+const lite = matchMedia('(hover: none) and (pointer: coarse)').matches || /[?&]lite\b/.test(location.search);
+document.documentElement.classList.toggle('lite', lite);
 const isIt = () => S.lang === 'it';
 const tr = (s: string) => (S.lang === 'it' && IT[s]) || s;
 const setT = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.innerHTML = tr(en); };
@@ -300,7 +303,7 @@ document.querySelectorAll<HTMLElement>('[data-k-text]').forEach((b) => b.addEven
 // View Transitions (Chrome, Safari 18+, Firefox 144+): tab panes slide in the direction you move,
 // the chosen field object flies into the mission card. Older browsers get the plain swap.
 type VT = { ready: Promise<void>; updateCallbackDone: Promise<void>; finished: Promise<void> };
-const startVT = (document as Document & { startViewTransition?: (cb: () => unknown) => VT }).startViewTransition?.bind(document);
+const startVT = lite ? undefined : (document as Document & { startViewTransition?: (cb: () => unknown) => VT }).startViewTransition?.bind(document);
 let vtBusy = false, vtSeq = 0;
 document.documentElement.classList.toggle('has-vt', !!startVT && !matchMedia('(prefers-reduced-motion: reduce)').matches); // the pane's own slide then replaces the cards' fade-up (app.css)
 // Runs cb inside a View Transition with `cls` on <html> while it plays. A skipped transition (rapid taps,
@@ -378,27 +381,23 @@ const closeSheet = (sh: HTMLElement) => {
   sh.addEventListener('click', (e) => { if (e.target === sh) closeSheet(sh); });
   sh.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeSheet(sh); } });
 });
-// Drag a sheet down from its top to close it: the handle and the first stretch under it (the title row; on a mission, the bar and header, even when scrolled).
-// A short drag springs back. Fingers use touch events (preventDefault on the downward move keeps the page from scrolling or pulling to refresh),
-// a mouse or pen uses pointer events, and the controls in the zone (buttons, fields, links) keep working.
-const SWIPE_CLOSE_PX = 80, TOP_ZONE_PX = 96, INTERACTIVE = 'button, a, input, textarea, select, [role="button"]';
+// Drag a sheet down from its top to close it: the handle area and, on a mission, the bar and header. Those parts have touch-action: none (app.css), so a finger's
+// drag arrives as pointer events and the page never has to wait for a script before it scrolls. A short drag springs back; buttons in the zone keep working.
+const SWIPE_CLOSE_PX = 80, INTERACTIVE = 'button, a, input, textarea, select, [role="button"]';
 kScr.querySelectorAll<HTMLElement>('.k-sheet').forEach((sh) => {
   const inner = sh.querySelector<HTMLElement>('.k-sh-in')!;
   let startY = 0, dy = 0, live = false;
-  const zone = (y: number, t: EventTarget | null) => y - inner.getBoundingClientRect().top <= TOP_ZONE_PX && (inner.scrollTop <= 0 || !!(t as HTMLElement | null)?.closest?.('.k-shbar'));
-  const begin = (y: number) => { startY = y; dy = 0; live = true; };
-  const move = (y: number) => { dy = Math.max(0, y - startY); inner.classList.add('drag'); inner.style.translate = dy ? `0 ${dy}px` : ''; };
-  const end = (cancel = false) => { if (!live) return; live = false; inner.classList.remove('drag'); inner.style.translate = ''; if (!cancel && dy >= SWIPE_CLOSE_PX) closeSheet(sh); };
-  inner.addEventListener('touchstart', (e) => { live = false; if (zone(e.touches[0].clientY, e.target)) begin(e.touches[0].clientY); }, { passive: true });
-  inner.addEventListener('touchmove', (e) => { if (!live) return; if (inner.scrollTop > 0 && !(e.target as HTMLElement).closest('.k-shbar')) return end(true); if (e.touches[0].clientY > startY) { e.preventDefault(); move(e.touches[0].clientY); } else move(startY); }, { passive: false });
-  inner.addEventListener('touchend', () => end());
-  inner.addEventListener('touchcancel', () => end(true));
+  const end = (cancel = false) => { if (!live) return; live = false; inner.classList.remove('drag'); inner.style.translate = ''; inner.style.userSelect = ''; if (!cancel && dy >= SWIPE_CLOSE_PX) closeSheet(sh); };
   inner.addEventListener('pointerdown', (e) => {
-    if (e.pointerType === 'touch' || e.button !== 0 || (e.target as HTMLElement).closest(INTERACTIVE) || !zone(e.clientY, e.target)) return;
-    begin(e.clientY); inner.setPointerCapture(e.pointerId); inner.style.userSelect = 'none';
+    const t = e.target as HTMLElement;
+    if (e.button !== 0 || t.closest(INTERACTIVE) || !t.closest('.k-grab, .k-shbar, .k-top-zone')) return;
+    startY = e.clientY; dy = 0; live = true; inner.setPointerCapture(e.pointerId); inner.style.userSelect = 'none';
   });
-  inner.addEventListener('pointermove', (e) => { if (live && e.pointerType !== 'touch' && inner.hasPointerCapture(e.pointerId)) move(e.clientY); });
-  const up = (e: PointerEvent, cancel = false) => { if (e.pointerType === 'touch' || !live) return; if (inner.hasPointerCapture(e.pointerId)) inner.releasePointerCapture(e.pointerId); inner.style.userSelect = ''; end(cancel); };
+  inner.addEventListener('pointermove', (e) => {
+    if (!live || !inner.hasPointerCapture(e.pointerId)) return;
+    dy = Math.max(0, e.clientY - startY); inner.classList.add('drag'); inner.style.translate = dy ? `0 ${dy}px` : '';
+  });
+  const up = (e: PointerEvent, cancel = false) => { if (live && inner.hasPointerCapture(e.pointerId)) inner.releasePointerCapture(e.pointerId); end(cancel); };
   inner.addEventListener('pointerup', (e) => up(e));
   inner.addEventListener('pointercancel', (e) => up(e, true));
 });
@@ -798,11 +797,15 @@ const startChat = () => {
 };
 // Live co-pilot: asks netlify/functions/coach.mts, which calls Claude with the rules "only ask, never answer".
 // If there is no key, no network or any error, the scripted coach below answers instead, so the chat always works.
-let liveOk: boolean | null = null;
-const setLive = (ok: boolean) => {
-  if (liveOk === ok) return;
-  liveOk = ok; setT($('kAiLbl'), ok ? 'You are talking to an AI · live replies' : 'You are talking to an AI · offline preview');
+let liveOk: boolean | null = null, liveWhy = '';
+// Why the live co-pilot did not answer, from the server's error code: the line under the title says so, instead of a silent fall back to the scripted coach.
+const WHY: Record<string, string> = { no_key: 'You are talking to an AI · offline preview · no AI key on the server yet', rate: 'You are talking to an AI · offline preview · too many messages, try in a minute' };
+const setLive = (ok: boolean, why = '') => {
+  if (liveOk === ok && liveWhy === why) return;
+  liveOk = ok; liveWhy = why;
+  setT($('kAiLbl'), ok ? 'You are talking to an AI · live replies' : WHY[why] ?? 'You are talking to an AI · offline preview');
 };
+let lastWhy = ''; // the error code of the last failed ask
 async function askAI(extra?: { mission?: { title: string; brief: string }; messages?: { who: string; t: string }[] }): Promise<string | null> {
   // The demo asks the live co-pilot too (it is what is shown to people); the AI tab says so in the demo (#kAiDemo) and the function stores nothing.
   const ctl = new AbortController(), to = window.setTimeout(() => ctl.abort(), 10000);
@@ -811,10 +814,11 @@ async function askAI(extra?: { mission?: { title: string; brief: string }; messa
       method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal,
       body: JSON.stringify({ lang: S.lang, field: extra?.mission ? cur.f : S.field, versions: extra ? 0 : S.mine.length, mission: extra?.mission, messages: extra?.messages ?? S.msgs.filter((m) => !m.typing).slice(-12).map((m) => ({ who: m.who, t: said(m) })) }),
     });
-    if (!r.ok) return null;
-    const j = await r.json();
+    const j = await r.json().catch(() => null);
+    if (!r.ok) { lastWhy = typeof j?.error === 'string' ? j.error : ''; return null; }
+    lastWhy = '';
     return typeof j?.reply === 'string' && j.reply.trim() ? j.reply.trim().slice(0, 500) : null;
-  } catch { return null; } finally { clearTimeout(to); }
+  } catch { lastWhy = ''; return null; } finally { clearTimeout(to); }
 }
 const scripted = (v: string) => {
   if (ASKED.test(v)) return aiSay("I won't hand you the idea. What is the first thing that comes to mind, even if it's rough?");
@@ -833,7 +837,7 @@ const sendChat = () => {
   askAI().then((reply) => {
     if (g !== gen) return;
     S.msgs = S.msgs.filter((m) => !m.typing);
-    if (!reply) { setLive(false); scripted(v); return; }
+    if (!reply) { setLive(false, lastWhy); scripted(v); return; }
     setLive(true);
     if (!ASKED.test(v) && !STUCK.test(v)) S.mine.push(v); // versions still count the same way
     S.msgs.push({ who: 'ai', t: reply }); busy = false; save(); renderChat(); renderSignals(); renderBadges();

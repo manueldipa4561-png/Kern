@@ -101,7 +101,7 @@
       .k-sh-in { width: 100%; max-height: 92%; overflow: auto; background: var(--bg); border-top: 1px solid var(--edge); border-radius: 26px 26px 0 0; padding: 12px 20px 22px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -20px 50px -20px rgba(0,0,0,.5); animation: kSlide .38s cubic-bezier(.2,.9,.3,1) both; }
       @keyframes kSlide { from { transform: translateY(100%); } }
       .k-grab { position: relative; width: 38px; height: 4px; border-radius: 4px; background: var(--edge); align-self: center; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
-      .k-grab::before { content: ''; position: absolute; inset: -14px -48px -10px; } /* a thumb-sized grip around the 4px bar */
+      .k-grab::before { content: ''; position: absolute; inset: -18px -150px -30px; } /* a thumb-sized grip around the 4px bar: about 340 x 52px */
       .k-sheet textarea { resize: none; min-height: 96px; }
       .k-sh-btns { display: flex; align-items: center; gap: 12px; }
       .k-body { scroll-behavior: smooth; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 12px), transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 12px), transparent 100%); }
@@ -906,9 +906,21 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-coopr .k-coq { align-self: stretch; }
 .k-coopst { margin: 0; font-size: 0.9375rem; }
 
-/* Moving between sections: one calm motion. The pane fades and slides a short way (View Transitions); nothing else animates on top of it,
-   the always-moving aurora waits, and a phone does not blur what is behind the tab bar on every frame. */
-.has-vt .k-pane.on > * { animation: none; }
+/* Moving between sections: one calm motion. The pane fades (View Transitions slide it a short way on a computer), the cards do not also animate on top,
+   the always-moving aurora waits during the slide. */
+.k-pane.on > * { animation: none; }
+html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .vt-tab .k-body { -webkit-mask-image: none; mask-image: none; }
 .vt-tab .k-scr::before { animation-play-state: paused; }
-@media (hover: none) { .k-tabs { -webkit-backdrop-filter: none; backdrop-filter: none; background: color-mix(in srgb, var(--bg) 92%, transparent); } }
+/* The parts of a sheet you drag down to close it: the browser leaves those touches to the script (app.ts) instead of scrolling. */
+.k-shbar, .k-top-zone { touch-action: none; }
+
+/* Phones (app.ts sets html.lite for touch screens, or ?lite): what costs a phone's graphics chip every frame goes. Static aurora, no noise layer, no blur
+   behind sheets and the tab bar, no mask on the scrolling area, no endless motion. The look stays; the lag does not. */
+.lite .k-scr::before { animation: none; filter: none; will-change: auto; }
+.lite .k-scr::after { display: none; }
+.lite .k-body { -webkit-mask-image: none; mask-image: none; }
+.lite .k-sheet, .lite .k-reward { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.lite .k-tabs { -webkit-backdrop-filter: none; backdrop-filter: none; background: color-mix(in srgb, var(--bg) 94%, transparent); }
+.lite .k-obj:not(.arrive), .lite .k-hd-img, .lite .k-rank-img, .lite .k-hero-img, .lite .k-float img, .lite .k-mrow.next .k-mdot, .lite .k-bar-g i::after,
+.lite .k-main .k-btn::before, .lite .k-go::before, .lite .k-go:not(:disabled)::before, .lite .k-lvl::before, .lite .k-lvl::after, .lite .k-streak svg { animation: none; }
