@@ -15,12 +15,12 @@ assert.match(css, /html \{ font-size: calc\(16px \* var\(--kts, 1\)\)/, 'app.css
 
 const entry = ['fields', 'icons', 'i18n', 'fieldinfo', 'coop', 'coopask'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
 const { text } = buildSync({ stdin: { contents: entry, resolveDir: process.cwd(), loader: 'ts' }, bundle: true, format: 'esm', platform: 'node', write: false }).outputFiles[0];
-const { FIELDS, ICONS, FIELD_PICS, IT, FIELD_INFO, COOP_KEYS, ASK } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
+const { FIELDS, ICONS, FIELD_PICS, picFile, IT, FIELD_INFO, COOP_KEYS, ASK } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
 
 for (const f of Object.keys(FIELDS)) assert.ok(FIELD_PICS.includes(f) && existsSync(`public/img/f/${f.toLowerCase()}.webp`), `icons.ts: field ${f} has no picture in public/img/f`);
-for (const n of FIELD_PICS) assert.ok(existsSync(`public/img/f/${n.toLowerCase()}.webp`), `icons.ts: ${n} has no picture in public/img/f`);
-assert.ok(FIELD_PICS.includes('yourkern'), 'icons.ts: the yourKERN tab is a picture');
-for (const n of ['missions', 'copilot', 'done']) assert.ok(ICONS[n], `icons.ts: no icon named ${n}`);
+for (const n of FIELD_PICS) assert.ok(existsSync(`public/img/f/${picFile(n)}.webp`), `icons.ts: ${n} has no picture in public/img/f`);
+assert.ok(FIELD_PICS.includes('yourkern') && FIELD_PICS.includes('copilot'), 'icons.ts: the yourKERN and KERN.AI tabs are pictures');
+for (const n of ['missions', 'done']) assert.ok(ICONS[n], `icons.ts: no icon named ${n}`);
 for (const [name, body] of Object.entries(ICONS)) {
   assert.equal((body.match(/</g) || []).length, (body.match(/>/g) || []).length, `icons.ts: ${name} has unbalanced tags`);
   assert.ok(name.endsWith('-on') || /class="(b[ps]?|gb|pd)"/.test(body), `icons.ts: ${name} has no lime (a bead or a lime body)`); // -on: the filled tab-bar versions, one solid shape

@@ -12,8 +12,9 @@ The seven field icons live in `public/img/f/<field>.webp` (192 x 192, transparen
 | Music | single eighth note | bead inside the note head |
 | Prompting | speech bubble | vertical text-cursor bar |
 | yourKERN (profile tab, not a field) | minimal person: frosted shoulders, no neck | the lime bead is the head |
+| KERN.AI (AI tab and cards, not a field), file `ai.webp` | a large frosted star with the lime bead (you) and a small glowing light-blue gem star overlapping its upper right point (the AI assisting you) | lime bead in the large star; the small star is light blue |
 
-KERN.AI (the AI tab and cards) is still on the SVG sparkle while a better glass icon is chosen.
+The blue (#7CC8FF) is used only for the AI, so lime keeps meaning "you" everywhere else. For the AI icon the large star follows the style block below; the small star is "luminous light-blue glass that glows from inside, like a small blue gem", about 45% of the large star, with no lime in it.
 
 ## Style block (same for all seven, then the object line)
 
@@ -23,7 +24,7 @@ Settings: model `gpt_image_2_5`, quality `high`, 1:1, `background: transparent`.
 
 ## Higgsfield job ids
 
-design df208fb2-3ef6-49ab-bc91-44645676ff7f, writing 2e4e0606-a723-4fa7-9a1b-03e4a08de357, code 87e39ba6-61cf-473f-a2e5-6e7f777d4a9e, video b26a4e3c-54c8-4092-9c47-c01151a18ae2, selling 4b9f0668-edbc-4671-a5ce-6ed536f12763, music c5e2aceb-0206-4081-84eb-5d99ef862ba4, prompting 777025d9-daa4-41ed-be7c-54440b7c19f6, yourkern 02ab1699-78d5-4ffc-ba1c-426b99cb5a83.
+design df208fb2-3ef6-49ab-bc91-44645676ff7f, writing 2e4e0606-a723-4fa7-9a1b-03e4a08de357, code 87e39ba6-61cf-473f-a2e5-6e7f777d4a9e, video b26a4e3c-54c8-4092-9c47-c01151a18ae2, selling 4b9f0668-edbc-4671-a5ce-6ed536f12763, music c5e2aceb-0206-4081-84eb-5d99ef862ba4, prompting 777025d9-daa4-41ed-be7c-54440b7c19f6, yourkern 02ab1699-78d5-4ffc-ba1c-426b99cb5a83, ai d9e35445-2132-4385-9fbb-3f4cd0ce09ff.
 
 ## Using them
 

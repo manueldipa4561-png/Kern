@@ -803,7 +803,8 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 /* KERN.AI mark: the sparkle in a small glass tile, in the co-pilot's blue */
 .k-ci { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; color: var(--ai); --bead: var(--ai); background: color-mix(in srgb, var(--ai) 14%, transparent); border: 1px solid color-mix(in srgb, var(--ai) 35%, transparent); }
 .k-ci .k-i { width: 24px; height: 24px; }
-.k-ait .k-ci { width: 34px; height: 34px; border-radius: 11px; } .k-ait .k-ci .k-i { width: 20px; height: 20px; }
+.k-ci .k-fp { width: 36px; height: 36px; }
+.k-ait .k-ci { width: 34px; height: 34px; border-radius: 11px; } .k-ait .k-ci .k-i { width: 20px; height: 20px; } .k-ait .k-ci .k-fp { width: 28px; height: 28px; }
 .k-aic { display: grid; grid-template-columns: 44px 1fr; column-gap: 14px; row-gap: 6px; align-items: start; }
 .k-aic > :not(.k-ci) { grid-column: 2; padding-right: 0 !important; }
 .k-aic > .k-ci { grid-column: 1; grid-row: 1 / span 3; }
@@ -926,6 +927,6 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .lite .k-scr::after { display: none; }
 .lite .k-body { -webkit-mask-image: none; mask-image: none; }
 .lite .k-sheet, .lite .k-reward { -webkit-backdrop-filter: none; backdrop-filter: none; }
-.lite .k-tabs { -webkit-backdrop-filter: none; backdrop-filter: none; background: color-mix(in srgb, var(--bg) 98%, transparent); } /* nearly solid: with no blur, text passing under it would show through */
+.lite .k-tabs { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--bg); } /* solid: with no blur, text passing under it would show through */
 .lite .k-obj:not(.arrive), .lite .k-hd-img, .lite .k-rank-img, .lite .k-hero-img, .lite .k-float img, .lite .k-mrow.next .k-mdot, .lite .k-bar-g i::after,
 .lite .k-main .k-btn::before, .lite .k-go::before, .lite .k-go:not(:disabled)::before, .lite .k-lvl::before, .lite .k-lvl::after, .lite .k-streak svg { animation: none; }

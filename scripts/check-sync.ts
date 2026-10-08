@@ -19,7 +19,8 @@ assert.equal(mergeAnswers([x2], [x], [], []).answers[0].t, 'x edited');
 // Undo after the delete already synced: the restored answer is newer than its tombstone, so it stays.
 assert.deepEqual(keys(mergeAnswers([], [{ ...x, ed: 1600 }], [[akey(x), 1500]], [])), [akey(x)]);
 // A device whose clock is behind still stamps changes newer than what it saw.
-assert.ok(stamp(Date.now() + 60_000) > Date.now() + 60_000);
+const ahead = Date.now() + 60_000; // one reading of the clock: reading it twice failed whenever a millisecond passed in between
+assert.ok(stamp(ahead) > ahead);
 // Tombstones are capped.
 const many: Tomb[] = Array.from({ length: 300 }, (_, k) => [`Design.0.${k}`, k]);
 assert.equal(mergeAnswers([], [], many, []).gone.length, 200);
