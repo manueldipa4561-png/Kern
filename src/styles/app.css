@@ -417,6 +417,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-tile img { width: 66px; height: 66px; filter: drop-shadow(0 10px 12px rgba(0,0,0,.35)); transition: transform .5s var(--spring); }
 .k-tile.sel { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 14%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 22%, transparent); }
 .k-tile.sel img { transform: translateY(-4px) scale(1.14) rotate(-5deg); }
+.k-tile:last-child:nth-child(3n + 1) { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 12px; } /* a seventh tile sits alone on the last row: it takes the whole row, icon beside the name */
 
 /* Reward: the new rank object pops in */
 .k-rankup { display: flex; align-items: center; gap: 12px; padding: 6px 18px 6px 6px; text-align: left; }

@@ -11,7 +11,7 @@ import bricolageFont from '@fontsource-variable/bricolage-grotesque/files/bricol
 const touchIcon = 'data:image/png;base64,' + readFileSync('public/icons/apple-touch-icon.png').toString('base64');
 // Link previews (chat apps, social) need a full address for the image: Netlify gives the site's main address as URL while it builds (a local build has none, so the path stays relative).
 const site = (process.env.URL ?? '').replace(/\/$/, '');
-const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music'];
+const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Prompting'];
 ---
 <!doctype html>
 <html lang="en">
@@ -205,7 +205,7 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music'];
           <img class="k-mark" src="/img/mark.webp" alt="" width="84" height="84" />
           <div class="k-l">Start here</div>
           <h4 id="kS1H">What do you want<br>to <b>try?</b></h4>
-          <p class="k-promise">Try short missions in six different fields and see which path clicks. Free, no account.</p>
+          <p class="k-promise">Try short missions in seven different fields and see which path clicks. Free, no account.</p>
           <ol class="k-how">
             <li><b>01</b><p>Try a short mission</p></li>
             <li><b>02</b><p>Reflect in 20 seconds</p></li>

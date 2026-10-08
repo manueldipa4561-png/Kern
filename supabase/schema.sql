@@ -44,7 +44,7 @@ grant execute on function public.delete_my_account() to authenticated;
 create table if not exists public.kern_signs (
   id         bigint generated always as identity primary key,
   user_id    uuid not null references auth.users (id) on delete cascade,
-  field      text not null check (field in ('Design', 'Writing', 'Code', 'Video', 'Selling', 'Music')),
+  field      text not null check (field in ('Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Prompting')),
   mission    smallint not null check (mission between 0 and 5),
   tip        text not null check (char_length(tip) between 3 and 140 and tip !~* '(https?://|www\.|@|[0-9]{6,})'),
   created_at timestamptz not null default now(),
@@ -114,7 +114,7 @@ create table if not exists public.kern_events (
 alter table public.kern_events drop constraint if exists kern_events_ev_check;
 alter table public.kern_events add constraint kern_events_ev_check check (ev in ('optin', 'visit', 'open', 'answer', 'reflect', 'share', 'ask_ai'));
 alter table public.kern_events drop constraint if exists kern_events_field_check;
-alter table public.kern_events add constraint kern_events_field_check check (field in ('Design', 'Writing', 'Code', 'Video', 'Selling', 'Music'));
+alter table public.kern_events add constraint kern_events_field_check check (field in ('Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Prompting'));
 alter table public.kern_events drop constraint if exists kern_events_mission_check;
 alter table public.kern_events add constraint kern_events_mission_check check (mission between 0 and 5);
 create index if not exists kern_events_aid on public.kern_events (aid, created_at);

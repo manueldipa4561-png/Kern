@@ -4,7 +4,7 @@
 // Pure on purpose, so npm test can check it (scripts/check-sync.ts). The texts the friend sees are in coopask.ts; the screens are in app.ts.
 export type Coop = { v: 1; f: string; i: number; n: string; a: string; r?: string; m?: string }; // n: who sent it, a: their answer, r: the friend's reply, m: who replied
 export type CoopRec = { role: 'out' | 'in'; f: string; i: number; at: number; with: string; mine: string; theirs: string }; // out: I answered and sent it. in: I replied to a friend's. with: the friend's first name; mine and theirs: the two texts
-export const COOP_KEYS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music'].flatMap((f) => [`${f}.2`, `${f}.5`]);
+export const COOP_KEYS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Prompting'].flatMap((f) => [`${f}.2`, `${f}.5`]);
 export const MAX_NAME = 20, MAX_ANSWER = 500, MAX_REPLY = 300;
 const MAX_LINK = 3800; // chat apps and browsers handle far longer, but not every share target does
 

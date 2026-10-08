@@ -1,5 +1,5 @@
 // Offline support: pages network-first, assets cache-first. Bump CACHE to drop old caches on deploy.
-const CACHE = 'kern-v8';
+const CACHE = 'kern-v9';
 const SHELL = ['/', '/privacy/', '/terms/', '/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png',
   ...['mark', 'cairn'].map((n) => `/img/${n}.webp`)];
 

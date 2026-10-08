@@ -85,8 +85,8 @@ const out: Coop = { v: 1, f: 'Writing', i: 2, n: 'Giulia', a: 'Tre versioni: �
 assert.deepEqual(decodeCoop(hashOf(out)), out); // accents, quotes and emoji survive the trip
 const back: Coop = { ...out, r: 'Terrei la calda, perché è vera.', m: 'Marco' };
 assert.deepEqual(decodeCoop(hashOf(back)), back); // the reply link keeps both halves
-assert.equal(COOP_KEYS.length, 12);
-assert.equal(new Set(COOP_KEYS.map((k) => k.split('.')[0])).size, 6); // two in every field
+assert.equal(COOP_KEYS.length, 14);
+assert.equal(new Set(COOP_KEYS.map((k) => k.split('.')[0])).size, 7); // two in every field
 for (const k of COOP_KEYS) assert.equal(Number(k.split('.')[1]) % PER_ROUND, 2, `${k} is not a with-a-partner mission`);
 assert.equal(decodeCoop(enc({ v: 2 })), null); // unknown version
 assert.equal(decodeCoop(enc({ ...out, i: 0 })), null); // not a co-op mission

@@ -1078,6 +1078,7 @@ const STARTERS: Record<string, string[]> = {
   Video: [t2('Film 5 seconds of something', 'Filma 5 secondi di qualcosa'), t2('Note the first shot of one video', 'Annota la prima inquadratura di un video')],
   Selling: [t2('Ask one person what they need', 'Chiedi a una persona di cosa ha bisogno'), t2('Rewrite one pitch in one line', 'Riscrivi una proposta in una riga')],
   Music: [t2('Hum or tap a rhythm for 30 seconds', 'Canticchia o batti un ritmo per 30 secondi'), t2('Name one instrument in a song', 'Nomina uno strumento in una canzone')],
+  Prompting: [t2('Add one detail to a prompt you used', 'Aggiungi un dettaglio a un prompt che hai usato'), t2('Ask an AI what it is unsure about', 'Chiedi a un’AI di cosa non è sicura')],
 };
 const CUES = [t2('wake up', 'mi sveglio'), t2('have my coffee', 'bevo il caffè'), t2('finish lunch', 'finisco di pranzare'), t2('get home', 'torno a casa'), t2('brush my teeth', 'mi lavo i denti')];
 // A habit or cue picked from the chips is saved as the words on the chip at that moment (English or Italian): show it in the current language. Words typed by hand stay as typed.

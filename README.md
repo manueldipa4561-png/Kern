@@ -1,6 +1,6 @@
 # KERN
 
-Don't guess your passion, test it. Try short missions in design, writing, code, video, selling and music, free. Installable web app (PWA) by Manuel Di Paolo.
+Don't guess your passion, test it. Try short missions in design, writing, code, video, selling, music and prompting with AI, free. Installable web app (PWA) by Manuel Di Paolo.
 
 ## Run it
 
