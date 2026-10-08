@@ -55,7 +55,7 @@ assert.ok(existsSync('src/pages/terms.astro'), 'terms.astro: the Terms page is m
 // Mission pictures: every img / imgIt path in missions.ts must be a file in public/.
 // A mission opens full screen with a bar of three segments (read, answer, reflect) that app.ts keeps up to date and CSS fills.
 assert.equal((page.match(/<div class="k-prog" id="kProg"[^>]*role="progressbar"[^>]*>((?:<i><b><\/b><\/i>){3})<\/div>/g) || []).length, 1, 'index.astro: the mission needs one progress bar with three segments');
-assert.ok(/id="kShX"/.test(page) && /function renderProg\(\)/.test(readFileSync('src/scripts/app.ts', 'utf8')), 'the full-screen mission needs its close button and renderProg()');
+assert.ok(/id="kShClose"/.test(page) && /function renderProg\(\)/.test(readFileSync('src/scripts/app.ts', 'utf8')), 'the full-screen mission needs its close button and renderProg()');
 const pics = [...readFileSync('src/scripts/missions.ts', 'utf8').matchAll(/\bimg(?:It)?: '(\/img\/m\/[^']+)'/g)].map((m) => m[1]);
 assert.ok(pics.length >= 9, `missions.ts: expected the mission pictures, found ${pics.length}`);
 for (const p of pics) assert.ok(existsSync(`public${p}`), `missions.ts: picture ${p} is not in public/`);

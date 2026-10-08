@@ -61,7 +61,7 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - EN / IT, dark / light theme, and a text size setting (four steps, every font size is in rem, `npm test` checks it)
 - Installable and works offline after the first visit (`public/sw.js`). Security headers and CSP in `netlify.toml`
 - Export and delete your data from Settings. Privacy page at `/privacy/`, Terms at `/terms/` (EN and IT), and a feedback button that opens your own mail app
-- Design (v2): one icon family (`src/scripts/icons.ts`: Phosphor Icons duotone, MIT, changed so the body takes the brand lime, plus the app's own yourKERN mark), a floating glass tab bar, italic serif accents (Instrument Serif), bigger type, one calm confirmation after each mission (no points or random rewards). View Transitions slide the panes (plain swap where unsupported, nothing moves with reduced motion)
+- Design (v2): icons (`src/scripts/icons.ts`: the fields and the three tabs are glass pictures in `public/img/f/`, see `design/field-icons.md`; the done icon is a Phosphor Icon, MIT, with the body in the brand lime), a floating glass tab bar, italic serif accents (Instrument Serif), bigger type, one calm confirmation after each mission (no points or random rewards). View Transitions slide the panes (plain swap where unsupported, nothing moves with reduced motion)
 
 **Cut from the interface in v2** (the code is still there, hidden with the `k-cut` class, so each piece can come back): points and ranks, finds, badges, trail days, the habit builder, the review teaser, daily boosts and the random drops. The Trail section moved into yourKERN. The classic design before v1.0 is kept on the `classic-design` branch and the `v0.4-classic` tag.
 
@@ -76,7 +76,7 @@ Real partner missions (brand missions are demos for now), peer review and rankin
 - `src/scripts/i18n.ts` Italian strings (English is the source), `src/scripts/fields.ts` missions per field
 - `src/scripts/next.ts` rounds and the next-mission rule, `src/scripts/sponsors.ts` brand missions, `src/scripts/stats.ts` opt-in usage counts, `src/scripts/demo.ts` the demo profile's sample trail (texts in both languages)
 - `scripts/` the tests run by `npm test`, and the Mission Studio
-- `public/` manifest (with install screenshots in `public/screenshots/`), service worker, icons, favicons, `og.jpg` (link preview, the banner). `public/img/` the app icon mark (header and launch screen) and the cairn on the Kern card
+- `public/` manifest (with install screenshots in `public/screenshots/`), service worker, icons, favicons, `og.jpg` (link preview, the banner). `public/img/` the app icon mark (header and launch screen), `public/img/f/` the glass pictures (fields, tabs, the Kern card) and `public/img/m/` the mission photos
 
 ## License
 

@@ -53,6 +53,9 @@ create table if not exists public.kern_signs (
 -- Round 2 adds missions 3 to 5. Widens the limit on a table created before it (safe to repeat).
 alter table public.kern_signs drop constraint if exists kern_signs_mission_check;
 alter table public.kern_signs add constraint kern_signs_mission_check check (mission between 0 and 5);
+-- A new field is added here too, so a table made earlier is widened when this script runs again.
+alter table public.kern_signs drop constraint if exists kern_signs_field_check;
+alter table public.kern_signs add constraint kern_signs_field_check check (field in ('Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Prompting'));
 create index if not exists kern_signs_trail on public.kern_signs (field, mission, created_at desc);
 alter table public.kern_signs enable row level security;
 

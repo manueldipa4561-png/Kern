@@ -863,7 +863,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-shx .k-i { width: 24px; height: 24px; }
 .k-shx:active { background: color-mix(in srgb, var(--fg) 10%, transparent); }
 #kSheet .k-drop { flex: 1 0 auto; justify-content: center; padding-bottom: 8vh; } /* the done screen sits in the middle of the full screen, not hugging the top */
-#kSheet[data-mode="edit"] .k-prog { display: none; }
+#kSheet[data-mode="edit"] .k-prog, #kSheet[data-mode="relic"] .k-prog { display: none; }
 #kSheet.drop .k-prog b { --p: 1 !important; }
 .k-scr.demo #kSheet::before { top: max(34px, calc(env(safe-area-inset-top) + 30px)); }
 @media (prefers-reduced-motion: reduce) { .k-prog b { transition: none; } }

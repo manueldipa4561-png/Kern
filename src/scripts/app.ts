@@ -829,7 +829,7 @@ const startChat = () => {
 // If there is no key, no network or any error, the scripted coach below answers instead, so the chat always works.
 let liveOk: boolean | null = null, liveWhy = '';
 // Why the live co-pilot did not answer, from the server's error code: the line under the title says so, instead of a silent fall back to the scripted coach.
-const WHY: Record<string, string> = { no_key: 'You are talking to an AI · offline preview · no AI key on the server yet', rate: 'You are talking to an AI · offline preview · too many messages, try in a minute' };
+const WHY: Record<string, string> = { no_key: 'You are talking to an AI · offline preview · no AI key on the server yet', rate: 'You are talking to an AI · offline preview · too many messages, try in a minute', rate_day: 'You are talking to an AI · offline preview · daily limit reached, try tomorrow' };
 const setLive = (ok: boolean, why = '') => {
   if (liveOk === ok && liveWhy === why) return;
   liveOk = ok; liveWhy = why;
@@ -1055,7 +1055,7 @@ $('kXAsk').addEventListener('click', async () => {
   const reply = await askAI({ mission: { title: FIELDS[cur.f].m[cur.i][1], brief: v.brief }, messages: [{ who: 'me', t: draft ? `My answer so far: ${draft}` : 'I am about to start this mission. Help me begin.' }] });
   if (cur.f !== f0 || cur.i !== i0 || kSheet.hidden) return; // another mission was opened meanwhile
   p.classList.remove('k-typing'); p.textContent = '';
-  setLive(!!reply);
+  setLive(!!reply, lastWhy);
   if (reply) p.textContent = reply;
   else p.textContent = draft.length >= 10 ? echo(draft) + tr(pick(Q_MORE[0])) : tr(pick(Q_STUCK)); // never a button that does nothing, and never a hint in disguise
   reveal(p);
@@ -1173,7 +1173,7 @@ $('kHbDo').addEventListener('click', () => {
   S.habit.l = [...S.habit.l, [today, find] as [number, string]].slice(-90);
   save(); renderLoot(); setLvl(); renderBadges();
   if ('vibrate' in navigator) navigator.vibrate(find ? [20, 30, 40] : [14]);
-  if (find) { const d: Drop = { tier: 'relic', id: find, stones: 0 }; openSheetEl(kSheet, $('kDrOk')); showDrop(d, 0); }
+  if (find) { const d: Drop = { tier: 'relic', id: find, stones: 0 }; kSheet.dataset.mode = 'relic'; openSheetEl(kSheet, $('kDrOk')); showDrop(d, 0); }
   else setD($('kHbMsg'), tr(HB_MSG[Math.floor(Math.random() * HB_MSG.length)]));
 });
 const DROP_T: Record<string, string> = { spark: t2('A spark', 'Una scintilla'), gem: t2('A gem', 'Una gemma'), relic: t2('A find!', 'Un ritrovamento!'), jackpot: t2('Jackpot', 'Jackpot') };
@@ -1266,7 +1266,7 @@ function renderProg() {
   [1, reflecting ? 1 : Math.min(1, written / ANSWER_FULL), reflecting ? asked / 2 : 0].forEach((p, i) => progFill[i].style.setProperty('--p', String(p)));
   setProgText(reflecting ? 3 : written ? 2 : 1);
 }
-$('kShX').addEventListener('click', () => closeSheet(kSheet));
+$('kShClose').addEventListener('click', () => dismiss(kSheet));
 const groups = ['kRfE', 'kRfA'].map((id) => $(id));
 groups.forEach((g) => g.querySelectorAll<HTMLElement>('[data-v]').forEach((c) => {
   const pick = () => { g.querySelectorAll<HTMLElement>('[data-v]').forEach((o) => { o.classList.toggle('sel', o === c); o.setAttribute('aria-pressed', String(o === c)); }); g.dataset.val = c.dataset.v!; renderProg(); };
@@ -1910,7 +1910,7 @@ renderAcct();
 booted = true;
 if (DEMO) {
   const LEAVE_ARM_MS = 4000, kDemo = $('kDemo'); let armed = 0;
-  kDemo.hidden = false; $('kAiDemo').hidden = false; kScr.classList.add('demo'); // app.css repeats a Demo tag over every sheet, where the scrim covers this marker
+  kDemo.hidden = false; $('kAiDemo').hidden = false; $('kXDemo').hidden = false; kScr.classList.add('demo'); // app.css repeats a Demo tag over every sheet, where the scrim covers this marker
   // The first tap says what the marker does, a second one within a few seconds leaves: a stray tap mid-pitch must not drop the sample trail.
   kDemo.addEventListener('click', () => {
     if (Date.now() - armed > LEAVE_ARM_MS) { armed = Date.now(); say('Tap again to leave the demo.'); return; }

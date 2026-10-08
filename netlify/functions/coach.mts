@@ -43,10 +43,10 @@ const limited = (rawIp: string) => {
   const ip = bucket(rawIp);
   const now = Date.now(), list = (hits.get(ip) || []).filter((t) => now - t < 864e5);
   const last = list.filter((t) => now - t < 6e4).length;
-  if (last >= 20 || list.length >= 300) { hits.set(ip, list); return true; }
+  if (last >= 20 || list.length >= 300) { hits.set(ip, list); return last >= 20 ? 'rate' : 'rate_day'; } // the code tells the app which limit it hit
   list.push(now); hits.delete(ip); hits.set(ip, list); // delete first so the Map's order tracks recency
   if (hits.size > 5000) hits.delete(hits.keys().next().value as string); // drop the oldest, never everyone's counters
-  return false;
+  return '';
 };
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
@@ -60,7 +60,8 @@ export default async (req: Request, context: Context) => {
   const origin = req.headers.get('origin');
   if (origin && origin !== new URL(req.url).origin) return json({ error: 'origin' }, 403);
   if (Number(req.headers.get('content-length')) > 12000) return json({ error: 'size' }, 413);
-  if (limited(context.ip || 'unknown')) return json({ error: 'rate' }, 429);
+  const over = limited(context.ip || 'unknown');
+  if (over) return json({ error: over }, 429);
 
   let body: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   try { const raw = await req.text(); if (raw.length > 12000) return json({ error: 'size' }, 413); body = JSON.parse(raw); } catch { return json({ error: 'json' }, 400); }
