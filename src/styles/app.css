@@ -840,9 +840,17 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-mark { width: 84px; height: 84px; margin: 0 0 4px; border-radius: 20px; }
 .k-ti { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 19px; background: color-mix(in srgb, var(--fg) 8%, transparent); transition: background .25s, color .25s; }
 .k-ti .k-i { width: 32px; height: 32px; }
+.k-fp { display: block; object-fit: contain; } /* a field's icon is a picture of a glass object (icons.ts, public/img/f), not an SVG */
+.k-ti .k-fp { width: 58px; height: 58px; filter: none; }
 .k-tile { padding: 16px 6px 12px; gap: 8px; }
 .k-card[hidden] { display: none; } /* .k-card sets display: flex, which beats the browser's own [hidden]: without this the co-op, compare and further cards showed up empty */
 .k-tile.sel .k-ti { background: var(--acc); color: var(--on); --bead: var(--on); }
+.k-ti, .k-tile.sel .k-ti { background: none; } /* the glass object stands on its own: the selected tile already has the accent border */
+.k-fl-i .k-fp { width: 100%; height: 100%; }
+.k-fchip.on .k-fi { width: 30px; height: 30px; border-radius: 10px; background: rgba(15, 20, 14, .82); } /* pale glass would vanish on the lime chip: it gets a night plate */
+.k-fchip.on .k-fp { width: 26px; height: 26px; filter: none; }
+.k-nxic .k-fp { width: 46px; height: 46px; }
+:root.light .k-fp { filter: drop-shadow(0 3px 3px rgba(35, 50, 38, .55)) contrast(1.25) brightness(.92); } /* pale glass on a pale tile would wash out */
 
 /* Polish: gold meant rewards; with those cut, the compare card and the meters use the accent */
 .k-cmp p { border-left-color: var(--acc); }
