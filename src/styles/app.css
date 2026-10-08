@@ -841,6 +841,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-ti { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 19px; background: color-mix(in srgb, var(--fg) 8%, transparent); transition: background .25s, color .25s; }
 .k-ti .k-i { width: 32px; height: 32px; }
 .k-tile { padding: 16px 6px 12px; gap: 8px; }
+.k-card[hidden] { display: none; } /* .k-card sets display: flex, which beats the browser's own [hidden]: without this the co-op, compare and further cards showed up empty */
 .k-tile.sel .k-ti { background: var(--acc); color: var(--on); --bead: var(--on); }
 
 /* Polish: gold meant rewards; with those cut, the compare card and the meters use the accent */
