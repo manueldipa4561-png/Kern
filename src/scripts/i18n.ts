@@ -145,7 +145,7 @@ export const IT: Record<string, string> = {
         'Settings': 'Impostazioni', 'Language': 'Lingua', 'Theme': 'Tema', 'System': 'Sistema', 'Dark': 'Scuro', 'Light': 'Chiaro',
         'Change field': 'Cambia campo', 'Install KERN': 'Installa KERN',
         'On iPhone: tap Share, then Add to Home Screen.': 'Su iPhone: tocca Condividi, poi Aggiungi alla schermata Home.',
-        'Export my data': 'Esporta i miei dati', 'Delete my data': 'Elimina i miei dati', 'Close': 'Chiudi', 'Mission progress': 'Avanzamento della missione',
+        'Export my data': 'Esporta i miei dati', 'Delete my data': 'Elimina i miei dati', 'Close': 'Chiudi', 'Mission progress': 'Avanzamento della missione', 'Demo: what you type here is sent to the AI to get a reply. We do not store it.': 'Demo: quello che scrivi qui viene inviato all’AI per ricevere una risposta. Noi non lo conserviamo.',
         'This deletes your trail on this device. Continue?': 'Questo elimina la tua traccia su questo dispositivo. Vuoi continuare?',
         'KERN is installed.': 'KERN è installata.',
         'Answer': 'Rispondi', 'Your answers': 'Le tue risposte',

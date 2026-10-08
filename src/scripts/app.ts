@@ -302,6 +302,7 @@ document.querySelectorAll<HTMLElement>('[data-k-text]').forEach((b) => b.addEven
 type VT = { ready: Promise<void>; updateCallbackDone: Promise<void>; finished: Promise<void> };
 const startVT = (document as Document & { startViewTransition?: (cb: () => unknown) => VT }).startViewTransition?.bind(document);
 let vtBusy = false, vtSeq = 0;
+document.documentElement.classList.toggle('has-vt', !!startVT && !matchMedia('(prefers-reduced-motion: reduce)').matches); // the pane's own slide then replaces the cards' fade-up (app.css)
 // Runs cb inside a View Transition with `cls` on <html> while it plays. A skipped transition (rapid taps,
 // hidden tab) still runs cb; its promises then reject by design, so they are caught here.
 const runVT = (cls: string, cb: () => unknown, after?: () => void) => {
@@ -337,18 +338,14 @@ const goTab = (name: string) => kScr.querySelector<HTMLElement>(`[data-k-tab="${
 const nav = kScr.querySelector<HTMLElement>('.k-tabs')!;
 const ind = document.createElement('span');
 ind.className = 'k-ind'; ind.setAttribute('aria-hidden', 'true'); nav.appendChild(ind);
-let indX = -1, indT = 0;
+let indX = -1;
 function moveInd(btn: HTMLElement, animate: boolean) {
   const x = btn.offsetLeft + btn.offsetWidth / 2 - ind.offsetWidth / 2;
   const travel = Math.abs(x - indX);
-  clearTimeout(indT);
   if (!animate || still || indX < 0 || travel < 1) {
     ind.classList.add('snap'); ind.style.transform = `translateX(${x}px)`;
     void ind.offsetWidth; ind.classList.remove('snap');
-  } else {
-    ind.style.transform = `translateX(${(x + indX) / 2}px) scaleX(${Math.min(1.5, 1 + travel / 300)})`;
-    indT = window.setTimeout(() => { ind.style.transform = `translateX(${x}px)`; }, 160);
-  }
+  } else ind.style.transform = `translateX(${x}px)`; // one clean slide, no stretch and no second step
   indX = x;
 }
 const onTab = () => kScr.querySelector<HTMLElement>('.k-tabs button.on')!;
@@ -381,19 +378,29 @@ const closeSheet = (sh: HTMLElement) => {
   sh.addEventListener('click', (e) => { if (e.target === sh) closeSheet(sh); });
   sh.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeSheet(sh); } });
 });
-// The grab handle is a handle: drag it down to close the sheet. A short drag springs back.
-const SWIPE_CLOSE_PX = 80;
+// Drag a sheet down from its top to close it: the handle and the first stretch under it (the title row; on a mission, the bar and header, even when scrolled).
+// A short drag springs back. Fingers use touch events (preventDefault on the downward move keeps the page from scrolling or pulling to refresh),
+// a mouse or pen uses pointer events, and the controls in the zone (buttons, fields, links) keep working.
+const SWIPE_CLOSE_PX = 80, TOP_ZONE_PX = 96, INTERACTIVE = 'button, a, input, textarea, select, [role="button"]';
 kScr.querySelectorAll<HTMLElement>('.k-sheet').forEach((sh) => {
-  const inner = sh.querySelector<HTMLElement>('.k-sh-in')!, grab = sh.querySelector<HTMLElement>('.k-grab')!;
-  let startY = 0, dy = 0;
-  const settle = () => { inner.style.translate = ''; };
-  grab.addEventListener('pointerdown', (e) => { startY = e.clientY; dy = 0; grab.setPointerCapture(e.pointerId); });
-  grab.addEventListener('pointermove', (e) => {
-    if (!grab.hasPointerCapture(e.pointerId)) return;
-    dy = Math.max(0, e.clientY - startY); inner.style.translate = `0 ${dy}px`;
+  const inner = sh.querySelector<HTMLElement>('.k-sh-in')!;
+  let startY = 0, dy = 0, live = false;
+  const zone = (y: number, t: EventTarget | null) => y - inner.getBoundingClientRect().top <= TOP_ZONE_PX && (inner.scrollTop <= 0 || !!(t as HTMLElement | null)?.closest?.('.k-shbar'));
+  const begin = (y: number) => { startY = y; dy = 0; live = true; };
+  const move = (y: number) => { dy = Math.max(0, y - startY); inner.classList.add('drag'); inner.style.translate = dy ? `0 ${dy}px` : ''; };
+  const end = (cancel = false) => { if (!live) return; live = false; inner.classList.remove('drag'); inner.style.translate = ''; if (!cancel && dy >= SWIPE_CLOSE_PX) closeSheet(sh); };
+  inner.addEventListener('touchstart', (e) => { live = false; if (zone(e.touches[0].clientY, e.target)) begin(e.touches[0].clientY); }, { passive: true });
+  inner.addEventListener('touchmove', (e) => { if (!live) return; if (inner.scrollTop > 0 && !(e.target as HTMLElement).closest('.k-shbar')) return end(true); if (e.touches[0].clientY > startY) { e.preventDefault(); move(e.touches[0].clientY); } else move(startY); }, { passive: false });
+  inner.addEventListener('touchend', () => end());
+  inner.addEventListener('touchcancel', () => end(true));
+  inner.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch' || e.button !== 0 || (e.target as HTMLElement).closest(INTERACTIVE) || !zone(e.clientY, e.target)) return;
+    begin(e.clientY); inner.setPointerCapture(e.pointerId); inner.style.userSelect = 'none';
   });
-  grab.addEventListener('pointerup', (e) => { grab.releasePointerCapture(e.pointerId); settle(); if (dy >= SWIPE_CLOSE_PX) closeSheet(sh); });
-  grab.addEventListener('pointercancel', settle);
+  inner.addEventListener('pointermove', (e) => { if (live && e.pointerType !== 'touch' && inner.hasPointerCapture(e.pointerId)) move(e.clientY); });
+  const up = (e: PointerEvent, cancel = false) => { if (e.pointerType === 'touch' || !live) return; if (inner.hasPointerCapture(e.pointerId)) inner.releasePointerCapture(e.pointerId); inner.style.userSelect = ''; end(cancel); };
+  inner.addEventListener('pointerup', (e) => up(e));
+  inner.addEventListener('pointercancel', (e) => up(e, true));
 });
 
 // Ranks
@@ -797,7 +804,7 @@ const setLive = (ok: boolean) => {
   liveOk = ok; setT($('kAiLbl'), ok ? 'You are talking to an AI · live replies' : 'You are talking to an AI · offline preview');
 };
 async function askAI(extra?: { mission?: { title: string; brief: string }; messages?: { who: string; t: string }[] }): Promise<string | null> {
-  if (DEMO) return null; // a demo never sends what is typed anywhere: the scripted coach answers
+  // The demo asks the live co-pilot too (it is what is shown to people); the AI tab says so in the demo (#kAiDemo) and the function stores nothing.
   const ctl = new AbortController(), to = window.setTimeout(() => ctl.abort(), 10000);
   try {
     const r = await fetch('/api/coach', {
@@ -1869,7 +1876,7 @@ renderAcct();
 booted = true;
 if (DEMO) {
   const LEAVE_ARM_MS = 4000, kDemo = $('kDemo'); let armed = 0;
-  kDemo.hidden = false; kScr.classList.add('demo'); // app.css repeats a Demo tag over every sheet, where the scrim covers this marker
+  kDemo.hidden = false; $('kAiDemo').hidden = false; kScr.classList.add('demo'); // app.css repeats a Demo tag over every sheet, where the scrim covers this marker
   // The first tap says what the marker does, a second one within a few seconds leaves: a stray tap mid-pitch must not drop the sample trail.
   kDemo.addEventListener('click', () => {
     if (Date.now() - armed > LEAVE_ARM_MS) { armed = Date.now(); say('Tap again to leave the demo.'); return; }
