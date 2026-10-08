@@ -4,15 +4,28 @@ Measures the co-pilot (`netlify/functions/coach.mts`) on 38 made-up conversation
 
 ## Run it
 
-Your key stays in your own terminal. Nothing writes it to disk.
+The key lives in a file only you can read, outside the repo. No pasting into a terminal and no command ever contains it.
+
+1. In the Claude Console, create a key (Settings, API keys) and press its copy button.
+2. Save it from the clipboard straight to the file:
 
 ```bash
-read -s "ANTHROPIC_API_KEY?Anthropic key (hidden): " && export ANTHROPIC_API_KEY
-npm run eval:coach -- --variant baseline --model claude-haiku-4-5-20251001
-npm run eval:coach -- --variant v1 --model claude-haiku-5-5
-node evals/coach/build-report-lite.mjs evals/coach   # writes evals/coach/report.html
-unset ANTHROPIC_API_KEY
+mkdir -p ~/.config/kern && umask 077 && pbpaste > ~/.config/kern/anthropic-key
 ```
+
+3. Run both variants and build the report:
+
+```bash
+npm run eval:coach:all
+```
+
+4. When you are done, delete the file and the key (Console, API keys):
+
+```bash
+rm ~/.config/kern/anthropic-key
+```
+
+An `ANTHROPIC_API_KEY` in your shell works too and wins over the file. `--key-file <path>` points at another file.
 
 A full pass is 38 cases × 2 repetitions. The coach calls cost cents and the judge (Claude Sonnet 5.5) about $0.30, so one variant is under $0.50. Each run prints its own measured spend.
 
