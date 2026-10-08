@@ -868,7 +868,7 @@ function flushDraft() {
   if (kTa.value.length >= kTa.maxLength) setD(kSaved, `${tr(note)} · ${tr('Limit reached: {n} characters.').replace('{n}', String(kTa.maxLength))}`); else setT(kSaved, note);
   kSaved.hidden = false;
 }
-kTa.addEventListener('input', () => { clearTimeout(dT); dT = window.setTimeout(flushDraft, 500); });
+kTa.addEventListener('input', () => { clearTimeout(dT); dT = window.setTimeout(flushDraft, 500); renderProg(); });
 // Signs on the trail: the tip each person leaves after a mission is shown, without a name, to the next
 // people who open it (cloud.ts, table kern_signs). No account, no sharing: the tip stays on the device.
 const shareable = (t: string) => t.trim().length >= 3 && !/(https?:\/\/|www\.|@|\d{6,})/i.test(t);
@@ -1154,7 +1154,7 @@ const dropArt = (d: Drop) => {
 // Reveal screen: appears the moment the reflection is saved, under a second to read, one tap to continue.
 function showDrop(d: Drop, side: number, withNext = false) {
   const rel = RELICS.find((r) => r.id === d.id);
-  kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = d.tier;
+  kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = d.tier; setProgText(4);
   $('kDrCoop').hidden = true; $('kDrCoN').hidden = true;
   setT(kDrOk, 'Keep going'); delete kDrOk.dataset.next; kDrNx.hidden = true; kDrNx.textContent = ''; // aria-describedby reads hidden text too
   if (withNext) offerNext(); // before the focus below, so the button is announced with its final label
@@ -1200,6 +1200,7 @@ const openAnswer = (f: string, i: number, dare = false) => {
   track('open', f, i);
   fillSheet(f, i); setT($('kSub'), 'Submit answer');
   kTa.value = S.drafts[dKey()] || '';
+  delete kSheet.dataset.mode; renderProg();
   const title = $('kShT'); title.tabIndex = -1; // focus the title, not the answer box: the brief stays in view and no keyboard pops up before it is read
   openSheetEl(kSheet, title);
 };
@@ -1207,13 +1208,27 @@ function openEdit(idx: number) {
   const a = S.answers[idx]; if (!a) return;
   cur = { f: a.f, i: a.i, dare: false, edit: idx };
   fillSheet(a.f, a.i); setT($('kSub'), 'Save changes');
-  kTa.value = a.t;
+  kTa.value = a.t; kSheet.dataset.mode = 'edit'; // editing is not a run through the three parts: no progress bar
   openSheetEl(kSheet, kTa);
   kTa.scrollIntoView({ block: 'nearest' }); // editing: the answer box is what matters, so bring it into view
 }
+// The bar on top of a mission: three segments, read the brief, write the answer, reflect. The brief is on screen from the start, so the first is always full;
+// the second fills as the answer grows (ANSWER_FULL characters is a few sentences, not a quota), the third as the two reflection questions are answered.
+// The done screen fills all three in CSS (.drop); editing an answer hides the bar.
+const kProg = $('kProg'), progFill = [...kProg.querySelectorAll<HTMLElement>('b')];
+const ANSWER_FULL = 60;
+const PROG_TEXT = [t2('Step 1 of 3: read the brief', 'Passo 1 di 3: leggi il brief'), t2('Step 2 of 3: write your answer', 'Passo 2 di 3: scrivi la tua risposta'), t2('Step 3 of 3: reflect', 'Passo 3 di 3: rifletti'), t2('Mission done', 'Missione completata')];
+const setProgText = (stage: number) => { kProg.setAttribute('aria-valuenow', String(Math.min(stage, 3))); kProg.setAttribute('aria-valuetext', tr(PROG_TEXT[stage - 1])); };
+function renderProg() {
+  const reflecting = !kShR.hidden, written = kTa.value.trim().length;
+  const asked = ['kRfE', 'kRfA'].filter((id) => $(id).dataset.val).length;
+  [1, reflecting ? 1 : Math.min(1, written / ANSWER_FULL), reflecting ? asked / 2 : 0].forEach((p, i) => progFill[i].style.setProperty('--p', String(p)));
+  setProgText(reflecting ? 3 : written ? 2 : 1);
+}
+$('kShX').addEventListener('click', () => closeSheet(kSheet));
 const groups = ['kRfE', 'kRfA'].map((id) => $(id));
 groups.forEach((g) => g.querySelectorAll<HTMLElement>('[data-v]').forEach((c) => {
-  const pick = () => { g.querySelectorAll<HTMLElement>('[data-v]').forEach((o) => { o.classList.toggle('sel', o === c); o.setAttribute('aria-pressed', String(o === c)); }); g.dataset.val = c.dataset.v!; };
+  const pick = () => { g.querySelectorAll<HTMLElement>('[data-v]').forEach((o) => { o.classList.toggle('sel', o === c); o.setAttribute('aria-pressed', String(o === c)); }); g.dataset.val = c.dataset.v!; renderProg(); };
   c.addEventListener('click', pick);
   c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
 }));
@@ -1243,7 +1258,7 @@ $('kSub').addEventListener('click', once(() => {
   setLvl(); renderProgress();
   groups.forEach((g) => { g.dataset.val = ''; g.querySelectorAll('[data-v]').forEach((o) => { o.classList.remove('sel'); o.setAttribute('aria-pressed', 'false'); }); });
   $<HTMLInputElement>('kRfH').value = ''; $<HTMLInputElement>('kRfT').value = '';
-  kShA.hidden = true; kShR.hidden = false; setRfNote();
+  kShA.hidden = true; kShR.hidden = false; setRfNote(); renderProg();
   $('kRfShort').hidden = na.t.length >= 20; // say why a short answer earns no bonus, instead of silently skipping it
   groups[0].querySelector<HTMLElement>('[data-v]')!.focus();
 }));
@@ -1264,7 +1279,7 @@ function finish(r: Refl | undefined) {
 // The screen after a finished mission: where you are in this field, and one button to go on.
 function showDone() {
   const f = cur.f, it = isIt();
-  kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = 'done';
+  kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = 'done'; setProgText(4);
   setT(kDrOk, 'Keep going'); delete kDrOk.dataset.next; kDrNx.hidden = true; kDrNx.textContent = ''; // aria-describedby reads hidden text too
   offerNext(); // before the focus below, so the button is announced with its final label
   $('kDrArt').innerHTML = icon('done', 'k-i k-done-i');
