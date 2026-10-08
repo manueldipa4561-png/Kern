@@ -5,7 +5,7 @@ Measures the co-pilot (`netlify/functions/coach.mts`) on 38 made-up conversation
 ## Run it
 
 1. In the Claude Console, create a key (Settings, API keys) and press its copy button.
-2. Run both variants and build the report. The program asks for the key once: paste it and press Enter. You see one `*` per character, and the key is never printed or saved.
+2. Run both variants and build the report. The program asks for the key once: paste it and press Enter. You see one `*` per character, and nothing prints or saves the key.
 
 ```bash
 npm run eval:coach:all
