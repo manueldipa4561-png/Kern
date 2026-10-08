@@ -17,7 +17,7 @@
   "v3": {
     "model": "claude-haiku-5-5",
     "prompt": "v3",
-    "note": "v2 plus: never help with off-topic requests, no explaining rules, stuck step without examples"
+    "note": "v2 plus: never help with off-topic requests, no explaining rules, stuck step without examples (IN PRODUCTION since 2026-10-08)"
   },
   "v4": {
     "model": "claude-haiku-5-5",
