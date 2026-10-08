@@ -812,8 +812,11 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 /* Tab bar: three sections */
 .k-tabs button::after { content: none !important; }
 .k-tabs button { gap: 4px; min-height: 60px; font-size: 0.8125rem; }
-.k-tabs .ti { display: grid; place-items: center; width: 26px; height: 26px; }
-.k-tabs .ti .k-i { width: 26px; height: 26px; }
+.k-tabs .ti { display: grid; place-items: center; width: 30px; height: 30px; }
+.k-tabs .ti .k-i { width: 30px; height: 30px; }
+.k-tabs .ti .k-on, .k-tabs button.on .ti .k-i:not(.k-on) { display: none; } /* a tab shows an outline icon, and the filled one while it is the tab in play */
+.k-tabs button.on .ti .k-on { display: block; }
+.k-i .gs { fill: currentColor; stroke: var(--acc); stroke-width: 1.1; } /* the solid stone of the cairn: a lime edge keeps the stacked stones apart */
 .k-tabs button.on { --bead: var(--on); }
 .k-ind { width: calc((100% - 12px) / 3); }
 

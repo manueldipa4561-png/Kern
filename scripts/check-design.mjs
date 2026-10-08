@@ -21,7 +21,7 @@ for (const f of Object.keys(FIELDS)) assert.ok(FIELD_PICS.includes(f) && existsS
 for (const n of ['missions', 'yourkern', 'copilot', 'done']) assert.ok(ICONS[n], `icons.ts: no icon named ${n}`);
 for (const [name, body] of Object.entries(ICONS)) {
   assert.equal((body.match(/</g) || []).length, (body.match(/>/g) || []).length, `icons.ts: ${name} has unbalanced tags`);
-  assert.ok(/class="(b[ps]?|gb|pd)"/.test(body), `icons.ts: ${name} has no lime (a bead or a lime body)`);
+  assert.ok(name.endsWith('-on') || /class="(b[ps]?|gb|pd)"/.test(body), `icons.ts: ${name} has no lime (a bead or a lime body)`); // -on: the filled tab-bar versions, one solid shape
 }
 for (const k of ['Text size', 'Small', 'Default', 'Large', 'Larger', 'Done.', 'What to expect', 'A day in it', 'People like', 'People find hard', 'Try the next mission', 'Take it further', 'Three steps outside the app', 'Ask', 'Make', 'Learn', 'Send feedback', 'Terms']) assert.ok(IT[k], `i18n.ts: no Italian for "${k}"`);
 
