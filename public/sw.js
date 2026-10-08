@@ -1,7 +1,7 @@
 // Offline support: pages network-first, assets cache-first. Bump CACHE to drop old caches on deploy.
-const CACHE = 'kern-v12';
+const CACHE = 'kern-v14';
 const SHELL = ['/', '/privacy/', '/terms/', '/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png',
-  '/img/mark.webp', '/img/f/yourkern.webp', '/img/f/ai.webp'];
+  '/img/mark.webp', '/img/f/yourkern.webp', '/img/f/yourkern-512.webp', '/img/f/ai.webp'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

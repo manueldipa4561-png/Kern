@@ -400,6 +400,24 @@ kScr.querySelectorAll<HTMLElement>('.k-sheet').forEach((sh) => {
   const up = (e: PointerEvent, cancel = false) => { if (live && inner.hasPointerCapture(e.pointerId)) inner.releasePointerCapture(e.pointerId); end(cancel); };
   inner.addEventListener('pointerup', (e) => up(e));
   inner.addEventListener('pointercancel', (e) => up(e, true));
+  // Settings and the field sheet also follow a finger pulling down on their content while that content is scrolled to its top. Passive listeners: scrolling never waits for them.
+  if (sh.id !== 'kSet' && sh.id !== 'kFld') return;
+  let ty = 0, tt = 0, pulling = false, armed = false;
+  // (the handle and the header have their own pointer drag above, so a touch there is left out)
+  inner.addEventListener('touchstart', (e) => { armed = inner.scrollTop <= 0 && !(e.target as HTMLElement).closest('textarea, input, .k-grab, .k-top-zone'); pulling = false; ty = e.touches[0].clientY; tt = e.timeStamp; dy = 0; }, { passive: true });
+  inner.addEventListener('touchmove', (e) => {
+    if (!armed) return;
+    const d = e.touches[0].clientY - ty;
+    if (d <= 0 || inner.scrollTop > 0) { if (pulling) { pulling = false; inner.classList.remove('drag'); inner.style.translate = ''; } if (inner.scrollTop > 0 || d < -6) armed = false; return; }
+    pulling = true; dy = d; inner.classList.add('drag'); inner.style.translate = `0 ${d}px`;
+  }, { passive: true });
+  const release = (e: TouchEvent, cancel: boolean) => {
+    if (!pulling) return; pulling = false; armed = false; inner.classList.remove('drag'); inner.style.translate = '';
+    const fast = dy / Math.max(1, e.timeStamp - tt) > 0.6; // a quick flick closes it even when short
+    if (!cancel && (dy >= SWIPE_CLOSE_PX || (fast && dy >= 36))) closeSheet(sh);
+  };
+  inner.addEventListener('touchend', (e) => release(e, false));
+  inner.addEventListener('touchcancel', (e) => release(e, true));
 });
 
 // Ranks
@@ -1591,7 +1609,7 @@ const cardImage = async (): Promise<Blob | null> => {
   x.fillStyle = '#0F140E'; x.fillRect(0, 0, 1080, 1350);
   const g = x.createRadialGradient(920, 120, 0, 920, 120, 760); g.addColorStop(0, 'rgba(201,242,74,.28)'); g.addColorStop(1, 'rgba(201,242,74,0)');
   x.fillStyle = g; x.fillRect(0, 0, 1080, 1350);
-  try { const im = new Image(); im.src = '/img/f/yourkern.webp'; await im.decode(); x.drawImage(im, 700, 70, 300, 300); } catch { /* card works without it */ }
+  try { const im = new Image(); im.src = '/img/f/yourkern-512.webp'; await im.decode(); x.drawImage(im, 700, 70, 300, 300); } catch { /* card works without it */ }
   let wx = 90; // the word moves right when the app icon fits in front of it
   try { const ic = new Image(); ic.src = '/img/mark.webp'; await ic.decode(); x.drawImage(ic, 90, 108, 104, 104); wx = 90 + 104 + 26; } catch { /* the word alone is fine */ }
   x.font = `800 110px ${D}`; x.fillStyle = '#E8E6DA'; x.fillText('kern', wx, 210);

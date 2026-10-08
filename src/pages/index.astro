@@ -113,10 +113,12 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
       <div class="k-sheet" id="kSet" role="dialog" aria-modal="true" aria-labelledby="kSetT" hidden>
         <div class="k-sh-in">
           <div class="k-grab" aria-hidden="true"></div>
-          <h5 id="kSetT" class="k-top-zone">Settings</h5>
+          <div class="k-sethd k-top-zone"><h5 id="kSetT">Settings</h5><button type="button" class="k-shx" id="kSetX" aria-label="Close"><svg class="k-i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          <div class="k-prefs">
           <div class="k-row"><span class="k-l" id="kLgL">Language</span><div class="k-seg" role="group" aria-labelledby="kLgL"><button type="button" data-k-lang="en" lang="en" aria-label="English">EN</button><button type="button" data-k-lang="it" lang="it" aria-label="Italiano">IT</button></div></div>
           <div class="k-row"><span class="k-l" id="kThL">Theme</span><div class="k-seg" role="group" aria-labelledby="kThL"><button type="button" data-k-theme="dark">Dark</button><button type="button" data-k-theme="light">Light</button></div></div>
           <div class="k-row"><span class="k-l" id="kTxL">Text size</span><div class="k-seg k-txt" role="group" aria-labelledby="kTxL"><button type="button" data-k-text="0" aria-label="Small">A</button><button type="button" data-k-text="1" aria-label="Default">A</button><button type="button" data-k-text="2" aria-label="Large">A</button><button type="button" data-k-text="3" aria-label="Larger">A</button></div></div>
+          </div>
           <div class="k-acct" id="kAcct" hidden>
             <span class="k-l">Account</span>
             <p id="kAcctE">Not signed in · your trail is only on this device</p>
@@ -127,20 +129,22 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
           </div>
           <div class="k-set-list">
             <button type="button" class="k-ask-btn" data-k-send>Share my trail with the KERN team</button>
-            <button type="button" class="k-ask-btn" id="kRemind">Add a weekly reminder to my calendar</button>
             <button type="button" class="k-ask-btn" data-k-copy="app">Copy app link</button>
-            <button type="button" class="k-ask-btn" id="kFeed">Send feedback</button>
-            <button type="button" class="k-ask-btn" id="kChField">Your interests</button>
+            <button type="button" class="k-ask-btn" id="kRemind">Add a weekly reminder to my calendar</button>
             <button type="button" class="k-ask-btn" id="kInst" hidden>Install KERN</button>
             <p class="k-l" id="kIos" hidden>On iPhone: tap Share, then Add to Home Screen.</p>
+          </div>
+          <div class="k-set-list">
+            <button type="button" class="k-ask-btn" id="kChField">Your interests</button>
+            <button type="button" class="k-ask-btn" id="kFeed">Send feedback</button>
             <button type="button" class="k-ask-btn" id="kStatSet" hidden>Usage counts: off</button>
             <button type="button" class="k-ask-btn" id="kExp">Export my data</button>
+          </div>
+          <div class="k-set-list">
             <button type="button" class="k-ask-btn k-danger" id="kDel">Delete my data</button>
             <button type="button" class="k-ask-btn k-danger" id="kDelAcc" hidden>Delete my account</button>
           </div>
-          <p class="k-l">Missions are samples while partners join.</p>
-          <p class="k-l"><a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a> · KERN 1.0</p>
-          <button type="button" class="k-go" id="kSetX">Close</button>
+          <div class="k-foot"><p class="k-l">Missions are samples while partners join.</p><p class="k-l"><a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a> · KERN 1.0</p></div>
         </div>
       </div>
 
@@ -286,7 +290,7 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
 
           <section class="k-pane" id="k-yourkern">
             <div><div class="k-l">yourKERN · first signs</div><h4>Your <b>KERN</b><br>so far.</h4></div>
-            <div class="k-card k-kcard" id="kKernCard"><div class="k-l">Your Kern card</div><div class="k-kc"><img class="k-kc-img" src="/img/f/yourkern.webp" alt="" width="192" height="192" loading="lazy" decoding="async" /><div class="k-kt">kern<i>.</i></div><h5 id="kCardH">You light up when you start from zero.</h5><div class="k-chips" id="kCardC"><span>Shaping ideas</span><span>Writing</span></div><div class="k-l" id="kCardL">Example · answer and reflect to make it yours</div></div><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="card">Share my card</button><button type="button" class="k-ask-btn" data-k-copy="app">Copy app link</button></div></div>
+            <div class="k-card k-kcard" id="kKernCard"><div class="k-l">Your Kern card</div><div class="k-kc"><img class="k-kc-img" src="/img/f/yourkern-512.webp" alt="" width="512" height="512" loading="lazy" decoding="async" /><div class="k-kt">kern<i>.</i></div><h5 id="kCardH">You light up when you start from zero.</h5><div class="k-chips" id="kCardC"><span>Shaping ideas</span><span>Writing</span></div><div class="k-l" id="kCardL">Example · answer and reflect to make it yours</div></div><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="card">Share my card</button><button type="button" class="k-ask-btn" data-k-copy="app">Copy app link</button></div></div>
             <div class="k-card" id="kFcmp" hidden><div class="k-l">Fields side by side</div><h5 id="kFcmpT"></h5><div class="k-meter" id="kFcmpM"></div><p class="k-l">Energy from how it felt, and how many reflections it rests on. Your own answers, not a test.</p></div>
             <div class="k-card" id="kCoops" hidden><div class="k-l">Co-op with a friend</div><p>Two missions in every field work with a friend. Answer one, send the link, and read both answers here.</p><div id="kCoopL"></div></div>
             <div class="k-card k-further" id="kFurther" hidden><div class="k-l" id="kFuL"></div><h5>Three steps outside the app</h5><ol class="k-fu" id="kFuO"></ol><p class="k-l">Small and free. Pick one this week.</p></div>
