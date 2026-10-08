@@ -815,7 +815,12 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-tabs .ti .k-i { width: 30px; height: 30px; }
 .k-tabs .ti .k-on, .k-tabs button.on .ti .k-i:not(.k-on) { display: none; } /* a tab shows an outline icon, and the filled one while it is the tab in play */
 .k-tabs button.on .ti .k-on { display: block; }
-.k-i .gs { fill: currentColor; stroke: var(--acc); stroke-width: 1.1; } /* the solid stone of the cairn: a lime edge keeps the stacked stones apart */
+/* The yourKERN tab is a glass picture: dimmed while idle; on the lime capsule it sits on a night plate so the pale glass does not vanish. */
+.k-tabs .ti .k-fp { width: 30px; height: 30px; opacity: .6; transition: opacity .2s; }
+.k-tabs button.on .ti:has(.k-fp) { background: rgba(15, 20, 14, .86); border-radius: 11px; }
+.k-tabs button.on .ti .k-fp { opacity: 1; filter: none; }
+:root.light .k-tabs .ti:has(.k-fp) { background: rgba(15, 20, 14, .86); border-radius: 11px; } /* pale glass on the pale bar vanishes: in the light theme it always sits on the night plate */
+:root.light .k-tabs button:not(.on) .ti .k-fp { opacity: .9; filter: none; }
 .k-tabs button.on { --bead: var(--on); }
 .k-ind { width: calc((100% - 12px) / 3); }
 
@@ -921,6 +926,6 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .lite .k-scr::after { display: none; }
 .lite .k-body { -webkit-mask-image: none; mask-image: none; }
 .lite .k-sheet, .lite .k-reward { -webkit-backdrop-filter: none; backdrop-filter: none; }
-.lite .k-tabs { -webkit-backdrop-filter: none; backdrop-filter: none; background: color-mix(in srgb, var(--bg) 94%, transparent); }
+.lite .k-tabs { -webkit-backdrop-filter: none; backdrop-filter: none; background: color-mix(in srgb, var(--bg) 98%, transparent); } /* nearly solid: with no blur, text passing under it would show through */
 .lite .k-obj:not(.arrive), .lite .k-hd-img, .lite .k-rank-img, .lite .k-hero-img, .lite .k-float img, .lite .k-mrow.next .k-mdot, .lite .k-bar-g i::after,
 .lite .k-main .k-btn::before, .lite .k-go::before, .lite .k-go:not(:disabled)::before, .lite .k-lvl::before, .lite .k-lvl::after, .lite .k-streak svg { animation: none; }

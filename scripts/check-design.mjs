@@ -18,7 +18,9 @@ const { text } = buildSync({ stdin: { contents: entry, resolveDir: process.cwd()
 const { FIELDS, ICONS, FIELD_PICS, IT, FIELD_INFO, COOP_KEYS, ASK } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
 
 for (const f of Object.keys(FIELDS)) assert.ok(FIELD_PICS.includes(f) && existsSync(`public/img/f/${f.toLowerCase()}.webp`), `icons.ts: field ${f} has no picture in public/img/f`);
-for (const n of ['missions', 'yourkern', 'copilot', 'done']) assert.ok(ICONS[n], `icons.ts: no icon named ${n}`);
+for (const n of FIELD_PICS) assert.ok(existsSync(`public/img/f/${n.toLowerCase()}.webp`), `icons.ts: ${n} has no picture in public/img/f`);
+assert.ok(FIELD_PICS.includes('yourkern'), 'icons.ts: the yourKERN tab is a picture');
+for (const n of ['missions', 'copilot', 'done']) assert.ok(ICONS[n], `icons.ts: no icon named ${n}`);
 for (const [name, body] of Object.entries(ICONS)) {
   assert.equal((body.match(/</g) || []).length, (body.match(/>/g) || []).length, `icons.ts: ${name} has unbalanced tags`);
   assert.ok(name.endsWith('-on') || /class="(b[ps]?|gb|pd)"/.test(body), `icons.ts: ${name} has no lime (a bead or a lime body)`); // -on: the filled tab-bar versions, one solid shape
