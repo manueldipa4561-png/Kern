@@ -4,10 +4,11 @@
 //   add --mock for an offline wiring check (no API, no key): npm run eval:coach:selftest
 // The key is read from ANTHROPIC_API_KEY in your own shell and is never written to disk. Reports: node evals/coach/build-report-lite.mjs evals/coach
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { homedir, tmpdir } from 'node:os';
+import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getKey } from './key.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i > -1 ? process.argv[i + 1] : d; };
@@ -17,15 +18,7 @@ const NULL_MOCK = arg('mock-kind', 'oracle') === 'null'; // --mock-kind null: th
 if (!/^(baseline|v\d+|mock)$/.test(VARIANT)) { console.error('variant must be baseline, v1, v2, ...'); process.exit(2); }
 if (arg('model')) process.env.COACH_MODEL = arg('model');
 if (MOCK) process.env.ANTHROPIC_API_KEY = 'mock';
-// No env var? Read the key from a file only you can read (default ~/.config/kern/anthropic-key). It is never printed or copied anywhere.
-const KEYFILE = arg('key-file', path.join(homedir(), '.config/kern/anthropic-key'));
-if (!MOCK && !process.env.ANTHROPIC_API_KEY && existsSync(KEYFILE)) {
-  if (statSync(KEYFILE).mode & 0o077) { console.error(`${KEYFILE} can be read by other users: run  chmod 600 ${KEYFILE}  and try again.`); process.exit(2); }
-  const k = readFileSync(KEYFILE, 'utf8').trim();
-  if (!/^sk-ant-[\w-]+$/.test(k)) { console.error(`${KEYFILE} does not hold an Anthropic key (it should be one line starting with sk-ant-). Copy the key again and save it.`); process.exit(2); }
-  process.env.ANTHROPIC_API_KEY = k;
-}
-if (!process.env.ANTHROPIC_API_KEY) { console.error(`No key found. Save it to ${KEYFILE} (see evals/coach/README.md) or set ANTHROPIC_API_KEY in this shell.`); process.exit(2); }
+if (!MOCK) { try { process.env.ANTHROPIC_API_KEY = await getKey(arg('key-file') || undefined); } catch (e) { console.error(e.message); process.exit(2); } } // env var, private file or a prompt (key.mjs)
 
 // $/MTok [input, output], first-party prices (platform.claude.com pricing page, checked 2026-10-08)
 const PRICE = { 'claude-haiku-5-5': [0.1, 0.5], 'claude-haiku-4-5-20251001': [1, 5], 'claude-sonnet-5-5': [2, 10] };

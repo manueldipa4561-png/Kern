@@ -14,7 +14,7 @@
     "test": "node --experimental-strip-types scripts/check-sync.ts && node scripts/check-content.mjs && node scripts/check-heavy.mjs && node scripts/check-studio.mjs && node scripts/check-stats.mjs && node scripts/check-design.mjs && npm run --silent eval:coach:selftest",
     "eval:coach:selftest": "node --experimental-strip-types evals/coach/run.mjs --mock",
     "eval:coach": "node --experimental-strip-types evals/coach/run.mjs",
-    "eval:coach:all": "npm run --silent eval:coach -- --variant baseline --model claude-haiku-4-5-20251001 && npm run --silent eval:coach -- --variant v1 --model claude-haiku-5-5 && node evals/coach/build-report-lite.mjs evals/coach"
+    "eval:coach:all": "node evals/coach/all.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
