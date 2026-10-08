@@ -1591,7 +1591,7 @@ const cardImage = async (): Promise<Blob | null> => {
   x.fillStyle = '#0F140E'; x.fillRect(0, 0, 1080, 1350);
   const g = x.createRadialGradient(920, 120, 0, 920, 120, 760); g.addColorStop(0, 'rgba(201,242,74,.28)'); g.addColorStop(1, 'rgba(201,242,74,0)');
   x.fillStyle = g; x.fillRect(0, 0, 1080, 1350);
-  try { const im = new Image(); im.src = '/img/cairn.webp'; await im.decode(); x.drawImage(im, 680, 60, 340, 340); } catch { /* card works without it */ }
+  try { const im = new Image(); im.src = '/img/f/yourkern.webp'; await im.decode(); x.drawImage(im, 700, 70, 300, 300); } catch { /* card works without it */ }
   let wx = 90; // the word moves right when the app icon fits in front of it
   try { const ic = new Image(); ic.src = '/img/mark.webp'; await ic.decode(); x.drawImage(ic, 90, 108, 104, 104); wx = 90 + 104 + 26; } catch { /* the word alone is fine */ }
   x.font = `800 110px ${D}`; x.fillStyle = '#E8E6DA'; x.fillText('kern', wx, 210);
