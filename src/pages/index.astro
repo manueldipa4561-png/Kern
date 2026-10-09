@@ -80,6 +80,11 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
               <textarea id="kTa" rows="4" maxlength="2000"></textarea>
               <p class="k-rf-note" id="kSaved" aria-live="polite">It stays on this device unless you ask KERN.AI.</p>
               <p class="k-l k-s" id="kBrandNote" hidden>A company sees your answer only if you choose to send it to them.</p>
+              <div class="k-x" id="kRun" hidden>
+                <div class="k-xbtns"><button type="button" class="k-chipb" id="kRunB" aria-describedby="kRunN">Try your prompt on the AI</button></div>
+                <p class="k-l k-s" id="kRunN">Sends only your prompt to the AI. Nothing is saved.</p>
+                <div class="k-xex" id="kRunO" aria-live="polite" hidden><div class="k-l">What the AI made of it</div><pre id="kRunT"></pre></div>
+              </div>
               <div class="k-sh-btns"><button type="button" class="k-go" id="kSub">Submit answer</button><button type="button" class="k-sk" id="kCancel">Not now</button></div>
             </div>
             <div class="k-x" id="kShH">

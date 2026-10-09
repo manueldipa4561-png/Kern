@@ -54,9 +54,10 @@ const CLOUD = cloud.enabled && !DEMO;
 const KEY = DEMO ? 'kern:demo' : 'kern:v1';
 const PEND = 'kern:rm-signs'; // ids of signs still to be removed from the trail
 const YK_SEEN = 'kern:seen-yourkern'; // yourKERN was opened once on this device: its one-line explanation is not needed any more
+const RUNS = 'kern:runs'; // today's tries of "Try your prompt on the AI", per mission
 // Delete my data, Log out and Delete my account also clear what sits beside the trail: the demo and the copy set aside when a trail could not be read.
 // Once the account is gone so is the list of signs still to be removed (a plain Log out or Delete keeps it: those signs must still go at the next sign-in). The demo never touches any of it.
-const wipeExtras = (accountGone = false) => { if (DEMO) return; try { for (const k of ['kern:demo', 'kern:mode', 'kern:v1:unreadable', YK_SEEN, ...(accountGone ? [PEND] : [])]) localStorage.removeItem(k); } catch { /* nothing stored */ } };
+const wipeExtras = (accountGone = false) => { if (DEMO) return; try { for (const k of ['kern:demo', 'kern:mode', 'kern:v1:unreadable', YK_SEEN, RUNS, ...(accountGone ? [PEND] : [])]) localStorage.removeItem(k); } catch { /* nothing stored */ } };
 const eraseStats = () => (DEMO ? Promise.resolve() : stats.erase()); // the demo must never touch the real usage-count record
 const OPEN = "What is your idea? Write it in your own words first. I won't suggest one."; // the co-pilot's first line (the demo chat starts with it too)
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
@@ -913,19 +914,21 @@ const setLive = (ok: boolean, why = '') => {
   setT($('kAiLbl'), ok ? 'You are talking to an AI · live replies' : WHY[why] ?? 'You are talking to an AI · offline preview');
 };
 let lastWhy = ''; // the error code of the last failed ask
-async function askAI(extra?: { mission?: { title: string; brief: string }; messages?: { who: string; t: string }[] }): Promise<string | null> {
-  // The demo asks the live co-pilot too (it is what is shown to people); the AI tab says so in the demo (#kAiDemo) and the function stores nothing.
+// One POST to the function, 10 s at most: its reply, or null (the error code in lastWhy).
+async function postCoach(body: object): Promise<string | null> {
   const ctl = new AbortController(), to = window.setTimeout(() => ctl.abort(), 10000);
   try {
-    const r = await fetch('/api/coach', {
-      method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal,
-      body: JSON.stringify({ lang: S.lang, field: extra?.mission ? cur.f : S.field, versions: extra ? 0 : S.mine.length, mission: extra?.mission, messages: extra?.messages ?? S.msgs.filter((m) => !m.typing).slice(-12).map((m) => ({ who: m.who, t: said(m) })) }),
-    });
+    const r = await fetch('/api/coach', { method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal, body: JSON.stringify(body) });
     const j = await r.json().catch(() => null);
     if (!r.ok) { lastWhy = typeof j?.error === 'string' ? j.error : ''; return null; }
     lastWhy = '';
-    return typeof j?.reply === 'string' && j.reply.trim() ? j.reply.trim().slice(0, 500) : null;
+    return typeof j?.reply === 'string' && j.reply.trim() ? j.reply.trim() : null;
   } catch { lastWhy = ''; return null; } finally { clearTimeout(to); }
+}
+async function askAI(extra?: { mission?: { title: string; brief: string }; messages?: { who: string; t: string }[] }): Promise<string | null> {
+  // The demo asks the live co-pilot too (it is what is shown to people); the AI tab says so in the demo (#kAiDemo) and the function stores nothing.
+  const reply = await postCoach({ lang: S.lang, field: extra?.mission ? cur.f : S.field, versions: extra ? 0 : S.mine.length, mission: extra?.mission, messages: extra?.messages ?? S.msgs.filter((m) => !m.typing).slice(-12).map((m) => ({ who: m.who, t: said(m) })) });
+  return reply && reply.slice(0, 500);
 }
 const scripted = (v: string) => {
   if (ASKED.test(v)) return aiSay("I won't hand you the idea. What is the first thing that comes to mind, even if it's rough?");
@@ -986,7 +989,7 @@ function flushDraft() {
   if (kTa.value.length >= kTa.maxLength) setD(kSaved, `${tr(note)} · ${tr('Limit reached: {n} characters.').replace('{n}', String(kTa.maxLength))}`); else setT(kSaved, note);
   kSaved.hidden = false;
 }
-kTa.addEventListener('input', () => { clearTimeout(dT); dT = window.setTimeout(flushDraft, 500); renderProg(); });
+kTa.addEventListener('input', () => { clearTimeout(dT); dT = window.setTimeout(flushDraft, 500); renderProg(); runHold(); });
 // Signs on the trail: the tip each person leaves after a mission is shown, without a name, to the next
 // people who open it (cloud.ts, table kern_signs). No account, no sharing: the tip stays on the device.
 const shareable = (t: string) => t.trim().length >= 3 && !/(https?:\/\/|www\.|@|\d{6,})/i.test(t);
@@ -1092,7 +1095,7 @@ function renderBrief(f: string, i: number) {
   playGen = ''; $('kPlay').hidden = !pl || cur.edit >= 0;
   if (pl && cur.edit < 0) renderPlay($('kPlayB'), pl, tr, playWrite); else $('kPlayB').innerHTML = '';
   // Hints, KERN.AI and the easy switch. The strong answer waits until the person has written theirs: it shows after Submit, to compare (kCmp).
-  hintN = 0; $('kXHints').innerHTML = '';
+  hintN = 0; runTold = false; $('kXHints').innerHTML = '';
   setX($('kXExT'), v.ex);
   setT($('kXHint'), 'Need a hint?'); hold($('kXHint'), !v.hints.length);
   setT($('kXEasy'), S.easy ? 'Back to the full version' : 'Make it easier');
@@ -1158,7 +1161,34 @@ $('kXAsk').addEventListener('click', async () => {
   if (reply) p.textContent = reply;
   else p.textContent = draft.length >= 10 ? echo(draft) + tr(pick(Q_MORE[0])) : tr(pick(Q_STUCK)); // never a button that does nothing, and never a hint in disguise
   reveal(p);
+  if (cur.f === 'Prompting' && draft.length >= RUN_MIN && !runTold) { // once a prompt is written, KERN.AI points at the button that runs it, once per sheet
+    runTold = true;
+    const t = document.createElement('p'); t.className = 'k-msg k-ai'; setX(t, RUN_TIP); $('kXHints').appendChild(t); reveal(t);
+  }
   hold(btn, false);
+});
+// Try your prompt (Prompting missions): only the prompt in the answer box goes to the AI (coach.mts, mode 'run'), on a tap, 5 tries per mission a day.
+// It never changes the answer and never counts as Submit.
+const kRun = $('kRun'), kRunB = $('kRunB'), kRunO = $('kRunO'), kRunT = $('kRunT');
+const RUN_MIN = 20, RUN_MAX = 1500, RUN_DAY = 5;
+const RUN_TIP = t2('When your prompt is ready, tap Try your prompt on the AI under your answer.', 'Quando il prompt è pronto, tocca Prova il prompt con l’AI sotto la tua risposta.');
+const RUN_LBL = t2('Try your prompt on the AI', 'Prova il prompt con l’AI');
+let runTold = false;
+const runHold = () => hold(kRunB, kTa.value.trim().length < RUN_MIN);
+const runsToday = (): Record<string, number> => { try { const v = JSON.parse(localStorage.getItem(RUNS) || '{}'); return v?.d === new Date().toDateString() && v.n && typeof v.n === 'object' ? v.n : {}; } catch { return {}; } };
+const countRun = (k: string) => { const n = runsToday(); try { localStorage.setItem(RUNS, JSON.stringify({ d: new Date().toDateString(), n: { ...n, [k]: (n[k] || 0) + 1 } })); } catch { /* storage blocked: no daily count */ } };
+const runShow = (text: string) => { kRunT.textContent = text; kRunO.hidden = false; reveal(kRunO); }; // plain text, never HTML: it is the model's reply
+kRunB.addEventListener('click', async () => {
+  const prompt = kTa.value.trim(), k = dKey();
+  if (held(kRunB) || prompt.length < RUN_MIN) return;
+  if (prompt.length > RUN_MAX) return runShow(tr(t2('Keep your prompt under 1500 characters to try it here.', 'Per provarlo qui, tieni il prompt sotto i 1500 caratteri.')));
+  if (HEAVY.test(prompt)) return runShow(tr(HEAVY_REPLY)); // heavy words: nothing is sent, the mission pauses (as Ask KERN.AI does)
+  if ((runsToday()[k] || 0) >= RUN_DAY) return runShow(tr(t2('That is 5 tries for this mission today. Paste your prompt into any AI to keep going.', 'Oggi hai fatto 5 prove in questa missione. Per continuare, incolla il prompt in un’AI qualsiasi.')));
+  countRun(k); hold(kRunB, true); setT(kRunB, t2('Asking the AI…', 'Lo chiedo all’AI…'));
+  const reply = await postCoach({ mode: 'run', lang: S.lang, field: 'Prompting', prompt });
+  if (dKey() !== k || kSheet.hidden) return; // another mission was opened meanwhile
+  setT(kRunB, RUN_LBL); runHold();
+  runShow(reply ?? tr(t2("The AI isn't reachable right now. Paste your prompt into any AI instead.", 'Ora l’AI non risponde. Incolla il prompt in un’AI qualsiasi.')));
 });
 // Self-check after submitting: +10 per quality bar met, +25 for the twist. Returns the bonus (not saved here).
 const bonus = () => {
@@ -1333,6 +1363,7 @@ const fillSheet = (f: string, i: number) => {
   kShA.hidden = false; kShR.hidden = true; setT(kSaved, NOTE_DEFAULT); kSaved.hidden = false;
   renderTrailSigns(f, i);
   $('kCoopHint').hidden = !isCoop(f, i);
+  kRun.hidden = f !== 'Prompting'; kRunO.hidden = true; kRunT.textContent = ''; setT(kRunB, RUN_LBL); // a new sheet starts without the last AI reply
 };
 // No clock on a mission: "~3 min" is a soft estimate shown by renderBrief, never a countdown or a speed bonus (quality over speed).
 const openAnswer = (f: string, i: number, dare = false) => {
@@ -1340,7 +1371,7 @@ const openAnswer = (f: string, i: number, dare = false) => {
   track('open', f, i);
   fillSheet(f, i); setT($('kSub'), 'Submit answer');
   kTa.value = S.drafts[dKey()] || '';
-  delete kSheet.dataset.mode; renderProg();
+  delete kSheet.dataset.mode; renderProg(); runHold();
   const title = $('kShT'); title.tabIndex = -1; // focus the title, not the answer box: the brief stays in view and no keyboard pops up before it is read
   openSheetEl(kSheet, title);
 };
@@ -1348,7 +1379,7 @@ function openEdit(idx: number) {
   const a = S.answers[idx]; if (!a) return;
   cur = { f: a.f, i: a.i, dare: false, edit: idx };
   fillSheet(a.f, a.i); setT($('kSub'), 'Save changes');
-  kTa.value = a.t; kSheet.dataset.mode = 'edit'; // editing is not a run through the three parts: no progress bar
+  kTa.value = a.t; kSheet.dataset.mode = 'edit'; runHold(); // editing is not a run through the three parts: no progress bar
   openSheetEl(kSheet, kTa);
   kTa.scrollIntoView({ block: 'nearest' }); // editing: the answer box is what matters, so bring it into view
 }
