@@ -5,9 +5,9 @@ Real sound for Music and real clips for Video, made with AI on 2026-10-09 in Ele
 | File | Mission | What it is | Made with |
 |---|---|---|---|
 | `noa-mango.m4a` | Music 1 (Noa's playlist) | Mango Static · bright, bouncy indie pop, 118 bpm | ElevenLabs Music v2.5, instrumental |
-| `noa-trombone.m4a` | Music 1 | Sad Trombone Tuesday · muted trombone over minor piano, 62 bpm | same |
+| `noa-trombone.m4a` | Music 1 | Sad Trombone Tuesday · muted trombone over minor piano, 62 bpm (the song that kills the mood) | same |
 | `noa-sunrise.m4a` | Music 1 | Pocket Sunrise · fingerpicked acoustic guitar, 80 bpm (gain 0.5: it is a quiet song) | same |
-| `noa-confetti.m4a` | Music 1 | Confetti Cannon · festival pop anthem, 128 bpm (the song to cut) | same |
+| `noa-confetti.m4a` | Music 1 | Confetti Cannon · festival pop anthem, 128 bpm (the loudest, it goes last) | same |
 | `noa-tile.m4a` | Music 1 | Tile Floor Groove · laid-back nu-disco, 112 bpm | same |
 | `noa-bus.m4a` | Music 1 | Last Bus Home · dreamy lo-fi, 72 bpm (gain 0.5) | same |
 | `gufo-beat.m4a` | Music 2 (Forno Gufo) | the house groove that comes in at the drop, 100 bpm, 10 s | same |
