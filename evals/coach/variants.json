@@ -23,5 +23,10 @@
     "model": "claude-haiku-5-5",
     "prompt": "v4",
     "note": "v3 plus: nothing after the question, stuck step phrased as a question, no either/or questions"
+  },
+  "v5": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v5",
+    "note": "v3 safety rules kept; quote only their own idea, never requests or meta text, declines in six words at most, 1 or 2 short sentences, question anchored in the draft or mission"
   }
 }
