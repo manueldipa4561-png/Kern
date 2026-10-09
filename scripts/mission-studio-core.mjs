@@ -25,7 +25,7 @@ export const escapeOdd = (s) => String(s).replace(ALL_ODD, (c) => {
 });
 const safe = (s) => escapeOdd(String(s).slice(0, 160)); // for anything derived from the model that is printed
 
-const EN_PREFIX = 'Practice brief · ', IT_PREFIX = 'Brief di pratica · ';
+const EN_PREFIX = 'Practice mission · ', IT_PREFIX = 'Missione di prova · '; // the tag() prefix in src/scripts/missions.ts
 const RULES_START = '<!-- studio:rules -->', RULES_END = '<!-- /studio:rules -->';
 const isObj = (x) => x !== null && typeof x === 'object' && !Array.isArray(x);
 const enOf = (p) => (typeof p?.en === 'string' ? p.en : ''), itOf = (p) => (typeof p?.it === 'string' ? p.it : '');

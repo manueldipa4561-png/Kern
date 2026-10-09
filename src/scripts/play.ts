@@ -20,7 +20,7 @@ export const PLAY: Record<string, Play> = {
   ...PLAY_DESIGN, ...PLAY_WRITING, ...PLAY_CODE, ...PLAY_VIDEO, ...PLAY_SELLING, ...PLAY_MUSIC, ...PLAY_PROMPTING, // missions 2 to 6, one file per field
   'Design.0': [
     { kind: 'pick', label: t2('Keep the message that makes people turn up (1 or 2)', 'Tieni il messaggio che fa venire la gente (1 o 2)'), out: t2('Keep', 'Tengo'), rest: t2('Cut', 'Tolgo'), max: 2,
-      items: [t2('Pizza night Saturday', 'Serata pizza sabato'), t2('2 for 1 until 9pm', '2x1 fino alle 21'), t2('Live DJ from 10', 'DJ dal vivo dalle 22'), t2('New menu', 'Nuovo menu'), t2('Win a year of pizza', 'Vinci un anno di pizza'), t2('Tag 3 friends', 'Tagga 3 amici'), t2('12 Via Verdi', 'Via Verdi 12'), t2('The dog', 'Il cane')] },
+      items: [t2('Pizza night Saturday', 'Serata pizza sabato'), t2('2 for 1 until 9pm', '2x1 fino alle 21'), t2('Live DJ from 10', 'DJ dal vivo dalle 22'), t2('New menu', 'Nuovo menu'), t2('Win a year of pizza', 'Vinci un anno di pizza'), t2('Tag 3 friends', 'Tagga 3 amici'), t2('12 Via Verdi', 'Via Verdi 12')] }, // the dog is part of the photo, not a message: keeping it is the person's call
     { kind: 'pick', label: t2('One colour', 'Un solo colore'), out: t2('Colour', 'Colore'), max: 1,
       items: [t2('Red on cream', 'Rosso su crema'), t2('Yellow on black', 'Giallo su nero'), t2('Blue on white', 'Blu su bianco'), t2('Green on bone', 'Verde su avorio')] },
   ],
@@ -49,8 +49,8 @@ export const PLAY: Record<string, Play> = {
       items: [t2('Desk lamp', 'Lampada da scrivania'), t2('Black', 'Nera'), t2('Metal', 'In metallo'), t2('40 cm', '40 cm'), t2('Bulb included', 'Lampadina inclusa'), t2('Used', 'Usata'), t2('Cheap', 'Economica'), t2('Vintage', 'Vintage')] },
   ],
   'Music.0': [
-    { kind: 'sort', label: t2('Tap ✕ on the song that kills the mood, then drag from calmest to loudest', 'Tocca ✕ sulla canzone che rovina tutto, poi trascina dalla più calma alla più forte'), out: t2('Order', 'Ordine'), cutOut: t2('Cut', 'Tolgo'), cut: 1, badge: t2('energy', 'energia'),
-      items: [{ t: 'Mango Static', n: 4 }, { t: 'Sad Trombone Tuesday', n: 1 }, { t: 'Pocket Sunrise', n: 2 }, { t: 'Confetti Cannon', n: 5 }, { t: 'Tile Floor Groove', n: 3 }, { t: 'Last Bus Home', n: 2 }] },
+    { kind: 'sort', label: t2('Tap ✕ on the song that kills the mood, then drag from calmest to loudest', 'Tocca ✕ sulla canzone che rovina tutto, poi trascina dalla più calma alla più forte'), out: t2('Order', 'Ordine'), cutOut: t2('Cut', 'Tolgo'), cut: 1, // no energy badge: the main version gives mood words only, the numbers live in Make it easier (easy.ts)
+      items: [{ t: 'Mango Static' }, { t: 'Sad Trombone Tuesday' }, { t: 'Pocket Sunrise' }, { t: 'Confetti Cannon' }, { t: 'Tile Floor Groove' }, { t: 'Last Bus Home' }] },
   ],
   'Prompting.0': [
     { kind: 'pick', label: t2('Facts the AI needs (at least 3)', 'I fatti che servono all’AI (almeno 3)'), out: t2('Facts', 'Fatti'), max: 6,

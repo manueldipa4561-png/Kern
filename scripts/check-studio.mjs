@@ -45,7 +45,7 @@ for (const text of nasty) {
 }
 
 // 3. Broken or hostile drafts fail with the expected rule names (the dangerous ones also block the snippets, see section 5).
-const liveBrand = live.MX[field][1].who.replace(/^Practice brief · /, '').split(',')[0].replace(/\s*\(.*\)$/, '');
+const liveBrand = live.MX[field][1].who.replace(/^Practice mission · /, '').split(',')[0].replace(/\s*\(.*\)$/, '');
 const cases = [
   ['missing Italian', (d) => delete d.steps[0].it, 'bilingual'],
   ['4 steps', (d) => d.steps.push({ en: 'Do one more thing now.', it: 'Fai ancora una cosa adesso.' }), 'steps-3'],
