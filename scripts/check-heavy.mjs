@@ -49,6 +49,8 @@ assert.equal(JSON.parse(appReply[1]), en, 'the app and the server must show the 
 for (const [file, text, name] of [['src/scripts/i18n.ts', it, 'Italian'], ['src/scripts/i18n-de.ts', de, 'German'], ['src/scripts/i18n-fr.ts', fr, 'French']]) {
   assert.ok(readFileSync(file, 'utf8').includes(`${JSON.stringify(en)}: ${JSON.stringify(text)}`), `${file} must translate the pause with the server's ${name} text`);
 }
+// "Need to talk to someone now?" (app.ts helpText) shows the pause without its first sentence: no number may sit in that sentence.
+for (const t of [en, it, de, fr]) assert.ok(!/\d/.test(t.match(/^[^.]*\.\s*/)[0]), `the first sentence of the pause must have no number, the helpline link drops it: "${t.slice(0, 60)}"`);
 for (const n of ['116 123', '112', '999']) assert.ok(en.includes(n), `English pause lost ${n}`);
 for (const n of ['02 2327 2327', '112']) assert.ok(it.includes(n), `Italian pause lost ${n}`);
 for (const n of ['0800 111 0 111', '0800 111 0 222', '116 123', '142', '143', '112']) assert.ok(de.includes(n), `German pause lost ${n}`);

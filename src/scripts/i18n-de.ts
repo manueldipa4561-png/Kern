@@ -2431,6 +2431,20 @@ const APP_DE: Record<string, string> = {
   '{n} replied. It is in yourKERN.': '{n} hat geantwortet. Du findest es in yourKERN.',
   'This link is broken: ask your friend to send it again.': 'Dieser Link funktioniert nicht: Bitte darum, ihn dir noch mal zu schicken.',
   'Opening your email app. Or write to {e}': 'Deine Mail-App öffnet sich. Oder schreib an {e}',
+  // MiroFish fixes (9 Oct)
+  'What we keep': 'Was wir speichern',
+  'No account needed. Your answers stay on this device. What you write to KERN.AI goes to our AI provider to get a reply. <a href="/privacy/#keep">What we keep</a>': 'Kein Konto nötig. Deine Antworten bleiben auf diesem Gerät. Was du KERN.AI schreibst, geht an unseren KI-Anbieter, damit er antworten kann. <a href="/privacy/#keep">Was wir speichern</a>',
+  "What you write here goes to our AI provider to get a reply. KERN doesn't keep it.": 'Was du hier schreibst, geht an unseren KI-Anbieter, damit er antworten kann. KERN speichert es nicht.',
+  'See a strong answer': 'Eine starke Antwort ansehen', 'Good enough, next': 'Passt so, weiter', '2–3 lines is enough.': '2–3 Zeilen reichen.',
+  'Missions are set in Italy. Most are text; a few have real sound and clips.': 'Die Missionen spielen in Italien. Die meisten sind Text; ein paar haben echten Sound und echte Clips.',
+  'Your Kern card comes from your own taps after each mission. No AI scores you.': 'Deine Kern-Karte entsteht aus dem, was du nach jeder Mission selbst antippst. Keine KI bewertet dich.',
+  'From {b}.': 'Von {b}.',
+  'If you choose to send your answer, they see only that answer, never your email or your other answers.': 'Wenn du deine Antwort schicken willst, sieht die Marke nur diese Antwort, nie deine E-Mail oder deine anderen Antworten.',
+  'You decide each time, and saying no changes nothing.': 'Du entscheidest jedes Mal neu, und ein Nein ändert nichts.',
+  "Sending isn't active yet: this is a sample.": 'Das Senden ist noch nicht aktiv: Das hier ist nur ein Beispiel.',
+  'Need to talk to someone now?': 'Brauchst du jetzt jemanden zum Reden?',
+  'Clip made with AI for KERN. Everything in it is fictional.': 'Clip mit KI für KERN gemacht. Alles darin ist erfunden.',
+  'Sounds made with AI for KERN. Fictional.': 'Sounds mit KI für KERN gemacht. Erfunden.',
 };
 const CRISIS_DE: Record<string, string> = {
   "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline: in the UK and Ireland, Samaritans answer free, day or night, on 116 123. If you are in danger, call 112 (999 in the UK).": "Das klingt schwer, deshalb pausiere ich die Mission. Bitte sprich mit jemandem, dem du vertraust, oder ruf eine Beratungsstelle an: In Deutschland erreichst du die TelefonSeelsorge kostenlos und rund um die Uhr unter 0800 111 0 111, 0800 111 0 222 oder 116 123, in Österreich unter 142. In der Schweiz hilft die Dargebotene Hand Tag und Nacht unter 143. Wenn du in Gefahr bist, ruf die 112 an.",

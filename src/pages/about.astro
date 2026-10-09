@@ -24,7 +24,10 @@ import '@fontsource-variable/bricolage-grotesque';
       .top a, .foot a { display: inline-block; padding: 10px 6px; margin: -10px -6px; } /* 44px tap areas without moving the links */
       .foot { margin-top: 32px; }
       hr { border: 0; border-top: 1px solid color-mix(in srgb, var(--fg) 20%, transparent); margin: 40px 0; }
-      #en, #it, #de, #fr { scroll-margin-top: 48px; }
+      #en, #it, #de, #fr, [id^="keep"] { scroll-margin-top: 48px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+      th, td { text-align: left; vertical-align: top; padding: 10px 0; border-top: 1px solid color-mix(in srgb, var(--fg) 20%, transparent); }
+      th { width: 34%; padding-right: 14px; }
     </style>
   </head>
   <body>
@@ -32,14 +35,23 @@ import '@fontsource-variable/bricolage-grotesque';
       <p class="top" id="en"><a href="/">← KERN</a> · <a href="#it" lang="it">Italiano</a> · <a href="#de" lang="de">Deutsch</a> · <a href="#fr" lang="fr">Français</a></p>
       <h1>About KERN</h1>
       <small>Don’t guess your passion. Test it.</small>
+      <h2 id="keep">What we keep</h2>
+      <small>As of 9 October 2026</small>
+      <table>
+        <tr><th scope="row">On your phone</th><td>Your answers, drafts, reflections, your Kern card and settings. Nobody else sees them.</td></tr>
+        <tr><th scope="row">What leaves your phone</th><td>What you write to KERN.AI, and a prompt you choose to try on the AI, goes to our AI provider (Anthropic) to get a reply; KERN doesn’t keep it. Things you share yourself. Your account copy, if you make an account (Supabase, EU). Usage counts, only if you say yes.</td></tr>
+        <tr><th scope="row">Delete it</th><td>Settings › Delete my data removes everything on this phone, your Kern card included. Delete my account also removes your account copy, if you have one.</td></tr>
+        <tr><th scope="row">What a company sees</th><td>Nothing today. Later, only an answer you choose to send for one brand mission, never your email; off by default, and saying no changes nothing.</td></tr>
+        <tr><th scope="row">How your card is made</th><td>From your own taps after each mission. No AI scores you.</td></tr>
+      </table>
       <h2>What it is</h2>
       <p>KERN is a free app to find your passion by testing different paths. You try short missions in seven fields (design, writing, code, video, selling online, music and prompting with AI), say in 20 seconds how each one felt, and see which path clicks. No account needed.</p>
-      <p>Seven creative and digital paths, for now.</p>
+      <p>Seven creative and digital paths, for now. Your Kern card comes from your own taps after each mission. No AI scores you.</p>
       <h2>Who makes it</h2>
       <p>KERN is made by Manuel Di Paolo, in Italy. Write to <a href="mailto:manuel@trykern.it">manuel@trykern.it</a> for anything: a question, feedback, or your data.</p>
       <h2>For parents</h2>
       <ul>
-        <li><b>Age:</b> KERN is for people aged 18 and over for now, because it is built for adults and keeps what people write.</li>
+        <li><b>Age:</b> KERN is for people aged 18 and over for now, because it is built for adults and keeps what people write. The 18+ check is a tick box for now: we ask, we can’t verify it.</li>
         <li><b>What is stored:</b> without an account, answers, reflections and settings stay in the browser on that device. With an account, a copy is kept at Supabase in the EU (Frankfurt, Germany), so it syncs across devices.</li>
         <li><b>KERN.AI:</b> the co-pilot only asks questions. What someone types to it is sent to the AI provider (Anthropic) to get a reply, and KERN does not keep it. If a message sounds heavy, it pauses the mission and suggests talking to someone they trust or a local helpline.</li>
         <li><b>No ads:</b> no advertising and no cookies. Usage counts stay off unless the person says yes, and never include a name or anything they wrote.</li>
@@ -52,14 +64,23 @@ import '@fontsource-variable/bricolage-grotesque';
         <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a> · <a href="#de" lang="de">Deutsch</a> · <a href="#fr" lang="fr">Français</a></p>
         <h1>Info su KERN</h1>
         <small>La passione non si indovina. Si prova.</small>
+        <h2 id="keep-it">Cosa conserviamo</h2>
+        <small>Aggiornato al 9 ottobre 2026</small>
+        <table>
+          <tr><th scope="row">Sul tuo telefono</th><td>Le tue risposte, bozze, riflessioni, la tua Kern card e le impostazioni. Non le vede nessun altro.</td></tr>
+          <tr><th scope="row">Cosa esce dal telefono</th><td>Quello che scrivi a KERN.AI, e un prompt che scegli di provare con l’AI, va al nostro fornitore di AI (Anthropic) per avere una risposta; KERN non lo conserva. Le cose che condividi tu. La copia nel tuo account, se ne crei uno (Supabase, UE). I conteggi di utilizzo, solo se dici di sì.</td></tr>
+          <tr><th scope="row">Cancellare</th><td>Impostazioni › Elimina i miei dati cancella tutto da questo telefono, Kern card compresa. Elimina il mio account cancella anche la copia nel tuo account, se ne hai uno.</td></tr>
+          <tr><th scope="row">Cosa vede un’azienda</th><td>Oggi niente. In futuro, solo una risposta che scegli di mandare per una missione di un brand, mai la tua email; è disattivato di default e dire di no non cambia niente.</td></tr>
+          <tr><th scope="row">Come nasce la tua card</th><td>Dai tuoi tocchi dopo ogni missione. Nessuna AI ti dà un voto.</td></tr>
+        </table>
         <h2>Cos’è</h2>
         <p>KERN è un’app gratuita per trovare la tua passione provando strade diverse. Fai brevi missioni in sette campi (design, scrittura, codice, video, vendita online, musica e prompting con l’AI), dici in 20 secondi com’è andata e scopri quale strada ti prende. Non serve un account.</p>
-        <p>Sette strade creative e digitali, per ora.</p>
+        <p>Sette strade creative e digitali, per ora. La tua Kern card nasce dai tuoi tocchi dopo ogni missione. Nessuna AI ti dà un voto.</p>
         <h2>Chi la fa</h2>
         <p>KERN è fatta da Manuel Di Paolo, in Italia. Scrivi a <a href="mailto:manuel@trykern.it">manuel@trykern.it</a> per qualsiasi cosa: una domanda, un feedback o i tuoi dati.</p>
         <h2>Per i genitori</h2>
         <ul>
-          <li><b>Età:</b> per ora KERN è per chi ha almeno 18 anni, perché è pensata per gli adulti e conserva quello che si scrive.</li>
+          <li><b>Età:</b> per ora KERN è per chi ha almeno 18 anni, perché è pensata per gli adulti e conserva quello che si scrive. Per ora il controllo dei 18 anni è una casella da spuntare: lo chiediamo, ma non possiamo verificarlo.</li>
           <li><b>Cosa viene conservato:</b> senza account, risposte, riflessioni e impostazioni restano nel browser di quel dispositivo. Con un account, una copia è custodita da Supabase nell’UE (Francoforte, Germania), per sincronizzarla tra i dispositivi.</li>
           <li><b>KERN.AI:</b> il co-pilota fa solo domande. Quello che gli si scrive viene inviato al fornitore di AI (Anthropic) per avere una risposta, e KERN non lo conserva. Se un messaggio sembra pesante, mette in pausa la missione e suggerisce di parlarne con una persona di fiducia o con un servizio di ascolto.</li>
           <li><b>Niente pubblicità:</b> né pubblicità né cookie. I conteggi di utilizzo restano spenti se la persona non dice di sì, e non contengono mai un nome o quello che ha scritto.</li>
@@ -73,14 +94,23 @@ import '@fontsource-variable/bricolage-grotesque';
         <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a> · <a href="#it" lang="it">Italiano</a> · <a href="#fr" lang="fr">Français</a></p>
         <h1>Über KERN</h1>
         <small>Rate deine Leidenschaft nicht. Teste sie.</small>
+        <h2 id="keep-de">Was wir speichern</h2>
+        <small>Stand: 9. Oktober 2026</small>
+        <table>
+          <tr><th scope="row">Auf deinem Handy</th><td>Deine Antworten, Entwürfe, Reflexionen, deine Kern card und deine Einstellungen. Niemand sonst sieht sie.</td></tr>
+          <tr><th scope="row">Was dein Handy verlässt</th><td>Was du KERN.AI schreibst und ein Prompt, den du mit der KI testen willst, gehen an unseren KI-Anbieter (Anthropic), damit er antworten kann; KERN speichert sie nicht. Was du selbst teilst. Die Kopie in deinem Konto, wenn du eins erstellst (Supabase, EU). Nutzungszählungen, nur wenn du Ja sagst.</td></tr>
+          <tr><th scope="row">Löschen</th><td>Einstellungen › Meine Daten löschen entfernt alles auf diesem Handy, auch deine Kern card. Mein Konto löschen entfernt auch die Kopie in deinem Konto, falls du eins hast.</td></tr>
+          <tr><th scope="row">Was ein Unternehmen sieht</th><td>Heute nichts. Später nur eine Antwort, die du für eine Markenmission selbst schickst, nie deine E-Mail; standardmäßig aus, und ein Nein ändert nichts.</td></tr>
+          <tr><th scope="row">Wie deine Karte entsteht</th><td>Aus dem, was du nach jeder Mission selbst antippst. Keine KI bewertet dich.</td></tr>
+        </table>
         <h2>Was es ist</h2>
         <p>KERN ist eine kostenlose App, mit der du deine Leidenschaft findest, indem du verschiedene Wege ausprobierst. Du machst kurze Missionen in sieben Bereichen (Design, Schreiben, Code, Video, Online-Verkauf, Musik und Prompting mit KI), sagst in 20 Sekunden, wie sich jede angefühlt hat, und siehst, welcher Weg zu dir passt. Kein Konto nötig.</p>
-        <p>Sieben kreative und digitale Wege, vorerst.</p>
+        <p>Sieben kreative und digitale Wege, vorerst. Deine Kern card entsteht aus dem, was du nach jeder Mission selbst antippst. Keine KI bewertet dich.</p>
         <h2>Wer es macht</h2>
         <p>KERN wird von Manuel Di Paolo in Italien gemacht. Schreib an <a href="mailto:manuel@trykern.it">manuel@trykern.it</a> für alles: eine Frage, Feedback oder deine Daten.</p>
         <h2>Für Eltern</h2>
         <ul>
-          <li><b>Alter:</b> KERN ist vorerst für Menschen ab 18 Jahren, weil es für Erwachsene gemacht ist und speichert, was Menschen schreiben.</li>
+          <li><b>Alter:</b> KERN ist vorerst für Menschen ab 18 Jahren, weil es für Erwachsene gemacht ist und speichert, was Menschen schreiben. Die 18+-Abfrage ist vorerst nur ein Häkchen: Wir fragen, können es aber nicht überprüfen.</li>
           <li><b>Was gespeichert wird:</b> Ohne Konto bleiben Antworten, Reflexionen und Einstellungen im Browser auf dem jeweiligen Gerät. Mit Konto wird eine Kopie bei Supabase in der EU (Frankfurt, Deutschland) gespeichert, damit sie auf allen Geräten synchronisiert wird.</li>
           <li><b>KERN.AI:</b> Der Co-Pilot stellt nur Fragen. Was jemand ihm schreibt, wird an den KI-Anbieter (Anthropic) gesendet, um eine Antwort zu bekommen, und KERN behält es nicht. Wenn eine Nachricht schwer klingt, pausiert er die Mission und schlägt vor, mit einer Vertrauensperson oder einer Beratungsstelle in der Nähe zu sprechen.</li>
           <li><b>Keine Werbung:</b> keine Werbung und keine Cookies. Nutzungszählungen bleiben aus, solange die Person nicht Ja sagt, und enthalten nie einen Namen oder etwas, das sie geschrieben hat.</li>
@@ -94,14 +124,23 @@ import '@fontsource-variable/bricolage-grotesque';
         <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a> · <a href="#it" lang="it">Italiano</a> · <a href="#de" lang="de">Deutsch</a></p>
         <h1>À propos de KERN</h1>
         <small>Ne devine pas ta passion. Teste-la.</small>
+        <h2 id="keep-fr">Ce qu’on garde</h2>
+        <small>À jour au 9 octobre 2026</small>
+        <table>
+          <tr><th scope="row">Sur ton téléphone</th><td>Tes réponses, brouillons, réflexions, ta Kern card et tes réglages. Personne d’autre ne les voit.</td></tr>
+          <tr><th scope="row">Ce qui quitte ton téléphone</th><td>Ce que tu écris à KERN.AI, et un prompt que tu choisis d’essayer sur l’IA, va chez notre fournisseur d’IA (Anthropic) pour obtenir une réponse ; KERN ne le garde pas. Ce que tu partages toi-même. La copie de ton compte, si tu en crées un (Supabase, UE). Les statistiques d’utilisation, seulement si tu dis oui.</td></tr>
+          <tr><th scope="row">Supprimer</th><td>Réglages › Supprimer mes données efface tout sur ce téléphone, ta Kern card comprise. Supprimer mon compte efface aussi la copie de ton compte, si tu en as un.</td></tr>
+          <tr><th scope="row">Ce que voit une entreprise</th><td>Rien aujourd’hui. Plus tard, seulement une réponse que tu choisis d’envoyer pour une mission de marque, jamais ton e-mail ; désactivé par défaut, et dire non ne change rien.</td></tr>
+          <tr><th scope="row">Comment ta carte est faite</th><td>À partir de ce que tu touches toi-même après chaque mission. Aucune IA ne te note.</td></tr>
+        </table>
         <h2>Ce que c’est</h2>
         <p>KERN est une app gratuite pour trouver ta passion en testant différents chemins. Tu essaies de courtes missions dans sept domaines (design, écriture, code, vidéo, vente en ligne, musique et prompting avec l’IA), tu dis en 20 secondes ce que tu as ressenti pour chacune, et tu vois quel chemin te parle. Pas besoin de compte.</p>
-        <p>Sept chemins créatifs et numériques, pour l’instant.</p>
+        <p>Sept chemins créatifs et numériques, pour l’instant. Ta Kern card vient de ce que tu touches toi-même après chaque mission. Aucune IA ne te note.</p>
         <h2>Qui le fait</h2>
         <p>KERN est fait par Manuel Di Paolo, en Italie. Écris à <a href="mailto:manuel@trykern.it">manuel@trykern.it</a> pour tout : une question, un retour ou tes données.</p>
         <h2>Pour les parents</h2>
         <ul>
-          <li><b>Âge :</b> KERN est pour l’instant destiné aux personnes de 18 ans et plus, parce qu’il est conçu pour les adultes et conserve ce que les gens écrivent.</li>
+          <li><b>Âge :</b> KERN est pour l’instant destiné aux personnes de 18 ans et plus, parce qu’il est conçu pour les adultes et conserve ce que les gens écrivent. La vérification des 18 ans n’est pour l’instant qu’une case à cocher : on demande, mais on ne peut pas vérifier.</li>
           <li><b>Ce qui est conservé :</b> sans compte, les réponses, réflexions et réglages restent dans le navigateur de l’appareil utilisé. Avec un compte, une copie est conservée chez Supabase dans l’UE (Francfort, Allemagne), pour la synchroniser entre les appareils.</li>
           <li><b>KERN.AI :</b> le copilote ne fait que poser des questions. Ce qu’on lui écrit est envoyé au fournisseur d’IA (Anthropic) pour obtenir une réponse, et KERN ne le conserve pas. Si un message semble lourd, il met la mission en pause et suggère de parler à une personne de confiance ou à une ligne d’écoute près de chez soi.</li>
           <li><b>Pas de pub :</b> ni publicité ni cookies. Les statistiques d’utilisation restent désactivées tant que la personne ne dit pas oui, et ne contiennent jamais un nom ni ce qu’elle a écrit.</li>
