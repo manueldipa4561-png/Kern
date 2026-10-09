@@ -9,7 +9,7 @@ const h = (ex: [string, string], a: [string, string], b: [string, string], c: [s
 
 export const HELPS: Record<string, Help[]> = {
   Design: [
-    h(['Keep: “Saturday · 2 for 1 pizza till 9”. Cut: DJ, new menu, contest, tag 3 friends, the address (it goes in a second story). The photo stays, darker at the bottom so the words read. One colour: cream letters, big, on that dark part. The dog stays if it makes you stop: your call. A tiny “Pomo Pizza” under the words.', 'Tengo: “Sabato · 2x1 sulle pizze fino alle 21”. Tolgo: DJ, nuovo menu, concorso, tagga 3 amici, l’indirizzo (va in una seconda storia). La foto resta, più scura in basso perché le parole si leggano. Un colore: lettere crema, grandi, sulla parte scura. Il cane resta se ti fa fermare: decidi tu. Un piccolo “Pomo Pizza” sotto le parole.'],
+    h(['Keep: Pizza night Saturday, 2 for 1 until 9pm. Cut: Live DJ, new menu, win a year of pizza, tag 3 friends, 12 Via Verdi (the address can go in a second story). Colour: cream letters, big, on the darker bottom of the photo. The dog can stay: your call.', 'Tengo: Serata pizza sabato, 2x1 fino alle 21. Tolgo: DJ dal vivo, nuovo menu, vinci un anno di pizza, tagga 3 amici, Via Verdi 12 (l’indirizzo può andare in una seconda storia). Colore: lettere crema, grandi, sulla parte bassa più scura della foto. Il cane può restare: decidi tu.'],
       ['If a stranger only has one second, what should they read?', 'Se uno sconosciuto ha solo un secondo, cosa deve leggere?'],
       ['Which of the 7 things could wait for a second story?', 'Quali delle 7 cose possono aspettare una seconda storia?'],
       ['Which one colour makes the words jump off the background?', 'Quale colore fa saltare fuori le parole dallo sfondo?']),
@@ -21,7 +21,7 @@ export const HELPS: Record<string, Help[]> = {
       ['What does the sentence smell or sound like?', 'Che odore o suono ha la frase?'],
       ['What small thing in a room carries that feeling?', 'Quale piccola cosa in una stanza porta quella sensazione?'],
       ['Which 2 colours show up in most of your 6 pictures?', 'Quali 2 colori compaiono nella maggior parte delle tue 6 immagini?']),
-    h(['Worst: dim yellow light, messy bed, toes cut off. Reshoot: by a window at midday, on a plain grey floor, shoes side by side, laces tied. Trim: shoes fill the frame, no hoodie. Photo 2: a close-up of the sole.', 'Peggio: luce gialla fioca, letto sfatto, punte tagliate. Nuovo scatto: vicino a una finestra a mezzogiorno, su un pavimento grigio liscio, scarpe affiancate, lacci allacciati. Ritaglio: le scarpe riempiono la foto, niente felpa. Foto 2: primo piano della suola.'],
+    h(['Worst: dim ceiling light, unmade bed, toes cut off. New photo: by a window at midday, on a plain grey floor, white wall behind. Shoes side by side, laces tied, filling most of the photo. A second photo shows the sole and size.', 'Peggio: luce fioca dal soffitto, letto sfatto, punte tagliate. Foto nuova: vicino a una finestra a mezzogiorno, su un pavimento grigio liscio, muro bianco dietro. Scarpe affiancate, lacci allacciati, riempiono quasi tutta la foto. Una seconda foto mostra suola e taglia.'],
       ['Which of these flaws would you notice first?', 'Quale di questi difetti noteresti per primo?'],
       ['Where in your home is the light best, and at what time?', 'Dove in casa c’è la luce migliore, e a che ora?'],
       ['What would make the shoes the only thing in the frame?', 'Cosa farebbe delle scarpe l’unica cosa nell’inquadratura?']),

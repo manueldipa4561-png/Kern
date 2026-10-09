@@ -17,8 +17,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Pomo Pizza (fictional)', 'Pomo Pizza (fittizia)'),
       brief: t2(
-        'Pomo Pizza’s Saturday story shouts 7 things at once, so people swipe past. Pick the one that gets people to turn up and rebuild it around that.',
-        'La storia di sabato di Pomo Pizza urla 7 cose insieme e la gente scorre via. Scegli la cosa che fa venire la gente e ricostruisci tutto attorno a quella.'),
+        'Pomo Pizza’s story shows 7 messages at once, so people swipe past. Keep the 1 or 2 that make people come, cut the rest, pick one colour for the words.',
+        'La storia di Pomo Pizza mostra 7 messaggi insieme e la gente scorre via. Tienine 1 o 2, quelli che fanno venire la gente, togli il resto e scegli un colore per le parole.'),
       asset: {
         mono: false,
         img: '/img/m/story-en.webp', imgIt: '/img/m/story-it.webp', only: true,
@@ -28,23 +28,24 @@ export const MX: Record<string, MissionX[]> = {
           'SERATA PIZZA SABATO!!! (enorme, rossa, lettere urlate)\n2x1 fino alle 21 (adesivo giallo, storto)\nDJ dal vivo dalle 22 (blu, lettere ricciolute)\nNuovo menu · vinci un anno di pizza · tagga 3 amici\nVia Verdi 12 (minuscolo, grigio, sulla foto)\nFoto: una pizza, una folla e un cane'),
       },
       steps: [
-        t2('Pick the one message that makes people turn up.', 'Scegli il messaggio che fa venire la gente.'),
-        t2('List what you cut. Be brave: at least four things.', 'Elenca cosa togli. Coraggio: almeno quattro cose.'),
-        t2('Describe the new story: the words and the one colour.', 'Descrivi la nuova storia: le parole e l’unico colore.'),
+        t2('Pick the 1 or 2 messages that make people come.', 'Scegli 1 o 2 messaggi che fanno venire la gente.'),
+        t2('Pick one colour for the words.', 'Scegli un colore per le parole.'),
+        t2('Check: 1 or 2 kept, the rest cut, one colour.', 'Controlla: 1 o 2 tenuti, il resto tolto, un colore.'),
       ],
       mins: 2,
       bar: [
+        t2('Only 1 or 2 messages left', 'Restano solo 1 o 2 messaggi'),
         t2('Readable in two seconds', 'Si legge in due secondi'),
-        t2('You cut at least four things', 'Hai tolto almeno quattro cose'),
-        t2('One colour, one kind of letters', 'Un colore, un solo tipo di lettere'),
+        t2('One colour for all the words', 'Un colore per tutte le parole'),
       ],
       twist: t2('Build it in your story editor for a real place you like. Post it, or send it to a friend.', 'Costruiscila nell’editor delle storie per un posto vero che ti piace. Pubblicala, o mandala a qualcuno.'),
+      answer: t2('The messages you keep (1 or 2), the ones you cut, and one colour for the words.', 'I messaggi che tieni (1 o 2), quelli che togli e un colore per le parole.'),
     },
     {
       who: tag('Bar Ficus (fictional)', 'Bar Ficus (fittizio)'),
       brief: t2(
-        'Bar Ficus wants a round sticker for its door. Can’t draw? Describe it in words so anyone could draw it: picture, 2 colours, name and one short line.',
-        'Bar Ficus vuole un adesivo rotondo per la porta. Non sai disegnare? Descrivilo a parole perché chiunque possa disegnarlo: immagine, 2 colori, nome e una frase breve.'),
+        'Bar Ficus wants a round sticker for its glass door. Describe it in words: one picture, 2 colours, and a line under the bar’s name (4 words max).',
+        'Bar Ficus vuole un adesivo rotondo per la sua porta a vetri. Descrivilo a parole: un’immagine, 2 colori e una frase sotto il nome del bar (massimo 4 parole).'),
       asset: {
         mono: false,
         title: t2('What you know about the bar', 'Cosa sai del bar'),
@@ -53,35 +54,36 @@ export const MX: Record<string, MissionX[]> = {
           'Aperto dal 1987, dalle 6:30 alle 21\nCaffè 1,20 € · Spritz 4 €\nRosa lo gestisce e chiama tutti “tesoro”\nUna pianta gigante vicino alla cassa, più vecchia dei figli di Rosa\nChiassoso alle 18, assonnato alle 15\nL’adesivo: rotondo, 8 cm, sulla porta a vetri'),
       },
       steps: [
-        t2('Pick one thing from the list that makes this bar itself.', 'Scegli dall’elenco una cosa che rende questo bar unico.'),
-        t2('Describe the picture, using just 2 colours.', 'Descrivi l’immagine, usando solo 2 colori.'),
-        t2('Write the line under the name: 4 words max.', 'Scrivi la frase sotto il nome: 4 parole al massimo.'),
+        t2('Pick the one thing that makes this bar special.', 'Scegli la cosa che rende speciale questo bar.'),
+        t2('Describe a picture of it in 2 colours.', 'Descrivi un’immagine di quella cosa in 2 colori.'),
+        t2('Add a line under the name: 4 words or fewer.', 'Aggiungi una frase sotto il nome: 4 parole al massimo.'),
       ],
       mins: 3,
       bar: [
-        t2('Clear from one step away', 'Si capisce da un passo di distanza'),
+        t2('The picture is one simple shape', 'L’immagine è una forma semplice'),
         t2('The line is 4 words or fewer', 'La frase ha 4 parole o meno'),
         t2('Only 2 colours, and you named them', 'Solo 2 colori, e li hai nominati'),
       ],
       twist: t2('Sketch it on paper, even badly. Post the photo, or send it to a friend.', 'Schizzalo su carta, anche male. Pubblica la foto, o mandala a qualcuno.'),
+      answer: t2('One picture in 2 colours, and a line under the bar’s name: 4 words or fewer.', 'Un’immagine in 2 colori e una frase sotto il nome del bar: 4 parole al massimo.'),
     },
     {
       who: tag('Elena’s bare room', 'La stanza vuota di Elena'),
       brief: t2(
-        'A friend describes their dream room in one sentence. You plan its moodboard (a collage): 6 pictures, described in words. Pair up, or do both parts.',
-        'Qualcuno descrive la sua stanza dei sogni in una frase. Pianifica il suo moodboard (un collage): 6 immagini, a parole. In coppia, o fai entrambe le parti.'),
+        'Elena wants her bare room to feel like “a slow Sunday in a tiny flat by the sea”. Describe 6 pictures for her moodboard (a collage that shows a feeling).',
+        'Elena vuole che la sua stanza vuota sembri “una domenica lenta in una casetta sul mare”. Descrivi 6 immagini per il suo moodboard (un collage che mostra una sensazione).'),
       asset: {
         mono: false,
         img: '/img/m/room.webp',
-        title: t2('Elena’s room (if you have no partner)', 'La stanza di Elena (se non hai un partner)'),
+        title: t2('Elena’s room', 'La stanza di Elena'),
         body: t2(
           'Elena’s sentence: “A room that feels like a slow Sunday in a tiny flat by the sea.”\nThe room: 3 by 3 metres, one window facing a wall\nShe already has: a bed, a lamp, a sad plant\nBudget: very small\nYou choose: 6 pictures, no more',
           'La frase di Elena: “Una stanza che sembra una domenica lenta in una casetta sul mare.”\nLa stanza: 3 metri per 3, una finestra che dà su un muro\nHa già: un letto, una lampada, una pianta un po’ triste\nBudget: minuscolo\nTu scegli: 6 immagini, non una di più'),
       },
       steps: [
-        t2('Read the sentence. Write its feeling in 2 words.', 'Leggi la frase. Scrivi la sua sensazione in 2 parole.'),
-        t2('Describe 6 pictures that match it, one line each.', 'Descrivi 6 immagini che ci stanno bene, una riga ciascuna.'),
-        t2('Name the 2 colours that tie the six together.', 'Scegli i 2 colori che tengono insieme le sei.'),
+        t2('Pick 2 words for the feeling of her sentence.', 'Scegli 2 parole per la sensazione della sua frase.'),
+        t2('Describe 6 different pictures, one line each.', 'Descrivi 6 immagini diverse, una riga ciascuna.'),
+        t2('Name 2 colours that all 6 share.', 'Nomina 2 colori che tutte e 6 hanno in comune.'),
       ],
       mins: 3,
       bar: [
@@ -89,13 +91,14 @@ export const MX: Record<string, MissionX[]> = {
         t2('6 different things, not 6 lamps', '6 cose diverse, non 6 lampade'),
         t2('A stranger could guess the sentence', 'Chi non la conosce indovinerebbe la frase'),
       ],
-      twist: t2('Copy the six lines and send them to your friend. Ask: “Is this it?” One word back is enough.', 'Copia le sei righe e mandale a chi ti ha dato la frase. Chiedi: “È questa?” Basta una parola di risposta.'),
+      twist: t2('Ask a friend for their dream room in one sentence, then plan their 6 pictures.', 'Chiedi a qualcuno la sua stanza dei sogni in una frase, poi pianifica le sue 6 immagini.'),
+      answer: t2('The feeling in 2 words, 6 pictures (one line each), and 2 colours.', 'La sensazione in 2 parole, 6 immagini (una riga ciascuna) e 2 colori.'),
     },
     {
       who: tag('Nonna Kicks (fictional)', 'Nonna Kicks (fittizia)'),
       brief: t2(
-        'Nonna Kicks sells second-hand sneakers online. This photo got zero messages in 5 days. Say what to change so a stranger stops scrolling.',
-        'Nonna Kicks vende sneaker di seconda mano online. Questa foto non ha avuto nessun messaggio in 5 giorni. Di’ cosa cambiare perché uno sconosciuto si fermi a guardarla.'),
+        'Nonna Kicks’ photo of used sneakers got zero messages in 5 days. Name the 3 worst problems and plan a new photo: where, what light, what behind the shoes.',
+        'La foto di sneaker usate di Nonna Kicks non ha ricevuto messaggi in 5 giorni. Indica i 3 problemi peggiori e pianifica una foto nuova: dove, che luce, cosa c’è dietro le scarpe.'),
       asset: {
         mono: false,
         img: '/img/m/sneakers.webp', only: true,
@@ -105,23 +108,24 @@ export const MX: Record<string, MissionX[]> = {
           'Scattata alle 20 sotto una luce fioca sul soffitto\nSu un letto sfatto, con una felpa in un angolo\nEntrambe le sneaker un po’ sfocate\nLacci slacciati, punte tagliate sul bordo\nLe sneaker bianche sembrano gialle\nNon si vedono la suola né la taglia'),
       },
       steps: [
-        t2('Name the 3 worst things about the photo.', 'Indica le 3 cose peggiori della foto.'),
-        t2('Describe the reshoot: where, what light, what behind the shoes.', 'Descrivi lo scatto nuovo: dove, che luce, cosa dietro le scarpe.'),
-        t2('Say what you trim off the edges and what stays.', 'Di’ cosa tagli ai bordi e cosa resta.'),
+        t2('Pick the 3 worst problems in the photo.', 'Scegli i 3 problemi peggiori della foto.'),
+        t2('Plan the new photo: where, what light, what behind.', 'Pianifica la foto nuova: dove, che luce, cosa c’è dietro.'),
+        t2('Say how close: the shoes should fill the photo.', 'Di’ quanto vicino: le scarpe devono riempire la foto.'),
       ],
       mins: 4,
       bar: [
-        t2('Light, background and trimming all covered', 'Luce, sfondo e ritaglio: tutti e tre'),
-        t2('The shoes fill most of the frame', 'Le scarpe riempiono quasi tutta la foto'),
-        t2('Nothing else competes with the shoes', 'Niente distrae dalle scarpe'),
+        t2('Where, light and background all covered', 'Dove, luce e sfondo: tutti e tre'),
+        t2('The shoes fill most of the photo', 'Le scarpe riempiono quasi tutta la foto'),
+        t2('Nothing in the photo distracts from the shoes', 'Niente nella foto distrae dalle scarpe'),
       ],
-      twist: t2('Reshoot a pair of your own tonight. Use it on Vinted or Subito, or send before and after to a friend.', 'Rifai la foto a un paio delle tue stasera. Usala su Vinted o Subito, oppure manda prima e dopo a qualcuno.'),
+      twist: t2('Take a photo of your own shoes this way. Use it on Vinted or Subito, or send before and after to a friend.', 'Fai così una foto alle tue scarpe. Usala su Vinted o Subito, oppure manda prima e dopo a qualcuno.'),
+      answer: t2('The 3 worst problems, then the new photo: where, what light, what behind, how close.', 'I 3 problemi peggiori, poi la foto nuova: dove, che luce, cosa c’è dietro, quanto vicino.'),
     },
     {
       who: tag('Fuorisede Diaries (fictional)', 'Fuorisede Diaries (fittizio)'),
       brief: t2(
-        'Fuorisede Diaries is an account for students living away from home. Plan the first picture of its swipe-through post “5 things I wish I knew before my first flatmates”.',
-        'Fuorisede Diaries è un account per chi vive fuorisede. Pianifica la prima immagine del suo carosello “5 cose che avrei voluto sapere prima dei miei primi coinquilini”.'),
+        'Fuorisede Diaries has a post with 5 flatmate tips, one per picture, but no first picture yet. Plan it around one tip: up to 6 words and one bright colour.',
+        'Fuorisede Diaries ha un post con 5 consigli sui coinquilini, uno per immagine, ma ancora nessuna prima immagine. Pianificala attorno a un consiglio: fino a 6 parole e un colore acceso.'),
       asset: {
         mono: false,
         title: t2('The 5 tips inside + the rules', 'I 5 consigli dentro + le regole'),
@@ -130,8 +134,8 @@ export const MX: Record<string, MissionX[]> = {
           'Consiglio 1: etichetta sempre il tuo cibo\nConsiglio 2: compra una pentola tua\nConsiglio 3: parla delle bollette già nella settimana 1\nConsiglio 4: chiarisci chi porta giù la spazzatura\nConsiglio 5: se qualcosa ti dà fastidio, dillo subito, non alle 2 di notte\nRegole: quadrata, vista piccola nel feed, massimo 6 parole, un colore acceso'),
       },
       steps: [
-        t2('Pick the tip that would make a stranger most curious.', 'Scegli il consiglio che incuriosirebbe di più uno sconosciuto.'),
-        t2('Write the words on the cover: 6 words or fewer.', 'Scrivi le parole sulla copertina: 6 parole o meno.'),
+        t2('Pick the tip that would make a stranger curious.', 'Scegli il consiglio che incuriosirebbe uno sconosciuto.'),
+        t2('Write the words on the picture: 6 or fewer.', 'Scrivi le parole sull’immagine: 6 al massimo.'),
         t2('Describe the picture, in one bright colour.', 'Descrivi l’immagine, in un solo colore acceso.'),
       ],
       mins: 4,
@@ -141,12 +145,13 @@ export const MX: Record<string, MissionX[]> = {
         t2('It does not give away all 5 tips', 'Non svela tutti e 5 i consigli'),
       ],
       twist: t2('Copy the plan and send it to someone about to move in with flatmates. Would they keep swiping?', 'Copia il piano e mandalo a chi sta per andare a vivere con dei coinquilini. Andrebbe avanti a scorrere?'),
+      answer: t2('The tip, the words on the picture (6 or fewer), and the picture in one bright colour.', 'Il consiglio, le parole sull’immagine (6 al massimo) e l’immagine in un colore acceso.'),
     },
     {
       who: tag('Noce Bites (fictional)', 'Noce Bites (fittizio)'),
       brief: t2(
-        'Luca’s video: “I tried Noce Bites for 7 days”. Plan 2 very different thumbnails (the small picture people tap). A friend picks one. Pair up, or do both parts.',
-        'Luca ha un video: “Ho provato Noce Bites per 7 giorni”. Pianifica 2 miniature molto diverse. Chi fa coppia con te ne sceglie una. In due, o fai entrambe le parti.'),
+        'Luca’s snack video needs a thumbnail (the small picture people tap on). Plan 2 very different ones, A and B, then pick the one you would tap.',
+        'Il video di Luca su uno snack ha bisogno di una miniatura (l’immagine piccola su cui si tocca). Pianificane 2 molto diverse, A e B, poi scegli quella che toccheresti.'),
       asset: {
         mono: false,
         img: '/img/m/luca.webp',
@@ -156,7 +161,7 @@ export const MX: Record<string, MissionX[]> = {
           'Video: “Ho provato Noce Bites per 7 giorni”\nLo snack: bocconcini di avena e nocciola, confezione arancione\nLuca al giorno 7: stanco ma felice\nSul telefono la miniatura è larga circa 3 cm\nRegole: massimo 3 parole, confezione visibile, un colore che spicca'),
       },
       steps: [
-        t2('Plan thumbnail A: a face, 3 words or fewer.', 'Pianifica la miniatura A: una faccia, 3 parole o meno.'),
+        t2('Plan thumbnail A: Luca’s face, a colour, 3 words max.', 'Pianifica la miniatura A: la faccia di Luca, un colore, massimo 3 parole.'),
         t2('Plan thumbnail B the same way, but really different.', 'Pianifica la miniatura B allo stesso modo, ma davvero diversa.'),
         t2('Pick the winner and say why in one line.', 'Scegli la vincente e di’ perché in una riga.'),
       ],
@@ -167,9 +172,9 @@ export const MX: Record<string, MissionX[]> = {
         t2('Your “why” is about the viewer, not you', 'Il “perché” riguarda chi guarda, non te'),
       ],
       twist: t2('Swap Noce for a snack you love. Make the winner for real and send it to a friend.', 'Sostituisci Noce con uno snack che ami. Fai davvero la vincente e mandala a qualcuno.'),
+      answer: t2('Thumbnail A and B (a face, a colour, 3 words max each), then the winner and why.', 'Miniatura A e B (una faccia, un colore, massimo 3 parole ciascuna), poi la vincente e perché.'),
     },
   ],
-
   Writing: [
     {
       who: tag('Camilla’s mirror selfie', 'Il selfie allo specchio di Camilla'),
