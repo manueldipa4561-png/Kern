@@ -46,6 +46,10 @@ assert.equal(STATS_PER_ROUND, PER_ROUND, 'scripts/stats-core.mjs counts finished
 assert.deepEqual(CLASHES, [],'the same English text has two different Italian versions, one overwrites the other');
 // One apostrophe style in Italian: a straight one between letters (l'app) stands out next to the typographic one (l’app) used everywhere else.
 for (const [en, it] of Object.entries(IT)) assert.ok(!/\p{L}'\p{L}/u.test(it), `i18n: the Italian for "${en.slice(0, 50)}" has a straight apostrophe, write ’`);
+// No job-world words anywhere a person reads in the app, English or Italian (they may appear only in the pitch deck).
+const BANNED_UI = /lavor|career|freelanc|real work|real job|choose a job|\bjobs?\b|impieg/i;
+const banned = Object.entries(IT).filter(([en, it]) => BANNED_UI.test(en) || BANNED_UI.test(it)).map(([en]) => en.slice(0, 50));
+assert.deepEqual(banned, [], `i18n: job-world words in the app copy: ${banned.join(' | ')}`);
 
 // The app counts rounds from the current field and searches the other fields with that count, so all fields must match.
 const counts = [...new Set(Object.values(FIELDS).map((f) => f.m.length))];
