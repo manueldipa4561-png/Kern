@@ -63,7 +63,12 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
               <p class="k-xb" id="kXBrief"></p>
               <div class="k-xa"><div class="k-l" id="kXAT"></div><img class="k-xi" id="kXAI" alt="" hidden decoding="async" /><pre id="kXAB"></pre></div>
             </div>
-            <p class="k-l k-coop-hint" id="kCoopHint" hidden>Co-op mission: answer it, then send it to a friend to finish together.</p>
+            <p class="k-l k-s k-coop-hint" id="kCoopHint" hidden>Co-op mission: answer it, then send it to a friend to finish together.</p>
+            <div class="k-x" id="kShP">
+              <div class="k-xh"><span class="k-l" id="kXSL">Your steps</span><span class="k-l" id="kXPn" aria-live="polite"></span></div>
+              <div class="k-xp" aria-hidden="true"><i id="kXPb"></i></div>
+              <div id="kXSteps" role="group" aria-labelledby="kXSL"></div>
+            </div>
             <div class="k-compose" id="kCompose">
               <p class="k-msg k-ai" id="kShQ">What would make the first step easier for someone brand new?</p>
               <label class="k-l" for="kTa">Your answer</label>
@@ -72,14 +77,9 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
               <div class="k-sh-btns"><button type="button" class="k-go" id="kSub">Submit answer</button><button type="button" class="k-sk" id="kCancel">Not now</button></div>
             </div>
             <div class="k-x" id="kShH">
-              <p class="k-msg k-ai" id="kXFirst" hidden>First time here? Write yours above, or use the example, the hints and the steps below. Too hard? Tap “Make it easier”.</p>
-              <p class="k-l" id="kXDemo" hidden>Demo: the question you ask KERN.AI, with your draft, is sent to the AI to get a reply. We do not store it.</p>
-              <div class="k-xbtns" id="kXBtns"><button type="button" class="k-chipb" id="kXEx" aria-expanded="false" aria-controls="kXExB">Show an example</button><button type="button" class="k-chipb" id="kXHint">Need a hint?</button><button type="button" class="k-chipb k-ai-btn" id="kXAsk">Ask KERN.AI</button><button type="button" class="k-chipb" id="kXEasy">Make it easier</button></div>
-              <div class="k-xex" id="kXExB" hidden><div class="k-l">A strong answer, for inspiration</div><pre id="kXExT"></pre></div>
+              <p class="k-l k-s" id="kXDemo" hidden>Demo: the question you ask KERN.AI, with your draft, is sent to the AI to get a reply. We do not store it.</p>
+              <div class="k-xbtns" id="kXBtns"><button type="button" class="k-chipb" id="kXHint">Need a hint?</button><button type="button" class="k-chipb k-ai-btn" id="kXAsk">Ask KERN.AI</button><button type="button" class="k-chipb" id="kXEasy">Make it easier</button></div>
               <div id="kXHints" aria-live="polite"></div>
-              <div class="k-xh"><span class="k-l" id="kXSL">Your steps</span><span class="k-l" id="kXPn" aria-live="polite"></span></div>
-              <div class="k-xp" aria-hidden="true"><i id="kXPb"></i></div>
-              <div id="kXSteps" role="group" aria-labelledby="kXSL"></div>
             </div>
             <div class="k-trailsigns"><div class="k-l">Reviews from people before you</div><div id="kShS" aria-live="polite"></div></div>
           </div>
@@ -94,6 +94,11 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
             <p class="k-l" id="kDrCoN" hidden>The link carries your answer, so it is only as private as the chat you send it to.</p>
           </div>
           <div class="k-step" id="kShR" hidden>
+            <div class="k-vs" id="kVs" hidden>
+              <div class="k-vs-y"><div class="k-l">Yours</div><p id="kVsY"></p></div>
+              <div class="k-xex" id="kXExB"><div class="k-l">One strong answer</div><pre id="kXExT"></pre></div>
+              <p class="k-l k-s">Not a grade. Spot one thing you would try next time.</p>
+            </div>
             <div class="k-l">Quick reflection · 20 seconds</div>
             <p class="k-q" id="kRfEQ">How did it feel?</p>
             <div class="k-chips" id="kRfE" role="group" aria-labelledby="kRfEQ"><span role="button" tabindex="0" data-v="flow">Time flew</span><span role="button" tabindex="0" data-v="ok">It was fine</span><span role="button" tabindex="0" data-v="drag">It dragged</span></div>
@@ -122,9 +127,9 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
           </div>
           <div class="k-acct" id="kAcct" hidden>
             <span class="k-l">Account</span>
-            <p id="kAcctE">Not signed in · your trail is only on this device</p>
+            <p id="kAcctE">Not signed in · your answers are only on this device</p>
             <div class="k-btnrow">
-              <button type="button" class="k-ask-btn" id="kAcctUp">Create an account to save your trail</button>
+              <button type="button" class="k-ask-btn" id="kAcctUp">Create an account to keep your answers</button>
               <button type="button" class="k-ask-btn" id="kLogout" hidden>Log out</button>
             </div>
           </div>
@@ -192,7 +197,7 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
         <form class="k-sp" id="kProf" novalidate>
           <img class="k-mark" src="/img/mark.webp" alt="" width="84" height="84" />
           <div class="k-l">Welcome</div>
-          <h4>Start your<br><b>trail.</b></h4>
+          <h4>Save your<br><b>progress.</b></h4>
           <div class="k-seg k-authseg" id="kAuthSeg" role="group" aria-label="Account" hidden><button type="button" data-k-mode="up">Create account</button><button type="button" data-k-mode="in">Log in</button></div>
           <div class="k-field" id="kFName"><label class="k-l" for="kNmI">Your name</label><input id="kNmI" type="text" maxlength="40" autocomplete="given-name" aria-required="true" /></div>
           <div class="k-field" id="kFEmail" hidden><label class="k-l" for="kEm">Email</label><input id="kEm" type="email" maxlength="254" autocomplete="email" inputmode="email" aria-required="true" /></div>
@@ -203,8 +208,8 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
           <button type="submit" class="k-go" id="kLog">Start</button>
           <button type="button" class="k-sk" id="kForgot" hidden>Forgot password?</button>
           <button type="button" class="k-sk" id="kGuest" hidden>Continue without an account</button>
-          <p class="k-l" id="kNoteLocal">No account needed yet. Your trail stays on this device. <a href="/privacy/">Privacy</a></p>
-          <p class="k-l" id="kNoteCloud" hidden>Your trail is saved to your account and synced across your devices. <a href="/privacy/">Privacy</a></p>
+          <p class="k-l" id="kNoteLocal">No account needed. Your answers stay on this device. <a href="/privacy/">Privacy</a></p>
+          <p class="k-l" id="kNoteCloud" hidden>Your answers are saved to your account and synced across your devices. <a href="/privacy/">Privacy</a></p>
         </form>
       </div>
 
@@ -217,7 +222,7 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
           <ol class="k-how">
             <li><b>01</b><p>Try a short mission</p></li>
             <li><b>02</b><p>Reflect in 20 seconds</p></li>
-            <li><b>03</b><p>See how you work</p></li>
+            <li><b>03</b><p>See what lights you up</p></li>
           </ol>
           <button type="button" class="k-go" id="kIdk">I don't know yet</button>
           <button type="button" class="k-sk" id="kSkip">Explore missions</button>
@@ -225,11 +230,13 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
         <div id="kS2" class="k-sp" hidden>
           <div class="k-l" id="kS2K">Good. Let's find out.</div>
           <h4 id="kS2H">What are you<br>curious about <b>right now?</b></h4>
-          <p class="k-l" id="kPickL">Pick one or more. You can add others anytime.</p>
+          <p class="k-l k-s" id="kPickL">Pick one or more. You can add others anytime.</p>
           <div class="k-tiles" id="kPick" role="group" aria-labelledby="kPickL">
             {FIELDS.map((f) => <button type="button" class="k-tile" data-f={f} aria-pressed="false"><span class="k-ti" aria-hidden="true" set:html={icon(f)} /><span>{f}</span></button>)}
           </div>
+          <label class="k-check" id="kS2Age" hidden><input type="checkbox" id="kAge2" /><span>I am 18 or older</span></label>
           <button type="button" class="k-go" id="kGo">Start my first mission</button>
+          <p class="k-l k-s" id="kS2Note" hidden>No account needed. Your answers stay on this device. <a href="/privacy/">Privacy</a></p>
           <button type="button" class="k-sk" id="kPickX" hidden>Not now</button>
         </div>
       </div>
@@ -256,7 +263,7 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
               <div class="k-btnrow"><button type="button" class="k-go" id="kCoSend">Send back</button><button type="button" class="k-sk" id="kCoSelf">Do the mission yourself</button><button type="button" class="k-sk" id="kCoNo">Not now</button></div>
             </div>
             <div class="k-card k-dare" id="kDare" hidden><div class="k-l">A friend dared you</div><h5 id="kDareT"></h5><button type="button" class="k-go" id="kDareGo">Answer the dare</button></div>
-            <div class="k-card k-main" id="kNext"><span class="k-nxic" id="kNxIc" aria-hidden="true"></span><div class="k-l" id="kNxL">Your next step</div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><div class="k-meta" id="kNxM"></div><div class="k-boost-chip" id="kNxB" hidden></div><button type="button" class="k-btn" id="kAdd">Add your answer</button><button type="button" class="k-sk" id="kAdd2" hidden></button></div>
+            <div class="k-card k-main" id="kNext"><span class="k-nxic" id="kNxIc" aria-hidden="true"></span><div class="k-l" id="kNxL">Your next step</div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><div class="k-meta" id="kNxM"></div><div class="k-boost-chip" id="kNxB" hidden></div><button type="button" class="k-btn" id="kAdd">Start mission</button><button type="button" class="k-sk" id="kAdd2" hidden></button></div>
             <div class="k-card k-stat" id="kStat" hidden><div class="k-l">Help improve KERN</div><p>Count my progress, without my name? We only see which missions you open and finish, when you come back, and whether you use Share or KERN.AI. Never your name, your answers or your email.</p><div class="k-btnrow"><button type="button" class="k-ask-btn" id="kStY">Yes, count me in</button><button type="button" class="k-ask-btn" id="kStN">No thanks</button></div><div><a class="k-l" href="/privacy/">What is counted?</a></div></div>
             <div class="k-card"><div class="k-l" id="kMsL">Your 3 missions</div>
               <div class="k-mlist">
@@ -290,23 +297,26 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
           </section>
 
           <section class="k-pane" id="k-yourkern">
-            <div><div class="k-l">yourKERN · first signs</div><h4>Your <b>KERN</b><br>so far.</h4></div>
-            <div class="k-card k-kcard" id="kKernCard"><div class="k-l">Your Kern card</div><div class="k-kc"><img class="k-kc-img" src="/img/f/yourkern-512.webp" alt="" width="512" height="512" loading="lazy" decoding="async" /><div class="k-kt">kern<i>.</i></div><h5 id="kCardH">You light up when you start from zero.</h5><div class="k-chips" id="kCardC"><span>Shaping ideas</span><span>Writing</span></div><div class="k-l" id="kCardL">Example · answer and reflect to make it yours</div></div><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="card">Share my card</button><button type="button" class="k-ask-btn" data-k-copy="app">Copy app link</button></div></div>
-            <div class="k-card" id="kFcmp" hidden><div class="k-l">Fields side by side</div><h5 id="kFcmpT"></h5><div class="k-meter" id="kFcmpM"></div><p class="k-l">Energy from how it felt, and how many reflections it rests on. Your own answers, not a test.</p></div>
+            <div><div class="k-l">yourKERN</div><h4>Your <b>KERN</b><br>so far.</h4></div>
+            <div class="k-card k-kcard" id="kKernCard"><div class="k-l">Your Kern card</div><div class="k-kc"><img class="k-kc-img" src="/img/f/yourkern-512.webp" alt="" width="512" height="512" loading="lazy" decoding="async" /><div class="k-kt">kern<i>.</i></div><h5 id="kCardH">You light up when you start from zero.</h5><div class="k-chips" id="kCardC"><span>Shaping ideas</span><span>Writing</span></div><div class="k-l" id="kCardL">Example · answer and reflect to make it yours</div></div>
+              <p class="k-l k-s" id="kWhy" hidden>Why we think so: you tried 3 versions of the open brief, and you wrote "time flew".</p>
+              <div class="k-ask" id="kCardAsk" hidden><button type="button" class="k-yes" data-k-msg="Saved. This sharpens your KERN.">That feels right</button><button type="button" data-k-msg="Noted. We'll give this guess less weight.">Not really</button></div><div class="k-l k-fb" id="kFb" aria-live="polite"></div>
+              <div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="card">Share my card</button><button type="button" class="k-ask-btn" data-k-copy="app">Copy app link</button></div></div>
+            <div class="k-l k-s k-note" id="kSample">This card is an example until you finish a mission and reflect.</div>
+            <div class="k-card" id="kMeterC" hidden><div class="k-l">What you light up on</div><div class="k-meter" id="kMeter"></div><p class="k-l k-s" id="kMeterN">From your reflections. Not a test.</p></div>
+            <div class="k-card"><div class="k-l">Your answers</div><div id="kAns"></div></div>
+            <div class="k-card k-further" id="kFurther" hidden><div class="k-l" id="kFuL"></div><h5>Three steps outside the app</h5><ol class="k-fu" id="kFuO"></ol><p class="k-l k-s">Small and free. Pick one this week.</p></div>
+            <div class="k-card" id="kFcmp" hidden><div class="k-l">Fields side by side</div><h5 id="kFcmpT"></h5><div class="k-meter" id="kFcmpM"></div><p class="k-l k-s">Energy from how it felt, and how many reflections it rests on. Your own answers, not a test.</p></div>
             <div class="k-card" id="kCoops" hidden><div class="k-l">Co-op with a friend</div><p>Two missions in every field work with a friend. Answer one, send the link, and read both answers here.</p><div id="kCoopL"></div></div>
-            <div class="k-card k-further" id="kFurther" hidden><div class="k-l" id="kFuL"></div><h5>Three steps outside the app</h5><ol class="k-fu" id="kFuO"></ol><p class="k-l">Small and free. Pick one this week.</p></div>
             <div class="k-card k-lvl k-cut"><div class="k-lvl-top"><div><div class="k-l">Your rank</div><div class="k-rank" id="kRank">Pebble</div></div><div class="k-stones"><b id="kSt">0</b> <span class="k-l">stones</span></div></div><div class="k-bar k-bar-g"><i id="kBar"></i></div><small class="k-nx" id="kNx"></small><div class="k-ladder" id="kLad"></div></div>
-            <div class="k-l k-note" id="kSample">Signals below are examples until you answer and reflect.</div>
-            <div class="k-card"><div class="k-l">A first guess</div><div class="k-sig" id="kGuess">You seemed to light up on the open brief and drag on the polish.</div><div class="k-l" id="kWhy">Why we think so: you tried 3 versions of the open brief, and you wrote "time flew".</div>
-              <div class="k-ask"><button type="button" class="k-yes" data-k-msg="Saved. This sharpens your KERN.">That feels right</button><button type="button" data-k-msg="Noted. We'll give this guess less weight.">Not really</button></div><div class="k-l k-fb" id="kFb" aria-live="polite"></div></div>
-            <div class="k-card"><div class="k-l">What you light up on</div><div class="k-meter" id="kMeter"></div><p class="k-l" id="kMeterN">From your reflections. Not a test.</p></div>
-            <div class="k-card"><div class="k-l">What you seem drawn to</div><div class="k-chips" id="kDrawn"><span>Shaping ideas</span><span>Writing</span><span>Solo work</span></div></div>
-            <div class="k-card"><div class="k-l">How you work with AI</div><div class="k-sig" id="kAiSig">You rewrote your question 4 times, and every version got clearer.</div></div>
+            <!-- Cut in v3 (they repeated the card): the first guess, what you seem drawn to, the AI signal. Kept in the code, like the other k-cut pieces. -->
+            <div class="k-card k-cut"><div class="k-l">A first guess</div><div class="k-sig" id="kGuess">You seemed to light up on the open brief and drag on the polish.</div></div>
+            <div class="k-card k-cut"><div class="k-l">What you seem drawn to</div><div class="k-chips" id="kDrawn"><span>Shaping ideas</span><span>Writing</span><span>Solo work</span></div></div>
+            <div class="k-card k-cut"><div class="k-l">Your idea in KERN.AI</div><div class="k-sig" id="kAiSig">You rewrote your question 4 times, and every version got clearer.</div></div>
             <div class="k-card k-cut"><div class="k-l k-finds-h"><span>Finds</span><span id="kFN"></span></div><div class="k-finds" id="kFinds"></div><p class="k-l">Finish missions to uncover them. You never know which one drops.</p></div>
             <div class="k-card k-cut"><div class="k-l" id="kBdL">Badges</div><div class="k-badges" id="kBadges" role="group" aria-labelledby="kBdL"></div></div>
-            <div class="k-card"><div class="k-l">Your answers</div><div id="kAns"></div></div>
             <div class="k-duo k-cut"><div class="k-card"><div class="k-l">Answers made</div><div class="k-stat"><b id="kCnt">0</b></div><span class="k-l">on this device · only you see this</span></div><div class="k-card"><div class="k-l">Your rhythm · no pressure</div><div class="k-cal" id="kDots" aria-hidden="true"></div><p id="kRhy"></p></div></div>
-            <div class="k-card k-signs-card"><div class="k-l">Reviews on the trail</div><p>People who finish a mission before you leave a short tip for you. Yours helps the next person.</p><div class="k-l">Reviews you left</div><div id="kSigns"></div></div>
+            <div class="k-card k-signs-card"><div class="k-l">Reviews from others</div><p>People who finish a mission before you leave a short tip for you. Yours helps the next person.</p><div class="k-l">Reviews you left</div><div id="kSigns"></div></div>
             <div class="k-card"><div class="k-l">Dare a friend</div><p>Send a mission to a friend, and answer it on your own. For two answers side by side, use a co-op mission.</p><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="dare">Send a dare</button><button type="button" class="k-ask-btn" data-k-copy="dare">Copy link</button></div></div>
             <div class="k-card k-pilot k-cut"><div class="k-l">Testing KERN?</div><p>Send your answers and reflections to the team. It helps us build the next version.</p><button type="button" class="k-ask-btn" data-k-send>Share my trail with the KERN team</button></div>
                       </section>

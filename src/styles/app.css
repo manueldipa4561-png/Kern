@@ -999,3 +999,11 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 #kSheet .k-sh-in { scroll-padding-top: 92px; }
 #kSet .k-sh-in { scroll-padding-top: 76px; }
 .lite .k-main::before { animation: none; }
+/* v8 (design review, 9 Oct): sentences in labels read in sentence case, the serif accent stays on the slogan only, and the compare block after Submit. */
+.k-l.k-s { font: 400 0.875rem/1.45 'Inter Tight Variable', system-ui, sans-serif; letter-spacing: 0; text-transform: none; }
+.k-scr h4 b { font-family: inherit; font-style: normal; font-weight: inherit; font-size: 1em; letter-spacing: inherit; line-height: inherit; }
+.k-vs[hidden], .k-ask[hidden], #kMeterC[hidden], #kWhy[hidden], #kS2Note[hidden], #kKernCard .k-ask-btn[hidden] { display: none; }
+.k-vs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.k-vs-y { border-left: 3px solid var(--line); background: color-mix(in srgb, var(--fg) 5%, transparent); border-radius: 4px 14px 14px 4px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.k-vs-y p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.9375rem; line-height: 1.5; }
+.k-kcard > .k-s, .k-kcard > .k-ask { margin-top: 10px; }

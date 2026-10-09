@@ -30,7 +30,7 @@ type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean; p?: string }; // p: 
 type Theme = 'dark' | 'light';
 type Lang = 'en' | 'it';
 type Habit = { t: string; c: string; l: [number, string][] }; // t: the tiny habit, c: the cue (after I...), l: [day number, relic id found that day or ''] per day done
-type State = { v: 1; name: string; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; text: number; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit; easy: boolean; coops: CoopRec[] }; // text: the text size step in Settings (0 small, 1 default, 2 large, 3 larger)
+type State = { v: 1; name: string; adult: boolean; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; text: number; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit; easy: boolean; coops: CoopRec[] }; // text: the text size step in Settings (0 small, 1 default, 2 large, 3 larger)
 
 // Demo profile (open /?demo, switch off with /?demo=off): a lived-in trail to show KERN in a minute. It has its own storage key,
 // never syncs, never publishes a sign and is never counted, so it cannot touch real data.
@@ -61,7 +61,7 @@ const OPEN = "What is your idea? Write it in your own words first. I won't sugge
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
 const FEELS: Feel[] = ['flow', 'ok', 'drag'];
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
-const fresh = (): State => ({ v: 1, name: '', field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'dark', text: 1, guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false, coops: [] });
+const fresh = (): State => ({ v: 1, name: '', adult: false, field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'dark', text: 1, guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false, coops: [] });
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
 // A name is cut by whole characters (never half an emoji) and holds no text-direction controls (U+202A-202E, U+2066-2069): they flip the text around them and leave the avatar empty.
 const cleanName = (v: unknown) => (typeof v === 'string' ? [...v.replace(/[\u202A-\u202E\u2066-\u2069]/g, '')].slice(0, 40).join('') : '');
@@ -102,6 +102,7 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
     return {
       ...d,
       name: cleanName(s.name),
+      adult: !!s.adult || !!cleanName(s.name), // older saves confirmed 18+ on the name screen
       field,
       fields,
       onboarded: !!s.onboarded,
@@ -142,7 +143,7 @@ const load = (): State => {
   const lost = ok && Array.isArray(saved?.answers) ? saved.answers.length - ok.answers.length : 0; // answers of a mission this build does not know, or damaged ones
   if (ok && !lost) return ok;
   if (raw && !DEMO) { // the next save would replace it: keep what was there (the demo is only a sample, nothing to keep)
-    recovered = ok ? "Some of your saved answers couldn't be read. A copy was kept on this device." : "We couldn't read your saved trail, so you are starting fresh. A copy was kept on this device.";
+    recovered = ok ? "Some of your saved answers couldn't be read. A copy was kept on this device." : "We couldn't read your saved answers, so you are starting fresh. A copy was kept on this device.";
     try { localStorage.setItem(KEY + ':unreadable', raw.slice(0, 400000)); } catch { /* no room for the copy */ }
   }
   return ok ?? (DEMO ? demoState() : fresh());
@@ -182,7 +183,7 @@ function schedulePush() {
     try {
       if (!pulled) { const remote = await cloud.pull(user.id); if (remote) mergeIn(remote); pulled = true; renderMe(); applyField(false); }
       await cloud.push(user.id, snapshot()); if (!syncOk) say('Synced again.'); syncOk = true; }
-    catch { if (syncOk) say("Couldn't sync. Your trail is safe on this device and will sync later."); syncOk = false; }
+    catch { if (syncOk) say("Couldn't sync. Your answers are safe on this device and will sync later."); syncOk = false; }
     renderAcct();
   }, 1200);
 }
@@ -194,6 +195,7 @@ const mergeIn = (raw: unknown) => {
   S.answers = m.answers; S.gone = m.gone;
   S.stones = S.answers.reduce((s, a) => s + worth(a), 0); // stones are exactly what the merged answers earned
   if (!S.name) S.name = r.name;
+  if (r.adult) S.adult = true;
   if (!S.onboarded && r.onboarded) { S.onboarded = true; S.field = r.field; }
   S.fields = [...new Set([...S.fields, ...r.fields, S.field])]; // interests from every device
   const rd = Object.fromEntries(Object.entries(r.drafts).filter(([k]) => !S.answers.some((a) => `${a.f}.${a.i}` === k)));
@@ -283,7 +285,7 @@ const SAMPLE = { guess: $('kGuess').dataset.en!, why: $('kWhy').dataset.en!, ai:
 // Launch loader
 const kLoad = $('kLoad');
 if (still) kLoad.classList.add('off');
-else { kLoad.classList.add('go'); window.setTimeout(() => kLoad.classList.add('off'), S.name ? 1900 : 2600); }
+else { kLoad.classList.add('go'); window.setTimeout(() => kLoad.classList.add('off'), S.onboarded ? 1900 : 2600); }
 
 // Theme
 const applyTheme = () => {
@@ -458,6 +460,7 @@ const readSignals = () => {
   const lowest = (i: number) => by[i].reduce((m, a) => (SCORE[a.r!.e!] <= SCORE[m.r!.e!] ? a : m)); // the answer behind a drag: the latest one with the lowest mark
   return { best, worst, n: rated.length, bestA: last(best), worstA: worst >= 0 ? lowest(worst) : null };
 };
+const ready = (sg: ReturnType<typeof readSignals>) => !!sg && sg.n === 3; // a reflection on each of the three kinds
 const chips = (box: HTMLElement, list: string[]) => { box.innerHTML = ''; list.forEach((t) => { const s = document.createElement('span'); s.textContent = t; box.appendChild(s); }); };
 const renderSignals = () => {
   const sg = readSignals(), it = isIt(), K = it ? KIND_IT : KIND_EN;
@@ -475,13 +478,19 @@ const renderSignals = () => {
     setD($('kWhy'), it
       ? `Perché lo pensiamo: hai segnato "${feel(sg.bestA)}" su ${title(sg.bestA)}${sg.worstA ? ` e "${feel(sg.worstA)}" su ${title(sg.worstA)}` : ''}.`
       : `Why we think so: you marked "${feel(sg.bestA)}" on ${title(sg.bestA)}${sg.worstA ? ` and "${feel(sg.worstA)}" on ${title(sg.worstA)}` : ''}.`);
-    setD($('kCardH'), it ? `Ti accendi quando ${K[sg.best]}.` : `You light up when you ${K[sg.best]}.`);
-    setD($('kCardL'), done === 3 && sg.n === 3 ? tr('3 missions · first guess')
-      : done > 3 && sg.n === 3 ? (it ? `${done} missioni · ipotesi più precisa` : `${done} missions · sharper guess`)
-      : (it ? `Basata su ${sg.n} ${sg.n === 1 ? 'riflessione' : 'riflessioni'} su 3 · iniziale` : `Based on ${sg.n} of 3 reflections · early`));
+    // The card only names a pattern once all three kinds of mission have a reflection: one "Time flew" is not a pattern yet.
+    const left = 3 - sg.n;
+    setD($('kCardH'), ready(sg)
+      ? (it ? `Ti accendi quando ${K[sg.best]}.` : `You light up when you ${K[sg.best]}.`)
+      : (it ? `Ancora ${left} ${left === 1 ? 'riflessione' : 'riflessioni'} e la tua card dice qualcosa.` : `${left} more ${left === 1 ? 'reflection' : 'reflections'} and your card says something.`));
+    setD($('kCardL'), done === 3 && ready(sg) ? tr('3 missions · first guess')
+      : done > 3 && ready(sg) ? (it ? `${done} missioni · ipotesi più precisa` : `${done} missions · sharper guess`)
+      : (it ? `${sg.n} ${sg.n === 1 ? 'riflessione' : 'riflessioni'} su 3` : `${sg.n} of 3 reflections`));
     chips($('kDrawn'), [tr(S.field), tr(KSHORT[sg.best])]);
-    chips($('kCardC'), [tr(S.field), tr(KSHORT[sg.best])]);
+    chips($('kCardC'), ready(sg) ? [tr(S.field), tr(KSHORT[sg.best])] : [tr(S.field)]);
   }
+  $('kWhy').hidden = $('kCardAsk').hidden = $('kMeterC').hidden = !ready(sg);
+  kScr.querySelector<HTMLElement>('#kKernCard [data-k-share="card"]')!.hidden = !ready(sg); // nothing to share until the card names a pattern
   // Energy per kind of mission in this field: the average of your own "how did it feel" answers.
   const meter = $('kMeter');
   meter.innerHTML = '';
@@ -607,7 +616,7 @@ const renderHome = () => {
   const f = F(), b = base(), round = b / PER_ROUND, done = winDone(), next = [0, 1, 2].find((k) => !done.has(k)), it = isIt();
   // fresh: a round was just finished and the next one is not started. Celebrate the Kern card first, then offer the new missions.
   const fresh = roundJustDone();
-  setD($('kHi'), S.name ? `${it ? 'Ciao' : 'Hi'} ${S.name}` : (it ? 'Ciao' : 'Hi'));
+  setD($('kHi'), S.name ? `${it ? 'Ciao' : 'Hi'} ${S.name}` : ''); $('kHi').hidden = !S.name; // no name is asked any more: no bare "Hi"
   const glyph = next === undefined || fresh ? 'yourkern' : S.field, kNxIc = $('kNxIc');
   if (kNxIc.dataset.g !== glyph) { kNxIc.dataset.g = glyph; kNxIc.innerHTML = icon(glyph); }
   kAdd2.hidden = !fresh;
@@ -615,16 +624,16 @@ const renderHome = () => {
     if (fresh) setD($('kNxL'), it ? `Round ${round} completato` : `Round ${round} complete`);
     else setD($('kNxL'), it ? `Le tue ${total()} missioni sono fatte` : `Your ${total()} missions are done`);
     setT($('kNxT'), 'Your Kern card is ready.');
-    setT($('kNxP'), fresh ? 'See what your answers say about how you work, or keep going with 3 new missions.' : 'See what your answers say about how you work, and share it.');
+    setT($('kNxP'), fresh ? 'See what your answers say about you, or keep going with 3 new missions.' : 'See what your answers say about you, and share it.');
     setT(kAdd, 'See your Kern card'); kAdd.dataset.kAns = 'card';
     if (fresh) { setD(kAdd2, it ? `Inizia il round ${round + 1}` : `Start round ${round + 1}`); kAdd2.dataset.kAns = String(b); }
   } else {
     const m = f.m[b + next];
     setD($('kNxL'), round
       ? (it ? `Round ${round + 1} · missione ${next + 1} di 3` : `Round ${round + 1} · mission ${next + 1} of 3`)
-      : (it ? `Prossimo passo · missione ${next + 1} di 3` : `Your next step · mission ${next + 1} of 3`));
+      : (it ? `Missione ${next + 1} di 3` : `Mission ${next + 1} of 3`));
     setT($('kNxT'), m[1]); setT($('kNxP'), m[2]);
-    setT(kAdd, S.drafts[`${S.field}.${b + next}`] ? 'Continue your draft' : 'Add your answer'); kAdd.dataset.kAns = String(b + next);
+    setT(kAdd, S.drafts[`${S.field}.${b + next}`] ? 'Continue your draft' : 'Start mission'); kAdd.dataset.kAns = String(b + next);
   }
   const finished = next === undefined || fresh; // the card is about the Kern card now, so no time chip
   const mins = finished ? 0 : MX[S.field]?.[b + (next ?? 0)]?.mins;
@@ -645,7 +654,8 @@ const renderHome = () => {
     setT(row.querySelector('b')!, f.m[a][1]);
     const bo = boostOf(S.field), isB = !!bo && bo.i === a;
     row.classList.toggle('boost', isB);
-    setD(row.querySelector('small')!, `${tr(f.m[a][0])} · ${tr(st)}${isCoop(S.field, a) ? ' · Co-op' : ''}${isB ? ' · ' + boostTxt(bo!.m) : ''}`);
+    const rm = MX[S.field]?.[a]?.mins;
+    setD(row.querySelector('small')!, `${rm ? `~${rm} min · ` : ''}${tr(st)}${isCoop(S.field, a) ? ' · Co-op' : ''}${isB ? ' · ' + boostTxt(bo!.m) : ''}`);
   });
 };
 
@@ -952,13 +962,13 @@ const renderTrailSigns = (f: string, i: number) => {
     });
   }).catch(() => { if (req === signReq) note("Couldn't load reviews right now."); });
 };
-const setRfNote = () => setT($('kRfN'), user ? 'Shared without your name with the next people on this trail.'
-  : CLOUD ? 'Stays on this device. Log in to share it, without your name, with the next people on this trail.'
+const setRfNote = () => setT($('kRfN'), user ? 'Shared without your name with the next people who do this mission.'
+  : CLOUD ? 'Stays on this device. Log in to share it, without your name, with the next people who do this mission.'
   : 'Stays on this device for now.');
 // Practice brief (missions.ts): scenario, material to work on, tick-off steps with a progress bar
 // (first step pre-ticked), and after submitting a self-check that pays bonus stones.
 const NOTE_DEFAULT = 'It stays on this device unless you ask KERN.AI.';
-const kShX = $('kShX'), kShH = $('kShH'), kSaved = $('kSaved'), kXSteps = $('kXSteps'), kRfBar = $('kRfBar'), kRfBI = $('kRfBI');
+const kShX = $('kShX'), kShH = $('kShH'), kShP = $('kShP'), kSaved = $('kSaved'), kXSteps = $('kXSteps'), kRfBar = $('kRfBar'), kRfBI = $('kRfBI');
 const setX = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.textContent = tr(en); }; // textContent: briefs contain code like <button>
 const tick = (host: HTMLElement, en: string, on: boolean, cls: string, change?: () => void) => {
   const d = document.createElement('div');
@@ -989,7 +999,7 @@ const setPic = () => {
 };
 function renderBrief(f: string, i: number) {
   const v = variant(f, i), x = v?.x;
-  kShX.hidden = kShH.hidden = kRfBar.hidden = !v;
+  kShX.hidden = kShH.hidden = kShP.hidden = kRfBar.hidden = !v;
   kXSteps.innerHTML = ''; kRfBI.innerHTML = '';
   if (!v || !x) return;
   setX($('kXWho'), x.who); setD($('kXMin'), `~${x.mins} min`);
@@ -1010,12 +1020,9 @@ function renderBrief(f: string, i: number) {
   stepProg();
   x.bar.forEach((b) => tick(kRfBI, b, false, 'bar'));
   tick(kRfBI, x.twist, false, 'tw');
-  // Example, hints, KERN.AI and the easy switch. On the very first mission the example is open and a short guide explains the workflow.
-  const first = !S.answers.length;
+  // Hints, KERN.AI and the easy switch. The strong answer waits until the person has written theirs: it shows after Submit, to compare (kCmp).
   hintN = 0; $('kXHints').innerHTML = '';
-  $('kXFirst').hidden = !first; $('kXExB').hidden = !(first && v.ex);
-  setX($('kXExT'), v.ex); setT($('kXEx'), first ? 'Hide the example' : 'Show an example');
-  $('kXEx').setAttribute('aria-expanded', String(!$('kXExB').hidden));
+  setX($('kXExT'), v.ex);
   setT($('kXHint'), 'Need a hint?'); hold($('kXHint'), !v.hints.length);
   setT($('kXEasy'), S.easy ? 'Back to the full version' : 'Make it easier');
   hold($('kXAsk'), false);
@@ -1024,11 +1031,6 @@ let hintN = 0;
 // Busy or spent buttons are dimmed but stay focusable: a disabled button drops keyboard focus to the page body.
 const hold = (b: Element, on: boolean) => b.setAttribute('aria-disabled', String(on));
 const held = (b: Element) => b.getAttribute('aria-disabled') === 'true';
-$('kXEx').addEventListener('click', () => {
-  const b = $('kXExB'); b.hidden = !b.hidden;
-  setT($('kXEx'), b.hidden ? 'Show an example' : 'Hide the example');
-  $('kXEx').setAttribute('aria-expanded', String(!b.hidden));
-});
 const nextHint = () => {
   const v = variant(cur.f, cur.i); if (!v || hintN >= v.hints.length) return;
   const p = document.createElement('p'); p.className = 'k-msg k-ai'; setX(p, v.hints[hintN]); $('kXHints').appendChild(p); reveal(p);
@@ -1228,7 +1230,7 @@ kDrOk.addEventListener('click', once(() => {
 const fillSheet = (f: string, i: number) => {
   kSheet.classList.remove('drop'); kShD.hidden = true;
   const m = FIELDS[f].m[i];
-  setT($('kShL'), m[0]); setT($('kShT'), m[1]);
+  setD($('kShL'), `${tr(f)} · ${isIt() ? 'missione' : 'mission'} ${(i % PER_ROUND) + 1} ${isIt() ? 'di' : 'of'} ${PER_ROUND}`); setT($('kShT'), m[1]); // not the internal label ("Mission 001 · crowded story")
   setT($('kShQ'), FIELDS[f].qs[i % FIELDS[f].qs.length]);
   renderBrief(f, i);
   kShA.hidden = false; kShR.hidden = true; setT(kSaved, NOTE_DEFAULT); kSaved.hidden = false;
@@ -1299,9 +1301,12 @@ $('kSub').addEventListener('click', once(() => {
   setLvl(); renderProgress();
   groups.forEach((g) => { g.dataset.val = ''; g.querySelectorAll('[data-v]').forEach((o) => { o.classList.remove('sel'); o.setAttribute('aria-pressed', 'false'); }); });
   $<HTMLInputElement>('kRfH').value = ''; $<HTMLInputElement>('kRfT').value = '';
+  const ex = variant(cur.f, cur.i)?.ex || '';
+  $('kVsY').textContent = na.t; $('kVs').hidden = !ex; // the example text is already in kXExT (renderBrief)
   kShA.hidden = true; kShR.hidden = false; setRfNote(); renderProg();
   $('kRfShort').hidden = na.t.length >= 20; // say why a short answer earns no bonus, instead of silently skipping it
-  groups[0].querySelector<HTMLElement>('[data-v]')!.focus();
+  groups[0].querySelector<HTMLElement>('[data-v]')!.focus({ preventScroll: true });
+  kSheet.querySelector('.k-sh-in')?.scrollTo({ top: 0 }); // the comparison is read first, then the reflection
 }));
 $('kRfOk').addEventListener('click', once(() => {
   const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value });
@@ -1372,17 +1377,20 @@ const kNmI = $<HTMLInputElement>('kNmI'), kAge = $<HTMLInputElement>('kAge'), kE
 // Interests: pick one or more fields to explore. You start in the current one if you keep it, else the first picked.
 let picks: string[] = [...S.fields];
 const tiles = kStart.querySelectorAll<HTMLElement>('#kPick [data-f]');
+const kAge2 = $<HTMLInputElement>('kAge2');
 const markPick = () => {
   tiles.forEach((o) => { const on = picks.includes(o.dataset.f!); o.classList.toggle('sel', on); o.setAttribute('aria-pressed', String(on)); });
-  $<HTMLButtonElement>('kGo').disabled = !picks.length;
+  $<HTMLButtonElement>('kGo').disabled = !picks.length || !(S.adult || kAge2.checked); // first visit: the 18+ box sits on this screen, no name is asked
 };
+kAge2.addEventListener('change', () => markPick());
 let pickerFromSettings = false; // opened from Settings (else from "+ Add"): where focus goes back to
 const openStart = (step2 = false, fromSettings = false) => {
   pickerFromSettings = fromSettings;
   if (S.onboarded) picks = [...S.fields];
   setT($('kGo'), S.onboarded ? 'Save interests' : 'Start my first mission');
   setT($('kS2K'), S.onboarded ? 'Your interests' : "Good. Let's find out."); // "Good. Let's find out." answers "I don't know", which an existing user never tapped
-  $('kPickX').hidden = !S.onboarded; // reopened from "+ Add" or Settings: there must be a way out
+  $('kPickX').hidden = !S.onboarded || !S.adult; // reopened from "+ Add" or Settings: there must be a way out (not past the 18+ box)
+  $('kS2Age').hidden = $('kS2Note').hidden = S.adult;
   kStart.setAttribute('aria-labelledby', step2 ? 'kS2H' : 'kS1H');
   kS1.hidden = step2; kS2.hidden = !step2; markPick(); kStart.classList.add('on');
   syncInert(); // Settings may still have left the screen inert: a focus() before this would be refused and land on the page body
@@ -1440,7 +1448,7 @@ $('kProf').addEventListener('submit', async (e) => {
   if (mode === 'guest') {
     if (!n || !kAge.checked) { fail('Add your name and confirm your age to continue.', ...[...(n ? [] : [kNmI]), ...(kAge.checked ? [] : [kAge])]); (n ? kAge : kNmI).focus(); return; }
     hideErr(); kLog.classList.add('busy');
-    window.setTimeout(() => { S.name = n; save(); renderMe(); renderHome(); kLog.classList.remove('busy'); kLogin.classList.remove('on'); if (S.onboarded) arrive(); else openStart(); }, still ? 0 : 600);
+    window.setTimeout(() => { S.name = n; S.adult = true; save(); renderMe(); renderHome(); kLog.classList.remove('busy'); kLogin.classList.remove('on'); if (S.onboarded) arrive(); else openStart(); }, still ? 0 : 600);
     return;
   }
   if (mode === 'up' && !n) { fail('Add your name.', kNmI); kNmI.focus(); return; }
@@ -1451,7 +1459,8 @@ $('kProf').addEventListener('submit', async (e) => {
   try {
     if (mode === 'up') {
       const r = await cloud.signUp(em, pw, n);
-      if (!S.name) { S.name = n; save(); renderMe(); }
+      if (!S.name) S.name = n;
+      S.adult = true; save(); renderMe(); // the sign-up form asks for 18+
       if (r.needsConfirm) { setMode('in'); kEm.value = em; note('Check your email to confirm your account, then log in. Already have one? Just log in.'); }
     } else await cloud.signIn(em, pw);
     kPw.value = '';
@@ -1468,7 +1477,7 @@ $('kForgot').addEventListener('click', async () => {
 function renderAcct() {
   $('kAcct').hidden = !CLOUD;
   if (!CLOUD) return;
-  setD($('kAcctE'), user ? `${user.email} · ${tr(syncOk ? 'synced' : 'sync paused')}` : tr('Not signed in · your trail is only on this device'));
+  setD($('kAcctE'), user ? `${user.email} · ${tr(syncOk ? 'synced' : 'sync paused')}` : tr('Not signed in · your answers are only on this device'));
   $('kAcctUp').hidden = !!user; $('kLogout').hidden = !user;
   $('kDelAcc').hidden = !user; $('kDel').hidden = !!user;
 }
@@ -1486,7 +1495,7 @@ const onUser = async (u: cloud.User | null, ev: string) => {
   if (user && user.id === u.id) { user = u; renderAcct(); return; }
   user = u; pulled = false;
   try { const remote = await cloud.pull(u.id); if (remote) mergeIn(remote); syncOk = true; pulled = true; }
-  catch { syncOk = false; say("Couldn't load your synced trail. We'll try again."); }
+  catch { syncOk = false; say("Couldn't load your synced answers. We'll try again."); }
   if (!S.name) S.name = cleanName(u.name);
   save(); renderMe(); applyField(false); setLang(S.lang); renderAcct(); flushSigns();
   if (kLogin.classList.contains('on')) { kLogin.classList.remove('on'); if (!S.onboarded) openStart(); else arrive(); }
@@ -1494,7 +1503,7 @@ const onUser = async (u: cloud.User | null, ev: string) => {
 if (CLOUD) void cloud.onAuth(onUser).catch(() => { /* SDK failed to load: stay local-only */ });
 $('kAcctUp').addEventListener('click', () => { closeSheet(kSet); setMode('up'); kNmI.value = S.name; kLogin.classList.add('on'); kEm.focus(); });
 $('kLogout').addEventListener('click', async () => {
-  if (!confirm(tr('Log out? Your trail stays in your account and is removed from this device.'))) return;
+  if (!confirm(tr('Log out? Your answers stay in your account and are removed from this device.'))) return;
   clearTimeout(pushT);
   if (user && pulled) { try { await cloud.push(user.id, snapshot()); } catch { /* best effort before leaving */ } }
   try { await cloud.signOut(); } catch { /* still clear the device */ }
@@ -1503,7 +1512,7 @@ $('kLogout').addEventListener('click', async () => {
   location.replace('/');
 });
 $('kDelAcc').addEventListener('click', async () => {
-  if (!confirm(tr('Delete your account and your whole trail? This cannot be undone.'))) return;
+  if (!confirm(tr('Delete your account and all your answers? This cannot be undone.'))) return;
   clearTimeout(pushT); // a pending sync must not race the deletion
   try { await cloud.deleteAccount(); } catch (err) { say(cloud.why(err)); return; }
   await eraseStats();
@@ -1520,9 +1529,10 @@ $('kPwF').addEventListener('submit', async (e) => {
   try { await cloud.setPassword(p); $<HTMLInputElement>('kPwN').value = ''; closeSheet(kPwS); say('Password updated.'); }
   catch (err) { setT(er, cloud.why(err)); er.hidden = false; }
 });
-$('kIdk').addEventListener('click', () => { kS1.hidden = true; kS2.hidden = false; kStart.setAttribute('aria-labelledby', 'kS2H'); land($('kS2H')); });
+const showPick = (kicker: string) => { setT($('kS2K'), kicker); kS1.hidden = true; kS2.hidden = false; kStart.setAttribute('aria-labelledby', 'kS2H'); markPick(); land($('kS2H')); };
+$('kIdk').addEventListener('click', () => showPick("Good. Let's find out."));
 $('kPickX').addEventListener('click', closePicker);
-// First visit: loader > choice > interests > profile (name + 18+, or an account) > missions.
+// First visit: loader > choice > interests with the 18+ box > missions. A name or an account is optional, later (Settings).
 const pop = () => { // the field's object drops into the mission card
   if (still) return;
   const o = $('kNxIc');
@@ -1535,10 +1545,9 @@ const closeStart = () => {
   const pick = (S.onboarded && picks.includes(S.field) ? S.field : picks[0]) || S.field;
   const changed = pick !== S.field;
   const commit = () => { S.fields = picks.length ? [...picks] : [pick]; S.field = pick; S.onboarded = true; save(); };
-  if (!S.name) { // no profile yet: keep the choice, ask who they are, then arrive()
-    commit(); applyField(changed);
-    kStart.classList.remove('on'); kLogin.classList.add('on'); syncInert(); (mode === 'in' ? kEm : kNmI).focus();
-    return;
+  if (!S.adult) { // Explore missions skips the choice, not the 18+ box: show the picker with the box
+    if (!kAge2.checked) { showPick("Pick where to start."); return; }
+    S.adult = true;
   }
   const run = () => { commit(); kStart.classList.remove('on'); applyField(changed); goTab('missions'); landHome(); };
   // Shared element: the picked field's object flies from its tile into the mission card.
@@ -1852,7 +1861,7 @@ $('kRemind').addEventListener('click', () => {
   say('Open the file to add the reminder to your calendar.');
 });
 $('kDel').addEventListener('click', async () => {
-  if (!confirm(tr(DEMO ? 'This resets the demo to its sample trail. Continue?' : 'This deletes your trail on this device. Continue?'))) return;
+  if (!confirm(tr(DEMO ? 'This resets the demo to its sample answers. Continue?' : 'This deletes your answers on this device. Continue?'))) return;
   await eraseStats(); // also deletes what was counted for this device (never from the demo)
   try { localStorage.removeItem(KEY); } catch { /* nothing stored */ } wipeExtras();
   location.replace('/');
@@ -1867,7 +1876,7 @@ addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); bip = e as 
 kInst.addEventListener('click', async () => { if (!bip) return; await bip.prompt(); await bip.userChoice; bip = null; kInst.hidden = true; });
 addEventListener('appinstalled', () => say('KERN is installed.'));
 $('kIos').hidden = !(/iphone|ipad|ipod/i.test(navigator.userAgent) && !standalone);
-addEventListener('offline', () => say('You are offline. Your trail is saved on this device.'));
+addEventListener('offline', () => say('You are offline. Your answers are saved on this device.'));
 // Other tab changed the data: pick it up instead of overwriting it later.
 // Idle: start over from its copy (a reload). Something open (a sheet, a text box): leave the screen and the typed text alone; the next save merges the other copy first (absorb).
 // A copy that was removed (Delete my data in the other tab) always reloads: this page must not write the trail back.
@@ -1922,4 +1931,4 @@ if (recovered) say(recovered);
 if (coopNote) { say(coopNote); if (coopGo && S.onboarded) goTab('yourkern'); }
 track('visit'); // once a day per device, only for people who said yes
 if (!S.onboarded) openStart(); // the choice comes first, right after the loader
-else if (!S.name) kLogin.classList.add('on');
+else if (!S.adult) openStart(true); // onboarded before the 18+ box moved onto the interests screen, without confirming it
