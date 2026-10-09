@@ -23,12 +23,12 @@ import '@fontsource-variable/bricolage-grotesque';
       .top a, .foot a { display: inline-block; padding: 10px 6px; margin: -10px -6px; } /* the links at the top and foot of each language get a 44px tap area without moving */
       .foot { margin-top: 32px; }
       hr { border: 0; border-top: 1px solid color-mix(in srgb, var(--fg) 20%, transparent); margin: 40px 0; }
-      #en, #it { scroll-margin-top: 48px; } /* landing on a language keeps the same air above its links as the top of the page */
+      #en, #it, #de, #fr { scroll-margin-top: 48px; } /* landing on a language keeps the same air above its links as the top of the page */
     </style>
   </head>
   <body>
     <main>
-      <p class="top" id="en"><a href="/">← KERN</a> · <a href="#it" lang="it">Italiano</a></p>
+      <p class="top" id="en"><a href="/">← KERN</a> · <a href="#it" lang="it">Italiano</a> · <a href="#de" lang="de">Deutsch</a> · <a href="#fr" lang="fr">Français</a></p>
       <h1>Privacy</h1>
       <small>Last updated 9 October 2026</small>
       <h2>What KERN keeps</h2>
@@ -76,7 +76,7 @@ import '@fontsource-variable/bricolage-grotesque';
       <p class="foot"><a href="/about/">About KERN</a> · <a href="/terms/">Terms</a></p>
       <hr />
       <section id="it" lang="it">
-        <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a></p>
+        <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a> · <a href="#de" lang="de">Deutsch</a> · <a href="#fr" lang="fr">Français</a></p>
         <h1>Privacy</h1>
         <small>Ultimo aggiornamento 9 ottobre 2026</small>
         <h2>Cosa conserva KERN</h2>
@@ -104,6 +104,106 @@ import '@fontsource-variable/bricolage-grotesque';
         <h2>Chi gestisce KERN</h2>
         <p>KERN è sviluppato e gestito da Manuel Di Paolo (Italia), titolare del trattamento. Contatto: <a href="mailto:manuel@trykern.it">manuel@trykern.it</a>.</p>
         <p class="foot"><a href="/about/#it">Info su KERN</a> · <a href="/terms/#it">Termini</a></p>
+      </section>
+      <hr />
+      <section id="de" lang="de">
+        <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a> · <a href="#it" lang="it">Italiano</a> · <a href="#fr" lang="fr">Français</a></p>
+        <h1>Datenschutz</h1>
+        <small>Zuletzt aktualisiert am 9. Oktober 2026</small>
+        <p><small>Diese Übersetzung dient der Lesbarkeit; maßgeblich ist die englische Fassung.</small></p>
+        <h2>Was KERN speichert</h2>
+        <p>Ohne Konto werden dein Vorname, dein gewählter Bereich, deine Antworten und Entwürfe, deine Reflexionen, dein Chat mit dem Co-Piloten und deine Einstellungen nur in diesem Browser auf diesem Gerät gespeichert (Local Storage). Wir können sie nicht sehen, außer dem, was du an den Co-Piloten schickst (siehe unten).</p>
+        <h2>Wenn du ein Konto erstellst</h2>
+        <p>Ein Konto ist freiwillig. Wenn du eins erstellst, speichern wir deine E-Mail-Adresse, deinen Vornamen und eine Kopie derselben Spur, damit sie auf deinen Geräten synchronisiert wird. Unser Anbieter für Konten und Datenbank, Supabase, speichert sie in der EU (Frankfurt, Deutschland). Zugriffsregeln sorgen dafür, dass kein anderer Nutzer sie lesen kann, und wir sehen sie uns nur an, wenn es für den Betrieb des Dienstes nötig ist. Dein Passwort wird nie lesbar gespeichert, nur als sicherer Hash. Supabase verschickt auch die E-Mails, mit denen du deine Adresse bestätigst und dein Passwort zurücksetzt. Du bleibst über ein Token angemeldet, das in diesem Browser gespeichert ist, nicht über ein Cookie.</p>
+        <h2>Was gesendet wird</h2>
+        <p>Nichts, was du schreibst, wird irgendwohin gesendet, außer du schreibst dem Co-Piloten (siehe unten), du entscheidest dich, es zu teilen (zum Beispiel, indem du deine Antworten an das KERN-Team schickst: Das öffnet dein eigenes Teilen-Menü oder kopiert den Text), oder du hast ein Konto. Dann geht deine Spur nur an dein Konto, und die Zeichen, die du hinterlässt, werden ohne deinen Namen anderen Menschen bei derselben Mission gezeigt (siehe unten). Es gibt keine Cookies und keine Werbung, und Nutzungszählungen bleiben aus, solange du nicht Ja sagst (siehe unten). Wenn du dem Co-Piloten schreibst, werden deine letzten Nachrichten und dein gewählter Bereich (und, wenn du in einer Mission KERN.AI fragst, diese Mission und die ersten 400 Zeichen deines Entwurfs) an unseren KI-Anbieter Anthropic gesendet, nur damit er die Antwort schreiben kann. Wenn du in Prompting-Missionen auf „Teste deinen Prompt mit der KI“ tippst, wird nur dieser Prompt an die KI von Anthropic gesendet, um die Antwort zu erstellen, und KERN speichert ihn nicht. Wir fügen deinen Namen nicht hinzu, also tippe besser keine persönlichen Angaben in den Chat. Wir speichern diese Nachrichten nicht auf unseren Servern; Anthropic, ein US-Unternehmen, kann sie nach seinen eigenen Bedingungen für begrenzte Zeit aufbewahren, und die Übermittlung aus der EU stützt sich auf die Standardvertragsklauseln in diesen Bedingungen. Unser Server behält deine IP-Adresse bis zu einem Tag im Speicher, um Missbrauch zu begrenzen. Wenn der Dienst nicht erreichbar ist, antwortet der Co-Pilot mit vorgefertigten Fragen, die auf deinem Gerät laufen. Der Hosting-Anbieter (Netlify) nutzt technische Daten wie deine IP-Adresse, um die Seite auszuliefern, wie es jeder Website-Host tut.</p>
+        <h2>Eine Antwort an ein Unternehmen senden</h2>
+        <p><b>Stand:</b> noch nicht aktiv. Markenmissionen sind vorerst Beispiele, und keine Antwort geht an ein Unternehmen.</p>
+        <ul>
+          <li><b>So wird es funktionieren:</b> Bei einer Markenmission kannst du entscheiden, genau diese eine Antwort an das Unternehmen dahinter zu senden. Du entscheidest jedes Mal neu, Mission für Mission. Standardmäßig ist es aus: Nichts wird gesendet, außer du sendest es selbst.</li>
+          <li><b>Was gesendet wird:</b> die Antwort, die du senden möchtest, und, falls du ihn angegeben hast, dein Vorname. Nie deine E-Mail, dein Passwort, deine anderen Antworten, deine Reflexionen, deine Kern card, dein Chat mit dem Co-Piloten oder deine Entwürfe.</li>
+          <li><b>Wer sie bekommt:</b> nur das Unternehmen hinter dieser Mission. Ab dann ist es für das Erhaltene verantwortlich (als eigenständiger Verantwortlicher im Sinne der DSGVO).</li>
+          <li><b>Rechtsgrundlage:</b> deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du für jede gesendete Antwort gibst. Sie ist nie eine Bedingung, um KERN zu nutzen, und ein Nein ändert nichts an deinen Missionen oder deiner Kern card.</li>
+          <li><b>Deine Meinung ändern:</b> Du kannst jederzeit aufhören zu senden. Für eine Antwort, die ein Unternehmen schon hat, ist das Unternehmen verantwortlich; du kannst es bitten, sie zu löschen, und wir sagen ihm, dass du darum gebeten hast.</li>
+          <li><b>Nur Summen:</b> Ein Unternehmen kann auch Summen zu seiner eigenen Mission sehen, zum Beispiel wie viele Menschen sie abgeschlossen haben. Summen sind anonym und lassen sich nicht auf dich zurückführen.</li>
+        </ul>
+        <h2>Tipps für die nächste Person</h2>
+        <p>Nach einer Mission kannst du einen kurzen Tipp für die nächste Person hinterlassen (bis zu 140 Zeichen; im Code heißt er „sign“). Ohne Konto bleibt er auf diesem Gerät. Mit Konto wird er anderen Menschen gezeigt, die dieselbe Mission öffnen, zusammen mit dem Datum, aber nie mit deinem Namen, deiner E-Mail oder anderen Angaben über dich. Tipps mit Links, E-Mail-Adressen oder langen Zahlen werden nicht geteilt. Wenn du die Antwort löschst, verschwindet ihr Tipp; wenn du dein Konto löschst, verschwinden alle.</p>
+        <h2>Co-op mit jemandem</h2>
+        <p>Zwei Missionen in jedem Bereich kannst du zu zweit abschließen. Wenn du eine davon an jemanden schickst, erstellt KERN einen Link, der deinen Vornamen und deine Antwort (bis zu 500 Zeichen) nach dem Zeichen # enthält, und öffnet dein eigenes Teilen-Menü oder kopiert den Link. Der Teil nach # wird nie an unsere Server gesendet, aber die App, über die du den Link schickst, kann ihn lesen, und ebenso jeder, der den Link hat. Die Antwort der anderen Person kommt auf demselben Weg zurück, bis zu 300 Zeichen mit ihrem Vornamen. KERN speichert beide Texte nur auf deinem Gerät (und in deinem Konto, falls du eins hast), damit du sie in yourKERN lesen kannst, und entfernt sie, wenn du deine Daten löschst. Nichts wird gesendet, solange du dich nicht entscheidest, den Link zu schicken.</p>
+        <h2>Nutzungszählungen, ohne deinen Namen</h2>
+        <p><b>Aus, solange du nicht Ja sagst.</b> KERN fragt einmal auf dem Startbildschirm, und du kannst deine Meinung jederzeit in den Einstellungen ändern. Wenn du Ja sagst, erzeugt dein Gerät einen zufälligen Code (nicht mit deinem Namen, deiner E-Mail oder deinem Konto verknüpft) und sendet jedes Mal eine kurze Zeile an unsere Datenbank bei Supabase (EU, Frankfurt), wenn etwas passiert: Du hast Ja gesagt, KERN an diesem Tag geöffnet, eine Mission geöffnet, eine Antwort gesendet, eine Reflexion gespeichert, auf Teilen getippt oder KERN.AI um Hilfe gebeten. Jede Zeile enthält den zufälligen Code, die Art des Ereignisses, den Bereich und die Nummer der Mission, ob es eine Markenmission ist, deine Sprache und die Uhrzeit. Der zufällige Code und die Zeitpunkte sind trotzdem personenbezogene Daten, weil sie ein Gerät über die Zeit hinweg erkennbar machen können. Deshalb ist es deine Entscheidung.</p>
+        <ul>
+          <li><b>Nie gesendet:</b> dein Name, deine E-Mail, nichts, was du schreibst (Antworten, Entwürfe, Reflexionen, Chat), und nicht dein Konto. Deine IP-Adresse wird nicht in unserer Tabelle gespeichert; Supabase und Netlify nutzen sie technisch, um die Anfrage zuzustellen, wie es jeder Website-Host tut.</li>
+          <li><b>Wozu:</b> um zu zählen, wie viele Menschen KERN nutzen und welche Missionen funktionieren, damit wir KERN verbessern können, und um Partnern und Investoren Summen zu zeigen, nie einzelne Personen.</li>
+          <li><b>Rechtsgrundlage:</b> deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO; der zufällige Code auf deinem Gerät braucht sie auch nach den ePrivacy-Regeln). Sie ist nie eine Bedingung, um KERN zu nutzen.</li>
+          <li><b>Wer es sieht:</b> das KERN-Team. Alle anderen bekommen Summen.</li>
+          <li><b>Wie lange:</b> höchstens 12 Monate, dann löschen wir es.</li>
+          <li><b>Ausschalten und löschen:</b> Schalte in den Einstellungen die Nutzungszählungen aus: Wir hören auf zu zählen und löschen sofort, was für dieses Gerät gezählt wurde. Das Löschen deiner Daten, das Abmelden und das Löschen deines Kontos tun dasselbe. Wenn du in diesem Moment offline bist, bleiben die früheren Zeilen, bis sie nach 12 Monaten gelöscht werden. Der zufällige Code ist die einzige Verbindung zu deinem Gerät: Wenn du das Gerät verlierst, können wir deine Zeilen nicht für dich finden; sie verschwinden auf demselben Weg.</li>
+        </ul>
+        <h2>Deine Kontrolle</h2>
+        <ul>
+          <li>Exportieren: In den Einstellungen lädt der Export deine Spur als Datei herunter: deine Antworten, Reflexionen, Entwürfe, deinen Chat und deine Einstellungen. Die Entscheidung zu den Nutzungszählungen und ihr zufälliger Code sind nicht enthalten.</li>
+          <li>Löschen: In den Einstellungen entfernt das Löschen deiner Daten sie von diesem Gerät. Das Löschen deiner Browserdaten bewirkt dasselbe.</li>
+          <li>Konto: Abmelden entfernt deine Spur von diesem Gerät und behält sie in deinem Konto. Das Löschen des Kontos entfernt das Konto und die synchronisierte Spur endgültig.</li>
+        </ul>
+        <h2>Alter</h2>
+        <p>KERN ist vorerst für Menschen ab 18 Jahren, weil es für Erwachsene gemacht ist und speichert, was du schreibst.</p>
+        <h2>Keine Therapie</h2>
+        <p>KERN ist keine Therapie und keine medizinische Beratung. Wenn es dir schlecht geht, sprich bitte mit jemandem, dem du vertraust, oder mit einer Beratungsstelle in deiner Nähe. Wenn du in Gefahr bist, ruf deine örtliche Notrufnummer an.</p>
+        <h2>Wer KERN betreibt</h2>
+        <p>KERN wird von Manuel Di Paolo (Italien) entwickelt und betrieben, dem Verantwortlichen im Sinne der DSGVO. Kontakt: <a href="mailto:manuel@trykern.it">manuel@trykern.it</a>.</p>
+        <p class="foot"><a href="/about/#de">Über KERN</a> · <a href="/terms/#de">Nutzungsbedingungen</a></p>
+      </section>
+      <hr />
+      <section id="fr" lang="fr">
+        <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a> · <a href="#it" lang="it">Italiano</a> · <a href="#de" lang="de">Deutsch</a></p>
+        <h1>Confidentialité</h1>
+        <small>Dernière mise à jour : 9 octobre 2026</small>
+        <p><small>Cette traduction est fournie pour faciliter la lecture ; la version anglaise fait foi.</small></p>
+        <h2>Ce que KERN conserve</h2>
+        <p>Sans compte, ton prénom, le domaine que tu as choisi, tes réponses et brouillons, tes réflexions, ta discussion avec le copilote et tes réglages sont enregistrés uniquement dans ce navigateur, sur cet appareil (stockage local). Nous ne pouvons pas les voir, sauf ce que tu envoies au copilote (voir plus bas).</p>
+        <h2>Si tu crées un compte</h2>
+        <p>Un compte est facultatif. Si tu en crées un, nous conservons ton adresse e-mail, ton prénom et une copie du même parcours, pour qu’il se synchronise entre tes appareils. Notre fournisseur de comptes et de base de données, Supabase, les stocke dans l’UE (Francfort, Allemagne). Des règles d’accès garantissent qu’aucun autre utilisateur ne peut les lire, et nous ne les consultons que lorsque c’est nécessaire au fonctionnement du service. Ton mot de passe n’est jamais stocké sous une forme lisible, seulement sous forme de hachage sécurisé. Supabase envoie aussi les e-mails qui confirment ton adresse et réinitialisent ton mot de passe. Tu restes connecté grâce à un jeton enregistré dans ce navigateur, pas à un cookie.</p>
+        <h2>Ce qui est envoyé</h2>
+        <p>Rien de ce que tu écris n’est envoyé nulle part, sauf si tu écris au copilote (voir plus bas), si tu choisis de le partager (par exemple en envoyant tes réponses à l’équipe KERN, ce qui ouvre ton propre menu de partage ou copie le texte), ou si tu as un compte : dans ce cas, ton parcours va uniquement à ton compte, et les signes que tu laisses sont montrés, sans ton nom, aux autres personnes qui font la même mission (voir plus bas). Il n’y a ni cookies ni publicité, et les statistiques d’utilisation restent désactivées tant que tu ne dis pas oui (voir plus bas). Quand tu écris au copilote, tes derniers messages et le domaine choisi (et, si tu demandes à KERN.AI dans une mission, cette mission et les 400 premiers caractères de ton brouillon) sont envoyés à notre fournisseur d’IA, Anthropic, uniquement pour qu’il rédige la réponse. Dans les missions de Prompting, si tu touches « Essaie ton prompt sur l’IA », seul ce prompt est envoyé à l’IA d’Anthropic pour produire la réponse, et KERN ne le conserve pas. Nous n’ajoutons pas ton nom : évite donc de taper des informations personnelles dans la discussion. Nous ne conservons pas ces messages sur nos serveurs ; Anthropic, une société américaine, peut les conserver pendant une durée limitée selon ses propres conditions, et le transfert depuis l’UE repose sur les clauses contractuelles types prévues dans ses conditions. Notre serveur garde ton adresse IP en mémoire jusqu’à un jour pour limiter les abus. Si le service est injoignable, le copilote répond avec des questions déjà écrites qui tournent sur ton appareil. L’hébergeur (Netlify) traite des données techniques comme ton adresse IP pour afficher la page, comme tout hébergeur de site web.</p>
+        <h2>Envoyer une réponse à une entreprise</h2>
+        <p><b>Statut :</b> pas encore actif. Les missions de marques sont pour l’instant des exemples, et aucune réponse n’est envoyée à une entreprise.</p>
+        <ul>
+          <li><b>Comment ça marchera :</b> sur une mission de marque, tu pourras choisir d’envoyer cette seule réponse à l’entreprise qui la propose. Tu décides à chaque fois, mission par mission. C’est désactivé par défaut : rien n’est envoyé si tu ne l’envoies pas toi-même.</li>
+          <li><b>Ce qui est envoyé :</b> la réponse que tu as choisi d’envoyer et, si tu l’as indiqué, ton prénom. Jamais ton e-mail, ton mot de passe, tes autres réponses, tes réflexions, ta Kern card, ta discussion avec le copilote ou tes brouillons.</li>
+          <li><b>Qui la reçoit :</b> seulement l’entreprise derrière cette mission. À partir de là, elle est responsable de ce qu’elle a reçu (en tant que responsable du traitement indépendant au sens du RGPD).</li>
+          <li><b>Base légale :</b> ton consentement (RGPD, art. 6, paragraphe 1, point a), donné pour chaque réponse que tu envoies. Ce n’est jamais une condition pour utiliser KERN, et dire non ne change rien à tes missions ni à ta Kern card.</li>
+          <li><b>Changer d’avis :</b> tu peux arrêter d’envoyer à tout moment. Une réponse qu’une entreprise a déjà reçue relève de sa responsabilité ; tu peux lui demander de la supprimer, et nous lui dirons que tu l’as demandé.</li>
+          <li><b>Seulement des totaux :</b> une entreprise peut aussi voir des totaux sur sa propre mission, par exemple combien de personnes l’ont terminée. Les totaux sont anonymes et ne peuvent pas être reliés à toi.</li>
+        </ul>
+        <h2>Des conseils pour la personne suivante</h2>
+        <p>Après une mission, tu peux laisser un court conseil pour la personne suivante (jusqu’à 140 caractères ; dans le code, on l’appelle un « sign »). Sans compte, il reste sur cet appareil. Avec un compte, il est montré aux autres personnes qui ouvrent la même mission, avec la date, mais jamais avec ton nom, ton e-mail ou un autre détail te concernant. Les conseils qui contiennent des liens, des adresses e-mail ou de longs numéros ne sont pas partagés. Supprimer cette réponse supprime son conseil ; supprimer ton compte les supprime tous.</p>
+        <h2>Co-op avec quelqu’un</h2>
+        <p>Dans chaque domaine, deux missions peuvent se terminer à deux. Quand tu envoies l’une d’elles à quelqu’un, KERN crée un lien qui contient ton prénom et ta réponse (jusqu’à 500 caractères) après le signe #, et ouvre ton propre menu de partage ou copie le lien. La partie après le # n’est jamais envoyée à nos serveurs, mais l’app avec laquelle tu envoies le lien peut la lire, tout comme toute personne qui a le lien. La réponse de l’autre personne revient de la même façon, jusqu’à 300 caractères avec son prénom. KERN conserve les deux textes uniquement sur ton appareil (et dans ton compte, si tu en as un) pour que tu puisses les lire dans yourKERN, et les supprime quand tu supprimes tes données. Rien n’est envoyé si tu ne choisis pas d’envoyer le lien.</p>
+        <h2>Statistiques d’utilisation, sans ton nom</h2>
+        <p><b>Désactivées tant que tu ne dis pas oui.</b> KERN te le demande une fois sur l’écran d’accueil, et tu peux changer d’avis à tout moment dans les réglages. Si tu dis oui, ton appareil crée un code aléatoire (sans lien avec ton nom, ton e-mail ou ton compte) et envoie une courte ligne à notre base de données chez Supabase (UE, Francfort) chaque fois qu’il se passe quelque chose : tu as dit oui, tu as ouvert KERN ce jour-là, ouvert une mission, envoyé une réponse, enregistré une réflexion, touché Partager ou demandé de l’aide à KERN.AI. Chaque ligne contient le code aléatoire, le type d’événement, le domaine et le numéro de la mission, s’il s’agit d’une mission de marque, ta langue et l’heure. Le code aléatoire et les heures restent des données personnelles, car ils peuvent distinguer un appareil dans le temps. C’est pour cela que c’est ton choix.</p>
+        <ul>
+          <li><b>Jamais envoyés :</b> ton nom, ton e-mail, ce que tu écris (réponses, brouillons, réflexions, discussion) ou ton compte. Ton adresse IP n’est pas stockée dans notre table ; Supabase et Netlify la traitent techniquement pour acheminer la requête, comme tout hébergeur.</li>
+          <li><b>Pourquoi :</b> pour compter combien de personnes utilisent KERN et quelles missions fonctionnent, afin de l’améliorer, et pour montrer des totaux aux partenaires et aux investisseurs, jamais des individus.</li>
+          <li><b>Base légale :</b> ton consentement (RGPD, art. 6, paragraphe 1, point a ; le code aléatoire conservé sur ton appareil en a aussi besoin selon les règles ePrivacy). Ce n’est jamais une condition pour utiliser KERN.</li>
+          <li><b>Qui les voit :</b> l’équipe KERN. Tous les autres reçoivent des totaux.</li>
+          <li><b>Combien de temps :</b> 12 mois au maximum, puis nous les supprimons.</li>
+          <li><b>Désactiver et supprimer :</b> dans les réglages, désactive les statistiques d’utilisation : nous arrêtons de compter et supprimons immédiatement ce qui a été compté pour cet appareil. Supprimer tes données, te déconnecter et supprimer ton compte font de même. Si tu es hors ligne à ce moment-là, les lignes précédentes restent jusqu’à leur suppression à 12 mois. Le code aléatoire est le seul lien avec ton appareil : si tu perds l’appareil, nous ne pouvons pas retrouver tes lignes pour toi ; elles disparaissent de la même façon.</li>
+        </ul>
+        <h2>Tu gardes la main</h2>
+        <ul>
+          <li>Exporter : dans les réglages, l’export télécharge ton parcours dans un fichier : tes réponses, réflexions, brouillons, ta discussion et tes réglages. Le choix concernant les statistiques d’utilisation et son code aléatoire n’y figurent pas.</li>
+          <li>Supprimer : dans les réglages, supprimer tes données les efface de cet appareil. Effacer les données de ton navigateur fait la même chose.</li>
+          <li>Compte : te déconnecter retire ton parcours de cet appareil et le garde dans ton compte. Supprimer ton compte efface définitivement le compte et le parcours synchronisé.</li>
+        </ul>
+        <h2>Âge</h2>
+        <p>KERN est pour l’instant destiné aux personnes de 18 ans et plus, parce qu’il est conçu pour les adultes et conserve ce que tu écris.</p>
+        <h2>Pas une thérapie</h2>
+        <p>KERN n’est ni une thérapie ni un avis médical. Si ça ne va pas, parle à quelqu’un en qui tu as confiance ou à une ligne d’écoute près de chez toi. Si tu es en danger, appelle le numéro d’urgence local.</p>
+        <h2>Qui gère KERN</h2>
+        <p>KERN est conçu et géré par Manuel Di Paolo (Italie), responsable du traitement. Contact : <a href="mailto:manuel@trykern.it">manuel@trykern.it</a>.</p>
+        <p class="foot"><a href="/about/#fr">À propos de KERN</a> · <a href="/terms/#fr">Conditions d’utilisation</a></p>
       </section>
     </main>
   </body>
