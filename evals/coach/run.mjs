@@ -15,7 +15,7 @@ const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i > -1 
 const MOCK = process.argv.includes('--mock');
 const VARIANT = arg('variant', MOCK ? 'mock' : 'baseline'), REPS = Number(arg('reps', 2)), CONC = Number(arg('conc', 4)), JUDGE = arg('judge', 'claude-sonnet-5-5');
 const NULL_MOCK = arg('mock-kind', 'oracle') === 'null'; // --mock-kind null: the model answers badly on purpose (a grader that cannot fail is not a grader)
-if (!/^(baseline|v\d+|mock)$/.test(VARIANT)) { console.error('variant must be baseline, v1, v2, ...'); process.exit(2); }
+if (!/^(baseline|v\d+[a-z]?|mock)$/.test(VARIANT)) { console.error('variant must be baseline, v1, v2, v7d, ...'); process.exit(2); }
 if (arg('model')) process.env.COACH_MODEL = arg('model');
 const PROMPT = arg('prompt'); // a frozen prompt in prompts/<name>.txt; without it the production prompt in coach.mts is used
 if (MOCK) process.env.ANTHROPIC_API_KEY = 'mock';

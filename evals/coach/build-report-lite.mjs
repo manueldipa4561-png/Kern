@@ -153,7 +153,7 @@ const tsvCell = s => {
 // Variant directories: exactly `baseline` or `v<N>`, numeric order.
 function discoverVariants(flow) {
   const names = readdirSync(flow, { withFileTypes: true })
-    .filter(e => e.isDirectory() && /^(baseline|v\d+)$/.test(e.name))
+    .filter(e => e.isDirectory() && /^(baseline|v\d+[a-z]?)$/.test(e.name))
     .map(e => e.name);
   const rank = n => (n === 'baseline' ? -1 : +n.slice(1));
   return names.sort((a, b) => rank(a) - rank(b));
