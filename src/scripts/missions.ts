@@ -1,14 +1,14 @@
 import { t2 } from './i18n';
 
-// One concrete practice brief per mission (6 fields x 6, in rounds of 3). Every company here is fictional and the sheet says so.
-// Shape: who (practice brief tag), brief (scenario + stakes), asset (the real material to work on),
+// One concrete practice mission per mission (6 fields x 6, in rounds of 3). Every company here is fictional and the sheet says so.
+// Shape: who (practice mission tag), brief (scenario + stakes), asset (the real material to work on),
 // steps (3 actions), mins (time box), bar (what strong answers do), twist (optional bonus).
 // img: a picture of the asset (a photo, a story, a cover) shown above the text, imgIt the Italian version when the picture has words in it.
 // only: the picture says it all, so the text is kept just as its description for a screen reader.
 export type Asset = { title: string; body: string; mono: boolean; img?: string; imgIt?: string; only?: boolean };
 export type MissionX = { who: string; brief: string; asset: Asset; steps: string[]; mins: number; bar: string[]; twist: string };
 
-const tag = (en: string, it: string) => t2('Practice brief · ' + en, 'Missione di prova · ' + it);
+const tag = (en: string, it: string) => t2('Practice mission · ' + en, 'Missione di prova · ' + it);
 
 export const MX: Record<string, MissionX[]> = {
   Design: [
@@ -354,7 +354,7 @@ export const MX: Record<string, MissionX[]> = {
         'Pizzeria Zeta wants a “which pizza are you?” quiz for its stories. Write rules, “IF this THEN that”, so every answer lands on one pizza.',
         'Pizzeria Zeta vuole un quiz “che pizza sei?” per le storie. Scrivi regole “SE questo ALLORA quello”, così ogni risposta porta a una sola pizza.'),
       asset: {
-        mono: true,
+        mono: false,
         title: t2('The quiz · what your rules must cover', 'Il quiz · cosa devono coprire le regole'),
         body: t2(
           'Q1  Saturday night: stay in / go out\nQ2  Spice: none / lots\nPizza 1  Margherita\nPizza 2  Diavola\nPizza 3  Quattro Formaggi\nShape  IF (answers) THEN (pizza)',
@@ -429,7 +429,7 @@ export const MX: Record<string, MissionX[]> = {
         'Every photo Sunny Plants posts gets a DM that just says “price?”. Write the rules for an auto-reply that answers well and never guesses.',
         'Ogni foto che Sunny Plants pubblica riceve un DM che dice solo “prezzo?”. Scrivi le regole di una risposta automatica che risponde bene e non tira a indovinare.'),
       asset: {
-        mono: true,
+        mono: false,
         title: t2('The price list and three real DMs', 'Il listino e tre DM veri'),
         body: t2(
           'Prices (euro): fern 35 · cactus 18 · monstera 42\nDM 1: price?\nDM 2: how much for the monstera\nDM 3: can u ship to Bologna',
@@ -683,7 +683,7 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Quokka Vintage, a market stall (fictional)', 'Quokka Vintage, un banco al mercatino (fittizio)'),
       brief: t2(
-        'Someone at Quokka Vintage’s market stall wants a denim jacket for less. One of you sells, one haggles. Don’t cave to €30, stay friendly. Pair up, or play both sides.',
+        'Someone at Quokka Vintage’s market stall wants a denim jacket for less. One of you sells, one haggles. Don’t just accept €30, and stay friendly. Pair up, or play both sides.',
         'Al banco di Quokka Vintage qualcuno vuole una giacca di jeans a meno. Uno vende, uno tratta. Non cedere ai 30 €, resta gentile. In due, o fai le due parti.'),
       asset: {
         mono: false,
@@ -791,21 +791,21 @@ export const MX: Record<string, MissionX[]> = {
         'Noa’s friends arrive at 9 tonight. The playlist should start calm and get louder, but one song kills the mood. Cut it, then fix the order.',
         'Gli amici di Noa arrivano stasera alle 21. La playlist deve partire calma e salire, ma una canzone rovina l’atmosfera. Toglila, poi sistema l’ordine.'),
       asset: {
-        mono: true,
-        title: t2('Noa’s playlist · energy 1 sleepy, 5 huge', 'La playlist di Noa · energia 1 sonnolenta, 5 esplosiva'),
+        mono: false,
+        title: t2('Noa’s playlist · how each song feels', 'La playlist di Noa · che effetto fa ogni canzone'),
         body: t2(
-          'Mango Static · bright · 4\nSad Trombone Tuesday · gloomy · 1\nPocket Sunrise · warm · 2\nConfetti Cannon · huge · 5\nTile Floor Groove · swaying · 3\nLast Bus Home · dreamy · 2',
-          'Mango Static · allegra · 4\nSad Trombone Tuesday · cupa · 1\nPocket Sunrise · calda · 2\nConfetti Cannon · esplosiva · 5\nTile Floor Groove · dondolante · 3\nLast Bus Home · sognante · 2'),
+          'Mango Static · bright, bouncy\nSad Trombone Tuesday · gloomy, slow\nPocket Sunrise · warm, quiet\nConfetti Cannon · huge, singalong\nTile Floor Groove · relaxed, danceable\nLast Bus Home · dreamy, quiet',
+          'Mango Static · allegra, saltellante\nSad Trombone Tuesday · cupa, lenta\nPocket Sunrise · calda, tranquilla\nConfetti Cannon · esplosiva, da cantare\nTile Floor Groove · rilassata, ballabile\nLast Bus Home · sognante, tranquilla'),
       },
       steps: [
         t2('Name the one song to cut.', 'Scrivi la canzone da togliere.'),
-        t2('Type the other five, calmest first, loudest last.', 'Scrivi le altre cinque, dalla più calma alla più forte.'),
+        t2('Type the other five in the order you’d play them.', 'Scrivi le altre cinque nell’ordine in cui le metteresti.'),
         t2('Add one line on why your order works.', 'Aggiungi una riga su perché questo ordine funziona.'),
       ],
       mins: 2,
       bar: [
-        t2('The gloomy song is gone', 'La canzone cupa è fuori'),
-        t2('Energy climbs and never dips', 'L’energia sale e non scende mai'),
+        t2('The song you cut would kill the mood', 'La canzone tolta rovinerebbe l’atmosfera'),
+        t2('Energy builds to the end (one breather is fine)', 'L’energia cresce fino alla fine (una pausa ci sta)'),
         t2('Your why fits in one line', 'Il tuo perché sta in una riga'),
       ],
       twist: t2('Send the new order to the friend who is always late, with “it only gets louder”.', 'Manda il nuovo ordine a chi arriva sempre in ritardo, con “da qui si sale solo”.'),
@@ -813,7 +813,7 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Forno Gufo, a bakery opening its roller shutter at 6am (fictional)', 'Forno Gufo, un forno che alza la saracinesca alle 6 (fittizio)'),
       brief: t2(
-        'Forno Gufo is posting a 10-second Monday reel. Describe its sound and pick the second the drop hits (the moment the music kicks in).',
+        'Forno Gufo is posting a 10-second Monday reel. Describe its sound and pick the second the drop hits (the moment the music comes in).',
         'Forno Gufo pubblica un reel di 10 secondi per il lunedì. Descrivi il suono e scegli il secondo in cui parte il drop (quando la musica entra).'),
       asset: {
         mono: true,
@@ -866,12 +866,12 @@ export const MX: Record<string, MissionX[]> = {
         'Libro Lento puts its shop playlist online, but “Shelf mix 3” has 12 followers and a grey cover. Rename it and describe a cover that makes anyone tap play.',
         'Libro Lento mette online la playlist della libreria, ma “Shelf mix 3” ha 12 follower e una cover grigia. Rinominala e descrivi una cover che faccia premere play a chiunque.'),
       asset: {
-        mono: true,
+        mono: false,
         img: '/img/m/playlist-en.webp', imgIt: '/img/m/playlist-it.webp', only: true,
         title: t2('The playlist as it is now', 'La playlist com’è adesso'),
         body: t2(
-          'Name       Shelf mix 3\nCover      grey default squares\nAbout      (empty)\nFollowers  12\nVibe       quiet piano, rainy days',
-          'Nome       Shelf mix 3\nCover      quadrati grigi di default\nInfo       (vuota)\nFollower   12\nAtmosfera  pianoforte calmo, pioggia'),
+          'Name: Shelf mix 3\nCover: grey default squares\nAbout: (empty)\nFollowers: 12\nMood: quiet piano, rainy days',
+          'Nome: Shelf mix 3\nCover: quadrati grigi di default\nInfo: (vuota)\nFollower: 12\nAtmosfera: pianoforte calmo, pioggia'),
       },
       steps: [
         t2('Write a new name, four words or fewer.', 'Scrivi un nuovo nome, quattro parole al massimo.'),
@@ -945,7 +945,7 @@ export const MX: Record<string, MissionX[]> = {
         'Dana runs Argilla Studio and asked an AI for an Instagram post about her Saturday class. The post could belong to any studio. Rewrite her prompt so the answer sounds like Dana and has what people need to book.',
         'Dana gestisce Argilla Studio e ha chiesto a un’AI un post Instagram per il suo corso del sabato. Il post andrebbe bene per qualsiasi laboratorio. Riscrivi il suo prompt perché la risposta suoni come Dana e abbia quello che serve per prenotare.'),
       asset: {
-        mono: true,
+        mono: false,
         title: t2('Dana’s prompt, and what came back', 'Il prompt di Dana e cosa è tornato'),
         body: t2(
           'Prompt: Write a post about my pottery class.\nAnswer: Join our amazing pottery class! Unleash your creativity and have fun. Book now!\n\nThe class: Saturdays at 10:00 · 6 seats · €35, clay included\nYou take your bowl home after the firing\nNo experience needed\nDana laughs at every wobbly bowl, her own too',
@@ -970,7 +970,7 @@ export const MX: Record<string, MissionX[]> = {
         'Sofia has a biology exam on Thursday and rereading her notes is not working. Write the prompt that turns an AI into a quiz master: the notes go in, the questions come out one at a time.',
         'Sofia ha un esame di biologia giovedì e rileggere gli appunti non funziona. Scrivi il prompt che trasforma un’AI in chi fa le domande: gli appunti entrano, le domande escono una alla volta.'),
       asset: {
-        mono: true,
+        mono: false,
         title: t2('Sofia’s notes', 'Gli appunti di Sofia'),
         body: t2(
           'The cell\nMitochondria: make energy (ATP)\nNucleus: holds the DNA\nRibosomes: build proteins\nMembrane: decides what gets in\nExam: Thursday, 10 questions, no notes',
@@ -1020,7 +1020,7 @@ export const MX: Record<string, MissionX[]> = {
         'Marco asked an AI when Trattoria Nonno Pio closes on Sunday. It answered with total confidence, and Marco found a locked door. Rewrite the prompt so the AI says what it knows, what it is guessing and what Marco should check.',
         'Marco ha chiesto a un’AI quando chiude la Trattoria Nonno Pio la domenica. Ha risposto con assoluta sicurezza e Marco si è trovato davanti una porta chiusa. Riscrivi il prompt perché l’AI dica cosa sa, cosa sta tirando a indovinare e cosa Marco deve controllare.'),
       asset: {
-        mono: true,
+        mono: false,
         title: t2('What happened', 'Cosa è successo'),
         body: t2(
           'Prompt: When does Trattoria Nonno Pio close on Sundays?\nAnswer: Trattoria Nonno Pio is open every Sunday until 11pm.\n\nThe truth: the trattoria is closed on Sundays.\nThe AI had no way to know. It never said so.',
@@ -1045,14 +1045,14 @@ export const MX: Record<string, MissionX[]> = {
         'Four flatmates paid for things this month and nobody remembers who owes what. Write the prompt that gives an AI the payments and asks for a table, plus a way to check its sums.',
         'Quattro coinquilini hanno pagato delle cose questo mese e nessuno ricorda chi deve cosa. Scrivi il prompt che dà all’AI i pagamenti e chiede una tabella, più un modo per controllare i calcoli.'),
       asset: {
-        mono: true,
+        mono: false,
         title: t2('The messy notes', 'Gli appunti in disordine'),
         body: t2(
           'Marco paid the internet: €36\nChiara bought toilet paper and soap: €12\nSara paid the electricity: €84\nTeo paid nothing this month\nAll three costs are split in four',
           'Marco ha pagato internet: 36 €\nChiara ha comprato carta igienica e sapone: 12 €\nSara ha pagato la luce: 84 €\nTeo questo mese non ha pagato niente\nTutte e tre le spese si dividono in quattro'),
       },
       steps: [
-        t2('Say the task and paste the payments into the prompt.', 'Spiega cosa serve e incolla i pagamenti nel prompt.'),
+        t2('Say what you need and paste the payments into the prompt.', 'Spiega cosa serve e incolla i pagamenti nel prompt.'),
         t2('Name the columns you want in the table.', 'Scrivi le colonne che vuoi nella tabella.'),
         t2('Ask the AI to show its sums, so you can check them.', 'Chiedi all’AI di mostrare i calcoli, così puoi controllarli.'),
       ],
@@ -1070,7 +1070,7 @@ export const MX: Record<string, MissionX[]> = {
         'A friend has to choose between two flats and keeps going round in circles. Ask what matters most to them (two things), then write the prompt that makes an AI compare the flats on exactly those. Alone? Invent the two things.',
         'Una persona deve scegliere tra due case e continua a girare in tondo. Chiedile cosa conta di più per lei (due cose), poi scrivi il prompt che fa confrontare le case all’AI proprio su quelle. Senza partner? Inventa le due cose.'),
       asset: {
-        mono: true,
+        mono: false,
         title: t2('The two flats', 'Le due case'),
         body: t2(
           'Flat A: €520 · 25 minutes from the station · no balcony · quiet street\nFlat B: €580 · 8 minutes from the station · small balcony · busy street',

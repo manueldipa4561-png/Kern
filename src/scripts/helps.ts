@@ -9,7 +9,7 @@ const h = (ex: [string, string], a: [string, string], b: [string, string], c: [s
 
 export const HELPS: Record<string, Help[]> = {
   Design: [
-    h(['Keep: “Saturday · 2 for 1 pizza till 9”. Cut: DJ, new menu, contest, tag 3 friends, the address (second story), the dog. One colour: red letters on cream. Big words in the middle, a tiny “Pomo Pizza” at the bottom.', 'Tengo: “Sabato · 2x1 sulle pizze fino alle 21”. Tolgo: DJ, nuovo menu, concorso, tagga 3 amici, l’indirizzo (seconda storia), il cane. Un colore: lettere rosse su crema. Parole grandi al centro, un piccolo “Pomo Pizza” in basso.'],
+    h(['Keep: “Saturday · 2 for 1 pizza till 9”. Cut: DJ, new menu, contest, tag 3 friends, the address (it goes in a second story). The photo stays, darker at the bottom so the words read. One colour: cream letters, big, on that dark part. The dog stays if it makes you stop: your call. A tiny “Pomo Pizza” under the words.', 'Tengo: “Sabato · 2x1 sulle pizze fino alle 21”. Tolgo: DJ, nuovo menu, concorso, tagga 3 amici, l’indirizzo (va in una seconda storia). La foto resta, più scura in basso perché le parole si leggano. Un colore: lettere crema, grandi, sulla parte scura. Il cane resta se ti fa fermare: decidi tu. Un piccolo “Pomo Pizza” sotto le parole.'],
       ['If a stranger only has one second, what should they read?', 'Se uno sconosciuto ha solo un secondo, cosa deve leggere?'],
       ['Which of the 7 things could wait for a second story?', 'Quali delle 7 cose possono aspettare una seconda storia?'],
       ['Which one colour makes the words jump off the background?', 'Quale colore fa saltare fuori le parole dallo sfondo?']),
@@ -63,8 +63,8 @@ export const HELPS: Record<string, Help[]> = {
   Code: [
     h(['Found it: colour with a u on line 4. Everywhere else it is color. Fixed: if (hoodiesLeft === 0) color = "red";', 'Trovato: colour con la u alla riga 4. Altrove c’è color. Corretto: if (hoodiesLeft === 0) color = "red";'],
       ['Which line is supposed to change the button’s colour?', 'Quale riga dovrebbe cambiare il colore del pulsante?'],
-      ['Are all the words about colour spelled the same, letter for letter?', 'Le parole che parlano di colore sono scritte tutte uguali, lettera per lettera?'],
-      ['Stuck? Could an AI chat spot the difference if you paste the code in? (Allowed.)', 'Non lo trovi? Una chat con un’AI potrebbe vedere la differenza se incolli il codice? (Si può.)']),
+      ['That line changes something. Is it the same thing the last line paints?', 'Quella riga cambia qualcosa. È la stessa cosa che l’ultima riga colora?'],
+      ['Still stuck? What do you notice if you read lines 3 and 4 letter by letter?', 'Ancora niente? Cosa noti se leggi le righe 3 e 4 lettera per lettera?']),
     h(['IF spice is lots THEN Diavola. IF spice is none AND you stay in THEN Margherita. IF spice is none AND you go out THEN Quattro Formaggi.', 'SE piccante è tanto ALLORA Diavola. SE piccante è niente E resti a casa ALLORA Margherita. SE piccante è niente E esci ALLORA Quattro Formaggi.'],
       ['Which answers would make you think of a spicy pizza?', 'Quali risposte ti fanno pensare a una pizza piccante?'],
       ['Which pizza fits someone who stays in and wants no spice?', 'Quale pizza va a chi resta a casa e non vuole piccante?'],
@@ -139,10 +139,10 @@ export const HELPS: Record<string, Help[]> = {
       ['What can you say on day two that adds something new, not pressure?', 'Cosa puoi dire il secondo giorno che aggiunge qualcosa, senza pressione?']),
   ],
   Music: [
-    h(['Cut: Sad Trombone Tuesday (sorry, not tonight). New order: Pocket Sunrise, Last Bus Home, Tile Floor Groove, Mango Static, Confetti Cannon. Why: it starts like waking up and ends like the doorbell.', 'Via: Sad Trombone Tuesday (scusa, non stasera). Nuovo ordine: Pocket Sunrise, Last Bus Home, Tile Floor Groove, Mango Static, Confetti Cannon. Perché: parte come un risveglio e finisce come il citofono.'],
+    h(['Cut: Sad Trombone Tuesday (sorry, not tonight). New order: Pocket Sunrise, Last Bus Home, Tile Floor Groove, Mango Static, Confetti Cannon (Last Bus Home first works too). Why: it starts like waking up and ends like the doorbell.', 'Via: Sad Trombone Tuesday (scusa, non stasera). Nuovo ordine: Pocket Sunrise, Last Bus Home, Tile Floor Groove, Mango Static, Confetti Cannon (va bene anche Last Bus Home per prima). Perché: parte come un risveglio e finisce come il citofono.'],
       ['Which song would make you want to stay home instead?', 'Quale canzone ti farebbe venire voglia di restare a casa?'],
       ['Which songs could open the evening, and which could close it?', 'Quali canzoni potrebbero aprire la serata e quali chiuderla?'],
-      ['Two songs share one energy: which goes first, and why?', 'Due canzoni hanno la stessa energia: quale va prima, e perché?']),
+      ['Two songs are both quiet: which goes first, and why?', 'Due canzoni sono entrambe tranquille: quale va prima, e perché?']),
     h(['Sound: tiny, bouncy, claps. Before the drop: one low oven hum and a slow tick. The drop hits at second 3, on the shutter rolling up: claps and a bouncy bass jump in. Why: the shutter is the moment Monday actually starts.', 'Suono: piccolo, saltellante, battimani. Prima del drop: un ronzio basso da forno e un tic lento. Il drop arriva al secondo 3, quando si alza la saracinesca: entrano battimani e un basso saltellante. Perché: la saracinesca è il momento in cui il lunedì parte davvero.'],
       ['How should a Monday feel at second 0, and at second 10?', 'Che effetto deve fare un lunedì al secondo 0, e al secondo 10?'],
       ['Which shot is the happiest moment of the ten seconds?', 'Quale scena è il momento più felice dei dieci secondi?'],

@@ -11,7 +11,7 @@ export const ASK: Record<string, string> = {
   'Code.5': t2('Be the robot: follow the steps word for word and tell where you got stuck.', 'Fai il robot: segui i passaggi alla lettera e dimmi dove ti blocchi.'),
   'Video.2': t2('Write the three questions you would ask to direct this story.', 'Scrivi le tre domande che faresti per dirigere questa storia.'),
   'Video.5': t2('Would this reply calm you down? Name the second you would cut.', 'Questa risposta ti calmerebbe? Dimmi il secondo che taglieresti.'),
-  'Selling.2': t2('Be the haggler: push back once. What would you say next?', 'Fai quello che tratta: insisti una volta. Cosa diresti dopo?'),
+  'Selling.2': t2('Be the haggler: ask for a lower price one more time. What would you say next?', 'Fai quello che tratta: insisti una volta. Cosa diresti dopo?'),
   'Selling.5': t2('Be the silent buyer: would you answer? What would make you reply?', 'Fai il compratore che tace: risponderesti? Cosa ti farebbe rispondere?'),
   'Music.2': t2('Would this help on a rough day? Which line would you keep?', 'Ti aiuterebbe in una giornata storta? Quale riga terresti?'),
   'Music.5': t2('Write the next two lines of the hook.', 'Scrivi le due righe successive del ritornello.'),

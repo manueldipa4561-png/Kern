@@ -26,7 +26,7 @@ export const PLAY_SELLING: Record<string, Play> = {
     { kind: 'pick', label: t2('Tap the 2 bits of the old DM that sound most like spam', 'Tocca i 2 pezzi del vecchio DM che suonano più da spam'), out: t2('Sounds like spam', 'Suona da spam'), max: 2,
       items: [t2('Hi dear!!!', 'Ciao cara!!!'), t2('BEST candles in town 🔥', 'Le MIGLIORI candele della città 🔥'), t2('Collab alert', 'Collab alert'), t2('only TODAY', 'solo OGGI'), t2('DM us NOW!!', 'scrivici ORA!!')] },
     { kind: 'pick', label: t2('The easy question to end the new DM (pick 1)', 'La domanda facile per chiudere il nuovo DM (scegline 1)'), out: t2('Last line', 'Ultima riga'), max: 1,
-      items: [t2('Can you post it by Friday?', 'Puoi postarla entro venerdì?'), t2('Can I send you one, no strings?', 'Posso mandartene una, senza impegno?'), t2('How many views do your videos get?', 'Quante visualizzazioni fanno i tuoi video?'), t2('Want one for your desk?', 'Ne vuoi una per la scrivania?'), t2('Collab? Reply TODAY!', 'Collab? Rispondi OGGI!'), t2('Where should I ship it?', 'Dove te la spedisco?')] },
+      items: [t2('Can you post it by Friday?', 'Puoi postarla entro venerdì?'), t2('Can I send you one for free?', 'Posso mandartene una gratis?'), t2('How many views do your videos get?', 'Quante visualizzazioni fanno i tuoi video?'), t2('Want one for your desk?', 'Ne vuoi una per la scrivania?'), t2('Collab? Reply TODAY!', 'Collab? Rispondi OGGI!'), t2('Where should I ship it?', 'Dove te la spedisco?')] },
   ],
   'Selling.4': [
     { kind: 'pick', label: t2('The poll question that makes people think of money (pick 1)', 'La domanda del sondaggio che fa pensare ai soldi (scegline 1)'), out: t2('Poll question', 'Domanda del sondaggio'), max: 1,
@@ -46,6 +46,6 @@ export const PLAY_SELLING: Record<string, Play> = {
         { t: t2('Read the listing, it’s all there.', 'Leggi l’annuncio, c’è scritto tutto.') },
       ] },
     { kind: 'pick', label: t2('The nudge for day two, no pressure (pick 1)', 'La spintarella per il secondo giorno, senza pressione (scegline 1)'), out: t2('Nudge', 'Spintarella'), max: 1,
-      items: [t2('Hello??? Are you there?', 'Ciao??? Ci sei?'), t2('Still keen? I can send a video of it playing.', 'Ti interessa ancora? Posso mandarti un video mentre la suono.'), t2('Someone else wants it, last chance!', 'La vuole anche un’altra persona, ultima occasione!'), t2('Hi again! No worries if it’s not for you.', 'Ciao di nuovo! Nessun problema se non fa per te.'), t2('Price goes up on Monday.', 'Da lunedì il prezzo sale.'), t2('I can add new strings for €5.', 'Posso aggiungere corde nuove per 5 €.')] },
+      items: [t2('Hello??? Are you there?', 'Ciao??? Ci sei?'), t2('Still interested? I can send a video of it playing.', 'Ti interessa ancora? Posso mandarti un video mentre la suono.'), t2('Someone else wants it, last chance!', 'La vuole anche un’altra persona, ultima occasione!'), t2('Hi again! No worries if it’s not for you.', 'Ciao di nuovo! Nessun problema se non fa per te.'), t2('Price goes up on Monday.', 'Da lunedì il prezzo sale.'), t2('I can add new strings for €5.', 'Posso aggiungere corde nuove per 5 €.')] },
   ],
 };
