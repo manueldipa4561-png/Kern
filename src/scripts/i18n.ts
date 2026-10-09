@@ -347,6 +347,8 @@ export const IT: Record<string, string> = {
         'Your idea in KERN.AI': 'La tua idea in KERN.AI',
         'Does yours do this?': 'La tua risposta fa questo?',
         'A company sees your answer only if you choose to send it to them.': 'Un’azienda vede la tua risposta solo se scegli di mandargliela.',
+        'Sends only your prompt to the AI. Nothing is saved.': 'Invia solo il tuo prompt all’AI. Non salviamo niente.',
+        'What the AI made of it': 'Cosa ne ha fatto l’AI',
         'Dare someone to try it': 'Sfida qualcuno a provarla',
         'Do it here': 'Fallo qui',
         'Your picks fill in your answer. Add a line of your own if you like.': 'Le tue scelte riempiono la risposta. Se vuoi, aggiungi una riga tua.',

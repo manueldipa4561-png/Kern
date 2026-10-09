@@ -1,5 +1,6 @@
 // KERN.AI: a live coach that only asks questions. The API key stays on the server (ANTHROPIC_API_KEY).
 // Without a key, or on any error, it answers 503 and the app falls back to its scripted coach.
+// Mode 'run' is not the coach: in Prompting missions it runs the person's own prompt, on their tap (scripts/check-run.mjs).
 import type { Config, Context } from '@netlify/functions';
 
 const MODEL = process.env.COACH_MODEL || 'claude-haiku-5-5';
@@ -40,6 +41,10 @@ Rules:
 
 Context: the person is working in the field "${field}". They have written ${versions} version${versions === 1 ? '' : 's'} of their idea so far. After 3 versions the app asks them to compare the first and the last.${mission}`;
 
+// Try your prompt (mode 'run', Prompting missions only): the person's own prompt goes to the model alone, no mission data, so they see what that prompt makes.
+const RUN_MIN = 20, RUN_MAX = 1500;
+const RUN_SYSTEM = 'Answer the request as a helpful general assistant would: plainly, in plain text without Markdown, in at most about 180 words, in the language the request is written in. Refuse anything unsafe the way you normally would. Never use the words career, freelance, "real work" or "real job", nor any Italian word that starts with "lavor" (lavoro, lavorare): say it in other words.';
+
 // Best-effort limits per warm instance: 20 requests a minute and 300 a day for each IP.
 const hits = new Map<string, number[]>();
 // IPv6: expand '::' first, then keep the first 3 groups (a /48), so rotating the interface id or the /64 does not help.
@@ -60,6 +65,18 @@ const limited = (rawIp: string) => {
 };
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+// One request to the model: the text of its reply ('' when it has none). A failed call throws, and its status is logged, never the key or text.
+const complete = async (key: string, payload: Record<string, unknown>) => {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: MODEL, ...tuning(MODEL), ...payload }),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!r.ok) { console.error('coach upstream status', r.status); throw new Error('upstream'); }
+  const data: any = await r.json(); // eslint-disable-line @typescript-eslint/no-explicit-any
+  return (Array.isArray(data?.content) ? data.content.filter((c: any) => c?.type === 'text').map((c: any) => c.text).join(' ') : '') as string; // eslint-disable-line @typescript-eslint/no-explicit-any
+};
 
 export default async (req: Request, context: Context) => {
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
@@ -76,6 +93,16 @@ export default async (req: Request, context: Context) => {
   let body: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   try { const raw = await req.text(); if (raw.length > 12000) return json({ error: 'size' }, 413); body = JSON.parse(raw); } catch { return json({ error: 'json' }, 400); }
   const lang = body?.lang === 'it' ? 'it' : 'en';
+  if (body?.mode === 'run') {
+    const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
+    if (body.field !== 'Prompting' || prompt.length < RUN_MIN || prompt.length > RUN_MAX) return json({ error: 'input' }, 400);
+    if (HEAVY.test(prompt)) return json({ reply: PAUSE[lang] });
+    try {
+      const reply = (await complete(key, { max_tokens: 450, system: RUN_SYSTEM, messages: [{ role: 'user', content: prompt }] })).trim().slice(0, 2500);
+      if (!reply || BANNED.test(reply)) return json({ error: 'empty' }, 502); // a word KERN never uses: the app says the AI is not reachable
+      return json({ reply });
+    } catch { return json({ error: 'upstream' }, 502); }
+  }
   const field = typeof body?.field === 'string' && Object.hasOwn(FIELDS, body.field) ? body.field : 'Design';
   const clean = (v: unknown, n: number) => (typeof v === 'string' ? v.replace(/[<>"\n\r]/g, ' ').trim().slice(0, n) : '');
   const mTitle = clean(body?.mission?.title, 100), mBrief = clean(body?.mission?.brief, 300);
@@ -102,16 +129,7 @@ export default async (req: Request, context: Context) => {
   if (HEAVY.test(turns[turns.length - 1].content)) return json({ reply: PAUSE[lang] });
 
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 240, ...tuning(MODEL), system: SYSTEM(lang, field, versions, mission), messages: turns }),
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!r.ok) { console.error('coach upstream status', r.status); return json({ error: 'upstream' }, 502); } // status only, never the key or text
-    const data: any = await r.json(); // eslint-disable-line @typescript-eslint/no-explicit-any
-    const reply = (Array.isArray(data?.content) ? data.content.filter((c: any) => c?.type === 'text').map((c: any) => c.text).join(' ') : '') // eslint-disable-line @typescript-eslint/no-explicit-any
-      .replace(/\s+/g, ' ').trim().slice(0, 500);
+    const reply = (await complete(key, { max_tokens: 240, system: SYSTEM(lang, field, versions, mission), messages: turns })).replace(/\s+/g, ' ').trim().slice(0, 500);
     if (!reply) return json({ error: 'empty' }, 502);
     // The model's own pause for a distressed message the word list missed: send the fixed pause with its checked numbers, never the model's wording.
     if (PAUSED.test(reply)) return json({ reply: PAUSE[lang] });
