@@ -37,13 +37,13 @@ export const PLAY: Record<string, Play> = {
       items: ['let', 'hoodiesLeft', '0', 'color', '"green"', 'if', '===', 'colour', '"red"', 'paintButton'] },
   ],
   'Video.0': [
-    { kind: 'sort', label: t2('Cut the slow shots and drag the best moment to the top', 'Togli le parti lente e trascina in cima il momento migliore'), out: t2('Cut list', 'Lista dei tagli'), cutOut: t2('Cut', 'Tolgo'), cut: 5,
+    { kind: 'sort', label: t2('Tap ✕ on slow pieces, drag the best one to the top', 'Tocca ✕ sui pezzi lenti, trascina in cima il migliore'), out: t2('Keep', 'Tengo'), cutOut: t2('Cut', 'Tolgo'), cut: 5,
       sum: { label: t2('Total', 'Totale'), max: 6 },
       items: [ // the seconds of the real clip, public/media/tosta.mp4
         { t: t2('0-3s Rocco walks to the van', '0-3s Rocco cammina verso il furgone'), n: 3 },
         { t: t2('3-7s Reads the menu, waits', '3-7s Legge il menu, aspetta'), n: 4 },
-        { t: t2('7-9s The press closes', '7-9s La piastra si chiude'), n: 2 },
-        { t: t2('9-11s Cheese stretches an arm long', '9-11s Il formaggio fila lungo un braccio'), n: 2 },
+        { t: t2('7-9s The sandwich press closes', '7-9s La piastra si chiude'), n: 2 },
+        { t: t2('9-11s The cheese stretches long', '9-11s Il formaggio fila lunghissimo'), n: 2 },
         { t: t2('11-13s First bite, eyes wide', '11-13s Primo morso, occhi spalancati'), n: 2 },
         { t: t2('13-15s Walks off', '13-15s Se ne va'), n: 2 },
       ] },

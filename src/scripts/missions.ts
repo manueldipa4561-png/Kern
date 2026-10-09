@@ -492,45 +492,46 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Tosta, a toasted-sandwich van (fictional)', 'Tosta, un furgone di toast (fittizio)'),
       brief: t2(
-        "Rocco’s 15-second clip of his first toastie at Tosta starts slowly. Watch it, then type a cut list of 6 seconds or less that opens on the best moment.",
-        "La clip di 15 secondi di Rocco, al suo primo toast da Tosta, parte piano. Guardala, poi scrivi una lista dei tagli di 6 secondi al massimo che apra sul momento migliore."),
+        'Rocco’s 15-second clip at the Tosta sandwich van starts slowly, so people scroll away. Pick the pieces to keep, 6 seconds or less in total, with the best moment first.',
+        'La clip di 15 secondi di Rocco al furgone dei toast Tosta parte piano, e la gente scorre via. Scegli i pezzi da tenere, 6 secondi al massimo in tutto, con il momento migliore per primo.'),
       asset: {
         mono: true,
         video: '/media/tosta.mp4',
         title: t2('The clip, second by second', 'La clip, secondo per secondo'),
         body: t2(
-          '0-3s    Rocco walks to the van\n3-7s    Reads the menu, waits\n7-9s    The press closes\n9-11s   Toastie lifts, cheese stretches an arm long\n11-13s  First bite, his eyes go wide\n13-15s  Walks off, waves at the van',
-          '0-3s    Rocco cammina verso il furgone\n3-7s    Legge il menu, aspetta\n7-9s    La piastra si chiude\n9-11s   Il toast si alza, il formaggio fila lungo un braccio\n11-13s  Primo morso, gli occhi si spalancano\n13-15s  Se ne va e saluta il furgone'),
+          '0-3s    Rocco walks to the van\n3-7s    Reads the menu, waits\n7-9s    The sandwich press closes\n9-11s   The sandwich lifts, the cheese stretches long\n11-13s  First bite, his eyes go wide\n13-15s  Walks off, waves at the van',
+          '0-3s    Rocco cammina verso il furgone\n3-7s    Legge il menu, aspetta\n7-9s    La piastra si chiude\n9-11s   Il toast si alza, il formaggio fila lunghissimo\n11-13s  Primo morso, gli occhi si spalancano\n13-15s  Se ne va e saluta il furgone'),
       },
       steps: [
-        t2('Pick the best moment, the one you would replay.', 'Scegli il momento migliore, quello che riguarderesti.'),
-        t2('Type your cut list: start-end seconds for each piece.', 'Scrivi la lista dei tagli: inizio-fine in secondi per ogni pezzo.'),
-        t2('Add up the seconds. Keep it at 6 or less.', 'Somma i secondi. Devono essere 6 o meno.'),
+        t2('Watch the clip and pick the best moment.', 'Guarda la clip e scegli il momento migliore.'),
+        t2('Write the seconds of each piece, best moment first.', 'Scrivi i secondi di ogni pezzo, il momento migliore per primo.'),
+        t2('Check: 6 seconds or less, no walking or waiting.', 'Controlla: 6 secondi al massimo, niente camminate né attese.'),
       ],
       mins: 2,
       bar: [
         t2('It opens on the best moment', 'Apre sul momento migliore'),
         t2('The total is 6 seconds or less', 'Il totale è al massimo 6 secondi'),
-        t2('No walking or waiting shots', 'Niente camminate né attese'),
+        t2('No walking, no waiting', 'Niente camminate né attese'),
       ],
       twist: t2('Do the same cut on one of your own clips and post it tonight.', 'Fai lo stesso taglio su una tua clip e pubblicala stasera.'),
+      answer: t2('The pieces you keep, as seconds from the list, best first. 6 seconds or less in total.', 'I pezzi che tieni, in secondi come nell’elenco, il migliore per primo. 6 secondi al massimo in tutto.'),
     },
     {
       who: tag('Zumo, a pocket speaker (fictional)', 'Zumo, una cassa tascabile (fittizia)'),
       brief: t2(
-        "POV means the phone is your eyes. Your Zumo speaker is gone and cousin Bea looks very innocent. Plan a 10-second skit: 3 shots, with seconds and text.",
-        "POV: il telefono sono i tuoi occhi. La cassa Zumo è sparita e la cugina Bea sembra innocente. Pianifica una scenetta di 10 secondi: 3 inquadrature, con secondi e testo."),
+        'Your Zumo speaker is gone and cousin Bea looks too innocent. Plan a 10-second POV clip (the phone is your eyes): 3 shots, with seconds and text on screen.',
+        'La tua cassa Zumo è sparita e la cugina Bea sembra fin troppo innocente. Pianifica una clip POV di 10 secondi (il telefono sono i tuoi occhi): 3 inquadrature, con secondi e testo a schermo.'),
       asset: {
         mono: false,
-        title: t2('The rules of the skit', 'Le regole della scenetta'),
+        title: t2('The rules of the clip', 'Le regole della clip'),
         body: t2(
-          'Length: 10 seconds, one phone, one take\nWhere: the living room\nEvidence: an empty shelf, a loose cable, one innocent face\nShot 1 must show the empty shelf\nText on screen: 6 words or fewer per shot',
-          'Durata: 10 secondi, un telefono, un’unica ripresa\nDove: il salotto\nProve: uno scaffale vuoto, un cavo penzoloni, una faccia innocente\nL’inquadratura 1 deve mostrare lo scaffale vuoto\nTesto a schermo: massimo 6 parole per inquadratura'),
+          'Length: 10 seconds, one phone, filmed in one go\nWhere: the living room\nClues: an empty shelf, a loose cable, one innocent face\nShot 1 must show the empty shelf\nText on screen: 6 words or fewer per shot',
+          'Durata: 10 secondi, un telefono, girata tutta di fila\nDove: il salotto\nIndizi: uno scaffale vuoto, un cavo penzoloni, una faccia innocente\nL’inquadratura 1 deve mostrare lo scaffale vuoto\nTesto a schermo: massimo 6 parole per inquadratura'),
       },
       steps: [
-        t2('Write the 3 shots, one line each, with seconds.', 'Scrivi le 3 inquadrature, una riga ciascuna, con i secondi.'),
-        t2('Check the seconds add up to 10.', 'Controlla che i secondi facciano 10.'),
-        t2('Add the text for each shot, 6 words or fewer.', 'Aggiungi il testo di ogni inquadratura, massimo 6 parole.'),
+        t2('Describe 3 shots, one line each, empty shelf first.', 'Descrivi 3 inquadrature, una riga ciascuna, prima lo scaffale vuoto.'),
+        t2('Add the seconds and the text on screen to each.', 'Aggiungi a ognuna i secondi e il testo a schermo.'),
+        t2('Check: exactly 10 seconds, each text 6 words or fewer.', 'Controlla: esattamente 10 secondi, ogni testo al massimo 6 parole.'),
       ],
       mins: 3,
       bar: [
@@ -539,12 +540,13 @@ export const MX: Record<string, MissionX[]> = {
         t2('Every text is 6 words or fewer', 'Ogni testo ha al massimo 6 parole'),
       ],
       twist: t2('Copy it and send it to someone who will laugh. Or film it tonight and post it.', 'Copialo e mandalo a chi riderà. Oppure giralo stasera e pubblicalo.'),
+      answer: t2('3 shots, one per line: seconds, what we see, text on screen. 10 seconds in total.', '3 inquadrature, una per riga: secondi, cosa si vede, testo a schermo. 10 secondi in tutto.'),
     },
     {
-      who: tag('Biggest awkward moment, in two', 'La figuraccia più grande, in due'),
+      who: tag('Biggest awkward moment, for two', 'La figuraccia più grande, in due'),
       brief: t2(
-        "Film an awkward-moment story in 20 seconds. One person tells it. The other directs from behind the phone with three spoken questions. Pair up, or do both parts.",
-        "Filma la storia di una figuraccia in 20 secondi. Una persona la racconta. L’altra dirige da dietro il telefono con tre domande. In due, o fai entrambe le parti."),
+        'One person tells the story of an awkward moment in a 20-second clip, the other asks questions from behind the phone. Write 3 questions and a short answer to each.',
+        'Una persona racconta una figuraccia in una clip di 20 secondi, l’altra fa domande da dietro il telefono. Scrivi 3 domande e una risposta breve per ognuna.'),
       asset: {
         mono: false,
         title: t2('No awkward moment? Borrow Tino’s', 'Nessuna figuraccia? Usa quella di Tino'),
@@ -554,22 +556,23 @@ export const MX: Record<string, MissionX[]> = {
       },
       steps: [
         t2('Pick the story: yours, or Tino’s.', 'Scegli la storia: la tua o quella di Tino.'),
-        t2('Director: write 3 questions to say at 0s, 7s and 14s.', 'Regia: scrivi 3 domande da dire a 0s, 7s e 14s.'),
-        t2('Storyteller: answer each one in 12 words or fewer.', 'Chi racconta: rispondi a ognuna in 12 parole al massimo.'),
+        t2('Write 3 questions, to ask at 0s, 7s and 14s.', 'Scrivi 3 domande, da fare a 0s, 7s e 14s.'),
+        t2('Answer each one in 12 words or fewer.', 'Rispondi a ognuna in 12 parole al massimo.'),
       ],
       mins: 3,
       bar: [
-        t2('Questions land at 0s, 7s and 14s', 'Le domande cadono a 0s, 7s e 14s'),
+        t2('Questions at 0s, 7s and 14s', 'Domande a 0s, 7s e 14s'),
         t2('Each is a question, never an order', 'Ognuna è una domanda, non un ordine'),
-        t2('The last answer is the punchline', 'L’ultima risposta è la battuta finale'),
+        t2('The last answer is the funniest', 'L’ultima risposta è la più divertente'),
       ],
       twist: t2('Copy it. Film it tonight, 20 seconds, and post it or send it to the group chat.', 'Copialo. Giralo stasera, 20 secondi, e pubblicalo o mandalo nel gruppo.'),
+      answer: t2('3 questions at 0s, 7s and 14s, each with an answer of 12 words or fewer.', '3 domande a 0s, 7s e 14s, ognuna con una risposta di massimo 12 parole.'),
     },
     {
       who: tag('Pedala, a bike workshop (fictional)', 'Pedala, una ciclofficina (fittizia)'),
       brief: t2(
-        "Greta’s 12-second Pedala clip shows her words as one wall of tiny text. Rewrite it as on-screen captions, each 5 words or fewer and 1.5 seconds or more, no gaps.",
-        "La clip di Greta per Pedala, 12 secondi, mostra le parole come un muro di testo minuscolo. Riscrivilo come sottotitoli di massimo 5 parole e almeno 1,5 secondi, senza buchi."),
+        'Greta’s 12-second Pedala clip shows her words as one block of tiny text. Split them into subtitles of 5 words or fewer, each on screen for 1.5 seconds or more.',
+        'La clip di 12 secondi di Greta per Pedala mostra le sue parole in un unico blocco di testo minuscolo. Dividile in sottotitoli di massimo 5 parole, ognuno a schermo per almeno 1,5 secondi.'),
       asset: {
         mono: true,
         title: t2('What Greta says, and what shows now', 'Cosa dice Greta, e cosa si vede ora'),
@@ -578,23 +581,24 @@ export const MX: Record<string, MissionX[]> = {
           '0-4s   “Ciao, bentornati. Oggi: una gomma a terra.”\n4-8s   “Dieci minuti, una toppa. Solo cinque euro.”\n8-12s  “Il colpevole? Un chiodino.”\nOra: tutte le 18 parole in un blocco, 0-12s'),
       },
       steps: [
-        t2('Split Greta’s lines into captions of 5 words or fewer.', 'Dividi le frasi di Greta in sottotitoli di massimo 5 parole.'),
-        t2('Add start-end seconds to each caption. Keep each 1.5 seconds or longer.', 'Aggiungi inizio-fine in secondi a ogni sottotitolo. Ciascuno 1,5 secondi o più.'),
-        t2('Check the last caption ends at 12 seconds.', 'Controlla che l’ultimo sottotitolo finisca a 12 secondi.'),
+        t2('Split Greta’s lines into subtitles of 5 words or fewer.', 'Dividi le frasi di Greta in sottotitoli di massimo 5 parole.'),
+        t2('Add start-end seconds to each, at least 1.5 seconds.', 'Aggiungi a ognuno inizio-fine in secondi, almeno 1,5 secondi.'),
+        t2('Check: from 0 to 12 seconds with no gaps.', 'Controlla: da 0 a 12 secondi senza buchi.'),
       ],
       mins: 4,
       bar: [
-        t2('5 words or fewer in every caption', 'Massimo 5 parole per sottotitolo'),
+        t2('5 words or fewer in every subtitle', 'Massimo 5 parole per sottotitolo'),
         t2('None on screen under 1.5 seconds', 'Nessuno a schermo meno di 1,5 secondi'),
         t2('No gaps from 0 to 12 seconds', 'Nessun buco da 0 a 12 secondi'),
       ],
-      twist: t2('Copy your captions. Add them to a clip of your own and post it.', 'Copia i tuoi sottotitoli. Mettili su una tua clip e pubblicala.'),
+      twist: t2('Copy your subtitles. Add them to a clip of your own and post it.', 'Copia i tuoi sottotitoli. Mettili su una tua clip e pubblicala.'),
+      answer: t2('Subtitles, one per line: start-end seconds, then the words. From 0 to 12 seconds, no gaps.', 'Sottotitoli, uno per riga: inizio-fine in secondi, poi le parole. Da 0 a 12 secondi, senza buchi.'),
     },
     {
       who: tag('Rotella, a skate shop (fictional)', 'Rotella, un negozio di skate (fittizio)'),
       brief: t2(
-        "Rotella wants a 10-second skateboard clip: a push, then rolling away. Write what a sports commentator would say over it: one line per shot, about 2 words a second.",
-        "Rotella vuole una clip di 10 secondi su uno skate: una spinta, poi via. Scrivi cosa direbbe un telecronista sportivo: una riga per inquadratura, circa 2 parole al secondo."),
+        'Rotella’s 10-second clip shows a skateboard push, then the board rolling away. Write what a sports commentator would say: one line per shot, within its word limit.',
+        'La clip di 10 secondi di Rotella mostra una spinta su uno skate, poi la tavola che se ne va. Scrivi cosa direbbe un telecronista sportivo: una riga per inquadratura, nel suo limite di parole.'),
       asset: {
         mono: true,
         video: '/media/skate.mp4',
@@ -604,9 +608,9 @@ export const MX: Record<string, MissionX[]> = {
           '0-2s   Tavola sul marciapiede, ruote ferme · fino a 4 parole\n2-5s   Un piede sopra, una spinta forte · fino a 6 parole\n5-8s   Primo piano: le ruote girano · fino a 6 parole\n8-10s  La strada vuota: sparito · fino a 4 parole'),
       },
       steps: [
-        t2('Write one line for each shot, within its word limit.', 'Scrivi una riga per inquadratura, nel suo limite di parole.'),
-        t2('Read it out loud in a stadium voice.', 'Leggila ad alta voce con voce da stadio.'),
-        t2('Cut any word you had to rush through.', 'Taglia ogni parola che hai detto di corsa.'),
+        t2('Watch the clip and read each shot’s word limit.', 'Guarda la clip e leggi il limite di parole di ogni inquadratura.'),
+        t2('Write one line per shot, like a sports commentator.', 'Scrivi una riga per inquadratura, come un telecronista sportivo.'),
+        t2('Check: every line is within its word limit.', 'Controlla: ogni riga sta nel suo limite di parole.'),
       ],
       mins: 4,
       bar: [
@@ -615,23 +619,24 @@ export const MX: Record<string, MissionX[]> = {
         t2('The last line makes someone smile', 'L’ultima riga fa sorridere'),
       ],
       twist: t2('Say “Rotella” once, in the last line, without sounding like an ad. Then send it as a voice note.', 'Di’ “Rotella” una volta, nell’ultima riga, senza sembrare una pubblicità. Poi mandalo come nota vocale.'),
+      answer: t2('4 lines, one per shot in order, each within its limit: 4, 6, 6 and 4 words.', '4 righe, una per inquadratura in ordine, ognuna nel suo limite: 4, 6, 6 e 4 parole.'),
     },
     {
       who: tag('Taglio Tondo, a barber shop (fictional)', 'Taglio Tondo, un barbiere (fittizio)'),
       brief: t2(
-        "Ivo commented under Taglio Tondo’s video that a €15 haircut is too much. Plan a calm 12-second reply video. Pair up, or do both parts.",
-        "Ivo scrive sotto un video di Taglio Tondo: 15 € per un taglio sono troppi. Pianifica una risposta video calma di 12 secondi. In due, o fai entrambe le parti."),
+        'Ivo commented under Taglio Tondo’s video that a €15 haircut costs too much. Plan a calm 12-second video reply: 3 shots, each with one line to say.',
+        'Ivo ha commentato sotto un video di Taglio Tondo che 15 € per un taglio sono troppi. Pianifica una risposta video calma di 12 secondi: 3 inquadrature, ognuna con una frase da dire.'),
       asset: {
         mono: false,
         title: t2('The comment, and what is true', 'Il commento, e cosa è vero'),
         body: t2(
-          'Ivo: “€15 for a haircut?! Mine costs €10.”\nTrue: every cut gets 30 full minutes\nTrue: a hot towel and a neck shave are included\nTone: friendly, no sarcasm, never tell Ivo off',
-          'Ivo: “15 € per un taglio?! Il mio costa 10 €.”\nVero: ogni taglio dura 30 minuti pieni\nVero: asciugamano caldo e rasatura del collo inclusi\nTono: amichevole, niente sarcasmo, mai fare la morale a Ivo'),
+          'Ivo: “€15 for a haircut?! Mine costs €10.”\nTrue: every cut gets 30 full minutes\nTrue: a hot towel and a neck shave are included\nTone: friendly, no sarcasm, no arguing with Ivo',
+          'Ivo: “15 € per un taglio?! Il mio costa 10 €.”\nVero: ogni taglio dura 30 minuti pieni\nVero: asciugamano caldo e rasatura del collo inclusi\nTono: amichevole, niente sarcasmo, non discutere con Ivo'),
       },
       steps: [
-        t2('One writes 3 shots that add up to 12 seconds.', 'Una persona scrive 3 inquadrature che fanno 12 secondi.'),
-        t2('The other writes one line per shot, 8 words or fewer.', 'L’altra scrive una frase per inquadratura, massimo 8 parole.'),
-        t2('Read it out loud and cut anything defensive.', 'Leggilo a voce alta e togli tutto ciò che suona sulla difensiva.'),
+        t2('Describe 3 shots with seconds, the comment first.', 'Descrivi 3 inquadrature con i secondi, prima il commento.'),
+        t2('Add one spoken line per shot, 8 words or fewer.', 'Aggiungi una frase da dire per inquadratura, massimo 8 parole.'),
+        t2('Check: 12 seconds in total, no arguing.', 'Controlla: 12 secondi in tutto, niente discussioni.'),
       ],
       mins: 5,
       bar: [
@@ -640,6 +645,7 @@ export const MX: Record<string, MissionX[]> = {
         t2('It answers Ivo without arguing', 'Risponde a Ivo senza discutere'),
       ],
       twist: t2('Copy it and send it to someone you know. Or film it for real.', 'Copialo e mandalo a qualcuno che conosci. Oppure giralo davvero.'),
+      answer: t2('3 shots, one per line: seconds, what we see, what you say (8 words or fewer). 12 seconds in total.', '3 inquadrature, una per riga: secondi, cosa si vede, cosa dici (massimo 8 parole). 12 secondi in tutto.'),
     },
   ],
 

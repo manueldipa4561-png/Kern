@@ -99,7 +99,7 @@ export const HELPS: Record<string, Help[]> = {
       ['Which moment of that story would make people laugh or wince?', 'Quale momento di quella storia farebbe ridere o storcere il naso?'],
       ['Which question gets your friend to tell exactly that moment?', 'Quale domanda fa raccontare proprio quel momento?'],
       ['Does each answer fit in about 5 seconds?', 'Ogni risposta sta in circa 5 secondi?']),
-    h(['0-1.5 Hi, welcome back. 1.5-4 Today: flat tyre. 4-6 Ten minutes, one patch. 6-8 Only €5. 8-10 The culprit? 10-12 One tiny nail. Six captions, 12 seconds, none over 5 words, none under 1.5 seconds.', '0-1,5 Ciao, bentornati. 1,5-4 Oggi: gomma a terra. 4-6 Dieci minuti, una toppa. 6-8 Solo 5 €. 8-10 Il colpevole? 10-12 Un chiodino. Sei sottotitoli, 12 secondi, nessuno oltre 5 parole, nessuno sotto 1,5 secondi.'],
+    h(['0-1.5 Hi, welcome back. 1.5-4 Today: flat tyre. 4-6 Ten minutes, one patch. 6-8 Only €5. 8-10 The culprit? 10-12 One tiny nail. Six subtitles, 12 seconds, none over 5 words, none under 1.5 seconds.', '0-1,5 Ciao, bentornati. 1,5-4 Oggi: gomma a terra. 4-6 Dieci minuti, una toppa. 6-8 Solo 5 €. 8-10 Il colpevole? 10-12 Un chiodino. Sei sottotitoli, 12 secondi, nessuno oltre 5 parole, nessuno sotto 1,5 secondi.'],
       ['Where does Greta pause for breath?', 'Dove prende fiato Greta?'],
       ['Which words can you cut and keep the meaning?', 'Quali parole puoi togliere senza perdere il senso?'],
       ['Do your seconds run from 0 to 12 with no gap?', 'I tuoi secondi vanno da 0 a 12 senza buchi?']),
