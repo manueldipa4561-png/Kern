@@ -483,6 +483,9 @@ const fitOf = (best: number): Fit | '' => {
 };
 // One line from an answer: whole words, never half an emoji, no text-direction controls.
 const answerLine = (t: string, max = 100) => {
+  // Do it here writes its picks on the first lines ("Order: ..."): the card quotes the person's own words when they added any.
+  const lines = t.split('\n').map((l) => l.trim()).filter(Boolean), own = lines.filter((l) => !/^[^:]{1,24}: /.test(l));
+  if (own.length && own.length < lines.length) t = own[own.length - 1];
   const s = t.replace(/[\u202A-\u202E\u2066-\u2069]/g, '').replace(/\s+/g, ' ').trim();
   if ([...s].length <= max) return s;
   const cut = clip(s, max), sp = cut.lastIndexOf(' ');
