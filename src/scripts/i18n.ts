@@ -134,7 +134,7 @@ export const IT: Record<string, string> = {
         'If it gets heavy, it stops and points you to a person.': 'Se la cosa si fa pesante, si ferma e ti indirizza a una persona.',
         "What is your idea? Write it in your own words first. I won't suggest one.": 'Qual è la tua idea? Scrivila prima con parole tue. Non te ne suggerirò una.',
         "I won't hand you the idea. What is the first thing that comes to mind, even if it's rough?": 'Non ti darò io l’idea. Qual è la prima cosa che ti viene in mente, anche se è grezza?',
-        "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.": "Sembra una cosa pesante, quindi metto in pausa la missione. Parlane con una persona di cui ti fidi o con un servizio di ascolto locale. Se sei in pericolo, chiama il numero di emergenza.",
+        "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline: in the UK and Ireland, Samaritans answer free, day or night, on 116 123. If you are in danger, call 112 (999 in the UK).": "Sembra una cosa pesante, quindi metto in pausa la missione. Parlane con una persona di cui ti fidi, oppure chiama Telefono Amico Italia allo 02 2327 2327, tutti i giorni, 24 ore su 24. Se sei in pericolo, chiama il 112.",
         'You wrote it 3 times and each version changed. That is your evidence. Compare the first and the last.': 'L’hai scritta 3 volte e ogni versione è cambiata. Questa è la tua prova. Confronta la prima e l’ultima.',
         'Save it to yourKERN, or start over with a new idea.': 'Salvala in yourKERN, oppure ricomincia con una nuova idea.',
         'Your idea, your words…': 'La tua idea, a parole tue…',

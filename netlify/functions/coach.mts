@@ -6,13 +6,18 @@ const MODEL = process.env.COACH_MODEL || 'claude-haiku-5-5';
 // Claude Haiku 5.5 thinks unless told not to (thinking would eat the reply's token cap) and answers 400 to any temperature but its default.
 // Haiku 4.5 takes a temperature. COACH_MODEL=claude-haiku-4-5-20251001 still works for comparisons (evals/coach).
 const tuning = (model: string) => (/^claude-haiku-5/.test(model) ? { thinking: { type: 'disabled' } } : { temperature: 0.8 });
-const FIELDS = new Set(['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Prompting']);
+// The fields the app sends, with their Italian names (prompt v8 names the field in the language of its reply).
+const FIELDS: Record<string, string> = { Design: 'Design', Writing: 'Scrittura', Code: 'Codice', Video: 'Video', Selling: 'Vendita', Music: 'Musica', Prompting: 'Prompting con l’AI' };
 const MAX_MSGS = 14, MAX_LEN = 400, MAX_TOTAL = 6500;
 // Keep in sync with HEAVY in src/scripts/app.ts (scripts/check-heavy.mjs fails npm test when they differ). Heavy words are answered here with a pause and never sent to the model.
 const HEAVY = /(kill(ing)? myself|kill me\b|suicid|self.?harm|hurt(ing)? myself|end (my life|it all)|take my (own )?life|hopeless|want(ed)? to die|wish i (was|were) (dead|gone)|better off dead|(no|any) reason to live|don['’]?t want to (live|be here|wake up)|cut(ting)? myself|voglio morire|vorrei morire|farla finita|mi (voglio |vorrei |devo )?(uccid|ammazz|impicc)|uccider(mi|e me)|ammazzar(mi|e me)|impiccar(mi|e me)|tagliarmi le vene|mi taglio le vene|togliermi la vita|togliermi di mezzo|farmi del male|mi faccio del male|autolesion|non (voglio|riesco) pi[uù]['’]? (a )?vivere|non voglio pi[uù]['’]? stare qui|meglio morto|meglio morta|non ce la faccio pi[uù]|senza speranza|non vedo (una )?via d['’]?uscita|vorrei sparire|voglio sparire)/i;
 const BANNED = /lavor|career|freelance|real work|real job|choose a job/i; // keep in sync with BANNED in scripts/check-design.mjs
 const PAUSED = /(paus\w*|in pausa|sospend\w*|fermo|stop\w*) (\w+ ){0,3}mission/i; // "pausing the mission", "metto in pausa la missione", "mi fermo qui con la missione", "fermo la missione" (eval v5 lost two correct Italian pauses to the narrower pattern)
-const PAUSE = { en: "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline. If you are in danger, call your local emergency number.", it: 'Sembra una cosa pesante, quindi metto in pausa la missione. Parlane con una persona di cui ti fidi o con un servizio di ascolto locale. Se sei in pericolo, chiama il numero di emergenza.' };
+// Every crisis reply is this fixed text, never the model's own words, so the numbers are always there and always checked.
+// Checked 2026-10-09: Telefono Amico Italia 02 2327 2327, every day, 24 hours (telefonoamico.it); 112 free everywhere in the EU (European Commission,
+// digital-strategy.ec.europa.eu/en/policies/112); Samaritans 116 123, free, day or night, UK and Ireland (samaritans.org, HSE); 999 in the UK (NHS).
+// The app shows the same text (HEAVY_REPLY in src/scripts/app.ts, its Italian in i18n.ts): scripts/check-heavy.mjs fails npm test when they differ.
+const PAUSE = { en: "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline: in the UK and Ireland, Samaritans answer free, day or night, on 116 123. If you are in danger, call 112 (999 in the UK).", it: "Sembra una cosa pesante, quindi metto in pausa la missione. Parlane con una persona di cui ti fidi, oppure chiama Telefono Amico Italia allo 02 2327 2327, tutti i giorni, 24 ore su 24. Se sei in pericolo, chiama il 112." };
 
 // Prompt v7 of evals/coach (prompts/v7.txt), 9 Oct 2026, graded on the specific + natural rubric: 63% of replies pass (test split 62%) against 25% (35%) for v3,
 // natural 84% vs 25%, and it loses no case on distress, on task or no answer. Tuned on the train split only.
@@ -71,7 +76,7 @@ export default async (req: Request, context: Context) => {
   let body: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   try { const raw = await req.text(); if (raw.length > 12000) return json({ error: 'size' }, 413); body = JSON.parse(raw); } catch { return json({ error: 'json' }, 400); }
   const lang = body?.lang === 'it' ? 'it' : 'en';
-  const field = FIELDS.has(body?.field) ? body.field : 'Design';
+  const field = typeof body?.field === 'string' && Object.hasOwn(FIELDS, body.field) ? body.field : 'Design';
   const clean = (v: unknown, n: number) => (typeof v === 'string' ? v.replace(/[<>"\n\r]/g, ' ').trim().slice(0, n) : '');
   const mTitle = clean(body?.mission?.title, 100), mBrief = clean(body?.mission?.brief, 300);
   const mission = mTitle ? `\nThey are doing a mission. They may share their draft answer. Ask one question that helps them take the next small step on it. Never write or fix the answer for them.\n<mission_data>${mTitle}: ${mBrief}</mission_data>` : '';
@@ -107,9 +112,10 @@ export default async (req: Request, context: Context) => {
     const data: any = await r.json(); // eslint-disable-line @typescript-eslint/no-explicit-any
     const reply = (Array.isArray(data?.content) ? data.content.filter((c: any) => c?.type === 'text').map((c: any) => c.text).join(' ') : '') // eslint-disable-line @typescript-eslint/no-explicit-any
       .replace(/\s+/g, ' ').trim().slice(0, 500);
-    // A coach that does not ask a question is off-script: let the app fall back. The one exception is the model's own pause for a distressed
-    // message the word list missed (the rules say "say nothing else", so it has no question): drop it and the person gets scripted questions.
-    if (!reply || (!reply.includes('?') && !PAUSED.test(reply))) return json({ error: 'empty' }, 502);
+    if (!reply) return json({ error: 'empty' }, 502);
+    // The model's own pause for a distressed message the word list missed: send the fixed pause with its checked numbers, never the model's wording.
+    if (PAUSED.test(reply)) return json({ reply: PAUSE[lang] });
+    if (!reply.includes('?')) return json({ error: 'empty' }, 502); // a coach that does not ask a question is off-script: the app falls back
     if (BANNED.test(reply)) return json({ error: 'empty' }, 502); // a word KERN never uses (same list as scripts/check-design.mjs): the app falls back to its scripted coach
     return json({ reply });
   } catch { return json({ error: 'upstream' }, 502); }
