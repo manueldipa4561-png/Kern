@@ -17,7 +17,7 @@
   "v3": {
     "model": "claude-haiku-5-5",
     "prompt": "v3",
-    "note": "v2 plus: never help with off-topic requests, no explaining rules, stuck step without examples (IN PRODUCTION since 2026-10-08)"
+    "note": "v2 plus: never help with off-topic requests, no explaining rules, stuck step without examples"
   },
   "v4": {
     "model": "claude-haiku-5-5",
@@ -37,6 +37,6 @@
   "v7": {
     "model": "claude-haiku-5-5",
     "prompt": "v7",
-    "note": "v6 plus: one question only (no 'and' joining two), no extra instruction, open with the question unless they asked for the answer"
+    "note": "v6 plus: one question only (no 'and' joining two), no extra instruction, open with the question unless they asked for the answer (IN PRODUCTION since 2026-10-09)"
   }
 }
