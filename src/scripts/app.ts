@@ -3,7 +3,7 @@
 //  profile ──> field ──> mission ──> answer ──> reflection ──> signals ──> Kern card ──> share
 //                           ^            │ (draft autosaved)      │
 //                           └────────────┴── yourKERN / Trail ◄───┘
-import { IT, t2 } from './i18n';
+import { EN, IT, t2 } from './i18n';
 import { icon } from './icons';
 import { FIELDS } from './fields';
 import { FIELD_INFO } from './fieldinfo';
@@ -11,7 +11,7 @@ import { COOP_KEYS, MAX_ANSWER, MAX_NAME, MAX_REPLY, clip, coopUrl, decodeCoop, 
 import { ASK } from './coopask';
 import { SCORE, rowsOf, verdict, type Feel } from './compare';
 import { MX } from './missions';
-import { PLAY, renderPlay } from './play';
+import { PLAY, renderPlay, stopPlay } from './play';
 import { RELICS, rollDrop, type Drop } from './loot';
 import { nextSpot, roundOf, PER_ROUND } from './next';
 import { SPONSORS } from './sponsors';
@@ -223,7 +223,7 @@ const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lite = matchMedia('(hover: none) and (pointer: coarse)').matches || /[?&]lite\b/.test(location.search);
 document.documentElement.classList.toggle('lite', lite);
 const isIt = () => S.lang === 'it';
-const tr = (s: string) => (S.lang === 'it' && IT[s]) || s;
+const tr = (s: string) => (S.lang === 'it' ? IT[s] : EN[s]) || s; // EN: "Selling" reads "Selling online" wherever a field name shows
 const setT = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.innerHTML = tr(en); };
 // Dynamic text built in code: clear data-en so a language switch does not overwrite it.
 const setD = (el: Element, text: string) => { (el as HTMLElement).dataset.en = ''; el.textContent = text; };
@@ -384,7 +384,7 @@ const openSheetEl = (sh: HTMLElement, focus: HTMLElement) => {
 };
 const closeSheet = (sh: HTMLElement) => {
   const reveal = sh === kSheet && !$('kShD').hidden; // closed from the drop screen (Escape or backdrop): refresh stones and rank like Continue does
-  sh.hidden = true; syncInert(); if (sh === kSheet) flushDraft(); lastFocus?.focus();
+  sh.hidden = true; syncInert(); if (sh === kSheet) { flushDraft(); stopPlay(); } lastFocus?.focus();
   if (reveal) { setLvl(); renderProgress(); }
 };
 [kSheet, kSet, kFld].forEach((sh) => {
@@ -642,7 +642,7 @@ const renderFurther = () => {
     li.append(b, t); return li;
   }));
 };
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (absorb()) setLvl(); renderProgress(); track('visit'); } }); // habit button, boost, streak and dots go stale overnight otherwise
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (absorb()) setLvl(); renderProgress(); track('visit'); } else stopPlay(); }); // habit button, boost, streak and dots go stale overnight otherwise
 const kAdd = $('kAdd'), kAdd2 = $('kAdd2');
 // Usage counts without names (stats.ts): asked once on Home, switchable in Settings. Off until yes. Without Supabase there is nowhere to send them, so neither control shows.
 const kStat = $('kStat'), kStatSet = $('kStatSet');
@@ -1431,7 +1431,7 @@ $('kSub').addEventListener('click', once(() => {
   $<HTMLInputElement>('kRfH').value = ''; $<HTMLInputElement>('kRfT').value = '';
   const ex = variant(cur.f, cur.i)?.ex || '';
   $('kVsY').textContent = na.t; $('kVs').hidden = !ex; // the example text is already in kXExT (renderBrief)
-  kShA.hidden = true; kShR.hidden = false; setRfNote(); renderProg();
+  stopPlay(); kShA.hidden = true; kShR.hidden = false; setRfNote(); renderProg(); // the beat grid goes with the answer step, so does its sound
   groups[0].querySelector<HTMLElement>('[data-v]')!.focus({ preventScroll: true });
   kSheet.querySelector('.k-sh-in')?.scrollTo({ top: 0 }); // the comparison is read first, then the reflection
 }));
@@ -1458,7 +1458,9 @@ const burst = (n: number) => {
   if (!still) for (let i = 0; i < n; i++) { const p = document.createElement('i'); p.style.setProperty('--a', `${(360 / n) * i + Math.random() * 12}deg`); p.style.setProperty('--r', `${70 + Math.random() * 60}px`); bits.appendChild(p); }
 };
 // A field the person has not picked (or, with all picked, one not tried yet), a different one after each mission: "Curious about Video? Try one".
+// Prompting comes first until it is tried: it works with any field, and it was the pilot's most common second pick.
 const curiousField = () => {
+  if (cur.f !== 'Prompting' && !doneIn('Prompting').size) return 'Prompting';
   const all = Object.keys(FIELDS), unpicked = all.filter((f) => !S.fields.includes(f));
   const pool = unpicked.length ? unpicked : all.filter((f) => !doneIn(f).size);
   return pool.length ? pool[S.answers.length % pool.length] : '';
@@ -1487,7 +1489,7 @@ function showDone() {
   // One calm line under the buttons: a field not picked yet, and the weekly reminder. Small links, never a second call to action.
   const cf = curiousField(), tryB = $('kDrTry');
   tryB.hidden = !cf; tryB.dataset.f = cf;
-  if (cf) setD(tryB, tr('Curious about {f}? Try one').replace('{f}', tr(cf)));
+  if (cf) setD(tryB, cf === 'Prompting' ? tr('Prompting with AI works with any field. Try one.') : tr('Curious about {f}? Try one').replace('{f}', tr(cf)));
   setT($('kDrRem'), 'Remind me weekly'); $('kDrMore').hidden = false;
   const tw = twistOf(f, cur.i), twEl = $('kDrTw'); // the harder take that every mission already has
   twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tw}`);
