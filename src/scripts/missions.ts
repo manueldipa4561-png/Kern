@@ -337,46 +337,47 @@ export const MX: Record<string, MissionX[]> = {
 
   Code: [
     {
-      who: tag('Moss Merch, a band’s hoodie drop (fictional)', 'Moss Merch, il drop di felpe di una band (fittizio)'),
+      who: tag('Moss Merch, a band’s hoodie shop (fictional)', 'Moss Merch, il negozio di felpe di una band (fittizio)'),
       brief: t2(
-        'The last Moss Merch hoodie is gone. The Buy button should turn red, but it stays green. One word is off. Find it.',
-        'L’ultima felpa di Moss Merch è finita. Il pulsante Compra dovrebbe diventare rosso, ma resta verde. Una parola è sbagliata. Trovala.'),
+        'The Moss Merch hoodies sold out, but the Buy button stays green instead of turning red. Find the word spelled wrong in the code and write its line again, fixed.',
+        'Le felpe di Moss Merch sono finite, ma il pulsante Compra resta verde invece di diventare rosso. Trova la parola scritta male nel codice e riscrivi la sua riga, corretta.'),
       asset: {
         mono: true,
-        title: t2('This code turns the Buy button red when no hoodies are left', 'Questo codice rende rosso il pulsante Compra quando le felpe sono finite'),
+        title: t2('The Buy button’s code, with notes', 'Il codice del pulsante Compra, con le note'),
         body: t2(
-          '// Moss Merch · Buy hoodie\nlet hoodiesLeft = 0;\nlet color = "green";\nif (hoodiesLeft === 0) colour = "red";\npaintButton(color);',
-          '// Moss Merch · Compra felpa\nlet hoodiesLeft = 0;\nlet color = "green";\nif (hoodiesLeft === 0) colour = "red";\npaintButton(color);'),
+          '// Lines with // are notes for you.\n// How many hoodies are left: none\nlet hoodiesLeft = 0;\n// The button starts green\nlet color = "green";\n// If none are left, turn it red\nif (hoodiesLeft === 0) colour = "red";\n// Paint the button\npaintButton(color);',
+          '// Le righe con // sono note per te.\n// Quante felpe restano: nessuna\nlet hoodiesLeft = 0;\n// Il pulsante parte verde\nlet color = "green";\n// Se non ne restano, fallo rosso\nif (hoodiesLeft === 0) colour = "red";\n// Colora il pulsante\npaintButton(color);'),
       },
       steps: [
-        t2('Read the code out loud, line by line.', 'Leggi il codice ad alta voce, riga per riga.'),
-        t2('Find the line that should turn the button red.', 'Trova la riga che dovrebbe rendere rosso il pulsante.'),
-        t2('Type that line again, fixed.', 'Riscrivi quella riga, corretta.'),
+        t2('Read each note, then the code line under it.', 'Leggi ogni nota, poi la riga di codice sotto.'),
+        t2('Find the word that is spelled wrong.', 'Trova la parola scritta male.'),
+        t2('Write its line again, with only that word fixed.', 'Riscrivi la sua riga, correggendo solo quella parola.'),
       ],
       mins: 2,
       bar: [
         t2('Your fixed line uses color, not colour', 'La tua riga corretta usa color, non colour'),
-        t2('You changed only that one line', 'Hai cambiato solo quella riga'),
+        t2('You changed only that one word', 'Hai cambiato solo quella parola'),
         t2('You can explain the mistake in a sentence', 'Sai spiegare l’errore in una frase'),
       ],
       twist: t2('Send the broken code to someone: “Why is my button still green?” Time them.', 'Manda il codice rotto a qualcuno: “Perché il mio pulsante è ancora verde?” Cronometra quanto ci mette.'),
+      answer: t2('The word spelled wrong, then its line written again, fixed.', 'La parola scritta male, poi la sua riga riscritta, corretta.'),
     },
     {
       who: tag('Pizzeria Zeta (fictional)', 'Pizzeria Zeta (fittizia)'),
       brief: t2(
-        'Pizzeria Zeta wants a “which pizza are you?” quiz for its stories. Write rules, “IF this THEN that”, so every answer lands on one pizza.',
-        'Pizzeria Zeta vuole un quiz “che pizza sei?” per le storie. Scrivi regole “SE questo ALLORA quello”, così ogni risposta porta a una sola pizza.'),
+        'Pizzeria Zeta wants a quick quiz: two questions, and each person gets one of 3 pizzas. Write 3 rules, “IF these answers THEN this pizza”, so everyone gets exactly one.',
+        'Pizzeria Zeta vuole un quiz veloce: due domande, e ogni persona riceve una di 3 pizze. Scrivi 3 regole, “SE queste risposte ALLORA questa pizza”, così ognuno ne riceve una sola.'),
       asset: {
         mono: false,
-        title: t2('The quiz · what your rules must cover', 'Il quiz · cosa devono coprire le regole'),
+        title: t2('The two questions and the three pizzas', 'Le due domande e le tre pizze'),
         body: t2(
-          'Q1  Saturday night: stay in / go out\nQ2  Spice: none / lots\nPizza 1  Margherita\nPizza 2  Diavola\nPizza 3  Quattro Formaggi\nShape  IF (answers) THEN (pizza)',
-          'D1  Sabato sera: a casa / fuori\nD2  Piccante: niente / tanto\nPizza 1  Margherita\nPizza 2  Diavola\nPizza 3  Quattro Formaggi\nForma  SE (risposte) ALLORA (pizza)'),
+          'Question 1: Saturday night, stay in or go out?\nQuestion 2: Spice, none or lots?\nPizzas: Margherita, Diavola, Quattro Formaggi\nA rule: IF (answers) THEN (pizza)\nUse AND when a rule needs both answers.\nThe 4 kinds of people:\nstay in, no spice\nstay in, lots of spice\ngo out, no spice\ngo out, lots of spice',
+          'Domanda 1: sabato sera, a casa o fuori?\nDomanda 2: piccante, niente o tanto?\nPizze: Margherita, Diavola, Quattro Formaggi\nUna regola: SE (risposte) ALLORA (pizza)\nUsa E quando una regola vuole tutte e due le risposte.\nI 4 tipi di persona:\na casa, niente piccante\na casa, tanto piccante\nfuori, niente piccante\nfuori, tanto piccante'),
       },
       steps: [
-        t2('Write 3 rules, one line each, starting with IF.', 'Scrivi 3 regole, una per riga, che iniziano con SE.'),
-        t2('Test all four kinds of people: does each land on one pizza?', 'Prova i quattro tipi di persona: ognuno ha una pizza?'),
-        t2('Fix any rule that leaves someone with no pizza, or two.', 'Correggi ogni regola che lascia qualcuno senza pizza, o con due.'),
+        t2('Write 3 rules, one per line, each starting with IF.', 'Scrivi 3 regole, una per riga, ognuna inizia con SE.'),
+        t2('Test each of the 4 kinds of people.', 'Prova ognuno dei 4 tipi di persona.'),
+        t2('Check: each one gets exactly one pizza.', 'Controlla: ognuno riceve una sola pizza.'),
       ],
       mins: 3,
       bar: [
@@ -385,12 +386,13 @@ export const MX: Record<string, MissionX[]> = {
         t2('Each rule fits on one line', 'Ogni regola sta su una riga'),
       ],
       twist: t2('Post the two questions as story polls. Reply to each person who votes with their pizza.', 'Pubblica le due domande come sondaggi nelle storie. Rispondi a chi vota con la sua pizza.'),
+      answer: t2('Three rules, one per line: IF (answers) THEN (pizza).', 'Tre regole, una per riga: SE (risposte) ALLORA (pizza).'),
     },
     {
       who: tag('Flatmates’ group chat', 'Chat dei coinquilini'),
       brief: t2(
-        'The last to reply to “cinema tonight?” pays for the tickets. One plays Ada and hunts for a trick, the other fixes the rule. Pair up, or do both parts.',
-        'Chi risponde per ultimo a “cinema stasera?” paga i biglietti. Una persona è Ada e cerca un trucco, l’altra corregge la regola. In coppia, o fai entrambe le parti.'),
+        'In this flat, whoever replies last to “cinema tonight?” pays for the tickets. Find how Ada can avoid paying, then rewrite the rule so her trick fails.',
+        'In questa casa chi risponde per ultimo a “cinema stasera?” paga i biglietti. Trova come Ada può evitare di pagare, poi riscrivi la regola perché il suo trucco non funzioni.'),
       asset: {
         mono: false,
         title: t2('The flat’s rule and tonight’s chat', 'La regola della casa e la chat di stasera'),
@@ -401,7 +403,7 @@ export const MX: Record<string, MissionX[]> = {
       steps: [
         t2('Play Ada: find a way to never pay.', 'Fai la parte di Ada: trova un modo per non pagare mai.'),
         t2('Rewrite the rule so that trick fails.', 'Riscrivi la regola in modo che quel trucco non funzioni.'),
-        t2('Hunt for a second trick against your new rule.', 'Cerca un secondo trucco contro la tua nuova regola.'),
+        t2('Check: someone always ends up paying.', 'Controlla: qualcuno finisce sempre per pagare.'),
       ],
       mins: 3,
       bar: [
@@ -410,23 +412,24 @@ export const MX: Record<string, MissionX[]> = {
         t2('The rule still fits in two lines', 'La regola sta ancora in due righe'),
       ],
       twist: t2('Send your fixed rule to your real group chat. See how long it takes someone to beat it.', 'Manda la tua regola corretta alla tua vera chat di gruppo. Vedi quanto ci mette qualcuno a batterla.'),
+      answer: t2('Ada’s trick, then your new rule: 1 or 2 lines starting with IF.', 'Il trucco di Ada, poi la tua nuova regola: 1 o 2 righe che iniziano con SE.'),
     },
     {
       who: tag('Dado Games, a board-game shop (fictional)', 'Dado Games, un negozio di giochi da tavolo (fittizio)'),
       brief: t2(
-        'Dado Games gave out the code DADO10, 10% off. But its sheet makes a 40 euro basket cost 44. Find the mistake in the formula and fix it.',
-        'Dado Games ha dato il codice DADO10, 10% di sconto. Ma il suo foglio fa costare 44 euro un carrello da 40. Trova l’errore nella formula e correggilo.'),
+        'Dado Games offers 10% off, but its spreadsheet charges 44 euro for a 40 euro basket. Find the mistake in the formula, then write it correctly.',
+        'Dado Games fa il 10% di sconto, ma il suo foglio di calcolo fa pagare 44 euro un carrello da 40. Trova l’errore nella formula, poi scrivila corretta.'),
       asset: {
         mono: true,
-        title: t2('This sheet takes the code’s 10% off a basket', 'Questo foglio toglie il 10% del codice da un carrello'),
+        title: t2('The shop’s sheet, box by box', 'Il foglio del negozio, casella per casella'),
         body: t2(
-          'A1 Basket  B1  40\nA2 Code    B2  10%\nA3 To pay  B3  =B1+B1*B2\n* means times\nThe sheet shows 44.',
-          'A1 Carrello  B1  40\nA2 Codice    B2  10%\nA3 Da pagare B3  =B1+B1*B2\n* vuol dire per\nIl foglio mostra 44.'),
+          'B1  40         the basket, in euro\nB2  10%        the discount\nB3  =B1+B1*B2  the price to pay\n= means the sheet works it out.\n* means times. B3 shows 44.',
+          'B1  40         il carrello, in euro\nB2  10%        lo sconto\nB3  =B1+B1*B2  il prezzo da pagare\n= vuol dire: il foglio fa il conto.\n* vuol dire per. B3 mostra 44.'),
       },
       steps: [
-        t2('Work out by hand what a 40 euro basket should cost.', 'Calcola a mano quanto dovrebbe costare un carrello da 40 euro.'),
-        t2('Find the part of the formula that goes the wrong way.', 'Trova la parte della formula che va nel verso sbagliato.'),
-        t2('Write the fixed formula.', 'Scrivi la formula corretta.'),
+        t2('Work out what a 40 euro basket should cost.', 'Calcola quanto dovrebbe costare un carrello da 40 euro.'),
+        t2('Find the part of the formula that is wrong.', 'Trova la parte sbagliata della formula.'),
+        t2('Write the fixed formula, then test it with 40.', 'Scrivi la formula corretta, poi provala con 40.'),
       ],
       mins: 3,
       bar: [
@@ -434,24 +437,25 @@ export const MX: Record<string, MissionX[]> = {
         t2('A basket of 100 now costs 90', 'Un carrello da 100 ora costa 90'),
         t2('You can say why the price went up', 'Sai dire perché il prezzo saliva'),
       ],
-      twist: t2('Write one line announcing the code to customers. Post it, or send it to a friend.', 'Scrivi una riga che annunci il codice ai clienti. Pubblicala, o mandala a qualcuno.'),
+      twist: t2('Write one line announcing the discount to customers. Post it, or send it to a friend.', 'Scrivi una riga che annunci lo sconto ai clienti. Pubblicala, o mandala a qualcuno.'),
+      answer: t2('The price for 40 euro, the wrong part, then the fixed formula.', 'Il prezzo per 40 euro, la parte sbagliata, poi la formula corretta.'),
     },
     {
       who: tag('Sunny Plants, a plant shop (fictional)', 'Sunny Plants, un negozio di piante (fittizio)'),
       brief: t2(
-        'Every photo Sunny Plants posts gets a DM that just says “price?”. Write the rules for an auto-reply that answers well and never guesses.',
-        'Ogni foto che Sunny Plants pubblica riceve un DM che dice solo “prezzo?”. Scrivi le regole di una risposta automatica che risponde bene e non tira a indovinare.'),
+        'Sunny Plants gets many DMs (private messages) that just say “price?”. Write 3 rules, “IF the DM says this THEN reply that”, so an automatic reply never guesses.',
+        'Sunny Plants riceve tanti DM (messaggi privati) che dicono solo “prezzo?”. Scrivi 3 regole, “SE il DM dice questo ALLORA rispondi quello”, così la risposta automatica non tira mai a indovinare.'),
       asset: {
         mono: false,
         title: t2('The price list and three real DMs', 'Il listino e tre DM veri'),
         body: t2(
-          'Prices (euro): fern 35 · cactus 18 · monstera 42\nDM 1: price?\nDM 2: how much for the monstera\nDM 3: can u ship to Bologna',
-          'Prezzi (euro): felce 35 · cactus 18 · monstera 42\nDM 1: prezzo?\nDM 2: quanto costa la monstera\nDM 3: spedite a Bologna?'),
+          'Prices (euro): fern 35 · cactus 18 · monstera 42\nDM 1: price?\nDM 2: how much for the monstera\nDM 3: can u ship to Bologna\nA rule: IF (the DM says) THEN (the reply)',
+          'Prezzi (euro): felce 35 · cactus 18 · monstera 42\nDM 1: prezzo?\nDM 2: quanto costa la monstera\nDM 3: spedite a Bologna?\nUna regola: SE (il DM dice) ALLORA (la risposta)'),
       },
       steps: [
-        t2('Write the rule and reply for DM 2: someone names a plant.', 'Scrivi regola e risposta per il DM 2: qualcuno nomina una pianta.'),
-        t2('Write the rule and reply for DM 1: nobody names a plant.', 'Scrivi regola e risposta per il DM 1: nessuno nomina una pianta.'),
-        t2('Write a last rule and reply: anything else goes to a person.', 'Scrivi un’ultima regola e risposta: il resto passa a una persona.'),
+        t2('Write the rule for DM 2, which names a plant.', 'Scrivi la regola per il DM 2, che nomina una pianta.'),
+        t2('Write the rule for DM 1, which names no plant.', 'Scrivi la regola per il DM 1, che non nomina piante.'),
+        t2('Write a last rule: anything else goes to a person.', 'Scrivi un’ultima regola: tutto il resto va a una persona.'),
       ],
       mins: 4,
       bar: [
@@ -460,12 +464,13 @@ export const MX: Record<string, MissionX[]> = {
         t2('Replies sound like Sunny Plants, not a robot', 'Suonano come Sunny Plants, non come un robot'),
       ],
       twist: t2('Let someone play the customer. Ask them to DM three questions you did not plan for.', 'Fai fare il cliente a qualcuno: chiedi di mandarti tre DM che non avevi previsto.'),
+      answer: t2('Three rules, one per line: IF (the DM says) THEN (the reply).', 'Tre regole, una per riga: SE (il DM dice) ALLORA (la risposta).'),
     },
     {
       who: tag('Your neighbour and your basil', 'Chi ti innaffia il basilico'),
       brief: t2(
-        'Your neighbour Nico waters your basil tomorrow. One person writes the steps with only DO, REPEAT UNTIL and IF, the other is the robot. Pair up, or do both parts.',
-        'Domani Nico, il tuo vicino, innaffia il basilico. Una persona scrive passaggi con solo FAI, RIPETI FINCHÉ e SE, l’altra fa il robot. In coppia, o fai entrambe le parti.'),
+        'Your neighbour Nico waters your basil tomorrow and does exactly what you write, like a robot. Write the steps using only DO, REPEAT … UNTIL and IF lines.',
+        'Domani il tuo vicino Nico innaffia il basilico e fa esattamente quello che scrivi, come un robot. Scrivi i passaggi usando solo righe FAI, RIPETI … FINCHÉ e SE.'),
       asset: {
         mono: true,
         title: t2('The robot only understands 3 kinds of line', 'Il robot capisce solo 3 tipi di riga'),
@@ -474,8 +479,8 @@ export const MX: Record<string, MissionX[]> = {
           'FAI     una piccola azione\nRIPETI  un’azione FINCHÉ vedi un risultato\nSE      qualcosa è vero ALLORA un’azione\nIl basilico sta sul davanzale, in un vaso con il sottovaso.\nL’annaffiatoio è sotto il lavandino.\nIl rubinetto è in cucina.'),
       },
       steps: [
-        t2('Write the steps to water the basil, one DO per line.', 'Scrivi i passaggi per innaffiare il basilico, un FAI per riga.'),
-        t2('Add one REPEAT line and one IF line the robot can check.', 'Aggiungi una riga RIPETI e una SE che il robot può controllare.'),
+        t2('Write the watering steps, one DO per line.', 'Scrivi i passaggi per innaffiare, un FAI per riga.'),
+        t2('Add one REPEAT and one IF the robot can check.', 'Aggiungi un RIPETI e un SE che il robot può controllare.'),
         t2('Follow the steps like the robot: never guess.', 'Segui i passaggi come il robot: mai tirare a indovinare.'),
       ],
       mins: 5,
@@ -485,6 +490,7 @@ export const MX: Record<string, MissionX[]> = {
         t2('It handles a plant that is already wet', 'Gestisce una pianta già bagnata'),
       ],
       twist: t2('Send the steps to a friend. Ask which line was unclear.', 'Manda i passaggi a una persona amica. Chiedi quale riga era poco chiara.'),
+      answer: t2('The robot’s steps, one per line, each starting with DO, REPEAT or IF.', 'I passaggi del robot, uno per riga, ognuno inizia con FAI, RIPETI o SE.'),
     },
   ],
 

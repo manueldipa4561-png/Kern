@@ -61,10 +61,10 @@ export const HELPS: Record<string, Help[]> = {
       ['What would a lazy, kind shop say that no other shop would?', 'Cosa direbbe un locale pigro e gentile che nessun altro direbbe?']),
   ],
   Code: [
-    h(['Found it: colour with a u on line 4. Everywhere else it is color. Fixed: if (hoodiesLeft === 0) color = "red";', 'Trovato: colour con la u alla riga 4. Altrove c’è color. Corretto: if (hoodiesLeft === 0) color = "red";'],
+    h(['The wrong word is colour, with a u: everywhere else the code says color. So red went into a new word, and the button was painted with color, still green. Fixed: if (hoodiesLeft === 0) color = "red";', 'La parola sbagliata è colour, con la u: nel resto del codice c’è color. Così il rosso è finito in una parola nuova e il pulsante è stato colorato con color, ancora verde. Corretta: if (hoodiesLeft === 0) color = "red";'],
       ['Which line is supposed to change the button’s colour?', 'Quale riga dovrebbe cambiare il colore del pulsante?'],
       ['That line changes something. Is it the same thing the last line paints?', 'Quella riga cambia qualcosa. È la stessa cosa che l’ultima riga colora?'],
-      ['Still stuck? What do you notice if you read lines 3 and 4 letter by letter?', 'Ancora niente? Cosa noti se leggi le righe 3 e 4 lettera per lettera?']),
+      ['Still stuck? Read the “green” line and the “red” line letter by letter.', 'Ancora niente? Leggi la riga di “green” e quella di “red” lettera per lettera.']),
     h(['IF spice is lots THEN Diavola. IF spice is none AND you stay in THEN Margherita. IF spice is none AND you go out THEN Quattro Formaggi.', 'SE piccante è tanto ALLORA Diavola. SE piccante è niente E resti a casa ALLORA Margherita. SE piccante è niente E esci ALLORA Quattro Formaggi.'],
       ['Which answers would make you think of a spicy pizza?', 'Quali risposte ti fanno pensare a una pizza piccante?'],
       ['Which pizza fits someone who stays in and wants no spice?', 'Quale pizza va a chi resta a casa e non vuole piccante?'],
