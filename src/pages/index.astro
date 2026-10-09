@@ -306,9 +306,17 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
 
           <section class="k-pane" id="k-yourkern">
             <div><div class="k-l">yourKERN</div><h4>Your <b>KERN</b><br>so far.</h4></div>
-            <div class="k-card k-kcard" id="kKernCard"><div class="k-l">Your Kern card</div><div class="k-kc"><img class="k-kc-img" src="/img/f/yourkern-512.webp" alt="" width="512" height="512" loading="lazy" decoding="async" /><div class="k-kt">kern<i>.</i></div><h5 id="kCardH">You light up when you start from zero.</h5><div class="k-chips" id="kCardC"><span>Shaping ideas</span><span>Writing</span></div><div class="k-l" id="kCardL">Example · answer and reflect to make it yours</div></div>
+            <div class="k-card k-kcard" id="kKernCard"><div class="k-l">Your Kern card</div><div class="k-kc">
+                <div class="k-kc-top"><div class="k-kt">kern<i>.</i></div><span class="k-l" id="kCardF">Writing</span></div>
+                <div class="k-kc-path" id="kCardP" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+                <span class="k-l k-kc-n" id="kCardN">3 of 6 missions</span>
+                <p class="k-kc-q" id="kCardQ">Almost stayed home. Bag strap snapped on the bus. Lifted 40 kg anyway.</p>
+                <p class="k-kc-m" id="kCardM">Fix a flat caption · Time flew</p>
+                <h5 id="kCardH">So far, you get into it when you start from zero.</h5>
+                <div class="k-l k-kc-l" id="kCardL">Example · answer and reflect to make it yours</div>
+              </div>
               <p class="k-l k-s" id="kWhy" hidden>Why we think so: you tried 3 versions of the open brief, and you wrote "time flew".</p>
-              <div class="k-ask" id="kCardAsk" hidden><button type="button" class="k-yes" data-k-msg="Saved. This sharpens your KERN.">That feels right</button><button type="button" data-k-msg="Noted. We'll give this guess less weight.">Not really</button></div><div class="k-l k-fb" id="kFb" aria-live="polite"></div>
+              <div class="k-ask" id="kCardAsk" hidden><button type="button" class="k-yes" data-k-fit="yes" aria-pressed="false">That feels right</button><button type="button" data-k-fit="no" aria-pressed="false">Not really</button></div><div class="k-l k-fb" id="kFb" aria-live="polite"></div>
               <div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="card">Share my card</button><button type="button" class="k-ask-btn" data-k-copy="app">Copy app link</button></div></div>
             <div class="k-l k-s k-note" id="kSample">This card is an example until you finish a mission and reflect.</div>
             <div class="k-card" id="kMeterC" hidden><div class="k-l">What you light up on</div><div class="k-meter" id="kMeter"></div><p class="k-l k-s" id="kMeterN">From your reflections. Not a test.</p></div>

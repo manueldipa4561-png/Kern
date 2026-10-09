@@ -463,13 +463,75 @@ const readSignals = () => {
 };
 const ready = (sg: ReturnType<typeof readSignals>) => !!sg && sg.n === 3; // a reflection on each of the three kinds
 const chips = (box: HTMLElement, list: string[]) => { box.innerHTML = ''; list.forEach((t) => { const s = document.createElement('span'); s.textContent = t; box.appendChild(s); }); };
+// Kern card: a line you wrote, the field as a path, and the pattern once all three kinds of mission have a reflection.
+// Before that it shows your latest answer and how many reflections are left. With no answer in the field yet, it is a labelled example.
+const KIND_ME_IT = ['miglioro ciò che esiste già', 'parto da zero', 'collaboro con qualcuno']; // first person, for the image you share (English reads the same as KIND_EN)
+const CARD_EX = { f: 'Writing', n: '3 of 6 missions', q: 'Almost stayed home. Bag strap snapped on the bus. Lifted 40 kg anyway.', m: 'Fix a flat caption · Time flew', h: 'So far, you get into it when you start from zero.' };
+// "That feels right / Not really" is kept with the kind it was about ("Not really · Starting from zero"), so a new pattern starts fresh.
+const FIT = { yes: 'That feels right', no: 'Not really' } as const;
+const FIT_MSG = { yes: 'Saved. This guess stays on your card and on the image you share.', no: 'Noted. Your card marks this guess “not really” and leaves it off the image you share.' } as const;
+type Fit = keyof typeof FIT;
+const fitOf = (best: number): Fit | '' => {
+  const [a, k] = S.guess.split(' · ');
+  return k !== KSHORT[best] ? '' : a === FIT.yes ? 'yes' : a === FIT.no ? 'no' : '';
+};
+// One line from an answer: whole words, never half an emoji, no text-direction controls.
+const answerLine = (t: string, max = 100) => {
+  const s = t.replace(/[\u202A-\u202E\u2066-\u2069]/g, '').replace(/\s+/g, ' ').trim();
+  if ([...s].length <= max) return s;
+  const cut = clip(s, max), sp = cut.lastIndexOf(' ');
+  return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,.;:!?·–—-]+$/, '') + '…';
+};
+const missionsLine = (done: number, all: number) => (isIt() ? `${done} su ${all} missioni` : `${done} of ${all} missions`);
+const cardData = () => {
+  const sg = readSignals(), it = isIt(), f = S.field, mine = S.answers.filter((a) => a.f === f);
+  const latest = mine.reduce<Answer | undefined>((m, a) => (!m || a.at >= m.at ? a : m), undefined);
+  const best = sg && ready(sg) ? sg.best : -1, a = sg && best >= 0 ? sg.bestA : latest;
+  // The pattern is named only when its kind did better than "It was fine": three "It dragged" never become "you get into it".
+  const rated = mine.filter((x) => x.i % PER_ROUND === best && x.r?.e);
+  const lit = rated.length > 0 && rated.reduce((n, x) => n + SCORE[x.r!.e!], 0) / rated.length > SCORE.ok;
+  const fit = lit ? fitOf(best) : '';
+  return {
+    sg, a, lit, fit, done: doneIn(f), all: total(f), refl: mine.filter((x) => x.r?.e).length,
+    src: a ? `${tr(FIELDS[a.f].m[a.i][1])}${a.r?.e ? ' · ' + tr(FEEL_EN[a.r.e]) : ''}` : '',
+    you: best < 0 ? ''
+      : !lit ? (it ? 'Finora nessun tipo di missione ti ha fatto volare il tempo. Anche questo conta.' : 'So far, no kind of mission made time fly for you. That counts too.')
+      : it ? `Finora ti appassioni quando ${KIND_IT[best]}.` : `So far, you get into it when you ${KIND_EN[best]}.`,
+    me: !lit || fit === 'no' ? '' : it ? `Mi appassiono quando ${KIND_ME_IT[best]}.` : `I get into it when I ${KIND_EN[best]}.`, // "Not really" keeps it off the image
+  };
+};
+const renderCard = () => {
+  const c = cardData(), it = isIt(), h = $('kCardH'), fbEl = $('kFb');
+  $('kSample').hidden = !!c.a;
+  const on = c.a ? c.done : new Set([0, 1, 2]);
+  $('kCardP').innerHTML = Array.from({ length: c.a ? c.all : 6 }, (_, i) => `<i${on.has(i) ? ' class="on"' : ''}></i>`).join('');
+  h.classList.toggle('wait', !!c.a && !c.you); h.classList.toggle('no', c.fit === 'no');
+  if (!c.a) {
+    setT($('kCardF'), CARD_EX.f); setT($('kCardN'), CARD_EX.n); setT($('kCardQ'), CARD_EX.q); setT($('kCardM'), CARD_EX.m); setT(h, CARD_EX.h); setT($('kCardL'), SAMPLE.cardL);
+  } else {
+    const left = 3 - (c.sg?.n ?? 0), n = c.refl;
+    setD($('kCardF'), tr(S.field));
+    setD($('kCardN'), missionsLine(c.done.size, c.all));
+    setD($('kCardQ'), answerLine(c.a.t));
+    setD($('kCardM'), c.src);
+    setD(h, c.you || (it ? `Ancora ${left} ${left === 1 ? 'riflessione' : 'riflessioni'} e la card prova a dire cosa ti appassiona.` : `${left} more ${left === 1 ? 'reflection' : 'reflections'} and the card takes a guess at what you get into.`));
+    setD($('kCardL'), c.you
+      ? (it ? `Basata sulle tue ${n} riflessioni. Non è un test.${c.fit === 'no' ? ' Hai detto: non proprio.' : ''}` : `Based on your ${n} reflections. Not a test.${c.fit === 'no' ? ' You said: not really.' : ''}`)
+      : (it ? `La tua ultima risposta · ${n} ${n === 1 ? 'riflessione' : 'riflessioni'} finora` : `Your latest answer · ${n} ${n === 1 ? 'reflection' : 'reflections'} so far`));
+  }
+  $('kCardAsk').hidden = !c.lit; // nothing to agree with until the card names a pattern
+  kScr.querySelectorAll<HTMLElement>('#kCardAsk [data-k-fit]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.kFit === c.fit)));
+  const msg = c.fit ? FIT_MSG[c.fit] : '';
+  if (msg) fbEl.dataset.src = msg; else delete fbEl.dataset.src;
+  if (fbEl.textContent !== tr(msg)) fbEl.textContent = tr(msg); // the same words again are not news for a screen reader
+  kScr.querySelector<HTMLElement>('#kKernCard [data-k-share="card"]')!.hidden = !c.a; // your own line is worth sharing before the pattern is
+};
 const renderSignals = () => {
   const sg = readSignals(), it = isIt(), K = it ? KIND_IT : KIND_EN;
-  const done = doneSet().size;
-  $('kSample').hidden = !!sg;
+  renderCard();
   if (!sg) {
-    setT($('kGuess'), SAMPLE.guess); setT($('kWhy'), SAMPLE.why); setT($('kCardH'), SAMPLE.card); setT($('kCardL'), SAMPLE.cardL);
-    chips($('kDrawn'), SAMPLE.drawn.map(tr)); chips($('kCardC'), SAMPLE.cardC.map(tr));
+    setT($('kGuess'), SAMPLE.guess); setT($('kWhy'), SAMPLE.why);
+    chips($('kDrawn'), SAMPLE.drawn.map(tr));
   } else {
     const title = (a: Answer) => tr(FIELDS[a.f].m[a.i][1]);
     const feel = (a: Answer) => tr(FEEL_EN[a.r!.e!]);
@@ -479,19 +541,9 @@ const renderSignals = () => {
     setD($('kWhy'), it
       ? `Il motivo: hai segnato "${feel(sg.bestA)}" su ${title(sg.bestA)}${sg.worstA ? ` e "${feel(sg.worstA)}" su ${title(sg.worstA)}` : ''}.`
       : `Why we think so: you marked "${feel(sg.bestA)}" on ${title(sg.bestA)}${sg.worstA ? ` and "${feel(sg.worstA)}" on ${title(sg.worstA)}` : ''}.`);
-    // The card only names a pattern once all three kinds of mission have a reflection: one "Time flew" is not a pattern yet.
-    const left = 3 - sg.n;
-    setD($('kCardH'), ready(sg)
-      ? (it ? `Ti appassioni quando ${K[sg.best]}.` : `You light up when you ${K[sg.best]}.`)
-      : (it ? `Ancora ${left} ${left === 1 ? 'riflessione' : 'riflessioni'} e la tua card dice qualcosa.` : `${left} more ${left === 1 ? 'reflection' : 'reflections'} and your card says something.`));
-    setD($('kCardL'), done === 3 && ready(sg) ? tr('3 missions · first guess')
-      : done > 3 && ready(sg) ? (it ? `${done} missioni · ipotesi più precisa` : `${done} missions · sharper guess`)
-      : (it ? `${sg.n} ${sg.n === 1 ? 'riflessione' : 'riflessioni'} su 3` : `${sg.n} of 3 reflections`));
     chips($('kDrawn'), [tr(S.field), tr(KSHORT[sg.best])]);
-    chips($('kCardC'), ready(sg) ? [tr(S.field), tr(KSHORT[sg.best])] : [tr(S.field)]);
   }
-  $('kWhy').hidden = $('kCardAsk').hidden = $('kMeterC').hidden = !ready(sg);
-  kScr.querySelector<HTMLElement>('#kKernCard [data-k-share="card"]')!.hidden = !ready(sg); // nothing to share until the card names a pattern
+  $('kWhy').hidden = $('kMeterC').hidden = !ready(sg); // the card only names a pattern once all three kinds of mission have a reflection
   // Energy per kind of mission in this field: the average of your own "how did it feel" answers.
   const meter = $('kMeter');
   meter.innerHTML = '';
@@ -1396,11 +1448,15 @@ kWin.addEventListener('click', () => {
 $('kRwOk').addEventListener('click', closeWin);
 kRw.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); closeWin(); } });
 
-// "A first guess" feedback
+// The Kern card's "That feels right / Not really": saved with the kind it is about, and the card says what it changed (renderCard).
 const fb = $('kFb');
-const GUESSES = [...kScr.querySelectorAll<HTMLElement>('[data-k-msg]')].map((b) => b.dataset.kMsg!);
-kScr.querySelectorAll<HTMLElement>('[data-k-msg]').forEach((b) => b.addEventListener('click', () => { S.guess = b.dataset.kMsg!; save(); fb.dataset.src = S.guess; fb.textContent = tr(S.guess); }));
-if (GUESSES.includes(S.guess)) fb.dataset.src = S.guess;
+kScr.querySelectorAll<HTMLElement>('#kCardAsk [data-k-fit]').forEach((b) => b.addEventListener('click', () => {
+  const sg = readSignals();
+  if (!sg || !cardData().lit) return;
+  S.guess = `${FIT[b.dataset.kFit === 'no' ? 'no' : 'yes']} · ${KSHORT[sg.best]}`;
+  if (!save()) say(UNSAVED);
+  renderSignals();
+}));
 
 // Profile (local only) and onboarding
 const kLogin = $('kLogin'), kStart = $('kStart'), kS1 = $('kS1'), kS2 = $('kS2');
@@ -1652,44 +1708,79 @@ const shareText = async (title: string, text: string, url: string | undefined, c
   }
   if (await copy(url ? `${text} ${url}` : text)) say(copied); else say(url || text.slice(0, 120));
 };
-// Kern card as a 1080x1350 image for stories and chats.
+// Kern card as a 1080x1920 story image, with what the card shows: your answer line, the field as a path, the pattern once it is
+// ready (never after "Not really"), then the slogan and the address. The app's fonts and colours: dark ground, lime, bone.
+const STORY_W = 1080, STORY_H = 1920, STORY_X = 96, LIME = '#C9F24A', BONE = '#ECEADF', DIMB = 'rgba(236,234,223,.62)';
 const cardImage = async (): Promise<Blob | null> => {
-  try { await document.fonts.ready; } catch { /* fonts optional */ }
-  const c = document.createElement('canvas'); c.width = 1080; c.height = 1350;
-  const x = c.getContext('2d'); if (!x) return null;
-  const D = "'Bricolage Grotesque Variable', sans-serif", B = "'Inter Tight Variable', sans-serif";
-  x.fillStyle = '#0F140E'; x.fillRect(0, 0, 1080, 1350);
-  const g = x.createRadialGradient(920, 120, 0, 920, 120, 760); g.addColorStop(0, 'rgba(201,242,74,.28)'); g.addColorStop(1, 'rgba(201,242,74,0)');
-  x.fillStyle = g; x.fillRect(0, 0, 1080, 1350);
-  try { const im = new Image(); im.src = '/img/f/yourkern-512.webp'; await im.decode(); x.drawImage(im, 700, 70, 300, 300); } catch { /* card works without it */ }
-  let wx = 90; // the word moves right when the app icon fits in front of it
-  try { const ic = new Image(); ic.src = '/img/mark.webp'; await ic.decode(); x.drawImage(ic, 90, 108, 104, 104); wx = 90 + 104 + 26; } catch { /* the word alone is fine */ }
-  x.font = `800 110px ${D}`; x.fillStyle = '#E8E6DA'; x.fillText('kern', wx, 210);
-  x.fillStyle = '#C9F24A'; x.fillText('.', wx + x.measureText('kern').width, 210);
-  x.font = `500 34px ${B}`; x.fillStyle = '#b4b7a9'; x.fillText($('kCardL').textContent!.toUpperCase().slice(0, 48), 90, 470);
-  x.font = `800 92px ${D}`; x.fillStyle = '#E8E6DA';
-  let y = 590, line = '';
-  for (const w of $('kCardH').textContent!.split(' ')) {
-    const t = line ? line + ' ' + w : w;
-    if (x.measureText(t).width > 900 && line) { x.fillText(line, 90, y); y += 104; line = w; } else line = t;
+  const c = cardData();
+  if (!c.a) return null;
+  const it = isIt(), X = STORY_X, TW = STORY_W - 2 * X;
+  const D = "'Bricolage Grotesque Variable', sans-serif", B = "'Inter Tight Variable', sans-serif", SR = "'Instrument Serif', Georgia, serif";
+  try { await Promise.all([`800 96px ${D}`, `600 36px ${B}`, `italic 400 80px ${SR}`].map((f) => document.fonts.load(f))); } catch { /* the fallback fonts will do */ }
+  const cv = document.createElement('canvas'); cv.width = STORY_W; cv.height = STORY_H;
+  const x = cv.getContext('2d'); if (!x) return null;
+  x.fillStyle = '#0F140E'; x.fillRect(0, 0, STORY_W, STORY_H);
+  const g = x.createRadialGradient(STORY_W, 0, 0, STORY_W, 0, 1150); g.addColorStop(0, 'rgba(201,242,74,.24)'); g.addColorStop(1, 'rgba(201,242,74,0)');
+  x.fillStyle = g; x.fillRect(0, 0, STORY_W, STORY_H);
+  const put = (s: string, font: string, color: string, px: number, py: number) => { x.font = font; x.fillStyle = color; x.fillText(s, px, py); };
+  // Lines that fit the width: by words, by characters for a word longer than a line; a cut last line ends in "…".
+  const wrap = (s: string, font: string, max = Infinity) => {
+    x.font = font;
+    const lines: string[] = []; let line = '';
+    const add = (bit: string, sep: string) => { const next = line ? line + sep + bit : bit; if (line && x.measureText(next).width > TW) { lines.push(line); line = bit; } else line = next; };
+    for (const w of s.split(' ')) { if (x.measureText(w).width <= TW) add(w, ' '); else [...w].forEach((ch, i) => add(ch, i ? '' : ' ')); }
+    if (line) lines.push(line);
+    if (lines.length <= max) return lines;
+    let last = lines[max - 1];
+    while (last && x.measureText(last + '…').width > TW) last = [...last].slice(0, -1).join('');
+    return [...lines.slice(0, max - 1), last.trimEnd() + '…'];
+  };
+  // Header: the app icon and "kern.", below the strip a story covers with its progress bar and name.
+  let wx = X;
+  try { const ic = new Image(); ic.src = '/img/mark.webp'; await ic.decode(); x.drawImage(ic, X, 222, 96, 96); wx += 96 + 24; } catch { /* the word alone is fine */ }
+  put('kern', `800 96px ${D}`, BONE, wx, 302); put('.', `800 96px ${D}`, LIME, wx + x.measureText('kern').width, 302);
+  // The field and its path: one segment per mission, lit when done.
+  put(tr(S.field).toUpperCase(), `700 36px ${B}`, LIME, X, 440);
+  x.textAlign = 'right'; put(missionsLine(c.done.size, c.all).toUpperCase(), `600 30px ${B}`, DIMB, STORY_W - X, 440); x.textAlign = 'left';
+  const gap = 14, sw = (TW - gap * (c.all - 1)) / c.all;
+  for (let i = 0; i < c.all; i++) {
+    x.fillStyle = c.done.has(i) ? LIME : 'rgba(236,234,223,.16)'; x.beginPath();
+    if (x.roundRect) x.roundRect(X + i * (sw + gap), 470, sw, 16, 8); else x.rect(X + i * (sw + gap), 470, sw, 16);
+    x.fill();
   }
-  x.fillText(line, 90, y); y += 90;
-  x.font = `600 36px ${B}`;
-  let cx = 90;
-  [...$('kCardC').querySelectorAll('span')].forEach((s) => {
-    const t = s.textContent || '', w = x.measureText(t).width + 56;
-    x.strokeStyle = '#C9F24A'; x.lineWidth = 3; x.beginPath();
-    if (x.roundRect) x.roundRect(cx, y, w, 72, 36); else x.rect(cx, y, w, 72);
-    x.stroke(); x.fillStyle = '#E8E6DA'; x.fillText(t, cx + 28, y + 48); cx += w + 18;
-  });
-  x.font = `700 38px ${B}`; x.fillStyle = '#C9F24A'; x.fillText(`${tr('Find yours at')} ${location.host}`, 90, 1250);
-  return new Promise((res) => c.toBlob(res, 'image/png'));
+  // The middle: the quote as big as the room allows, the mission it answered, then the pattern. Set a little above the centre of the room.
+  const TOP = 560, BOTTOM = 1370, LH = 1.2, SS = 34, LS = 28, PS = 58;
+  const SF = `500 ${SS}px ${B}`, LF = `600 ${LS}px ${B}`, PF = `600 ${PS}px ${D}`, GF = `800 200px ${D}`, qf = (s: number) => `600 ${s}px ${D}`;
+  const block = (ls: string[], font: string, s: number, color: string, top: number) => { ls.forEach((l, i) => put(l, font, color, X, top + s * 0.95 + i * s * LH)); return top + ls.length * s * LH; };
+  x.font = GF; const gm = x.measureText('“'), markH = gm.actualBoundingBoxAscent + gm.actualBoundingBoxDescent; // the mark sits above the baseline: its descent is negative
+  const src = wrap(`— ${c.src}`, SF, 1), pat = c.me ? wrap(c.me, PF, 3) : [];
+  const fixed = markH + 28 + 20 + SS * LH + (pat.length ? 60 + 6 + 22 + LS * LH + 14 + pat.length * PS * LH : 0);
+  const q = `${answerLine(c.a.t)}”`, room = BOTTOM - TOP - fixed;
+  const size = [96, 84, 72, 62, 54].find((s) => wrap(q, qf(s)).length * s * LH <= room) ?? 54;
+  const lines = wrap(q, qf(size), Math.max(1, Math.floor(room / (size * LH))));
+  let y = TOP + Math.max(0, room - lines.length * size * LH) * 0.4;
+  put('“', GF, LIME, X - 6, y + gm.actualBoundingBoxAscent);
+  y = block(lines, qf(size), size, BONE, y + markH + 28);
+  y = block(src, SF, SS, DIMB, y + 20);
+  if (pat.length) {
+    x.fillStyle = LIME; x.fillRect(X, y + 60, 72, 6);
+    y = block([(it ? `Finora · da ${c.refl} riflessioni` : `So far · from ${c.refl} reflections`).toUpperCase()], LF, LS, DIMB, y + 88);
+    block(pat, PF, PS, BONE, y + 14);
+  }
+  // The slogan and the address, above the strip a story covers with its reply bar.
+  const slogan = tr('Don’t guess your passion.');
+  let ss = 80; // one line in both languages: the longer Italian line steps down until it fits
+  for (x.font = `italic 400 ${ss}px ${SR}`; x.measureText(slogan).width > TW && ss > 48; x.font = `italic 400 ${ss}px ${SR}`) ss -= 4;
+  put(slogan, `italic 400 ${ss}px ${SR}`, BONE, X, 1490);
+  put(tr('Test it.'), `italic 400 ${ss}px ${SR}`, LIME, X, 1490 + ss * 1.08);
+  put(location.host, `700 36px ${B}`, DIMB, X, 1652);
+  return new Promise((res) => cv.toBlob(res, 'image/png'));
 };
 let cardBusy = false; // one tap, one download
 const shareCard = async () => { if (cardBusy) return; cardBusy = true; try { await shareCardNow(); } finally { window.setTimeout(() => { cardBusy = false; }, 900); } };
 const shareCardNow = async () => {
-  const blob = await cardImage();
-  const text = tr('My KERN so far: {s}').replace('{s}', $('kCardH').textContent || '');
+  const blob = await cardImage(), c = cardData();
+  const text = c.me ? tr('My KERN so far: {s}').replace('{s}', c.me) : tr('Testing {f} on KERN.').replace('{f}', tr(S.field));
   if (!blob) return shareText('KERN', text, `${location.origin}/`, 'Link copied.');
   const file = new File([blob], 'my-kern-card.png', { type: 'image/png' });
   if (navigator.canShare?.({ files: [file] })) {

@@ -1039,3 +1039,26 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .k-pl-sum.over { color: var(--gold); }
 @media (prefers-reduced-motion: reduce) { .k-pl-chip { transition: none; } .k-pl-chip[aria-pressed="true"] { transform: none; } }
 #kPlayB { display: flex; flex-direction: column; gap: 18px; }
+/* v9: the Kern card shows something you made: a line from your answer, the field as a path of 6, then the pattern once it is ready. Dark in both themes. */
+.k-kc { padding: 18px 18px 16px; min-height: 0; justify-content: flex-start; gap: 0; }
+.k-kc-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.k-kc .k-kt { position: static; }
+.k-kc .k-kc-top .k-l { color: #C9F24A; font-weight: 600; text-align: right; }
+.k-kc-path { display: flex; gap: 5px; margin-top: 16px; }
+.k-kc-path i { flex: 1; height: 6px; border-radius: 999px; background: rgba(236,234,223,.16); }
+.k-kc-path i.on { background: #C9F24A; box-shadow: 0 0 10px rgba(201,242,74,.35); }
+.k-kc .k-kc-n { margin-top: 8px; }
+.k-kc .k-kc-q { margin-top: 20px; font: 600 1.375rem/1.25 var(--kd); letter-spacing: -.02em; color: var(--bone); opacity: 1; overflow-wrap: anywhere; }
+.k-kc-q::before, .k-kc-q::after { color: #C9F24A; font-weight: 800; }
+.k-kc-q::before { content: '“'; }
+.k-kc-q::after { content: '”'; }
+.k-kc .k-kc-m { margin-top: 8px; font: 500 0.875rem/1.4 'Inter Tight Variable', system-ui, sans-serif; color: rgba(236,234,223,.7); opacity: 1; }
+.k-kc h5 { margin-top: 18px; padding: 14px 0 0; border-top: 1px solid rgba(236,234,223,.16); font: 800 1.1875rem/1.2 var(--kd); letter-spacing: -.02em; color: var(--bone); }
+.k-kc h5.wait { font: 500 0.9375rem/1.45 'Inter Tight Variable', system-ui, sans-serif; letter-spacing: 0; color: rgba(236,234,223,.85); }
+.k-kc h5.no { color: rgba(236,234,223,.55); text-decoration: line-through 1px rgba(236,234,223,.55); }
+.k-kc .k-kc-l { margin-top: 8px; font: 400 0.8125rem/1.45 'Inter Tight Variable', system-ui, sans-serif; letter-spacing: 0; text-transform: none; color: rgba(236,234,223,.7); }
+/* That feels right / Not really: neither is pushed; the one you picked stays lit */
+#kCardAsk button { background: none; color: var(--fg); border-color: color-mix(in srgb, var(--fg) 45%, transparent); }
+#kCardAsk button[aria-pressed="true"] { background: var(--acc); color: var(--on); border-color: var(--acc); }
+#kKernCard #kFb { padding-left: 4px; font: 500 0.875rem/1.45 'Inter Tight Variable', system-ui, sans-serif; letter-spacing: 0; text-transform: none; }
+#kKernCard #kFb:empty { display: none; }
