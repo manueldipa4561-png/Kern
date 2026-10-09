@@ -8,7 +8,7 @@ export const ASK: Record<string, string> = {
   'Writing.2': t2('Pick the version you would keep and say why.', 'Scegli la versione che terresti e dimmi perché.'),
   'Writing.5': t2('Pick one name and write its counter sign in one line.', 'Scegli un nome e scrivi il suo cartello da banco in una riga.'),
   'Code.2': t2('Try to beat the rule: write the trick you found.', 'Prova a battere la regola: scrivi il trucco che hai trovato.'),
-  'Code.5': t2('Be the robot: follow the steps word for word and tell where you got stuck.', 'Fai il robot: segui i passaggi alla lettera e dimmi dove ti sei bloccato.'),
+  'Code.5': t2('Be the robot: follow the steps word for word and tell where you got stuck.', 'Fai il robot: segui i passaggi alla lettera e dimmi dove ti blocchi.'),
   'Video.2': t2('Write the three questions you would ask to direct this story.', 'Scrivi le tre domande che faresti per dirigere questa storia.'),
   'Video.5': t2('Would this reply calm you down? Name the second you would cut.', 'Questa risposta ti calmerebbe? Dimmi il secondo che taglieresti.'),
   'Selling.2': t2('Be the haggler: push back once. What would you say next?', 'Fai quello che tratta: insisti una volta. Cosa diresti dopo?'),

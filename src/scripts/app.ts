@@ -473,15 +473,15 @@ const renderSignals = () => {
     const title = (a: Answer) => tr(FIELDS[a.f].m[a.i][1]);
     const feel = (a: Answer) => tr(FEEL_EN[a.r!.e!]);
     setD($('kGuess'), it
-      ? `Sembri accenderti quando ${K[sg.best]}${sg.worst >= 0 ? ` e faticare quando ${K[sg.worst]}` : ''}.`
+      ? `Sembri appassionarti quando ${K[sg.best]}${sg.worst >= 0 ? ` e faticare quando ${K[sg.worst]}` : ''}.`
       : `You seemed to light up when you ${K[sg.best]}${sg.worst >= 0 ? ` and drag when you ${K[sg.worst]}` : ''}.`);
     setD($('kWhy'), it
-      ? `Perché lo pensiamo: hai segnato "${feel(sg.bestA)}" su ${title(sg.bestA)}${sg.worstA ? ` e "${feel(sg.worstA)}" su ${title(sg.worstA)}` : ''}.`
+      ? `Il motivo: hai segnato "${feel(sg.bestA)}" su ${title(sg.bestA)}${sg.worstA ? ` e "${feel(sg.worstA)}" su ${title(sg.worstA)}` : ''}.`
       : `Why we think so: you marked "${feel(sg.bestA)}" on ${title(sg.bestA)}${sg.worstA ? ` and "${feel(sg.worstA)}" on ${title(sg.worstA)}` : ''}.`);
     // The card only names a pattern once all three kinds of mission have a reflection: one "Time flew" is not a pattern yet.
     const left = 3 - sg.n;
     setD($('kCardH'), ready(sg)
-      ? (it ? `Ti accendi quando ${K[sg.best]}.` : `You light up when you ${K[sg.best]}.`)
+      ? (it ? `Ti appassioni quando ${K[sg.best]}.` : `You light up when you ${K[sg.best]}.`)
       : (it ? `Ancora ${left} ${left === 1 ? 'riflessione' : 'riflessioni'} e la tua card dice qualcosa.` : `${left} more ${left === 1 ? 'reflection' : 'reflections'} and your card says something.`));
     setD($('kCardL'), done === 3 && ready(sg) ? tr('3 missions · first guess')
       : done > 3 && ready(sg) ? (it ? `${done} missioni · ipotesi più precisa` : `${done} missions · sharper guess`)
@@ -799,7 +799,7 @@ const STUCK = /(stuck|don'?t know|do not know|no idea|not sure|blank|boh|non so|
 const pick = <T,>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
 const Q_STUCK = [t2('Let us make it smaller. What is one sentence you could write in 30 seconds?', 'Facciamolo più piccolo. Qual è una frase che potresti scrivere in 30 secondi?'), t2('Forget good. What would the roughest version look like?', 'Dimentica il bello. Come sarebbe la versione più grezza?'), t2('Who is it for? Name one real person.', 'Per chi è? Fai il nome di una persona vera.')];
 const Q_SMALL = [t2('What is the smallest part of it you could finish today?', 'Qual è la parte più piccola che potresti finire oggi?'), t2('If you only had 5 minutes, what would you do first?', 'Se avessi solo 5 minuti, cosa faresti per prima cosa?')];
-const Q_MORE = [[t2('What would make that clearer for someone brand new?', 'Cosa lo renderebbe più chiaro per chi è nuovo?'), t2('If a friend read that, what would they ask first?', 'Se un amico lo leggesse, cosa chiederebbe per prima cosa?')], [t2('What is the strongest word in that, and what would you cut?', 'Qual è la parola più forte e cosa taglieresti?'), t2('What did you change from your first version, and why?', 'Cosa hai cambiato rispetto alla prima versione, e perché?')]];
+const Q_MORE = [[t2('What would make that clearer for someone brand new?', 'Cosa lo renderebbe più chiaro per chi è nuovo?'), t2('If a friend read that, what would they ask first?', 'Se qualcuno lo leggesse, cosa chiederebbe per prima cosa?')], [t2('What is the strongest word in that, and what would you cut?', 'Qual è la parola più forte e cosa taglieresti?'), t2('What did you change from your first version, and why?', 'Cosa hai cambiato rispetto alla prima versione, e perché?')]];
 // Echo the user's own opening words back, so the question is clearly about their idea.
 const echo = (v: string) => { const w = v.split(/\s+/); return `“${w.slice(0, 6).join(' ')}${w.length > 6 ? '…' : ''}” `; };
 let announced = '';
@@ -1015,7 +1015,7 @@ function renderBrief(f: string, i: number) {
   setX($('kXAT'), pic && x.asset.only ? x.asset.title : v.asset.title); setX($('kXAB'), v.asset.body); $('kXAB').classList.toggle('mono', v.asset.mono);
   $('kXAB').hidden = !!(pic && x.asset.only);
   kXAI.hidden = !pic; kXAI.dataset.en = pic ?? ''; kXAI.dataset.it = x.asset.imgIt ?? pic ?? ''; kXAI.dataset.alt = x.asset.body; setPic();
-  tick(kXSteps, t2('Read the brief', 'Leggi il brief'), true, 'st', stepProg);
+  tick(kXSteps, t2('Read the brief', 'Leggi la missione'), true, 'st', stepProg);
   v.steps.forEach((s) => tick(kXSteps, s, cur.edit >= 0, 'st', stepProg)); // an answer being edited is a finished one: its steps show as done
   stepProg();
   x.bar.forEach((b) => tick(kRfBI, b, false, 'bar', barProg)); // after Submit: does yours do what a strong answer does? Self-ticked, never graded
@@ -1265,7 +1265,7 @@ function openEdit(idx: number) {
 // The done screen fills all three in CSS (.drop); editing an answer hides the bar.
 const kProg = $('kProg'), progFill = [...kProg.querySelectorAll<HTMLElement>('b')];
 const ANSWER_FULL = 60;
-const PROG_TEXT = [t2('Step 1 of 3: read the brief', 'Passo 1 di 3: leggi il brief'), t2('Step 2 of 3: write your answer', 'Passo 2 di 3: scrivi la tua risposta'), t2('Step 3 of 3: reflect', 'Passo 3 di 3: rifletti'), t2('Mission done', 'Missione completata')];
+const PROG_TEXT = [t2('Step 1 of 3: read the brief', 'Passo 1 di 3: leggi la missione'), t2('Step 2 of 3: write your answer', 'Passo 2 di 3: scrivi la tua risposta'), t2('Step 3 of 3: reflect', 'Passo 3 di 3: rifletti'), t2('Mission done', 'Missione completata')];
 const setProgText = (stage: number) => { kProg.setAttribute('aria-valuenow', String(Math.min(stage, 3))); kProg.setAttribute('aria-valuetext', tr(PROG_TEXT[stage - 1])); };
 function renderProg() {
   const reflecting = !kShR.hidden, written = kTa.value.trim().length;
@@ -1732,12 +1732,12 @@ $('kDareGo').addEventListener('click', () => { if (dare) openAnswer(dare.f, dare
 // Co-op with a friend (coop.ts): two missions in every field are finished by two people through links, with no server. A link carries one answer
 // after the #; the friend's reply comes back the same way. The pair lives in S.coops, so it survives a reload and syncs with the trail.
 function isCoop(f: string, i: number) { return COOP_KEYS.includes(`${f}.${i}`); }
-const myName = () => [...cleanName(S.name)].slice(0, MAX_NAME).join('') || (isIt() ? 'Un amico' : 'A friend');
+const myName = () => [...cleanName(S.name)].slice(0, MAX_NAME).join('') || (isIt() ? 'Qualcuno' : 'A friend');
 const coopAsk = (f: string, i: number) => tr(ASK[`${f}.${i}`]);
 const keepCoops = () => { S.coops = S.coops.slice(-30); };
 let coopIn: Coop | null = null, coopNote = '', coopGo = false; // the friend's request waiting to be answered; a one-line notice (and whether to open yourKERN) after a link was opened
 function receiveCoopReply(c: Coop) { // someone answered my co-op: keep both halves (coop.ts decides which row it belongs to, or that it is not for me)
-  const res = settleReply(S.coops, c, Date.now()), it = isIt(), who = c.m || (it ? 'Un amico' : 'A friend');
+  const res = settleReply(S.coops, c, Date.now()), it = isIt(), who = c.m || (it ? 'Qualcuno' : 'A friend');
   if (res.status === 'stranger') { coopNote = it ? 'Questa risposta non è per una tua missione.' : 'This reply is not for one of your missions.'; return; }
   if (res.status === 'own') { coopNote = it ? 'Questa è la risposta che hai mandato tu.' : 'This is the reply you sent.'; return; }
   if (res.status !== 'same') { S.coops = res.coops; keepCoops(); save(); }
@@ -1749,7 +1749,7 @@ function readCoopLink() {
   const c = decodeCoop(location.hash);
   if (c?.r) { receiveCoopReply(c); dropCoopHash(); } // a reply is kept in the trail at once
   else if (c) coopIn = c;
-  else if (location.hash.startsWith('#coop=')) { coopNote = isIt() ? 'Questo link non funziona: chiedi all’amico di rimandarlo.' : 'This link is broken: ask your friend to send it again.'; dropCoopHash(); } // a chat app may cut or add characters to a link
+  else if (location.hash.startsWith('#coop=')) { coopNote = isIt() ? 'Questo link non funziona: chiedi di rimandartelo.' : 'This link is broken: ask your friend to send it again.'; dropCoopHash(); } // a chat app may cut or add characters to a link
 }
 readCoopLink();
 addEventListener('hashchange', () => { if (location.hash.startsWith('#coop=')) location.reload(); }); // a link opened while KERN is already open changes only the fragment
@@ -1772,7 +1772,7 @@ function renderCoopIn() { // the card for a friend's request
   const c = coopIn, card = $('kCoop');
   card.hidden = !c;
   if (!c) return;
-  const who = c.n || (isIt() ? 'Un amico' : 'A friend');
+  const who = c.n || (isIt() ? 'Qualcuno' : 'A friend');
   setD($('kCoL'), `Co-op · ${who}`); setD($('kCoT'), tr(FIELDS[c.f].m[c.i][1]));
   setD($('kCoQL'), isIt() ? `La risposta di ${who}` : `${who}’s answer`); setD($('kCoQ'), c.a);
   setD($('kCoAsk'), coopAsk(c.f, c.i));
@@ -1805,19 +1805,19 @@ function renderCoops() { // yourKERN: every co-op mission answered, sent, or rep
     if (act) { const b = mk('button', 'k-ask-btn', act[0]) as HTMLButtonElement; b.type = 'button'; b.setAttribute('aria-label', `${act[0]}: ${title}`); b.addEventListener('click', act[1]); r.append(b); } // the same two words repeat on every row
     return r;
   };
-  const rows: { pri: number; el: HTMLElement }[] = [], used = new Set<CoopRec>(), seen = new Set<string>(), me = tr('You'), unknown = it ? 'Un amico' : 'A friend';
+  const rows: { pri: number; el: HTMLElement }[] = [], used = new Set<CoopRec>(), seen = new Set<string>(), me = tr('You'), unknown = it ? 'Qualcuno' : 'A friend';
   for (const a of [...S.answers].reverse()) {
     if (!isCoop(a.f, a.i) || seen.has(`${a.f}.${a.i}`)) continue;
     seen.add(`${a.f}.${a.i}`);
     const rec = S.coops.find((r) => r.role === 'out' && r.f === a.f && r.i === a.i && (r.at === a.at || r.mine.trim() === clip(a.t, MAX_ANSWER).trim()));
     if (rec) used.add(rec);
-    const friend = rec?.with || (it ? 'un amico' : 'a friend');
+    const friend = rec?.with || (it ? 'qualcuno' : 'a friend');
     rows.push({ pri: rec?.theirs ? 0 : rec ? 1 : 2, el: row(tr(FIELDS[a.f].m[a.i][1]), !rec ? tr('Not sent yet') : rec.theirs ? (it ? `Fatta con ${friend}` : `Done with ${friend}`) : tr('Sent. Waiting for a reply.'),
       rec?.theirs ? [[me, clip(a.t, MAX_ANSWER)], [friend, rec.theirs]] : [], [tr(rec ? 'Send again' : 'Send to a friend'), () => sendCoop(a)]) });
   }
   for (const r of [...S.coops].reverse()) {
-    if (r.role === 'out' && !used.has(r)) rows.push({ pri: r.theirs ? 0 : 1, el: row(tr(FIELDS[r.f].m[r.i][1]), r.theirs ? (it ? `Fatta con ${r.with || 'un amico'}` : `Done with ${r.with || 'a friend'}`) : tr('Sent. Waiting for a reply.'), r.theirs ? [[me, r.mine], [r.with || unknown, r.theirs]] : []) }); // a second friend's reply, or an answer deleted since
-    if (r.role === 'in') rows.push({ pri: 0, el: row(tr(FIELDS[r.f].m[r.i][1]), it ? `Hai risposto a ${r.with || 'un amico'}` : `You replied to ${r.with || 'a friend'}`, [[r.with || unknown, r.theirs], [me, r.mine]], [tr('Send again'), () => sendCoopReply(r)]) });
+    if (r.role === 'out' && !used.has(r)) rows.push({ pri: r.theirs ? 0 : 1, el: row(tr(FIELDS[r.f].m[r.i][1]), r.theirs ? (it ? `Fatta con ${r.with || 'qualcuno'}` : `Done with ${r.with || 'a friend'}`) : tr('Sent. Waiting for a reply.'), r.theirs ? [[me, r.mine], [r.with || unknown, r.theirs]] : []) }); // a second friend's reply, or an answer deleted since
+    if (r.role === 'in') rows.push({ pri: 0, el: row(tr(FIELDS[r.f].m[r.i][1]), it ? `Hai risposto a ${r.with || 'qualcuno'}` : `You replied to ${r.with || 'a friend'}`, [[r.with || unknown, r.theirs], [me, r.mine]], [tr('Send again'), () => sendCoopReply(r)]) });
   }
   card.hidden = !rows.length;
   box.replaceChildren(...rows.sort((x, y) => x.pri - y.pri).slice(0, 12).map((x) => x.el)); // finished pairs first, so a reply that just arrived is never past the cut

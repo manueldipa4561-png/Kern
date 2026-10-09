@@ -8,7 +8,7 @@ import { t2 } from './i18n';
 export type Asset = { title: string; body: string; mono: boolean; img?: string; imgIt?: string; only?: boolean };
 export type MissionX = { who: string; brief: string; asset: Asset; steps: string[]; mins: number; bar: string[]; twist: string };
 
-const tag = (en: string, it: string) => t2('Practice brief · ' + en, 'Brief di pratica · ' + it);
+const tag = (en: string, it: string) => t2('Practice brief · ' + en, 'Missione di prova · ' + it);
 
 export const MX: Record<string, MissionX[]> = {
   Design: [
@@ -1052,7 +1052,7 @@ export const MX: Record<string, MissionX[]> = {
           'Marco ha pagato internet: 36 €\nChiara ha comprato carta igienica e sapone: 12 €\nSara ha pagato la luce: 84 €\nTeo questo mese non ha pagato niente\nTutte e tre le spese si dividono in quattro'),
       },
       steps: [
-        t2('Say the task and paste the payments into the prompt.', 'Di’ qual è il compito e incolla i pagamenti nel prompt.'),
+        t2('Say the task and paste the payments into the prompt.', 'Spiega cosa serve e incolla i pagamenti nel prompt.'),
         t2('Name the columns you want in the table.', 'Scrivi le colonne che vuoi nella tabella.'),
         t2('Ask the AI to show its sums, so you can check them.', 'Chiedi all’AI di mostrare i calcoli, così puoi controllarli.'),
       ],

@@ -71,7 +71,7 @@ export const FIELD_INFO: Record<string, FieldInfo> = {
     hard: [t2('Getting a sure-sounding answer that is wrong', 'Ricevere una risposta sicura di sé ma sbagliata'), t2('Knowing what to tell the AI and what to leave out', 'Capire cosa dire all’AI e cosa lasciare fuori')],
     steps: {
       ask: t2('Ask someone who uses an AI every day what they add when its first answer is bland.', 'Chiedi a qualcuno che usa un’AI ogni giorno cosa aggiunge quando la prima risposta è insipida.'),
-      make: t2('Pick a small task this week, like a message or a plan, and rewrite the prompt three times. Keep the best.', 'Scegli un compito piccolo questa settimana, come un messaggio o un piano, e riscrivi il prompt tre volte. Tieni il migliore.'),
+      make: t2('Pick a small task this week, like a message or a plan, and rewrite the prompt three times. Keep the best.', 'Scegli una cosa piccola da fare questa settimana, come un messaggio o un piano, e riscrivi il prompt tre volte. Tieni il migliore.'),
       learn: t2('Ask an AI the same question twice, once vague and once with details, and write down what changed.', 'Fai la stessa domanda a un’AI due volte, una vaga e una con i dettagli, e scrivi cosa è cambiato.'),
     },
   },
