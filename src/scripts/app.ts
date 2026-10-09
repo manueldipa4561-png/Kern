@@ -3,7 +3,7 @@
 //  profile ──> field ──> mission ──> answer ──> reflection ──> signals ──> Kern card ──> share
 //                           ^            │ (draft autosaved)      │
 //                           └────────────┴── yourKERN / Trail ◄───┘
-import { IT, t2 } from './i18n';
+import { EN, IT, t2 } from './i18n';
 import { icon } from './icons';
 import { FIELDS } from './fields';
 import { FIELD_INFO } from './fieldinfo';
@@ -222,7 +222,7 @@ const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lite = matchMedia('(hover: none) and (pointer: coarse)').matches || /[?&]lite\b/.test(location.search);
 document.documentElement.classList.toggle('lite', lite);
 const isIt = () => S.lang === 'it';
-const tr = (s: string) => (S.lang === 'it' && IT[s]) || s;
+const tr = (s: string) => (S.lang === 'it' ? IT[s] : EN[s]) || s; // EN: "Selling" reads "Selling online" wherever a field name shows
 const setT = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.innerHTML = tr(en); };
 // Dynamic text built in code: clear data-en so a language switch does not overwrite it.
 const setD = (el: Element, text: string) => { (el as HTMLElement).dataset.en = ''; el.textContent = text; };

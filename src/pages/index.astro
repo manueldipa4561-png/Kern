@@ -12,7 +12,7 @@ const touchIcon = 'data:image/png;base64,' + readFileSync('public/icons/apple-to
 // Link previews (chat apps, social) need a full address for the image: Netlify gives the site's main address as URL while it builds (a local build has none, so the path stays relative).
 const site = (process.env.URL ?? '').replace(/\/$/, '');
 // Each field with one plain line under its name on the picker: what you do in it (Italian in i18n.ts).
-const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words people actually read'], ['Code', 'Tell a computer what to do'], ['Video', 'Plan and cut short clips'], ['Selling', 'Get someone to say yes'], ['Music', 'Pick sounds for a mood'], ['Prompting', 'Tell an AI exactly what you want']];
+const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words people actually read'], ['Code', 'Tell a computer what to do'], ['Video', 'Plan and cut short clips'], ['Selling', 'Sell your own things: listings, DMs, haggling'], ['Music', 'Pick sounds for a mood'], ['Prompting', 'Tell an AI exactly what you want']];
 ---
 <!doctype html>
 <html lang="en">
@@ -20,7 +20,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>KERN · Don't guess your passion. Test it.</title>
-    <meta name="description" content="Try short missions in design, writing, code, video, selling, music and prompting with AI, with an AI co-pilot that only asks questions. Find your passion by testing different paths. Free, no account." />
+    <meta name="description" content="Try short missions in design, writing, code, video, selling online, music and prompting with AI, with an AI co-pilot that only asks questions. Find your passion by testing different paths. Free, no account." />
     <meta name="theme-color" content="#0F140E" />
     <link rel="preload" as="font" type="font/woff2" href={interFont} crossorigin />
     <link rel="preload" as="font" type="font/woff2" href={bricolageFont} crossorigin />
@@ -34,7 +34,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
     <meta name="apple-mobile-web-app-title" content="KERN" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="KERN" />
-    <meta property="og:description" content="Try short missions in design, writing, code, video, selling, music and prompting with AI, with an AI co-pilot that only asks questions. Find your passion by testing different paths. Free, no account." />
+    <meta property="og:description" content="Try short missions in design, writing, code, video, selling online, music and prompting with AI, with an AI co-pilot that only asks questions. Find your passion by testing different paths. Free, no account." />
     <meta property="og:image" content={`${site}/og.jpg`} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />

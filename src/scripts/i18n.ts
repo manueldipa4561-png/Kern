@@ -92,7 +92,7 @@ export const IT: Record<string, string> = {
         'Words people actually read': 'Parole che si leggono davvero',
         'Tell a computer what to do': 'Di’ a un computer cosa fare',
         'Plan and cut short clips': 'Pensa e monta clip brevi',
-        'Get someone to say yes': 'Convinci qualcuno a dire sì',
+        'Sell your own things: listings, DMs, haggling': 'Vendi le tue cose: annunci, DM, trattative',
         'Pick sounds for a mood': 'Scegli i suoni per un’atmosfera',
         'Tell an AI exactly what you want': 'Spiega a un’AI cosa vuoi, esattamente',
         'KERN is for 18+ for now, because it is built for adults and keeps your answers.': 'Per ora KERN è per chi ha almeno 18 anni, perché è pensata per gli adulti e conserva le tue risposte.',
@@ -101,7 +101,7 @@ export const IT: Record<string, string> = {
         'Pick at least one field.': 'Scegli almeno un campo.',
         "Good. Let's find out.": 'Bene. Scopriamolo.',
         'What are you<br>curious about <b>right now?</b>': 'Cosa ti incuriosisce<br><b>adesso?</b>',
-        'Code': 'Codice', 'Selling': 'Vendere', 'Music': 'Musica',
+        'Code': 'Codice', 'Selling': 'Vendere online','Music': 'Musica',
         'Start my first mission': 'Inizia la mia prima missione',
         'Answer #7': 'Risposta #7', 'Answer #31': 'Risposta #31', 'Answer #12': 'Risposta #12',
         'Ranked by anonymous review, not likes.': 'Classifica da revisione anonima, non dai like.',
@@ -338,7 +338,7 @@ export const IT: Record<string, string> = {
         'Limit reached: {n} characters.': 'Limite raggiunto: {n} caratteri.',
         'Demo profile with sample data. Tap to leave the demo.': 'Profilo demo con dati di esempio. Tocca per uscire dalla demo.',
         'KERN.AI is typing': 'KERN.AI sta scrivendo',
-        'Try short missions in design, writing, code, video, selling, music and prompting with AI, with an AI co-pilot that only asks questions. Find your passion by testing different paths. Free, no account.': 'Prova brevi missioni di design, scrittura, codice, video, vendita, musica e prompting con l’AI, con un co-pilota AI che fa solo domande. Trova la tua passione provando strade diverse. Gratis, senza account.',
+        'Try short missions in design, writing, code, video, selling online, music and prompting with AI, with an AI co-pilot that only asks questions. Find your passion by testing different paths. Free, no account.': 'Prova brevi missioni di design, scrittura, codice, video, vendita online, musica e prompting con l’AI, con un co-pilota AI che fa solo domande. Trova la tua passione provando strade diverse. Gratis, senza account.',
         'Yours': 'La tua',
         'One strong answer': 'Una buona risposta',
         'Not a grade. Spot one thing you would try next time.': 'Non è un voto. Trova una cosa da provare la prossima volta.',
@@ -358,6 +358,9 @@ export const IT: Record<string, string> = {
         'Noted. Your card marks this guess “not really” and leaves it off the image you share.': 'Preso nota. La card segna questa ipotesi come “non proprio” e la lascia fuori dall’immagine che condividi.',
         'Testing {f} on KERN.': 'Sto provando {f} su KERN.',
 };
+// English shown for a key that reads differently on screen: the field key 'Selling' stays in storage, links and data (Italian is in IT).
+// Null prototype: tr() looks up any text, typed words too, and "constructor" must not find a function.
+export const EN: Record<string, string> = Object.assign(Object.create(null), { Selling: 'Selling online' });
 // English texts registered twice with different Italian: the last one silently wins. npm test fails if this list is not empty.
 export const CLASHES: string[] = [];
 export const t2 = (en: string, it: string) => { if (IT[en] !== undefined && IT[en] !== it) CLASHES.push(en); IT[en] = it; return en; };
