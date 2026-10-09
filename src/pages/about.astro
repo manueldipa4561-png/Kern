@@ -24,12 +24,12 @@ import '@fontsource-variable/bricolage-grotesque';
       .top a, .foot a { display: inline-block; padding: 10px 6px; margin: -10px -6px; } /* 44px tap areas without moving the links */
       .foot { margin-top: 32px; }
       hr { border: 0; border-top: 1px solid color-mix(in srgb, var(--fg) 20%, transparent); margin: 40px 0; }
-      #en, #it { scroll-margin-top: 48px; }
+      #en, #it, #de, #fr { scroll-margin-top: 48px; }
     </style>
   </head>
   <body>
     <main>
-      <p class="top" id="en"><a href="/">← KERN</a> · <a href="#it" lang="it">Italiano</a></p>
+      <p class="top" id="en"><a href="/">← KERN</a> · <a href="#it" lang="it">Italiano</a> · <a href="#de" lang="de">Deutsch</a> · <a href="#fr" lang="fr">Français</a></p>
       <h1>About KERN</h1>
       <small>Don’t guess your passion. Test it.</small>
       <h2>What it is</h2>
@@ -49,7 +49,7 @@ import '@fontsource-variable/bricolage-grotesque';
       <p class="foot"><a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></p>
       <hr />
       <section id="it" lang="it">
-        <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a></p>
+        <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a> · <a href="#de" lang="de">Deutsch</a> · <a href="#fr" lang="fr">Français</a></p>
         <h1>Info su KERN</h1>
         <small>La passione non si indovina. Si prova.</small>
         <h2>Cos’è</h2>
@@ -67,6 +67,48 @@ import '@fontsource-variable/bricolage-grotesque';
           <li><b>Cancellare:</b> nelle Impostazioni, Elimina i miei dati (o Elimina il mio account) cancella tutto. Puoi anche scrivere a <a href="mailto:manuel@trykern.it">manuel@trykern.it</a>.</li>
         </ul>
         <p class="foot"><a href="/privacy/#it">Privacy</a> · <a href="/terms/#it">Termini</a></p>
+      </section>
+      <hr />
+      <section id="de" lang="de">
+        <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a> · <a href="#it" lang="it">Italiano</a> · <a href="#fr" lang="fr">Français</a></p>
+        <h1>Über KERN</h1>
+        <small>Rate deine Leidenschaft nicht. Teste sie.</small>
+        <h2>Was es ist</h2>
+        <p>KERN ist eine kostenlose App, mit der du deine Leidenschaft findest, indem du verschiedene Wege ausprobierst. Du machst kurze Missionen in sieben Bereichen (Design, Schreiben, Code, Video, Online-Verkauf, Musik und Prompting mit KI), sagst in 20 Sekunden, wie sich jede angefühlt hat, und siehst, welcher Weg zu dir passt. Kein Konto nötig.</p>
+        <p>Sieben kreative und digitale Wege, vorerst.</p>
+        <h2>Wer es macht</h2>
+        <p>KERN wird von Manuel Di Paolo in Italien gemacht. Schreib an <a href="mailto:manuel@trykern.it">manuel@trykern.it</a> für alles: eine Frage, Feedback oder deine Daten.</p>
+        <h2>Für Eltern</h2>
+        <ul>
+          <li><b>Alter:</b> KERN ist vorerst für Menschen ab 18 Jahren, weil es für Erwachsene gemacht ist und speichert, was Menschen schreiben.</li>
+          <li><b>Was gespeichert wird:</b> Ohne Konto bleiben Antworten, Reflexionen und Einstellungen im Browser auf dem jeweiligen Gerät. Mit Konto wird eine Kopie bei Supabase in der EU (Frankfurt, Deutschland) gespeichert, damit sie auf allen Geräten synchronisiert wird.</li>
+          <li><b>KERN.AI:</b> Der Co-Pilot stellt nur Fragen. Was jemand ihm schreibt, wird an den KI-Anbieter (Anthropic) gesendet, um eine Antwort zu bekommen, und KERN behält es nicht. Wenn eine Nachricht schwer klingt, pausiert er die Mission und schlägt vor, mit einer Vertrauensperson oder einer Beratungsstelle in der Nähe zu sprechen.</li>
+          <li><b>Keine Werbung:</b> keine Werbung und keine Cookies. Nutzungszählungen bleiben aus, solange die Person nicht Ja sagt, und enthalten nie einen Namen oder etwas, das sie geschrieben hat.</li>
+          <li><b>Nichts ohne Einwilligung geteilt:</b> Kein Unternehmen sieht eine Antwort, außer die Person entscheidet sich, sie zu senden, eine Mission nach der anderen. Das ist noch nicht aktiv.</li>
+          <li><b>Löschen:</b> In den Einstellungen entfernt das Löschen der Daten (oder des Kontos) alles. Du kannst auch an <a href="mailto:manuel@trykern.it">manuel@trykern.it</a> schreiben.</li>
+        </ul>
+        <p class="foot"><a href="/privacy/#de">Datenschutz</a> · <a href="/terms/#de">Nutzungsbedingungen</a></p>
+      </section>
+      <hr />
+      <section id="fr" lang="fr">
+        <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a> · <a href="#it" lang="it">Italiano</a> · <a href="#de" lang="de">Deutsch</a></p>
+        <h1>À propos de KERN</h1>
+        <small>Ne devine pas ta passion. Teste-la.</small>
+        <h2>Ce que c’est</h2>
+        <p>KERN est une app gratuite pour trouver ta passion en testant différents chemins. Tu essaies de courtes missions dans sept domaines (design, écriture, code, vidéo, vente en ligne, musique et prompting avec l’IA), tu dis en 20 secondes ce que tu as ressenti pour chacune, et tu vois quel chemin te parle. Pas besoin de compte.</p>
+        <p>Sept chemins créatifs et numériques, pour l’instant.</p>
+        <h2>Qui le fait</h2>
+        <p>KERN est fait par Manuel Di Paolo, en Italie. Écris à <a href="mailto:manuel@trykern.it">manuel@trykern.it</a> pour tout : une question, un retour ou tes données.</p>
+        <h2>Pour les parents</h2>
+        <ul>
+          <li><b>Âge :</b> KERN est pour l’instant destiné aux personnes de 18 ans et plus, parce qu’il est conçu pour les adultes et conserve ce que les gens écrivent.</li>
+          <li><b>Ce qui est conservé :</b> sans compte, les réponses, réflexions et réglages restent dans le navigateur de l’appareil utilisé. Avec un compte, une copie est conservée chez Supabase dans l’UE (Francfort, Allemagne), pour la synchroniser entre les appareils.</li>
+          <li><b>KERN.AI :</b> le copilote ne fait que poser des questions. Ce qu’on lui écrit est envoyé au fournisseur d’IA (Anthropic) pour obtenir une réponse, et KERN ne le conserve pas. Si un message semble lourd, il met la mission en pause et suggère de parler à une personne de confiance ou à une ligne d’écoute près de chez soi.</li>
+          <li><b>Pas de pub :</b> ni publicité ni cookies. Les statistiques d’utilisation restent désactivées tant que la personne ne dit pas oui, et ne contiennent jamais un nom ni ce qu’elle a écrit.</li>
+          <li><b>Rien de partagé sans consentement :</b> aucune entreprise ne voit une réponse si la personne ne choisit pas de la lui envoyer, une mission à la fois. Ce n’est pas encore actif.</li>
+          <li><b>Supprimer :</b> dans les réglages, supprimer les données (ou le compte) efface tout. Tu peux aussi écrire à <a href="mailto:manuel@trykern.it">manuel@trykern.it</a>.</li>
+        </ul>
+        <p class="foot"><a href="/privacy/#fr">Confidentialité</a> · <a href="/terms/#fr">Conditions d’utilisation</a></p>
       </section>
     </main>
   </body>

@@ -972,7 +972,7 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .k-sheet { transition: background-color .19s; }
 #kSet, #kFld { background: color-mix(in srgb, var(--bg) calc(55% * (1 - var(--drag, 0))), transparent); }
 .k-seg { position: relative; display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; --n: 2; }
-.k-seg.k-txt { --n: 4; }
+.k-seg.k-txt, .k-seg.k-lang { --n: 4; }
 .k-seg::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: calc(100% / var(--n)); border-radius: 999px; background: var(--acc); transform: translateX(calc(var(--i, 0) * 100%)); transition: transform .3s var(--out); }
 .k-seg button { position: relative; z-index: 1; text-align: center; }
 .k-seg button[aria-pressed="true"] { background: none; transition: color .2s; }
