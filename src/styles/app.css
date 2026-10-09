@@ -1046,7 +1046,7 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 @media (prefers-reduced-motion: reduce) { .k-pl-chip { transition: none; } .k-pl-chip[aria-pressed="true"] { transform: none; } }
 /* Beat: a row of 8 steps per drum. Each step is a 44px-high cell with its pad inside, so the cells touch and every target is as wide as the row allows. */
 .k-pl-beat { display: flex; flex-direction: column; gap: 4px; }
-.k-pl-steps { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); margin-bottom: 6px; }
+.k-pl-steps { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); margin: 0 -8px 6px; } /* into the sheet's side padding: each step reaches 44px wide on a 375px phone */
 .k-pl-step { min-height: 44px; padding: 3px 2px; border: 0; background: none; color: var(--dim); cursor: pointer; }
 .k-pl-step i { display: grid; place-items: center; height: 100%; min-height: 38px; box-sizing: border-box; border-radius: 10px; border: 1px solid var(--edge); background: var(--surf); font: 600 0.75rem var(--mono); transition: background-color .1s, box-shadow .1s, transform .15s var(--spring); }
 .k-pl-step[aria-pressed="true"] i { background: var(--acc); border-color: var(--acc); color: var(--on); }

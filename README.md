@@ -39,10 +39,14 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 ## What is in it
 
 - Optional account: sign up, log in, forgot password, log out, delete account. The trail syncs across devices and merges with what was on the device
-- Or no account: local profile (first name, 18+ confirmation), everything stays in the browser
+- Or no account: local profile (18+ confirmation; a first name only comes with an account), everything stays in the browser
 - Onboarding: the choice first, then one or more interests (fields). On Missions you switch path in one tap and progress is kept per field, "+ Add" picks more. Three sections: Missions, yourKERN (your Kern card, first guess, evidence and answers) and the KERN.AI co-pilot (it only asks questions: live through Claude via a Netlify function when online, with a scripted fallback)
 - Home: your next mission first, then your 3 missions with status (done / next / draft)
 - Rounds: every field has 6 missions, shown 3 at a time. Finishing round 1 gives you your Kern card and shows a "round complete" moment on Home. Round 2 is never locked: a "Round 2" link under the list shows it from day one. Round 2 repeats the same three kinds (improve what exists, start from zero, work with a partner), so the card gets sharper with every round. After a finished mission, the button leads straight into the next mission of the round. Missions live in `fields.ts`, `missions.ts`, `helps.ts` and `easy.ts` (same order in all four). `npm test` checks they match
+- Every mission says under the answer box exactly what to write and its limit (`answer` in `missions.ts` and `easy.ts`); the three steps all happen in the app, anything outside it is the bonus
+- Real sound and clips: song previews, a reel with a drop you can hear and a beat grid in Music, two real clips in Video, made with AI and marked as such (`public/media/`, `design/mission-media.md`)
+- Try your prompt on the AI: in Prompting missions the person can run their own prompt and see what comes back (only the prompt is sent, 5 tries per mission per day)
+- KERN.AI checks when its tab opens that the live AI can answer (a free call, nothing of the person's is sent) and says live, key rejected or not reachable
 - Mission pictures: where a mission shows a photo, a story or a screen, the sheet shows the picture itself (`public/img/m/`, set with `img` on the asset in `missions.ts`; nine missions so far), the written version stays as its alt text
 - Brand missions: a mission can be presented by a brand, shown as "Brand mission · name" in the brand colour. The mission text stays brand-neutral (a made-up subject), so a deal is one line in `src/scripts/sponsors.ts`. The three in the app are samples, marked "(sample)", not real partners
 - Mission Studio: `node scripts/mission-studio.mjs` has Claude draft a new English and Italian mission from a field, a kind and a subject, 29 automatic rules check it, and a person approves it. It needs `ANTHROPIC_API_KEY` for a live run and is covered offline by `npm test`. The authoring guide is `docs/MISSIONS.md`
@@ -58,9 +62,9 @@ Email links (confirm, reset password) sign you in on the device and browser wher
 - Share your Kern card, dare a friend, copy links (native share sheet, clipboard fallback). Dare links open the same mission
 - Weekly reminder as a calendar file (no notifications permission, no streaks)
 - Pilot: "Share my trail with the KERN team" sends answers and reflections as plain text
-- EN / IT, dark / light theme, and a text size setting (four steps, every font size is in rem, `npm test` checks it)
+- English, Italian, German and French (`i18n.ts`, `i18n-de.ts`, `i18n-fr.ts`; `npm test` fails on a missing translation or a job-world word in any of them), dark / light theme, and a text size setting (four steps, every font size is in rem, `npm test` checks it)
 - Installable and works offline after the first visit (`public/sw.js`). Security headers and CSP in `netlify.toml`
-- Export and delete your data from Settings. Privacy page at `/privacy/`, Terms at `/terms/` (EN and IT), and a feedback button that opens your own mail app
+- Export and delete your data from Settings. Privacy page at `/privacy/` (with a "What we keep" table at the top), Terms at `/terms/` and About at `/about/` (four languages), and a feedback button that opens your own mail app
 - Design (v2): icons (`src/scripts/icons.ts`: the fields and the three tabs are glass pictures in `public/img/f/`, see `design/field-icons.md`; the done icon is a Phosphor Icon, MIT, with the body in the brand lime), a floating glass tab bar, italic serif accents (Instrument Serif), bigger type, one calm confirmation after each mission (no points or random rewards). View Transitions slide the panes (plain swap where unsupported, nothing moves with reduced motion)
 
 **Cut from the interface in v2** (the code is still there, hidden with the `k-cut` class, so each piece can come back): points and ranks, finds, badges, trail days, the habit builder, the review teaser, daily boosts and the random drops. The Trail section moved into yourKERN. The classic design before v1.0 is kept on the `classic-design` branch and the `v0.4-classic` tag.
@@ -73,7 +77,7 @@ Real partner missions (brand missions are demos for now), peer review and rankin
 
 - `src/pages/index.astro` markup, `src/styles/app.css` styles, `src/scripts/app.ts` logic
 - `src/scripts/cloud.ts` accounts and sync (loaded only when the Supabase variables are set), `supabase/schema.sql` database setup
-- `src/scripts/i18n.ts` Italian strings (English is the source), `src/scripts/fields.ts` missions per field
+- `src/scripts/i18n.ts` Italian strings (English is the source), `i18n-de.ts` / `i18n-fr.ts` German and French, `src/scripts/fields.ts` missions per field
 - `src/scripts/next.ts` rounds and the next-mission rule, `src/scripts/sponsors.ts` brand missions, `src/scripts/stats.ts` opt-in usage counts, `src/scripts/demo.ts` the demo profile's sample trail (texts in both languages)
 - `scripts/` the tests run by `npm test`, and the Mission Studio
 - `public/` manifest (with install screenshots in `public/screenshots/`), service worker, icons, favicons, `og.jpg` (link preview, the banner). `public/img/` the app icon mark (header and launch screen), `public/img/f/` the glass pictures (fields, tabs, the Kern card) and `public/img/m/` the mission photos
