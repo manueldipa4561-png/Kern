@@ -417,7 +417,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-tile img { width: 66px; height: 66px; filter: drop-shadow(0 10px 12px rgba(0,0,0,.35)); transition: transform .5s var(--spring); }
 .k-tile.sel { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 14%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 22%, transparent); }
 .k-tile.sel img { transform: translateY(-4px) scale(1.14) rotate(-5deg); }
-.k-tile:last-child:nth-child(3n + 1) { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 12px; } /* a seventh tile sits alone on the last row: it takes the whole row, icon beside the name */
+.k-tile:last-child:nth-child(3n + 1) { grid-column: 2; } /* a seventh tile sits alone on the last row: same size as the others, in the middle */
 
 /* Reward: the new rank object pops in */
 .k-rankup { display: flex; align-items: center; gap: 12px; padding: 6px 18px 6px 6px; text-align: left; }
@@ -1039,3 +1039,12 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .k-pl-sum.over { color: var(--gold); }
 @media (prefers-reduced-motion: reduce) { .k-pl-chip { transition: none; } .k-pl-chip[aria-pressed="true"] { transform: none; } }
 #kPlayB { display: flex; flex-direction: column; gap: 18px; }
+
+/* Pilot fixes (9 Oct): the first screens. Two choices of equal weight, a line under each field name, an "Aa" for text size, reasons under the 18+ box and the dimmed Start. */
+.k-choices { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.k-choice { min-height: 52px; padding: 14px 20px; border-radius: 999px; border: 1.5px solid var(--acc); background: color-mix(in srgb, var(--acc) 12%, transparent); color: var(--fg); font: 800 1.0625rem 'Inter Tight Variable', system-ui, sans-serif; text-align: left; cursor: pointer; transition: transform .45s var(--spring), background-color .2s; }
+.k-choice:active { transform: scale(.97); transition-duration: .08s; }
+.k-tile small { font: 500 0.8125rem/1.25 'Inter Tight Variable', system-ui, sans-serif; color: var(--dim); text-align: center; }
+.k-aa { position: absolute; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); z-index: 1; min-width: 44px; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--edge); background: var(--surf); color: var(--fg); font: 800 1rem var(--kd); cursor: pointer; }
+.k-sp #kGoWhy { margin-top: -6px; }
+@media (prefers-reduced-motion: reduce) { .k-choice { transition: none; } }

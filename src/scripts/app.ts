@@ -276,7 +276,7 @@ toast.addEventListener('pointerenter', () => clearTimeout(tT));
 toast.addEventListener('pointerleave', () => { if (toastAct) tT = window.setTimeout(hideToast, 4000); });
 
 // Static text: remember the English source so language switches are lossless.
-const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs .tt, #kXAsk, .k-streak small, .k-finds-h span');
+const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-tile small, .k-choice, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs .tt, #kXAsk, .k-streak small, .k-finds-h span');
 kTxt.forEach((e) => { e.dataset.en = e.innerHTML.trim(); });
 // Headings: the page is an h1 (screen-reader only), panes (h4) and cards (h5). Levels 2 and 3 are what a screen reader announces; the tags keep the look.
 kScr.querySelectorAll('h4').forEach((h) => h.setAttribute('aria-level', '2'));
@@ -302,6 +302,9 @@ document.querySelectorAll<HTMLElement>('[data-k-theme]').forEach((b) => b.addEve
 const TEXT_SCALE = [0.92, 1, 1.14, 1.3];
 const applyText = () => { document.documentElement.style.setProperty('--kts', String(TEXT_SCALE[S.text] ?? 1)); pressed('text', String(S.text)); };
 document.querySelectorAll<HTMLElement>('[data-k-text]').forEach((b) => b.addEventListener('click', () => { S.text = Number(b.dataset.kText); save(); applyText(); }));
+// "Aa" on the first screens: the same four steps, one tap each, so nobody has to find Settings to read the start.
+const TEXT_NAMES = ['Small', 'Default', 'Large', 'Larger'];
+$('kAa').addEventListener('click', () => { S.text = (S.text + 1) % TEXT_SCALE.length; save(); applyText(); say(`${tr('Text size')}: ${tr(TEXT_NAMES[S.text])}`); });
 
 // View Transitions (Chrome, Safari 18+, Firefox 144+): tab panes slide in the direction you move,
 // the chosen field object flies into the mission card. Older browsers get the plain swap.
@@ -1411,7 +1414,11 @@ const tiles = kStart.querySelectorAll<HTMLElement>('#kPick [data-f]');
 const kAge2 = $<HTMLInputElement>('kAge2');
 const markPick = () => {
   tiles.forEach((o) => { const on = picks.includes(o.dataset.f!); o.classList.toggle('sel', on); o.setAttribute('aria-pressed', String(on)); });
-  $<HTMLButtonElement>('kGo').disabled = !picks.length || !(S.adult || kAge2.checked); // first visit: the 18+ box sits on this screen, no name is asked
+  const noPick = !picks.length, noAge = !(S.adult || kAge2.checked); // first visit: the 18+ box sits on this screen, no name is asked
+  $<HTMLButtonElement>('kGo').disabled = noPick || noAge;
+  const why = $('kGoWhy'); // a dimmed button says what it waits for
+  why.hidden = !noPick && !noAge;
+  if (!why.hidden) setT(why, noPick && noAge ? 'Pick a field and tick the 18+ box to start.' : noAge ? 'Tick the 18+ box to start.' : 'Pick at least one field.');
 };
 kAge2.addEventListener('change', () => markPick());
 let pickerFromSettings = false; // opened from Settings (else from "+ Add"): where focus goes back to
@@ -1421,7 +1428,7 @@ const openStart = (step2 = false, fromSettings = false) => {
   setT($('kGo'), S.onboarded ? 'Save interests' : 'Start my first mission');
   setT($('kS2K'), S.onboarded ? 'Your interests' : "Good. Let's find out."); // "Good. Let's find out." answers "I don't know", which an existing user never tapped
   $('kPickX').hidden = !S.onboarded || !S.adult; // reopened from "+ Add" or Settings: there must be a way out (not past the 18+ box)
-  $('kS2Age').hidden = $('kS2Note').hidden = S.adult;
+  $('kS2Age').hidden = $('kAgeWhy').hidden = $('kS2Note').hidden = S.adult;
   kStart.setAttribute('aria-labelledby', step2 ? 'kS2H' : 'kS1H');
   kS1.hidden = step2; kS2.hidden = !step2; markPick(); kStart.classList.add('on');
   syncInert(); // Settings may still have left the screen inert: a focus() before this would be refused and land on the page body
