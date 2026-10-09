@@ -53,9 +53,10 @@ const DEMO = (() => { try { return localStorage.getItem('kern:mode') === 'demo';
 const CLOUD = cloud.enabled && !DEMO;
 const KEY = DEMO ? 'kern:demo' : 'kern:v1';
 const PEND = 'kern:rm-signs'; // ids of signs still to be removed from the trail
+const YK_SEEN = 'kern:seen-yourkern'; // yourKERN was opened once on this device: its one-line explanation is not needed any more
 // Delete my data, Log out and Delete my account also clear what sits beside the trail: the demo and the copy set aside when a trail could not be read.
 // Once the account is gone so is the list of signs still to be removed (a plain Log out or Delete keeps it: those signs must still go at the next sign-in). The demo never touches any of it.
-const wipeExtras = (accountGone = false) => { if (DEMO) return; try { for (const k of ['kern:demo', 'kern:mode', 'kern:v1:unreadable', ...(accountGone ? [PEND] : [])]) localStorage.removeItem(k); } catch { /* nothing stored */ } };
+const wipeExtras = (accountGone = false) => { if (DEMO) return; try { for (const k of ['kern:demo', 'kern:mode', 'kern:v1:unreadable', YK_SEEN, ...(accountGone ? [PEND] : [])]) localStorage.removeItem(k); } catch { /* nothing stored */ } };
 const eraseStats = () => (DEMO ? Promise.resolve() : stats.erase()); // the demo must never touch the real usage-count record
 const OPEN = "What is your idea? Write it in your own words first. I won't suggest one."; // the co-pilot's first line (the demo chat starts with it too)
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
@@ -325,9 +326,12 @@ const runVT = (cls: string, cb: () => unknown, after?: () => void) => {
 const tabs = kScr.querySelectorAll<HTMLElement>('[data-k-tab]');
 const tabIds = [...tabs].map((x) => 'k-' + x.dataset.kTab);
 let wanted = ''; // the pane the latest tap asked for: a swap runs a frame after its tap, and must show this one, so an earlier swap can never overrule a later tap
+// yourKERN says what it is in one line the first time it is opened on this device; from the next visit on the line is gone.
+try { $('kYkWhy').hidden = !!localStorage.getItem(YK_SEEN); } catch { /* storage blocked: the line just stays */ }
 tabs.forEach((t) => t.addEventListener('click', () => {
   const next = 'k-' + t.dataset.kTab, cur = kScr.querySelector<HTMLElement>('.k-pane.on');
   wanted = next;
+  if (next === 'k-yourkern') try { localStorage.setItem(YK_SEEN, '1'); } catch { /* storage blocked */ }
   tabs.forEach((x) => { x.classList.toggle('on', x === t); x.setAttribute('aria-current', String(x === t)); });
   const swap = () => {
     kScr.querySelectorAll('.k-pane').forEach((p) => { p.classList.remove('leaving'); p.classList.toggle('on', p.id === wanted); });
@@ -568,6 +572,8 @@ $('kAbout').addEventListener('click', openAbout);
 $('kFlX').addEventListener('click', () => dismiss(kFld));
 $('kFlGo').addEventListener('click', () => { closeSheet(kFld); kAdd.click(); });
 // Take it further: shown once the field on show has an answer, so it follows something the person did.
+// ponytail: one no-contacts alternative for every field's Ask step; a per-field one would live in fieldinfo.ts.
+const ASK_ALONE = 'No one to ask? Post the same question under a video or in a forum where people who do it hang out.';
 const renderFurther = () => {
   const info = FIELD_INFO[S.field], card = $('kFurther');
   card.hidden = !info || !doneIn(S.field).size;
@@ -576,6 +582,7 @@ const renderFurther = () => {
   $('kFuO').replaceChildren(...(['ask', 'make', 'learn'] as const).map((k) => {
     const li = document.createElement('li'), b = document.createElement('b'), t = document.createElement('span');
     b.textContent = tr({ ask: 'Ask', make: 'Make', learn: 'Learn' }[k]); t.textContent = tr(info.steps[k]);
+    if (k === 'ask') t.append(Object.assign(document.createElement('small'), { textContent: tr(ASK_ALONE) })); // not everyone knows someone who does it
     li.append(b, t); return li;
   }));
 };

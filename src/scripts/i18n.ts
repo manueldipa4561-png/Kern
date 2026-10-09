@@ -192,6 +192,8 @@ export const IT: Record<string, string> = {
         'Too easy': 'Troppo facile',
         'Curious about {f}? Try one': 'Ti incuriosisce {f}? Provane una',
         'Remind me weekly': 'Ricordamelo ogni settimana',
+        'yourKERN is what your missions say about you so far. Your Kern card is built from your missions and your reflections.': 'yourKERN è quello che le tue missioni dicono di te finora. La tua Kern card nasce dalle tue missioni e dalle tue riflessioni.',
+        'No one to ask? Post the same question under a video or in a forum where people who do it hang out.': 'Nessuno a cui chiedere? Fai la stessa domanda sotto un video o in un forum dove si ritrova chi lo fa.',
         'Would you do this kind of task again?': 'Rifaresti una missione così?',
         'Yes': 'Sì',
         'Maybe': 'Forse',

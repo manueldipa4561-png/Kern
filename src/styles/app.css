@@ -1079,6 +1079,9 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .k-fchip.on[data-fa] { box-shadow: 0 0 0 2px var(--fa); }
 #kSheet[data-fa] .k-shbar { background: linear-gradient(color-mix(in srgb, var(--fa) 16%, var(--bg)), var(--bg)); }
 #kSheet[data-fa] #kShL::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--fa); vertical-align: 1px; }
+/* yourKERN's one-line explanation, and the no-contacts way to do the Ask step */
+.k-scr .k-yk-why { margin-top: 10px; max-width: 40ch; }
+.k-fu small { display: block; margin-top: 4px; font-size: 0.875rem; line-height: 1.4; color: var(--dim); }
 /* Asked for less transparency: no glass blur, and solid scrims and bars */
 @media (prefers-reduced-transparency: reduce) {
   .k-sheet, .k-reward, .k-tabs { -webkit-backdrop-filter: none; backdrop-filter: none; }
