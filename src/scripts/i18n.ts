@@ -330,6 +330,8 @@ export const IT: Record<string, string> = {
         'Pick where to start.': 'Scegli da dove partire.',
         'This card is an example until you finish a mission and reflect.': 'Questa card è un esempio finché non finisci una missione e rifletti.',
         'Your idea in KERN.AI': 'La tua idea in KERN.AI',
+        'Does yours do this?': 'La tua risposta fa questo?',
+        'A company sees your answer only if you choose to send it to them.': 'Un’azienda vede la tua risposta solo se scegli di mandargliela.',
 };
 // English texts registered twice with different Italian: the last one silently wins. npm test fails if this list is not empty.
 export const CLASHES: string[] = [];

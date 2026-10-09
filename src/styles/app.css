@@ -501,7 +501,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-tk.st.on { color: var(--dim); }
 .k-tk:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 8px; }
 .k-tk.bar::after, .k-tk.tw::after { font: 600 0.75rem ui-monospace, Menlo, Consolas, monospace; color: var(--acc); padding-top: 3px; }
-.k-tk.bar::after { content: '+10'; }
+.k-tk.bar::after { content: none; } /* the self-check is not scored any more (v8): no stones label */
 .k-tk.tw::after { content: '+25'; }
 @media (prefers-reduced-motion: reduce) { .k-xp i, .k-tk::before { transition: none; } }
 
@@ -1007,3 +1007,15 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .k-vs-y { border-left: 3px solid var(--line); background: color-mix(in srgb, var(--fg) 5%, transparent); border-radius: 4px 14px 14px 4px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
 .k-vs-y p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.9375rem; line-height: 1.5; }
 .k-kcard > .k-s, .k-kcard > .k-ask { margin-top: 10px; }
+/* v8: the payoff after Submit. Self-check ticks under the compare, the field as a path on the done screen, the twist as "too easy? try this". */
+#kRfBar { display: flex; flex-direction: column; gap: 4px; margin-bottom: 18px; }
+#kRfBar[hidden], .k-dr-tw[hidden], #kBrandNote[hidden] { display: none; }
+.k-tk.bar.on { animation: kTickPop .32s var(--spring); }
+@keyframes kTickPop { 50% { transform: scale(1.03); } }
+.k-dr-path { display: flex; gap: 6px; justify-content: center; margin: 12px 0 4px; }
+.k-dr-path i { width: 24px; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--fg) 16%, transparent); }
+.k-dr-path i.on { background: var(--acc); }
+.k-dr-path i.now { animation: kPathNow .8s .35s var(--out) both; box-shadow: 0 0 10px color-mix(in srgb, var(--acc) 60%, transparent); }
+@keyframes kPathNow { from { transform: scaleX(.2); opacity: .3; } to { transform: none; opacity: 1; } }
+.k-scr .k-dr-tw { max-width: 32ch; margin: 6px auto 0; }
+@media (prefers-reduced-motion: reduce) { .k-tk.bar.on, .k-dr-path i.now { animation: none; } }

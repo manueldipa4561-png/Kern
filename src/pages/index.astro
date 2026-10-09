@@ -74,6 +74,7 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
               <label class="k-l" for="kTa">Your answer</label>
               <textarea id="kTa" rows="4" maxlength="2000"></textarea>
               <p class="k-rf-note" id="kSaved" aria-live="polite">It stays on this device unless you ask KERN.AI.</p>
+              <p class="k-l k-s" id="kBrandNote" hidden>A company sees your answer only if you choose to send it to them.</p>
               <div class="k-sh-btns"><button type="button" class="k-go" id="kSub">Submit answer</button><button type="button" class="k-sk" id="kCancel">Not now</button></div>
             </div>
             <div class="k-x" id="kShH">
@@ -88,8 +89,10 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
             <div class="k-l" id="kDrL">You found</div>
             <h5 id="kDrT"></h5>
             <p class="k-dr-n" id="kDrN" aria-live="polite"></p>
+            <div class="k-dr-path" id="kDrPath" aria-hidden="true"></div>
             <p class="k-l" id="kDrS"></p>
             <p class="k-dr-nx" id="kDrNx" hidden></p>
+            <p class="k-l k-s k-dr-tw" id="kDrTw" hidden></p>
             <div class="k-sh-btns"><button type="button" class="k-go" id="kDrOk" aria-describedby="kDrT kDrN kDrS kDrNx">Keep going</button><button type="button" class="k-sk" id="kDrCoop" aria-describedby="kDrCoN" hidden>Finish it with a friend</button></div>
             <p class="k-l" id="kDrCoN" hidden>The link carries your answer, so it is only as private as the chat you send it to.</p>
           </div>
@@ -99,6 +102,11 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
               <div class="k-xex" id="kXExB"><div class="k-l">One strong answer</div><pre id="kXExT"></pre></div>
               <p class="k-l k-s">Not a grade. Spot one thing you would try next time.</p>
             </div>
+            <div id="kRfBar" hidden>
+              <div class="k-l" id="kRfBL">Does yours do this?</div>
+              <div id="kRfBI" role="group" aria-labelledby="kRfBL"></div>
+              <p class="k-l k-s" id="kRfBN" aria-live="polite"></p>
+            </div>
             <div class="k-l">Quick reflection · 20 seconds</div>
             <p class="k-q" id="kRfEQ">How did it feel?</p>
             <div class="k-chips" id="kRfE" role="group" aria-labelledby="kRfEQ"><span role="button" tabindex="0" data-v="flow">Time flew</span><span role="button" tabindex="0" data-v="ok">It was fine</span><span role="button" tabindex="0" data-v="drag">It dragged</span></div>
@@ -106,11 +114,6 @@ const FIELDS = ['Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Promp
             <div class="k-chips" id="kRfA" role="group" aria-labelledby="kRfAQ"><span role="button" tabindex="0" data-v="yes">Yes</span><span role="button" tabindex="0" data-v="maybe">Maybe</span><span role="button" tabindex="0" data-v="no">No</span></div>
             <label class="k-l" for="kRfH">Hardest part (optional)</label><input id="kRfH" type="text" maxlength="140" autocomplete="off" />
             <label class="k-l" for="kRfT">Leave a review for the next person (optional)</label><input id="kRfT" type="text" maxlength="140" autocomplete="off" aria-describedby="kRfN" /><p class="k-rf-note" id="kRfN"></p>
-            <div id="kRfBar" class="k-cut" hidden>
-              <div class="k-l" id="kRfBL">Check your answer · +10 stones each</div>
-              <p class="k-rf-note" id="kRfShort" hidden>Bonus stones and finds start from 20 characters. This answer is a bit short.</p>
-              <div id="kRfBI" role="group" aria-labelledby="kRfBL"></div>
-            </div>
             <div class="k-sh-btns"><button type="button" class="k-go" id="kRfOk">Save</button><button type="button" class="k-sk" id="kRfSkip">Skip</button></div>
           </div>
         </div>

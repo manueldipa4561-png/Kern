@@ -1018,8 +1018,9 @@ function renderBrief(f: string, i: number) {
   tick(kXSteps, t2('Read the brief', 'Leggi il brief'), true, 'st', stepProg);
   v.steps.forEach((s) => tick(kXSteps, s, cur.edit >= 0, 'st', stepProg)); // an answer being edited is a finished one: its steps show as done
   stepProg();
-  x.bar.forEach((b) => tick(kRfBI, b, false, 'bar'));
-  tick(kRfBI, x.twist, false, 'tw');
+  x.bar.forEach((b) => tick(kRfBI, b, false, 'bar', barProg)); // after Submit: does yours do what a strong answer does? Self-ticked, never graded
+  barProg();
+  $('kBrandNote').hidden = !sp;
   // Hints, KERN.AI and the easy switch. The strong answer waits until the person has written theirs: it shows after Submit, to compare (kCmp).
   hintN = 0; $('kXHints').innerHTML = '';
   setX($('kXExT'), v.ex);
@@ -1028,6 +1029,11 @@ function renderBrief(f: string, i: number) {
   hold($('kXAsk'), false);
 }
 let hintN = 0;
+const barsHit = () => kRfBI.querySelectorAll('.bar.on').length, barsAll = () => kRfBI.querySelectorAll('.bar').length;
+function barProg() {
+  const n = barsHit(), all = barsAll(), it = isIt();
+  setD($('kRfBN'), !n ? '' : n < all ? (it ? `${n} su ${all}` : `${n} of ${all}`) : (it ? 'Tutti e tre. È una risposta forte.' : 'All three. That is a strong answer.'));
+}
 // Busy or spent buttons are dimmed but stay focusable: a disabled button drops keyboard focus to the page body.
 const hold = (b: Element, on: boolean) => b.setAttribute('aria-disabled', String(on));
 const held = (b: Element) => b.getAttribute('aria-disabled') === 'true';
@@ -1205,8 +1211,7 @@ function showDrop(d: Drop, side: number, withNext = false) {
   setT($('kDrT'), DROP_T[d.tier]);
   if (rel) setD($('kDrN'), `${tr(rel.name)} · ${relicsOwned().length + 0}/${RELICS.length}`); else setD($('kDrN'), `+${d.stones} ${isIt() ? 'pietre' : 'stones'}`);
   setD($('kDrS'), rel ? `${d.stones ? `+${d.stones} ${isIt() ? 'pietre' : 'stones'}` : ''}${side ? ` · +${side} bonus` : ''}` : side ? `+${side} bonus` : '');
-  const bits = $('kDrBits'); bits.innerHTML = '';
-  if (!still) for (let i = 0; i < 18; i++) { const p = document.createElement('i'); p.style.setProperty('--a', `${(360 / 18) * i + Math.random() * 12}deg`); p.style.setProperty('--r', `${70 + Math.random() * 60}px`); bits.appendChild(p); }
+  burst(18); $('kDrPath').innerHTML = ''; $('kDrTw').hidden = true;
   if ('vibrate' in navigator) navigator.vibrate(d.tier === 'jackpot' ? [30, 40, 30, 40, 60] : d.tier === 'relic' ? [20, 30, 40] : [18]);
   kDrOk.focus();
 }
@@ -1304,7 +1309,6 @@ $('kSub').addEventListener('click', once(() => {
   const ex = variant(cur.f, cur.i)?.ex || '';
   $('kVsY').textContent = na.t; $('kVs').hidden = !ex; // the example text is already in kXExT (renderBrief)
   kShA.hidden = true; kShR.hidden = false; setRfNote(); renderProg();
-  $('kRfShort').hidden = na.t.length >= 20; // say why a short answer earns no bonus, instead of silently skipping it
   groups[0].querySelector<HTMLElement>('[data-v]')!.focus({ preventScroll: true });
   kSheet.querySelector('.k-sh-in')?.scrollTo({ top: 0 }); // the comparison is read first, then the reflection
 }));
@@ -1323,6 +1327,11 @@ function finish(r: Refl | undefined) {
   if (!kept) say(UNSAVED);
 }
 // The screen after a finished mission: where you are in this field, and one button to go on.
+// A small burst behind the done mark (the same one the old reward screen used). Nothing moves with reduced motion.
+const burst = (n: number) => {
+  const bits = $('kDrBits'); bits.innerHTML = '';
+  if (!still) for (let i = 0; i < n; i++) { const p = document.createElement('i'); p.style.setProperty('--a', `${(360 / n) * i + Math.random() * 12}deg`); p.style.setProperty('--r', `${70 + Math.random() * 60}px`); bits.appendChild(p); }
+};
 function showDone() {
   const f = cur.f, it = isIt();
   kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = 'done'; setProgText(4);
@@ -1333,7 +1342,14 @@ function showDone() {
   $('kDrCoop').hidden = !co; $('kDrCoN').hidden = !co;
   setT($('kDrT'), 'Done.');
   setD($('kDrN'), it ? `${doneIn(f).size} su ${total(f)} fatte in ${tr(f)}` : `${doneIn(f).size} of ${total(f)} done in ${tr(f)}`);
-  setD($('kDrS'), it ? 'Salvata su questo dispositivo.' : 'Saved on this device.');
+  const hit = barsHit(), all = barsAll();
+  setD($('kDrS'), hit ? (it ? `${hit} controlli su ${all} · salvata su questo dispositivo.` : `${hit} of ${all} checks · saved on this device.`) : (it ? 'Salvata su questo dispositivo.' : 'Saved on this device.'));
+  // The field as a path: one segment per mission, the one just finished grows in.
+  const d = doneIn(f);
+  $('kDrPath').innerHTML = Array.from({ length: total(f) }, (_, i) => `<i class="${d.has(i) ? 'on' : ''}${i === cur.i ? ' now' : ''}"></i>`).join('');
+  const tw = MX[f]?.[cur.i]?.twist, twEl = $('kDrTw'); // the harder take that every mission already has
+  twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tr(tw)}`);
+  burst(14); if ('vibrate' in navigator) navigator.vibrate(18);
   kDrOk.focus();
 }
 
