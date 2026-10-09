@@ -58,9 +58,11 @@ export const PLAY: Record<string, Play> = {
         { t: 'Confetti Cannon', a: '/media/noa-confetti.m4a' }, { t: 'Tile Floor Groove', a: '/media/noa-tile.m4a' }, { t: 'Last Bus Home', a: '/media/noa-bus.m4a' }] },
   ],
   'Prompting.0': [
-    { kind: 'pick', label: t2('Facts the AI needs (at least 3)', 'I fatti che servono all’AI (almeno 3)'), out: t2('Facts', 'Fatti'), max: 6,
+    { kind: 'pick', label: t2('Tap the facts to put in your prompt (at least 3)', 'Tocca i fatti da mettere nel prompt (almeno 3)'), out: t2('Facts', 'Fatti'), max: 6,
       items: [t2('Saturdays at 10:00', 'Ogni sabato alle 10:00'), t2('6 seats', '6 posti'), t2('€35, clay included', '35 €, argilla inclusa'), t2('You take your bowl home', 'La ciotola la porti a casa'), t2('No experience needed', 'Non serve esperienza'), t2('Dana laughs at wobbly bowls', 'Dana ride delle ciotole storte')] },
-    { kind: 'pick', label: t2('How Dana sounds (3 words)', 'Come parla Dana (3 parole)'), out: t2('Tone', 'Tono'), max: 3,
+    { kind: 'pick', label: t2('Tap who the post is for (pick 1)', 'Tocca per chi è il post (scegline 1)'), out: t2('Post for', 'Post per'), max: 1,
+      items: [t2('People who never touched clay', 'Chi non ha mai toccato l’argilla'), t2('Expert potters', 'Ceramisti esperti'), t2('Everyone', 'Tutti'), t2('Families with kids', 'Famiglie con bambini')] },
+    { kind: 'pick', label: t2('Tap 3 words for how Dana talks', 'Tocca 3 parole su come parla Dana'), out: t2('Tone', 'Tono'), max: 3,
       items: [t2('warm', 'calda'), t2('funny', 'divertente'), t2('relaxed', 'rilassata'), t2('formal', 'formale'), t2('hyped', 'esaltata'), t2('honest', 'sincera')] },
   ],
 };
