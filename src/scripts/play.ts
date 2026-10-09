@@ -49,7 +49,7 @@ export const PLAY: Record<string, Play> = {
       ] },
   ],
   'Selling.0': [
-    { kind: 'pick', label: t2('Words for the title, the ones a buyer would search', 'Parole per il titolo, quelle che chi compra cerca'), out: t2('Title', 'Titolo'), max: 5,
+    { kind: 'pick', label: t2('Tap up to 5 words a buyer would search for', 'Tocca fino a 5 parole che chi compra cercherebbe'), out: t2('Title', 'Titolo'), max: 5,
       items: [t2('Desk lamp', 'Lampada da scrivania'), t2('Black', 'Nera'), t2('Metal', 'In metallo'), t2('40 cm', '40 cm'), t2('Bulb included', 'Lampadina inclusa'), t2('Used', 'Usata'), t2('Cheap', 'Economica'), t2('Vintage', 'Vintage')] },
   ],
   'Music.0': [
