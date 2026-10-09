@@ -30,4 +30,14 @@ const FINE_TEXTS = [
 for (const t of HEAVY_TEXTS) assert.ok(HEAVY.test(t), `HEAVY must pause on "${t}"`);
 for (const t of FINE_TEXTS) assert.ok(!HEAVY.test(t), `HEAVY must not pause on "${t}"`);
 
-console.log(`distress screen: ok (${HEAVY_TEXTS.length} phrases pause, ${FINE_TEXTS.length} do not)`);
+// The pause itself: the server's PAUSE and the app's HEAVY_REPLY (Italian in i18n.ts) are the same fixed text, with the checked numbers.
+const pause = readFileSync(FILES[1], 'utf8').match(/^const PAUSE = \{ en: (".+?"), it: (".+?") \};$/m);
+const appReply = readFileSync(FILES[0], 'utf8').match(/^const HEAVY_REPLY = (".+");$/m);
+assert.ok(pause && appReply, 'no "const PAUSE = { en: "...", it: "..." };" in coach.mts or no "const HEAVY_REPLY = "...";" in app.ts');
+const [en, it] = [JSON.parse(pause[1]), JSON.parse(pause[2])];
+assert.equal(JSON.parse(appReply[1]), en, 'the app and the server must show the same English pause');
+assert.ok(readFileSync('src/scripts/i18n.ts', 'utf8').includes(`${JSON.stringify(en)}: ${JSON.stringify(it)}`), 'i18n.ts must translate the pause with the server\'s Italian text');
+for (const n of ['116 123', '112', '999']) assert.ok(en.includes(n), `English pause lost ${n}`);
+for (const n of ['02 2327 2327', '112']) assert.ok(it.includes(n), `Italian pause lost ${n}`);
+
+console.log(`distress screen: ok (${HEAVY_TEXTS.length} phrases pause, ${FINE_TEXTS.length} do not, same pause text with helplines in app and server)`);
