@@ -11,7 +11,7 @@ import { COOP_KEYS, MAX_ANSWER, MAX_NAME, MAX_REPLY, clip, coopUrl, decodeCoop, 
 import { ASK } from './coopask';
 import { SCORE, rowsOf, verdict, type Feel } from './compare';
 import { MX } from './missions';
-import { PLAY, renderPlay } from './play';
+import { PLAY, renderPlay, stopPlay } from './play';
 import { RELICS, rollDrop, type Drop } from './loot';
 import { nextSpot, roundOf, PER_ROUND } from './next';
 import { SPONSORS } from './sponsors';
@@ -383,7 +383,7 @@ const openSheetEl = (sh: HTMLElement, focus: HTMLElement) => {
 };
 const closeSheet = (sh: HTMLElement) => {
   const reveal = sh === kSheet && !$('kShD').hidden; // closed from the drop screen (Escape or backdrop): refresh stones and rank like Continue does
-  sh.hidden = true; syncInert(); if (sh === kSheet) flushDraft(); lastFocus?.focus();
+  sh.hidden = true; syncInert(); if (sh === kSheet) { flushDraft(); stopPlay(); } lastFocus?.focus();
   if (reveal) { setLvl(); renderProgress(); }
 };
 [kSheet, kSet, kFld].forEach((sh) => {
@@ -641,7 +641,7 @@ const renderFurther = () => {
     li.append(b, t); return li;
   }));
 };
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (absorb()) setLvl(); renderProgress(); track('visit'); } }); // habit button, boost, streak and dots go stale overnight otherwise
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (absorb()) setLvl(); renderProgress(); track('visit'); } else stopPlay(); }); // habit button, boost, streak and dots go stale overnight otherwise
 const kAdd = $('kAdd'), kAdd2 = $('kAdd2');
 // Usage counts without names (stats.ts): asked once on Home, switchable in Settings. Off until yes. Without Supabase there is nowhere to send them, so neither control shows.
 const kStat = $('kStat'), kStatSet = $('kStatSet');
@@ -1400,7 +1400,7 @@ $('kSub').addEventListener('click', once(() => {
   $<HTMLInputElement>('kRfH').value = ''; $<HTMLInputElement>('kRfT').value = '';
   const ex = variant(cur.f, cur.i)?.ex || '';
   $('kVsY').textContent = na.t; $('kVs').hidden = !ex; // the example text is already in kXExT (renderBrief)
-  kShA.hidden = true; kShR.hidden = false; setRfNote(); renderProg();
+  stopPlay(); kShA.hidden = true; kShR.hidden = false; setRfNote(); renderProg(); // the beat grid goes with the answer step, so does its sound
   groups[0].querySelector<HTMLElement>('[data-v]')!.focus({ preventScroll: true });
   kSheet.querySelector('.k-sh-in')?.scrollTo({ top: 0 }); // the comparison is read first, then the reflection
 }));

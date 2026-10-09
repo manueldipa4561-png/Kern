@@ -1040,6 +1040,15 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .k-pl-sum { margin: 0; font: 700 0.9375rem 'Inter Tight Variable', system-ui, sans-serif; color: var(--acc); }
 .k-pl-sum.over { color: var(--gold); }
 @media (prefers-reduced-motion: reduce) { .k-pl-chip { transition: none; } .k-pl-chip[aria-pressed="true"] { transform: none; } }
+/* Beat: a row of 8 steps per drum. Each step is a 44px-high cell with its pad inside, so the cells touch and every target is as wide as the row allows. */
+.k-pl-beat { display: flex; flex-direction: column; gap: 4px; }
+.k-pl-steps { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); margin-bottom: 6px; }
+.k-pl-step { min-height: 44px; padding: 3px 2px; border: 0; background: none; color: var(--dim); cursor: pointer; }
+.k-pl-step i { display: grid; place-items: center; height: 100%; min-height: 38px; box-sizing: border-box; border-radius: 10px; border: 1px solid var(--edge); background: var(--surf); font: 600 0.75rem var(--mono); transition: background-color .1s, box-shadow .1s, transform .15s var(--spring); }
+.k-pl-step[aria-pressed="true"] i { background: var(--acc); border-color: var(--acc); color: var(--on); }
+.k-pl-step.now i { box-shadow: 0 0 0 2px var(--fg); transform: scale(1.08); }
+.k-pl-play { align-self: flex-start; gap: 6px; border-color: var(--acc); color: var(--acc); }
+@media (prefers-reduced-motion: reduce) { .k-pl-step i { transition: none; } .k-pl-step.now i { transform: none; } }
 #kPlayB { display: flex; flex-direction: column; gap: 18px; }
 /* v9: the Kern card shows something you made: a line from your answer, the field as a path of 6, then the pattern once it is ready. Dark in both themes. */
 .k-kc { padding: 18px 18px 16px; min-height: 0; justify-content: flex-start; gap: 0; }

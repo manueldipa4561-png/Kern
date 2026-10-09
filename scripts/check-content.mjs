@@ -83,10 +83,11 @@ for (const f of Object.keys(FIELDS)) for (let i = 0; i < FIELDS[f].m.length; i++
   const p = PLAY[`${f}.${i}`], at = `play ${f}.${i}`;
   assert.ok(Array.isArray(p) && p.length >= 1 && p.length <= 3, `${at}: needs 1 to 3 groups`);
   for (const g of p) {
-    assert.ok(g.label && g.out && g.items.length >= 2 && g.items.length <= 10, `${at}: a group needs a label, an out and 2 to 10 items`);
+    assert.ok(g.label && (g.out || g.kind === 'beat') && g.items.length >= 2 && g.items.length <= 10, `${at}: a group needs a label, an out (a beat's rows name its lines) and 2 to 10 items`);
     if (g.kind === 'pick') assert.ok(g.max >= 1 && g.max <= g.items.length, `${at}: max must be between 1 and the number of items`);
+    else if (g.kind === 'beat') assert.equal(g.items.length, 3, `${at}: a beat has three rows, kick, snare and hat in that order (play.ts DRUMS)`);
     else assert.ok(g.kind === 'sort' && g.cutOut && g.cut >= 0 && g.cut < g.items.length, `${at}: a sort needs cutOut and a cut smaller than its rows`);
-    for (const s of [g.label, g.out, g.rest, g.cutOut, g.badge, g.sum?.label].filter(Boolean)) assert.ok(IT[s], `${at}: no Italian for "${s}"`);
+    for (const s of [g.label, g.out, g.rest, g.cutOut, g.badge, g.sum?.label, ...(g.kind === 'beat' ? g.items : [])].filter(Boolean)) assert.ok(IT[s], `${at}: no Italian for "${s}"`);
   }
 }
 console.log(`content: ok (${Object.values(FIELDS).reduce((n, f) => n + f.m.length, 0)} missions)`);

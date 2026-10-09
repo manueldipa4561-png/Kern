@@ -10,11 +10,13 @@ import { PLAY_PROMPTING } from './play-prompting';
 // "Do it here": the first mission of every field can be done by tapping or dragging, not only by typing.
 // The picks write a plain text summary into the answer box, so Submit, the compare, the reflection, sync and co-op keep working on text.
 // pick: tap chips (up to max); `rest` also lists what was not picked ("Cut: ..."). sort: drag rows, or use the arrows, and tap ✕ to cut (up to cut);
-// `sum` adds up the n of the rows kept (seconds) against a max. Strings go through t2 so the Italian is in IT; code tokens and song names stay as they are.
+// `sum` adds up the n of the rows kept (seconds) against a max. beat: a row of 8 steps per drum (items name the rows: kick, snare, hat) and Play to hear it.
+// Strings go through t2 so the Italian is in IT; code tokens and song names stay as they are.
 type Pick = { kind: 'pick'; label: string; out: string; max: number; items: string[]; rest?: string };
 type Row = { t: string; n?: number };
 type Sort = { kind: 'sort'; label: string; out: string; cutOut: string; cut: number; items: Row[]; badge?: string; sum?: { label: string; max: number } };
-export type Play = (Pick | Sort)[];
+type Beat = { kind: 'beat'; label: string; items: string[] };
+export type Play = (Pick | Sort | Beat)[];
 
 export const PLAY: Record<string, Play> = {
   ...PLAY_DESIGN, ...PLAY_WRITING, ...PLAY_CODE, ...PLAY_VIDEO, ...PLAY_SELLING, ...PLAY_MUSIC, ...PLAY_PROMPTING, // missions 2 to 6, one file per field
@@ -62,8 +64,45 @@ export const PLAY: Record<string, Play> = {
 
 const UP = t2('Move up', 'Sposta su'), DOWN = t2('Move down', 'Sposta giù'), CUT = t2('Cut this', 'Togli'), BACK = t2('Put back', 'Rimetti');
 
-// Draws the groups into host and calls change(summary) after every pick, cut or move. Nothing to clean up: the host is emptied on the next mission.
+// beat: Play loops the 8 steps 4 times (4 bars) in eighth notes at 100 BPM. The drums are made on the spot with the Web Audio API, no sound files.
+// One AudioContext for the page, made on the first tap on Play (iOS allows sound only from a tap). Hits are booked on the audio clock a little
+// ahead (AHEAD_S), so a busy page cannot make the beat stumble; a step tapped while it plays joins on its next turn.
+const STEPS = 8, BARS = 4, STEP_S = 60 / 100 / 2, AHEAD_S = 0.1;
+const PLAY_L = t2('Play', 'Suona'), STOP_L = t2('Stop', 'Ferma'), STEP_L = t2('step', 'passo');
+let ac: AudioContext | null = null, hiss: AudioBuffer | null = null, halt = () => {};
+// Stops the beat that is playing: Stop, the next mission, and app.ts when the mission sheet closes or the page is hidden.
+export const stopPlay = () => halt();
+const audio = () => {
+  if (!ac) {
+    const as = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+    if (as) as.type = 'playback'; // iOS 17+: heard with the silent switch on, like a video, or Play would seem broken
+    ac = new AudioContext(); hiss = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); // a second of white noise for the snare and the hat
+    const d = hiss.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  return ac;
+};
+// One hit: src, through `last`, into a gain that falls from vol to silence in len seconds.
+const hit = (src: AudioScheduledSourceNode, last: AudioNode, out: AudioNode, t: number, vol: number, len: number) => {
+  const g = out.context.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+  last.connect(g).connect(out); src.start(t); src.stop(t + len);
+};
+const tone = (out: AudioNode, t: number, type: OscillatorType, hz: number, to: number, vol: number, len: number) => {
+  const o = out.context.createOscillator(); o.type = type; o.frequency.setValueAtTime(hz, t); o.frequency.exponentialRampToValueAtTime(to, t + len / 3);
+  hit(o, o, out, t, vol, len);
+};
+const noise = (out: AudioNode, t: number, type: BiquadFilterType, hz: number, vol: number, len: number) => {
+  const s = out.context.createBufferSource(), f = out.context.createBiquadFilter(); s.buffer = hiss; f.type = type; f.frequency.value = hz;
+  hit(s, s.connect(f), out, t, vol, len);
+};
+const DRUMS = [ // one per row, in the order of the rows
+  (out: AudioNode, t: number) => tone(out, t, 'sine', 150, 40, 1, 0.4), // kick: a sine whose pitch drops fast
+  (out: AudioNode, t: number) => { noise(out, t, 'bandpass', 1800, 0.8, 0.18); tone(out, t, 'triangle', 200, 160, 0.3, 0.1); }, // snare: a short burst of noise and a little tone
+  (out: AudioNode, t: number) => noise(out, t, 'highpass', 7000, 0.35, 0.05), // hat: a very short hiss, highs only
+];
+
+// Draws the groups into host and calls change(summary) after every pick, cut, move or step. The host is emptied on the next mission, and a beat stops.
 export function renderPlay(host: HTMLElement, play: Play, tr: (s: string) => string, change: (text: string) => void) {
+  halt();
   host.innerHTML = '';
   const parts: (() => string)[] = [];
   const emit = () => change(parts.map((p) => p()).filter(Boolean).join('\n'));
@@ -86,6 +125,44 @@ export function renderPlay(host: HTMLElement, play: Play, tr: (s: string) => str
       });
       box.append(row);
       parts.push(() => (chosen.length ? `${tr(g.out)}: ${chosen.map(tr).join(', ')}.` + (g.rest ? ` ${tr(g.rest)}: ${g.items.filter((x) => !chosen.includes(x)).map(tr).join(', ')}.` : '') : ''));
+    } else if (g.kind === 'beat') {
+      const on = g.items.map(() => Array<boolean>(STEPS).fill(false));
+      const grid = document.createElement('div'); grid.className = 'k-pl-beat'; grid.setAttribute('role', 'group'); grid.setAttribute('aria-label', tr(g.label));
+      g.items.forEach((name, r) => {
+        const lab = document.createElement('div'); lab.className = 'k-l'; lab.textContent = tr(name); lab.setAttribute('aria-hidden', 'true'); // every step says its row
+        const row = document.createElement('div'); row.className = 'k-pl-steps';
+        for (let s = 0; s < STEPS; s++) {
+          const b = document.createElement('button'); b.type = 'button'; b.className = 'k-pl-step'; b.dataset.s = String(s); b.innerHTML = `<i>${s + 1}</i>`;
+          b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', `${tr(name)}, ${tr(STEP_L)} ${s + 1}`);
+          b.addEventListener('click', () => { on[r][s] = !on[r][s]; b.setAttribute('aria-pressed', String(on[r][s])); emit(); });
+          row.append(b);
+        }
+        grid.append(lab, row);
+      });
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'k-chipb k-pl-play';
+      let playing = false;
+      const show = (p: boolean) => { playing = p; btn.innerHTML = `<span aria-hidden="true">${p ? '■' : '▶'}</span> ${tr(p ? STOP_L : PLAY_L)}`; };
+      const paint = (s: number) => grid.querySelectorAll<HTMLElement>('.k-pl-step').forEach((b) => b.classList.toggle('now', b.dataset.s === String(s)));
+      const start = () => {
+        const c = audio(), out = c.createGain(), t0 = c.currentTime + 0.05, end = STEPS * BARS;
+        void c.resume(); // a new context, or one put to sleep by Stop or a phone call, wakes on this tap
+        out.gain.value = 0.7; out.connect(c.destination); // headroom for a kick and a hat on the same step
+        let k = 0;
+        const timer = window.setInterval(() => {
+          const now = c.currentTime;
+          for (; k < end && t0 + k * STEP_S < now + AHEAD_S; k++) on.forEach((steps, r) => { if (steps[k % STEPS]) DRUMS[r](out, t0 + k * STEP_S); });
+          const at = Math.floor((now - t0) / STEP_S);
+          paint(at < end ? at % STEPS : -1);
+          if (at >= end + 2) halt(); // two steps after the last one, so its hit rings out
+        }, 25);
+        halt = () => { clearInterval(timer); out.disconnect(); paint(-1); show(false); halt = () => {}; void c.suspend(); };
+        show(true);
+      };
+      show(false);
+      btn.addEventListener('click', () => (playing ? halt() : start()));
+      box.append(grid);
+      if ('AudioContext' in window) box.append(btn); // without Web Audio the grid still writes the answer
+      parts.push(() => (on.some((steps) => steps.includes(true)) ? g.items.map((name, r) => `${tr(name)}: ${on[r].map((x) => (x ? 'X' : '.')).join(' ')}`).join('\n') : ''));
     } else {
       const list = document.createElement('ol'); list.className = 'k-pl-sort';
       const order = g.items.map((_, i) => i), cut = new Set<number>();

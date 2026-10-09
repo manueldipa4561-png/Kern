@@ -1,7 +1,6 @@
 import type { Play } from './play';
 import { t2 } from './i18n';
 
-const STEPS = ['1', '2', '3', '4', '5', '6', '7', '8']; // the beat grid's eight steps
 const SECONDS = [0, 2, 3, 4, 5, 7, 8, 9].map((s) => t2(`second ${s}`, `secondo ${s}`)); // shot starts plus seconds where no shot starts
 
 // Do it here for missions 2 to 6 of this field (keys '<Field>.1' to '<Field>.5'). Mission 1 is in play.ts.
@@ -24,8 +23,8 @@ export const PLAY_MUSIC: Record<string, Play> = {
       items: [t2('An open book', 'Un libro aperto'), t2('A rainy window', 'Una finestra con la pioggia'), t2('A cup of tea', 'Una tazza di tè'), t2('A disco ball', 'Una palla da discoteca'), t2('A dumbbell', 'Un manubrio'), t2('A sleeping cat', 'Un gatto che dorme')] },
   ],
   'Music.4': [
-    { kind: 'pick', label: t2('Kick (fist): tap 2 or 3 steps', 'Cassa (pugno): tocca 2 o 3 passi'), out: t2('Kick on steps', 'Cassa sui passi'), max: 3, items: STEPS },
-    { kind: 'pick', label: t2('Snare (clap): tap 1 or 2 steps, never on a kick', 'Rullante (mani): tocca 1 o 2 passi, mai dove c’è la cassa'), out: t2('Snare on steps', 'Rullante sui passi'), max: 2, items: STEPS },
+    { kind: 'beat', label: t2('Tap the steps you want: 2 or 3 kicks, 1 or 2 snares, never on the same step. Then press Play.', 'Tocca i passi che vuoi: 2 o 3 casse, 1 o 2 rullanti, mai sullo stesso passo. Poi premi Suona.'),
+      items: [t2('Kick', 'Cassa'), t2('Snare', 'Rullante'), t2('Hat', 'Hi-hat')] },
   ],
   'Music.5': [
     { kind: 'pick', label: t2('Line 2: a small disaster (pick 1)', 'Riga 2: un piccolo disastro (scegline 1)'), out: t2('Disaster', 'Disastro'), max: 1,
