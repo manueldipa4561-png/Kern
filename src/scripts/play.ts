@@ -53,7 +53,7 @@ export const PLAY: Record<string, Play> = {
       items: [t2('Desk lamp', 'Lampada da scrivania'), t2('Black', 'Nera'), t2('Metal', 'In metallo'), t2('40 cm', '40 cm'), t2('Bulb included', 'Lampadina inclusa'), t2('Used', 'Usata'), t2('Cheap', 'Economica'), t2('Vintage', 'Vintage')] },
   ],
   'Music.0': [
-    { kind: 'sort', label: t2('Tap ▶ to hear a song. Tap ✕ on the one that kills the mood, then drag from calmest to loudest', 'Tocca ▶ per sentire una canzone. Tocca ✕ su quella che rovina tutto, poi trascina dalla più calma alla più forte'), out: t2('Order', 'Ordine'), cutOut: t2('Cut', 'Tolgo'), cut: 1, // no energy badge: the main version gives mood words only, the numbers live in Make it easier (easy.ts)
+    { kind: 'sort', label: t2('▶ to listen, ✕ to cut one, drag from calm to loud', '▶ per ascoltare, ✕ per toglierne una, trascina dalla più calma alla più forte'), out: t2('Order', 'Ordine'), cutOut: t2('Cut', 'Tolgo'), cut: 1, // no energy badge: the main version gives mood words only, the numbers live in Make it easier (easy.ts)
       items: [{ t: 'Mango Static', a: '/media/noa-mango.m4a' }, { t: 'Sad Trombone Tuesday', a: '/media/noa-trombone.m4a' }, { t: 'Pocket Sunrise', a: '/media/noa-sunrise.m4a' },
         { t: 'Confetti Cannon', a: '/media/noa-confetti.m4a' }, { t: 'Tile Floor Groove', a: '/media/noa-tile.m4a' }, { t: 'Last Bus Home', a: '/media/noa-bus.m4a' }] },
   ],

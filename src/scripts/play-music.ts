@@ -6,9 +6,9 @@ const SECONDS = [0, 2, 3, 4, 5, 7, 8, 9].map((s) => t2(`second ${s}`, `secondo $
 // Do it here for missions 2 to 6 of this field (keys '<Field>.1' to '<Field>.5'). Mission 1 is in play.ts.
 export const PLAY_MUSIC: Record<string, Play> = {
   'Music.1': [
-    { kind: 'pick', label: t2('Your sound in three words', 'Il tuo suono in tre parole'), out: t2('Sound', 'Suono'), max: 3,
+    { kind: 'pick', label: t2('Tap three words for the music', 'Tocca tre parole per la musica'), out: t2('Music', 'Musica'), max: 3,
       items: [t2('bouncy', 'saltellante'), t2('claps', 'battimani'), t2('soft hum', 'ronzio morbido'), t2('sleepy', 'assonnato'), t2('crunchy', 'croccante'), t2('whistling', 'fischiettio'), t2('sad violin', 'violino triste'), t2('distorted guitar', 'chitarra distorta')] },
-    { kind: 'pick', label: t2('Tap the second the drop hits, then hear it', 'Tocca il secondo in cui parte il drop, poi ascoltalo'), out: t2('The drop', 'Il drop'), max: 1, items: SECONDS,
+    { kind: 'pick', label: t2('Tap the second the music comes in, then tap Hear it', 'Tocca il secondo in cui entra la musica, poi tocca Ascolta'), out: t2('Music comes in', 'Entra la musica'), max: 1, items: SECONDS,
       hear: { bed: '/media/gufo-bed.m4a', cues: [['/media/gufo-shutter.m4a', 3], ['/media/gufo-dough.m4a', 5]], drop: '/media/gufo-beat.m4a', len: 10 } }, // the shutter at 3s and the dough at 5s, as in the reel's shot list
   ],
   'Music.2': [
@@ -18,13 +18,13 @@ export const PLAY_MUSIC: Record<string, Play> = {
       items: [t2('Slow Kettle · gentle', 'Slow Kettle · delicata'), t2('Confetti Cannon · huge', 'Confetti Cannon · esplosiva'), t2('Sad Trombone Tuesday · gloomy', 'Sad Trombone Tuesday · cupa'), t2('Pocket Sunrise · warm', 'Pocket Sunrise · calda'), t2('Last Bus Home · dreamy', 'Last Bus Home · sognante'), t2('Mango Static · bright', 'Mango Static · allegra')] },
   ],
   'Music.3': [
-    { kind: 'pick', label: t2('Cover: one colour', 'Cover: un solo colore'), out: t2('Colour', 'Colore'), max: 1,
+    { kind: 'pick', label: t2('Tap one colour for the cover', 'Tocca un colore per la cover'), out: t2('Colour', 'Colore'), max: 1,
       items: [t2('Deep green', 'Verde scuro'), t2('Grey, like now', 'Grigio, come ora'), t2('Neon pink', 'Rosa fluo'), t2('Slate blue', 'Blu ardesia'), t2('Mustard yellow', 'Giallo senape'), t2('Brick red', 'Rosso mattone')] },
-    { kind: 'pick', label: t2('Cover: one object', 'Cover: un solo oggetto'), out: t2('Object', 'Oggetto'), max: 1,
+    { kind: 'pick', label: t2('Tap one object for the cover', 'Tocca un oggetto per la cover'), out: t2('Object', 'Oggetto'), max: 1,
       items: [t2('An open book', 'Un libro aperto'), t2('A rainy window', 'Una finestra con la pioggia'), t2('A cup of tea', 'Una tazza di tè'), t2('A disco ball', 'Una palla da discoteca'), t2('A dumbbell', 'Un manubrio'), t2('A sleeping cat', 'Un gatto che dorme')] },
   ],
   'Music.4': [
-    { kind: 'beat', label: t2('Tap the steps you want: 2 or 3 kicks, 1 or 2 snares, never on the same step. Then press Play.', 'Tocca i passi che vuoi: 2 o 3 casse, 1 o 2 rullanti, mai sullo stesso passo. Poi premi Suona.'),
+    { kind: 'beat', label: t2('Tap a box to add a hit, then press Play', 'Tocca una casella per aggiungere un colpo, poi premi Suona'),
       items: [t2('Kick', 'Cassa'), t2('Snare', 'Rullante'), t2('Hat', 'Hi-hat')] },
   ],
   'Music.5': [
