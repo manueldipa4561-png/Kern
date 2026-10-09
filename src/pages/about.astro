@@ -1,0 +1,71 @@
+---
+import '@fontsource-variable/inter-tight';
+import '@fontsource-variable/bricolage-grotesque';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>About · KERN</title>
+    <meta name="description" content="Who makes KERN, what it is, and what parents should know." />
+    <meta name="theme-color" content="#0F140E" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <style>
+      :root { color-scheme: dark; --bg: #0F140E; --fg: #E8E6DA; --acc: #C9F24A; --dim: #b4b7a9; }
+      @media (prefers-color-scheme: light) { :root { color-scheme: light; --bg: #E8E6DA; --fg: #141A12; --acc: #2C5A3A; --dim: #454b40; } }
+      body { margin: 0; background: var(--bg); color: var(--fg); font: 400 1rem/1.6 'Inter Tight Variable', system-ui, sans-serif; }
+      main { max-width: 640px; margin: 0 auto; padding: 48px 20px 80px; }
+      h1 { font: 800 2.5rem/1 'Bricolage Grotesque Variable', sans-serif; letter-spacing: -.04em; margin: 0 0 8px; }
+      h2 { font: 800 1.25rem/1.2 'Bricolage Grotesque Variable', sans-serif; letter-spacing: -.02em; margin: 32px 0 6px; }
+      small { color: var(--dim); } a { color: var(--acc); }
+      .top a, .foot a { display: inline-block; padding: 10px 6px; margin: -10px -6px; } /* 44px tap areas without moving the links */
+      .foot { margin-top: 32px; }
+      hr { border: 0; border-top: 1px solid color-mix(in srgb, var(--fg) 20%, transparent); margin: 40px 0; }
+      #en, #it { scroll-margin-top: 48px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="top" id="en"><a href="/">← KERN</a> · <a href="#it" lang="it">Italiano</a></p>
+      <h1>About KERN</h1>
+      <small>Don’t guess your passion. Test it.</small>
+      <h2>What it is</h2>
+      <p>KERN is a free app to find your passion by testing different paths. You try short missions in seven fields (design, writing, code, video, selling, music and prompting with AI), say in 20 seconds how each one felt, and see which path clicks. No account needed.</p>
+      <h2>Who makes it</h2>
+      <p>KERN is made by Manuel Di Paolo, in Italy. Write to <a href="mailto:manuel@trykern.it">manuel@trykern.it</a> for anything: a question, feedback, or your data.</p>
+      <h2>For parents</h2>
+      <ul>
+        <li><b>Age:</b> KERN is for people aged 18 and over for now, because it is built for adults and keeps what people write.</li>
+        <li><b>What is stored:</b> without an account, answers, reflections and settings stay in the browser on that device. With an account, a copy is kept at Supabase in the EU (Frankfurt, Germany), so it syncs across devices.</li>
+        <li><b>KERN.AI:</b> the co-pilot only asks questions. What someone types to it is sent to the AI provider (Anthropic) to get a reply, and KERN does not keep it. If a message sounds heavy, it pauses the mission and suggests talking to someone they trust or a local helpline.</li>
+        <li><b>No ads:</b> no advertising and no cookies. Usage counts stay off unless the person says yes, and never include a name or anything they wrote.</li>
+        <li><b>Nothing shared without consent:</b> no company sees an answer unless the person chooses to send it, one mission at a time. That is not active yet.</li>
+        <li><b>Deleting:</b> in Settings, Delete my data (or Delete my account) removes everything. You can also write to <a href="mailto:manuel@trykern.it">manuel@trykern.it</a>.</li>
+      </ul>
+      <p class="foot"><a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></p>
+      <hr />
+      <section id="it" lang="it">
+        <p class="top"><a href="/">← KERN</a> · <a href="#en" lang="en">English</a></p>
+        <h1>Info su KERN</h1>
+        <small>La passione non si indovina. Si prova.</small>
+        <h2>Cos’è</h2>
+        <p>KERN è un’app gratuita per trovare la tua passione provando strade diverse. Fai brevi missioni in sette campi (design, scrittura, codice, video, vendita, musica e prompting con l’AI), dici in 20 secondi com’è andata e scopri quale strada ti prende. Non serve un account.</p>
+        <h2>Chi la fa</h2>
+        <p>KERN è fatta da Manuel Di Paolo, in Italia. Scrivi a <a href="mailto:manuel@trykern.it">manuel@trykern.it</a> per qualsiasi cosa: una domanda, un feedback o i tuoi dati.</p>
+        <h2>Per i genitori</h2>
+        <ul>
+          <li><b>Età:</b> per ora KERN è per chi ha almeno 18 anni, perché è pensata per gli adulti e conserva quello che si scrive.</li>
+          <li><b>Cosa viene conservato:</b> senza account, risposte, riflessioni e impostazioni restano nel browser di quel dispositivo. Con un account, una copia è custodita da Supabase nell’UE (Francoforte, Germania), per sincronizzarla tra i dispositivi.</li>
+          <li><b>KERN.AI:</b> il co-pilota fa solo domande. Quello che gli si scrive viene inviato al fornitore di AI (Anthropic) per avere una risposta, e KERN non lo conserva. Se un messaggio sembra pesante, mette in pausa la missione e suggerisce di parlarne con una persona di fiducia o con un servizio di ascolto.</li>
+          <li><b>Niente pubblicità:</b> né pubblicità né cookie. I conteggi di utilizzo restano spenti se la persona non dice di sì, e non contengono mai un nome o quello che ha scritto.</li>
+          <li><b>Niente condiviso senza consenso:</b> nessuna azienda vede una risposta se la persona non sceglie di mandargliela, una missione alla volta. Non è ancora attivo.</li>
+          <li><b>Cancellare:</b> nelle Impostazioni, Elimina i miei dati (o Elimina il mio account) cancella tutto. Puoi anche scrivere a <a href="mailto:manuel@trykern.it">manuel@trykern.it</a>.</li>
+        </ul>
+        <p class="foot"><a href="/privacy/#it">Privacy</a> · <a href="/terms/#it">Termini</a></p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -9,7 +9,7 @@ import { FIELDS } from './fields';
 import { FIELD_INFO } from './fieldinfo';
 import { COOP_KEYS, MAX_ANSWER, MAX_NAME, MAX_REPLY, clip, coopUrl, decodeCoop, settleReply, type Coop, type CoopRec } from './coop';
 import { ASK } from './coopask';
-import { SCORE, rowsOf, verdict } from './compare';
+import { SCORE, rowsOf, verdict, type Feel } from './compare';
 import { MX } from './missions';
 import { PLAY, renderPlay } from './play';
 import { RELICS, rollDrop, type Drop } from './loot';
@@ -23,7 +23,6 @@ import * as stats from './stats';
 import { akey, ver, stamp, mergeAnswers, type Tomb } from './sync';
 import { inTime, clampCount } from './valid';
 
-type Feel = 'flow' | 'ok' | 'drag';
 type Again = 'yes' | 'maybe' | 'no';
 type Refl = { e?: Feel; again?: Again; hard?: string; tip?: string; sid?: number }; // sid: the tip's shared sign, if published
 type Answer = { f: string; i: number; t: string; at: number; ed?: number; r?: Refl; x?: number; d?: string }; // x: extra stones (bonuses, drop), d: drop id (loot.ts)
@@ -54,13 +53,14 @@ const DEMO = (() => { try { return localStorage.getItem('kern:mode') === 'demo';
 const CLOUD = cloud.enabled && !DEMO;
 const KEY = DEMO ? 'kern:demo' : 'kern:v1';
 const PEND = 'kern:rm-signs'; // ids of signs still to be removed from the trail
+const YK_SEEN = 'kern:seen-yourkern'; // yourKERN was opened once on this device: its one-line explanation is not needed any more
 // Delete my data, Log out and Delete my account also clear what sits beside the trail: the demo and the copy set aside when a trail could not be read.
 // Once the account is gone so is the list of signs still to be removed (a plain Log out or Delete keeps it: those signs must still go at the next sign-in). The demo never touches any of it.
-const wipeExtras = (accountGone = false) => { if (DEMO) return; try { for (const k of ['kern:demo', 'kern:mode', 'kern:v1:unreadable', ...(accountGone ? [PEND] : [])]) localStorage.removeItem(k); } catch { /* nothing stored */ } };
+const wipeExtras = (accountGone = false) => { if (DEMO) return; try { for (const k of ['kern:demo', 'kern:mode', 'kern:v1:unreadable', YK_SEEN, ...(accountGone ? [PEND] : [])]) localStorage.removeItem(k); } catch { /* nothing stored */ } };
 const eraseStats = () => (DEMO ? Promise.resolve() : stats.erase()); // the demo must never touch the real usage-count record
 const OPEN = "What is your idea? Write it in your own words first. I won't suggest one."; // the co-pilot's first line (the demo chat starts with it too)
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
-const FEELS: Feel[] = ['flow', 'ok', 'drag'];
+const FEELS = Object.keys(SCORE) as Feel[]; // every "how did it feel" value compare.ts can score, so stored and synced reflections keep all of them
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
 const fresh = (): State => ({ v: 1, name: '', adult: false, field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'dark', text: 1, guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false, coops: [] });
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
@@ -276,7 +276,7 @@ toast.addEventListener('pointerenter', () => clearTimeout(tT));
 toast.addEventListener('pointerleave', () => { if (toastAct) tT = window.setTimeout(hideToast, 4000); });
 
 // Static text: remember the English source so language switches are lossless.
-const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs .tt, #kXAsk, .k-streak small, .k-finds-h span');
+const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-tile small, .k-choice, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs .tt, #kXAsk, .k-streak small, .k-finds-h span');
 kTxt.forEach((e) => { e.dataset.en = e.innerHTML.trim(); });
 // Headings: the page is an h1 (screen-reader only), panes (h4) and cards (h5). Levels 2 and 3 are what a screen reader announces; the tags keep the look.
 kScr.querySelectorAll('h4').forEach((h) => h.setAttribute('aria-level', '2'));
@@ -302,6 +302,9 @@ document.querySelectorAll<HTMLElement>('[data-k-theme]').forEach((b) => b.addEve
 const TEXT_SCALE = [0.92, 1, 1.14, 1.3];
 const applyText = () => { document.documentElement.style.setProperty('--kts', String(TEXT_SCALE[S.text] ?? 1)); pressed('text', String(S.text)); };
 document.querySelectorAll<HTMLElement>('[data-k-text]').forEach((b) => b.addEventListener('click', () => { S.text = Number(b.dataset.kText); save(); applyText(); }));
+// "Aa" on the first screens: the same four steps, one tap each, so nobody has to find Settings to read the start.
+const TEXT_NAMES = ['Small', 'Default', 'Large', 'Larger'];
+$('kAa').addEventListener('click', () => { S.text = (S.text + 1) % TEXT_SCALE.length; save(); applyText(); say(`${tr('Text size')}: ${tr(TEXT_NAMES[S.text])}`); });
 
 // View Transitions (Chrome, Safari 18+, Firefox 144+): tab panes slide in the direction you move,
 // the chosen field object flies into the mission card. Older browsers get the plain swap.
@@ -323,9 +326,12 @@ const runVT = (cls: string, cb: () => unknown, after?: () => void) => {
 const tabs = kScr.querySelectorAll<HTMLElement>('[data-k-tab]');
 const tabIds = [...tabs].map((x) => 'k-' + x.dataset.kTab);
 let wanted = ''; // the pane the latest tap asked for: a swap runs a frame after its tap, and must show this one, so an earlier swap can never overrule a later tap
+// yourKERN says what it is in one line the first time it is opened on this device; from the next visit on the line is gone.
+try { $('kYkWhy').hidden = !!localStorage.getItem(YK_SEEN); } catch { /* storage blocked: the line just stays */ }
 tabs.forEach((t) => t.addEventListener('click', () => {
   const next = 'k-' + t.dataset.kTab, cur = kScr.querySelector<HTMLElement>('.k-pane.on');
   wanted = next;
+  if (next === 'k-yourkern') try { localStorage.setItem(YK_SEEN, '1'); } catch { /* storage blocked */ }
   tabs.forEach((x) => { x.classList.toggle('on', x === t); x.setAttribute('aria-current', String(x === t)); });
   const swap = () => {
     kScr.querySelectorAll('.k-pane').forEach((p) => { p.classList.remove('leaving'); p.classList.toggle('on', p.id === wanted); });
@@ -448,7 +454,7 @@ const setLvl = () => { $<HTMLTextAreaElement>('kTa').placeholder = tr('Write it 
 const KIND_EN = ['improve what already exists', 'start from zero', 'work with someone'];
 const KIND_IT = ['migliori ciò che esiste già', 'parti da zero', 'collabori con qualcuno'];
 const KSHORT = ['Improving things', 'Starting from zero', 'Working with others'];
-const FEEL_EN: Record<Feel, string> = { flow: 'Time flew', ok: 'It was fine', drag: 'It dragged' };
+const FEEL_EN: Record<Feel, string> = { flow: 'Time flew', ok: 'It was fine', drag: 'It dragged', easy: 'Too easy' };
 const AGAIN_EN: Record<Again, string> = { yes: 'Yes', maybe: 'Maybe', no: 'No' };
 const DRAGGED = 0.5; // a kind is only called a drag when its average is this low: a lone "It was fine" scores 1 and is not one
 const readSignals = () => {
@@ -588,7 +594,7 @@ const renderFields = () => {
   box.innerHTML = '';
   S.fields.forEach((f) => {
     const b = document.createElement('button'), im = document.createElement('span'), t = document.createElement('span'), n = document.createElement('small');
-    b.type = 'button'; b.className = 'k-fchip' + (f === S.field ? ' on' : ''); b.setAttribute('aria-pressed', String(f === S.field));
+    b.type = 'button'; b.className = 'k-fchip' + (f === S.field ? ' on' : ''); b.setAttribute('aria-pressed', String(f === S.field)); b.dataset.fa = f; // the field's accent colour (app.css)
     im.className = 'k-fi'; im.setAttribute('aria-hidden', 'true'); im.innerHTML = icon(f);
     t.textContent = tr(f);
     n.textContent = `${doneIn(f).size}/${total(f)}`;
@@ -618,6 +624,8 @@ $('kAbout').addEventListener('click', openAbout);
 $('kFlX').addEventListener('click', () => dismiss(kFld));
 $('kFlGo').addEventListener('click', () => { closeSheet(kFld); kAdd.click(); });
 // Take it further: shown once the field on show has an answer, so it follows something the person did.
+// ponytail: one no-contacts alternative for every field's Ask step; a per-field one would live in fieldinfo.ts.
+const ASK_ALONE = 'No one to ask? Post the same question under a video or in a forum where people who do it hang out.';
 const renderFurther = () => {
   const info = FIELD_INFO[S.field], card = $('kFurther');
   card.hidden = !info || !doneIn(S.field).size;
@@ -626,6 +634,7 @@ const renderFurther = () => {
   $('kFuO').replaceChildren(...(['ask', 'make', 'learn'] as const).map((k) => {
     const li = document.createElement('li'), b = document.createElement('b'), t = document.createElement('span');
     b.textContent = tr({ ask: 'Ask', make: 'Make', learn: 'Learn' }[k]); t.textContent = tr(info.steps[k]);
+    if (k === 'ask') t.append(Object.assign(document.createElement('small'), { textContent: tr(ASK_ALONE) })); // not everyone knows someone who does it
     li.append(b, t); return li;
   }));
 };
@@ -663,6 +672,8 @@ kStatSet.addEventListener('click', async () => {
 const roundJustDone = () => { const b = base(), d = winDone(); return b > 0 && ![0, 1, 2].some((k) => d.has(k) || S.drafts[`${S.field}.${b + k}`]); };
 // The word for a mission's state, the same on Home and in the Trail.
 const stateWord = (done: boolean, next: boolean, draft: boolean) => (done ? 'Done' : next ? 'Next' : draft ? 'Draft' : 'Not started');
+// The field as a path, one segment per mission, the same on Home and on the done screen (app.css splits it into its two rounds). `mark` gets `cls`.
+const pathOf = (f: string, mark: number, cls: string) => { const d = doneIn(f); return Array.from({ length: total(f) }, (_, i) => `<i class="${d.has(i) ? 'on' : ''}${i === mark ? ` ${cls}` : ''}"></i>`).join(''); };
 const renderHome = () => {
   renderStat();
   renderFields(); renderAbout(); renderFurther(); renderCoopIn();
@@ -682,15 +693,14 @@ const renderHome = () => {
     if (fresh) { setD(kAdd2, it ? `Inizia il round ${round + 1}` : `Start round ${round + 1}`); kAdd2.dataset.kAns = String(b); }
   } else {
     const m = f.m[b + next];
-    setD($('kNxL'), round
-      ? (it ? `Round ${round + 1} · missione ${next + 1} di 3` : `Round ${round + 1} · mission ${next + 1} of 3`)
-      : (it ? `Missione ${next + 1} di 3` : `Mission ${next + 1} of 3`));
+    setD($('kNxL'), it ? `${tr(S.field)} · prossima missione` : `Up next in ${tr(S.field)}`); // where you are shows as the path below, not as "1 of 3"
     setT($('kNxT'), m[1]); setT($('kNxP'), m[2]);
     setT(kAdd, S.drafts[`${S.field}.${b + next}`] ? 'Continue your draft' : 'Start mission'); kAdd.dataset.kAns = String(b + next);
   }
   const finished = next === undefined || fresh; // the card is about the Kern card now, so no time chip
+  $('kNxPath').innerHTML = pathOf(S.field, finished ? -1 : b + (next ?? 0), 'nx');
   const mins = finished ? 0 : MX[S.field]?.[b + (next ?? 0)]?.mins;
-  $('kNxM').innerHTML = mins ? `<span class="k-l">~${mins} min</span>` : '';
+  $('kNxM').innerHTML = mins ? `<span class="k-l">${aboutMins(mins)}</span>` : '';
   // The list shows the round in play, or a look at the next one (never a lock: every round is open).
   const looking = peeking(), vb = viewBase(), vr = vb / PER_ROUND, vdone = new Set([0, 1, 2].filter((k) => doneSet().has(vb + k)));
   if (vr) setD($('kMsL'), it ? `Round ${vr + 1} · le tue 3 missioni` : `Round ${vr + 1} · your 3 missions`); else setT($('kMsL'), 'Your 3 missions');
@@ -752,7 +762,8 @@ const renderProgress = () => {
   });
   const signs = $('kSigns'), tips = S.answers.filter((a) => a.r?.tip);
   signs.innerHTML = '';
-  if (!tips.length) { const p = document.createElement('p'); p.textContent = tr('After each mission, leave a short review for the next person.'); signs.appendChild(p); }
+  $('kSignsC').hidden = !tips.length; // no empty box: the card shows once there is a tip of yours
+  setT($('kSignsN'), user ? 'Shared without your name with the next people who do each mission.' : CLOUD ? 'They stay on this device. With an account, they are shared without your name.' : 'They stay on this device.');
   tips.slice(-3).reverse().forEach((a) => {
     const d = document.createElement('div'); d.className = 'k-sign';
     const q = document.createElement('p'); q.textContent = `“${a.r!.tip}”`;
@@ -783,7 +794,7 @@ const WEEKNUM = (t: number) => Math.floor(t / 6048e5);
 const BADGES: { id: string; t: string; d: string; ok: () => boolean }[] = [
   { id: 'first', t: 'First step', d: 'Your first answer', ok: () => S.answers.length > 0 },
   { id: 'reflect', t: 'Honest look', d: 'Your first reflection', ok: () => S.answers.some((a) => a.r) },
-  { id: 'sign', t: 'Trail marker', d: 'Left a review for the next person', ok: () => S.answers.some((a) => a.r?.tip) },
+  { id: 'sign', t: 'Trail marker', d: 'Left a tip for the next person', ok: () => S.answers.some((a) => a.r?.tip) },
   { id: 'full', t: 'Full trail', d: 'All 3 missions in one field', ok: () => Object.keys(FIELDS).some((f) => { const d = doneIn(f); return [0, 1, 2].every((i) => d.has(i)); }) },
   { id: 'deep', t: 'Deep dive', d: 'Every mission in one field', ok: () => Object.keys(FIELDS).some((f) => doneIn(f).size >= total(f)) },
   { id: 'twice', t: 'Do it twice', d: '3 versions of an idea in KERN.AI', ok: () => S.mine.length >= 3 },
@@ -995,31 +1006,31 @@ function unshareSign(a: Answer) {
   delete a.r!.sid;
   setPend([...pend(), id]); flushSigns();
 }
-const kShS = $('kShS');
+const kShS = $('kShS'), kShSB = $('kShSB');
 let signReq = 0;
+// Tips from people who finished the mission before: the box stays hidden until there is a real one (an empty box only says nobody is here).
 const renderTrailSigns = (f: string, i: number) => {
   const req = ++signReq;
-  const note = (en: string) => { kShS.innerHTML = ''; const p = document.createElement('p'); p.className = 'k-sign-empty'; setT(p, en); kShS.appendChild(p); };
-  if (!CLOUD) return note('When people finish this mission, the reviews they leave for you appear here.');
-  note('Loading reviews…');
+  kShSB.hidden = true; kShS.replaceChildren();
+  if (!CLOUD) return;
   cloud.signs(f, i).then((list) => {
     if (req !== signReq) return;
     const ok = list.filter((s) => shareable(s.tip));
-    if (!ok.length) return note('No reviews on this mission yet. Finish it and leave the first one.');
-    kShS.innerHTML = '';
-    ok.forEach((s) => {
+    kShS.replaceChildren(...ok.map((s) => {
       const d = document.createElement('div'), q = document.createElement('p'), w = document.createElement('span');
       d.className = 'k-sign'; q.textContent = `“${s.tip}”`; w.className = 'k-l';
       setD(w, `${tr('Someone who finished it')} · ${day(Date.parse(s.at) || Date.now())}`);
-      d.append(q, w); kShS.appendChild(d);
-    });
-  }).catch(() => { if (req === signReq) note("Couldn't load reviews right now."); });
+      d.append(q, w); return d;
+    }));
+    kShSB.hidden = !ok.length;
+  }).catch(() => { /* tips are optional: when they cannot load, the box simply stays hidden */ });
 };
+// Where a tip goes, said plainly under the tip box: shared without a name only with an account, otherwise it stays on this device.
 const setRfNote = () => setT($('kRfN'), user ? 'Shared without your name with the next people who do this mission.'
   : CLOUD ? 'Stays on this device. Log in to share it, without your name, with the next people who do this mission.'
-  : 'Stays on this device for now.');
+  : 'Stays on this device.');
 // Practice brief (missions.ts): scenario, material to work on, tick-off steps with a progress bar
-// (first step pre-ticked), and after submitting a self-check that pays bonus stones.
+// (none ticked for you), and after submitting a self-check.
 const NOTE_DEFAULT = 'It stays on this device unless you ask KERN.AI.';
 const kShX = $('kShX'), kShH = $('kShH'), kShP = $('kShP'), kSaved = $('kSaved'), kXSteps = $('kXSteps'), kRfBar = $('kRfBar'), kRfBI = $('kRfBI');
 const setX = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.textContent = tr(en); }; // textContent: briefs contain code like <button>
@@ -1055,7 +1066,7 @@ function renderBrief(f: string, i: number) {
   kShX.hidden = kShH.hidden = kShP.hidden = kRfBar.hidden = !v;
   kXSteps.innerHTML = ''; kRfBI.innerHTML = '';
   if (!v || !x) return;
-  setX($('kXWho'), x.who); setD($('kXMin'), `~${x.mins} min`);
+  setX($('kXWho'), x.who); setD($('kXMin'), aboutMins(x.mins));
   const who = $('kXWho'), sp = SPONSORS[`${f}.${i}`]; // a brand mission shows who presents it, in their colour (sponsors.ts)
   who.classList.toggle('brand', !!sp);
   if (sp) { setD(who, `${tr('Brand mission')} · ${tr(sp.name)}`); who.style.setProperty('--brand', sp.color); } else who.style.removeProperty('--brand');
@@ -1068,7 +1079,6 @@ function renderBrief(f: string, i: number) {
   setX($('kXAT'), pic && x.asset.only ? x.asset.title : v.asset.title); setX($('kXAB'), v.asset.body); $('kXAB').classList.toggle('mono', v.asset.mono);
   $('kXAB').hidden = !!(pic && x.asset.only);
   kXAI.hidden = !pic; kXAI.dataset.en = pic ?? ''; kXAI.dataset.it = x.asset.imgIt ?? pic ?? ''; kXAI.dataset.alt = x.asset.body; setPic();
-  tick(kXSteps, t2('Read the brief', 'Leggi la missione'), true, 'st', stepProg);
   v.steps.forEach((s) => tick(kXSteps, s, cur.edit >= 0, 'st', stepProg)); // an answer being edited is a finished one: its steps show as done
   stepProg();
   x.bar.forEach((b) => tick(kRfBI, b, false, 'bar', barProg)); // after Submit: does yours do what a strong answer does? Self-ticked, never graded
@@ -1083,8 +1093,20 @@ function renderBrief(f: string, i: number) {
   setX($('kXExT'), v.ex);
   setT($('kXHint'), 'Need a hint?'); hold($('kXHint'), !v.hints.length);
   setT($('kXEasy'), S.easy ? 'Back to the full version' : 'Make it easier');
+  $('kXHard').hidden = !twistOf(f, i); showHarder(false);
   hold($('kXAsk'), false);
 }
+// The harder take every mission already has (its twist), shown under the buttons before starting, not only after finishing.
+const twistOf = (f: string, i: number) => { const tw = MX[f]?.[i]?.twist; return tw ? tr(tw).replace(/^(bonus|extra)\s*:\s*/i, '') : ''; }; // some twists start with "Bonus:"
+const showHarder = (open: boolean) => {
+  const t = $('kXHardT'), b = $('kXHard');
+  t.hidden = !open; b.setAttribute('aria-expanded', String(open));
+  setT(b, open ? 'Hide the harder take' : 'Make it harder');
+  if (open) { setD(t, `${tr('Harder take:')} ${twistOf(cur.f, cur.i)}`); reveal(t); }
+};
+$('kXHard').addEventListener('click', () => showHarder($('kXHardT').hidden));
+// Time on a mission is a soft estimate, said so nobody feels slow.
+const aboutMins = (n: number) => (isIt() ? `circa ${n} min, con calma` : `about ${n} min, no rush`);
 let hintN = 0;
 // The picks own the first lines of the answer; whatever the person typed after them stays.
 // ponytail: if they edit inside the picked lines, the next pick starts a new block above their text instead of merging.
@@ -1270,7 +1292,7 @@ const dropArt = (d: Drop) => {
 function showDrop(d: Drop, side: number, withNext = false) {
   const rel = RELICS.find((r) => r.id === d.id);
   kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = d.tier; setProgText(4);
-  $('kDrCoop').hidden = true; $('kDrCoN').hidden = true; $('kDrDare').hidden = true;
+  $('kDrCoop').hidden = true; $('kDrCoN').hidden = true; $('kDrDare').hidden = true; $('kDrMore').hidden = true;
   setT(kDrOk, 'Keep going'); delete kDrOk.dataset.next; kDrNx.hidden = true; kDrNx.textContent = ''; // aria-describedby reads hidden text too
   if (withNext) offerNext(); // before the focus below, so the button is announced with its final label
   $('kDrArt').innerHTML = dropArt(d);
@@ -1299,10 +1321,11 @@ kDrOk.addEventListener('click', once(() => {
   openAnswer(f, Number(i));
 }));
 const fillSheet = (f: string, i: number) => {
-  kSheet.classList.remove('drop'); kShD.hidden = true;
+  kSheet.classList.remove('drop'); kShD.hidden = true; kSheet.dataset.fa = f; // the header takes the field's accent colour (app.css)
   const m = FIELDS[f].m[i];
   setD($('kShL'), `${tr(f)} · ${isIt() ? 'missione' : 'mission'} ${(i % PER_ROUND) + 1} ${isIt() ? 'di' : 'of'} ${PER_ROUND}`); setT($('kShT'), m[1]); // not the internal label ("Mission 001 · crowded story")
-  setT($('kShQ'), FIELDS[f].qs[i % FIELDS[f].qs.length]);
+  const code = f === 'Code'; // code is typed letter by letter: the phone must not correct, capitalise or underline it
+  kTa.spellcheck = !code; kTa.setAttribute('autocorrect', code ? 'off' : 'on'); kTa.setAttribute('autocapitalize', code ? 'off' : 'sentences');
   renderBrief(f, i);
   kShA.hidden = false; kShR.hidden = true; setT(kSaved, NOTE_DEFAULT); kSaved.hidden = false;
   renderTrailSigns(f, i);
@@ -1378,12 +1401,14 @@ $('kSub').addEventListener('click', once(() => {
   groups[0].querySelector<HTMLElement>('[data-v]')!.focus({ preventScroll: true });
   kSheet.querySelector('.k-sh-in')?.scrollTo({ top: 0 }); // the comparison is read first, then the reflection
 }));
-$('kRfOk').addEventListener('click', once(() => {
-  const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value });
+// Save keeps everything; Skip keeps the chips already tapped (a quick tap then Skip is still a reflection) and drops the half-typed lines.
+const reflect = (withText: boolean) => {
+  const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, ...(withText ? { hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value } : {}) });
   if (r) track('reflect', cur.f, cur.i);
   finish(r);
-}));
-$('kRfSkip').addEventListener('click', once(() => finish(undefined)));
+};
+$('kRfOk').addEventListener('click', once(() => reflect(true)));
+$('kRfSkip').addEventListener('click', once(() => reflect(false)));
 // Finishing a mission: keep the reflection, then one calm confirmation. No bonus points, combos or random rewards.
 function finish(r: Refl | undefined) {
   const a = lastAns && S.answers.includes(lastAns) ? lastAns : undefined;
@@ -1398,6 +1423,19 @@ const burst = (n: number) => {
   const bits = $('kDrBits'); bits.innerHTML = '';
   if (!still) for (let i = 0; i < n; i++) { const p = document.createElement('i'); p.style.setProperty('--a', `${(360 / n) * i + Math.random() * 12}deg`); p.style.setProperty('--r', `${70 + Math.random() * 60}px`); bits.appendChild(p); }
 };
+// A field the person has not picked (or, with all picked, one not tried yet), a different one after each mission: "Curious about Video? Try one".
+const curiousField = () => {
+  const all = Object.keys(FIELDS), unpicked = all.filter((f) => !S.fields.includes(f));
+  const pool = unpicked.length ? unpicked : all.filter((f) => !doneIn(f).size);
+  return pool.length ? pool[S.answers.length % pool.length] : '';
+};
+$('kDrTry').addEventListener('click', once(() => { // opens that field's first open mission and adds it to the paths, like a co-op's "Do the mission yourself"
+  const f = $('kDrTry').dataset.f || ''; if (!FIELDS[f]) return;
+  const i = Array.from({ length: total(f) }, (_, k) => k).find((k) => !doneIn(f).has(k)) ?? 0;
+  closeSheet(kSheet);
+  if (!S.fields.includes(f)) S.fields = [...S.fields, f];
+  switchField(f); openAnswer(f, i);
+}));
 function showDone() {
   const f = cur.f, it = isIt();
   kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = 'done'; setProgText(4);
@@ -1411,11 +1449,14 @@ function showDone() {
   setD($('kDrN'), it ? `${doneIn(f).size} su ${total(f)} fatte in ${tr(f)}` : `${doneIn(f).size} of ${total(f)} done in ${tr(f)}`);
   const hit = barsHit(), all = barsAll();
   setD($('kDrS'), hit ? (it ? `${hit} controlli su ${all} · salvata su questo dispositivo.` : `${hit} of ${all} checks · saved on this device.`) : (it ? 'Salvata su questo dispositivo.' : 'Saved on this device.'));
-  // The field as a path: one segment per mission, the one just finished grows in.
-  const d = doneIn(f);
-  $('kDrPath').innerHTML = Array.from({ length: total(f) }, (_, i) => `<i class="${d.has(i) ? 'on' : ''}${i === cur.i ? ' now' : ''}"></i>`).join('');
-  const tw = MX[f]?.[cur.i]?.twist, twEl = $('kDrTw'); // the harder take that every mission already has
-  twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tr(tw).replace(/^(bonus|extra)\s*:\s*/i, '')}`); // some twists start with "Bonus:"
+  $('kDrPath').innerHTML = pathOf(f, cur.i, 'now'); // the one just finished grows in
+  // One calm line under the buttons: a field not picked yet, and the weekly reminder. Small links, never a second call to action.
+  const cf = curiousField(), tryB = $('kDrTry');
+  tryB.hidden = !cf; tryB.dataset.f = cf;
+  if (cf) setD(tryB, tr('Curious about {f}? Try one').replace('{f}', tr(cf)));
+  setT($('kDrRem'), 'Remind me weekly'); $('kDrMore').hidden = false;
+  const tw = twistOf(f, cur.i), twEl = $('kDrTw'); // the harder take that every mission already has
+  twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tw}`);
   burst(14); if ('vibrate' in navigator) navigator.vibrate(18);
   kDrOk.focus();
 }
@@ -1467,7 +1508,11 @@ const tiles = kStart.querySelectorAll<HTMLElement>('#kPick [data-f]');
 const kAge2 = $<HTMLInputElement>('kAge2');
 const markPick = () => {
   tiles.forEach((o) => { const on = picks.includes(o.dataset.f!); o.classList.toggle('sel', on); o.setAttribute('aria-pressed', String(on)); });
-  $<HTMLButtonElement>('kGo').disabled = !picks.length || !(S.adult || kAge2.checked); // first visit: the 18+ box sits on this screen, no name is asked
+  const noPick = !picks.length, noAge = !(S.adult || kAge2.checked); // first visit: the 18+ box sits on this screen, no name is asked
+  $<HTMLButtonElement>('kGo').disabled = noPick || noAge;
+  const why = $('kGoWhy'); // a dimmed button says what it waits for
+  why.hidden = !noPick && !noAge;
+  if (!why.hidden) setT(why, noPick && noAge ? 'Pick a field and tick the 18+ box to start.' : noAge ? 'Tick the 18+ box to start.' : 'Pick at least one field.');
 };
 kAge2.addEventListener('change', () => markPick());
 let pickerFromSettings = false; // opened from Settings (else from "+ Add"): where focus goes back to
@@ -1477,7 +1522,7 @@ const openStart = (step2 = false, fromSettings = false) => {
   setT($('kGo'), S.onboarded ? 'Save interests' : 'Start my first mission');
   setT($('kS2K'), S.onboarded ? 'Your interests' : "Good. Let's find out."); // "Good. Let's find out." answers "I don't know", which an existing user never tapped
   $('kPickX').hidden = !S.onboarded || !S.adult; // reopened from "+ Add" or Settings: there must be a way out (not past the 18+ box)
-  $('kS2Age').hidden = $('kS2Note').hidden = S.adult;
+  $('kS2Age').hidden = $('kAgeWhy').hidden = $('kS2Note').hidden = S.adult;
   kStart.setAttribute('aria-labelledby', step2 ? 'kS2H' : 'kS1H');
   kS1.hidden = step2; kS2.hidden = !step2; markPick(); kStart.classList.add('on');
   syncInert(); // Settings may still have left the screen inert: a focus() before this would be refused and land on the page body
@@ -1632,7 +1677,7 @@ const closeStart = () => {
   const pick = (S.onboarded && picks.includes(S.field) ? S.field : picks[0]) || S.field;
   const changed = pick !== S.field;
   const commit = () => { S.fields = picks.length ? [...picks] : [pick]; S.field = pick; S.onboarded = true; save(); };
-  if (!S.adult) { // Explore missions skips the choice, not the 18+ box: show the picker with the box
+  if (!S.adult) { // "I know what I want to try" skips the choice, not the 18+ box: show the picker with the box
     if (!kAge2.checked) { showPick("Pick where to start."); return; }
     S.adult = true;
   }
@@ -1808,7 +1853,7 @@ const trailText = () => {
       if (a.r.e) p.push(tr(FEEL_EN[a.r.e]));
       if (a.r.again) p.push(`${it ? 'Di nuovo' : 'Again'}: ${tr(AGAIN_EN[a.r.again])}`);
       if (a.r.hard) p.push(`${it ? 'Più difficile' : 'Hardest'}: ${a.r.hard}`);
-      if (a.r.tip) p.push(`${it ? 'Recensione' : 'Review'}: ${a.r.tip}`);
+      if (a.r.tip) p.push(`${it ? 'Consiglio' : 'Tip'}: ${a.r.tip}`);
       L.push(p.join(' | '));
     }
     L.push('');
@@ -1955,7 +2000,7 @@ const setLang = (l: Lang) => {
   document.title = tr("KERN · Don't guess your passion. Test it.");
   kDesc?.setAttribute('content', tr(descEn));
   kTxt.forEach((e) => { const en = e.dataset.en; if (!en) return; if (e.classList.contains('k-xb')) e.textContent = tr(en); else e.innerHTML = tr(en); });
-  for (const page of ['privacy', 'terms']) document.querySelectorAll<HTMLAnchorElement>(`a[href^="/${page}/"]`).forEach((a) => a.setAttribute('href', `/${page}/${l === 'it' ? '#it' : ''}`)); // after the texts above: they bring their own links back
+  for (const page of ['privacy', 'terms', 'about']) document.querySelectorAll<HTMLAnchorElement>(`a[href^="/${page}/"]`).forEach((a) => a.setAttribute('href', `/${page}/${l === 'it' ? '#it' : ''}`)); // after the texts above: they bring their own links back
   document.querySelectorAll<HTMLElement>('[aria-label]').forEach((e) => { const en = (e.dataset.enLabel ??= e.getAttribute('aria-label') || ''); e.setAttribute('aria-label', tr(en)); });
   if (fb.dataset.src) fb.textContent = tr(fb.dataset.src);
   pressed('lang', l); setPic();
@@ -1973,7 +2018,7 @@ $('kFeed').addEventListener('click', () => {
 });
 $('kExp').addEventListener('click', () => download(JSON.stringify({ ...snapshot(), exportedAt: new Date().toISOString() }, null, 2), 'kern-data.json', 'application/json'));
 // Weekly calendar reminder (.ics): works in every calendar app, no notifications permission, no streaks.
-$('kRemind').addEventListener('click', () => {
+const remind = () => {
   const esc = (s: string) => s.replace(/[\\;,]/g, (m) => '\\' + m).replace(/\n/g, '\\n');
   const p = (n: number) => String(n).padStart(2, '0');
   const d = new Date(); d.setDate(d.getDate() + 1);
@@ -1986,7 +2031,9 @@ $('kRemind').addEventListener('click', () => {
     'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:PT0M', `DESCRIPTION:${title}`, 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
   download(ics, 'kern-reminder.ics', 'text/calendar');
   say('Open the file to add the reminder to your calendar.');
-});
+};
+$('kRemind').addEventListener('click', remind);
+$('kDrRem').addEventListener('click', remind); // the same reminder, offered on the done screen
 $('kDel').addEventListener('click', async () => {
   if (!confirm(tr(DEMO ? 'This resets the demo to its sample answers. Continue?' : 'This deletes your answers on this device. Continue?'))) return;
   await eraseStats(); // also deletes what was counted for this device (never from the demo)

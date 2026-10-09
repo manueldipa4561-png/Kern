@@ -417,7 +417,7 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 .k-tile img { width: 66px; height: 66px; filter: drop-shadow(0 10px 12px rgba(0,0,0,.35)); transition: transform .5s var(--spring); }
 .k-tile.sel { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 14%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 22%, transparent); }
 .k-tile.sel img { transform: translateY(-4px) scale(1.14) rotate(-5deg); }
-.k-tile:last-child:nth-child(3n + 1) { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 12px; } /* a seventh tile sits alone on the last row: it takes the whole row, icon beside the name */
+.k-tile:last-child:nth-child(3n + 1) { grid-column: 2; } /* a seventh tile sits alone on the last row: same size as the others, in the middle */
 
 /* Reward: the new rank object pops in */
 .k-rankup { display: flex; align-items: center; gap: 12px; padding: 6px 18px 6px 6px; text-align: left; }
@@ -1012,9 +1012,11 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 #kRfBar[hidden], .k-dr-tw[hidden], #kBrandNote[hidden] { display: none; }
 .k-tk.bar.on { animation: kTickPop .32s var(--spring); }
 @keyframes kTickPop { 50% { transform: scale(1.03); } }
-.k-dr-path { display: flex; gap: 6px; justify-content: center; margin: 12px 0 4px; }
-.k-dr-path i { width: 24px; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--fg) 16%, transparent); }
-.k-dr-path i.on { background: var(--acc); }
+.k-path { display: flex; gap: 6px; }
+.k-dr-path { justify-content: center; margin: 12px 0 4px; }
+.k-path i { width: 24px; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--fg) 16%, transparent); }
+.k-path i:nth-child(3n):not(:last-child) { margin-right: 8px; } /* a gap between the two rounds */
+.k-path i.on { background: var(--acc); }
 .k-dr-path i.now { animation: kPathNow .8s .35s var(--out) both; box-shadow: 0 0 10px color-mix(in srgb, var(--acc) 60%, transparent); }
 @keyframes kPathNow { from { transform: scaleX(.2); opacity: .3; } to { transform: none; opacity: 1; } }
 .k-scr .k-dr-tw { max-width: 32ch; margin: 6px auto 0; }
@@ -1062,3 +1064,51 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 #kCardAsk button[aria-pressed="true"] { background: var(--acc); color: var(--on); border-color: var(--acc); }
 #kKernCard #kFb { padding-left: 4px; font: 500 0.875rem/1.45 'Inter Tight Variable', system-ui, sans-serif; letter-spacing: 0; text-transform: none; }
 #kKernCard #kFb:empty { display: none; }
+
+/* Pilot fixes (9 Oct): the first screens. Two choices of equal weight, a line under each field name, an "Aa" for text size, reasons under the 18+ box and the dimmed Start. */
+.k-choices { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.k-choice { min-height: 52px; padding: 14px 20px; border-radius: 999px; border: 1.5px solid var(--acc); background: color-mix(in srgb, var(--acc) 12%, transparent); color: var(--fg); font: 800 1.0625rem 'Inter Tight Variable', system-ui, sans-serif; text-align: left; cursor: pointer; transition: transform .45s var(--spring), background-color .2s; }
+.k-choice:active { transform: scale(.97); transition-duration: .08s; }
+.k-tile small { font: 500 0.8125rem/1.25 'Inter Tight Variable', system-ui, sans-serif; color: var(--dim); text-align: center; }
+.k-aa { position: absolute; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); z-index: 1; min-width: 44px; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--edge); background: var(--surf); color: var(--fg); font: 800 1rem var(--kd); cursor: pointer; }
+.k-sp #kGoWhy { margin-top: -6px; }
+@media (prefers-reduced-motion: reduce) { .k-choice { transition: none; } }
+/* Mission sheet: the time as a calm estimate, the harder take under the help buttons */
+#kXMin { text-transform: none; letter-spacing: 0; }
+.k-hard { border-left: 3px solid var(--gold); background: color-mix(in srgb, var(--gold) 12%, transparent); }
+#kXHard[hidden] { display: none; }
+/* Tips: no empty box, only real tips */
+.k-trailsigns[hidden] { display: none; }
+/* Home: the next mission shows the field as the same path as the done screen. The card is dark green in both themes, so its colours are fixed. */
+.k-nx-path { padding-right: 74px; margin: 2px 0; }
+.k-main .k-path i { background: rgba(236,234,223,.24); }
+.k-main .k-path i.on { background: #C9F24A; }
+.k-main .k-path i.nx { box-shadow: inset 0 0 0 1.5px #C9F24A; }
+/* Done screen: one small calm line under the buttons (another field, the weekly reminder) */
+.k-dr-more { align-self: stretch; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; column-gap: 10px; margin: 4px 0 0; }
+.k-dr-more[hidden], .k-lnk[hidden] { display: none; }
+.k-lnk { min-height: 44px; padding: 0 4px; background: none; border: 0; color: var(--dim); font: 600 0.8125rem 'Inter Tight Variable', system-ui, sans-serif; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* Readability: labels one step bigger, and the grey a little stronger in both themes (8:1 or better on the page, still AA on cards and tints) */
+.k-scr { --dim: #c4c7b9; }
+.k-scr.light { --dim: #3c4237; }
+.k-l, .k-card p.k-l, .k-foot .k-l { font-size: 0.8125rem; }
+.k-main .k-l { opacity: 1; }
+/* KERN.AI's send button in the palette's lime */
+.k-send { background: var(--acc); color: var(--on); }
+/* An accent per field, for its chip and the mission header: mid tones that read on both themes, never used for text */
+[data-fa="Design"] { --fa: #E07A5F; } [data-fa="Writing"] { --fa: #6F8FE0; } [data-fa="Code"] { --fa: #3FB28C; } [data-fa="Video"] { --fa: #E0609A; }
+[data-fa="Selling"] { --fa: #E8A33A; } [data-fa="Music"] { --fa: #9B7BE0; } [data-fa="Prompting"] { --fa: #3AAFCB; }
+.k-fchip[data-fa]:not(.on) { border-color: color-mix(in srgb, var(--fa) 70%, transparent); }
+.k-fchip.on[data-fa] { box-shadow: 0 0 0 2px var(--fa); }
+#kSheet[data-fa] .k-shbar { background: linear-gradient(color-mix(in srgb, var(--fa) 16%, var(--bg)), var(--bg)); }
+#kSheet[data-fa] #kShL::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--fa); vertical-align: 1px; }
+/* yourKERN's one-line explanation, and the no-contacts way to do the Ask step */
+.k-scr .k-yk-why { margin-top: 10px; max-width: 40ch; }
+.k-fu small { display: block; margin-top: 4px; font-size: 0.875rem; line-height: 1.4; color: var(--dim); }
+/* Asked for less transparency: no glass blur, and solid scrims and bars */
+@media (prefers-reduced-transparency: reduce) {
+  .k-sheet, .k-reward, .k-tabs { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  #kSet, #kFld { background: color-mix(in srgb, var(--bg) calc(90% * (1 - var(--drag, 0))), transparent); }
+  .k-tabs { background: var(--bg); }
+  .k-scr::before { display: none; }
+}
