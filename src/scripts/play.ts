@@ -29,7 +29,7 @@ export const PLAY: Record<string, Play> = {
       items: [t2('Red on cream', 'Rosso su crema'), t2('Yellow on black', 'Giallo su nero'), t2('Blue on white', 'Blu su bianco'), t2('Green on bone', 'Verde su avorio')] },
   ],
   'Writing.0': [
-    { kind: 'pick', label: t2('The details a friend would ask about (pick 2)', 'I dettagli che fanno fare domande (scegline 2)'), out: t2('Details', 'Dettagli'), max: 2,
+    { kind: 'pick', label: t2('Tap up to 3 details a friend would ask about', 'Tocca fino a 3 dettagli che fanno fare domande'), out: t2('Details', 'Dettagli'), max: 3,
       items: [t2('She almost stayed home', 'Stava per restare a casa'), t2('Bag strap snapped on the bus', 'Tracolla rotta sul bus'), t2('First time lifting 40 kg', 'Prima volta con 40 kg'), t2('Feeling good', 'Mi sento bene'), '#gym #fitness'] },
   ],
   'Code.0': [
