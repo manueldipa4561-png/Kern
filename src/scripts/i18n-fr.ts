@@ -2428,6 +2428,8 @@ const FR_GEN: Record<string, string> = {
   "Tap 3 words for how Dana talks": "Touche 3 mots sur la façon de parler de Dana",
 };
 const APP_FR: Record<string, string> = {
+  "You are talking to an AI · offline preview · the AI key on the server was rejected": "Tu parles à une IA · aperçu hors ligne · la clé IA du serveur a été refusée",
+  "You are talking to an AI · offline preview · the AI service is not reachable right now": "Tu parles à une IA · aperçu hors ligne · le service IA est injoignable pour le moment",
   "The AI isn't reachable right now. Paste your prompt into any AI instead.": 'L’IA ne répond pas pour l’instant. Colle plutôt ton prompt dans n’importe quelle IA.',
   'A find!': 'Une trouvaille !', 'A gem': 'Une pépite', 'A spark': 'Une étincelle', 'Jackpot': 'Jackpot',
   'Add one detail to a prompt you used': 'Ajoute un détail à un prompt que tu as utilisé',

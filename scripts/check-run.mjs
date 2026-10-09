@@ -33,6 +33,18 @@ for (const [lang, prompt, re] of [['de', 'Schreib einen Brief an meine Mutter, i
   assert.equal(sent, null, 'heavy words reached the model');
 }
 
+// The KERN.AI tab's check: a free models call, never the model; a rejected key says so.
+const realFetch = globalThis.fetch;
+let pingUrl = '';
+globalThis.fetch = async (url) => { pingUrl = String(url); return new Response('{}', { status: 200 }); };
+assert.equal((await run({ mode: 'ping' })).reply, 'live', 'ping with a working key says live');
+assert.match(pingUrl, /\/v1\/models/, 'ping must not call the model');
+globalThis.fetch = async () => new Response('{}', { status: 401 });
+assert.equal((await run({ mode: 'ping' })).error, 'key_rejected', 'ping with a rejected key says so');
+globalThis.fetch = async () => { throw new Error('offline'); };
+assert.equal((await run({ mode: 'ping' })).error, 'upstream', 'ping without network says the service is not reachable');
+globalThis.fetch = realFetch;
+
 const ok = await run({ prompt: `  ${P}  ` });
 assert.equal(ok.reply, text);
 assert.deepEqual(sent.messages, [{ role: 'user', content: P }], 'the model gets the trimmed prompt alone');

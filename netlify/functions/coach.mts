@@ -107,6 +107,12 @@ export default async (req: Request, context: Context) => {
   let body: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   try { const raw = await req.text(); if (raw.length > 12000) return json({ error: 'size' }, 413); body = JSON.parse(raw); } catch { return json({ error: 'json' }, 400); }
   const lang = Object.keys(LANG).find((l) => l === body?.lang) ?? 'en';
+  if (body?.mode === 'ping') { // the app asks once when the KERN.AI tab opens: is the key accepted? Lists one model, costs nothing, sends nothing of the person's
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/models?limit=1', { headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' }, signal: AbortSignal.timeout(6000) });
+      return r.ok ? json({ reply: 'live' }) : json({ error: r.status === 401 || r.status === 403 ? 'key_rejected' : 'upstream' }, 502);
+    } catch { return json({ error: 'upstream' }, 502); }
+  }
   if (body?.mode === 'run') {
     const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
     if (body.field !== 'Prompting' || prompt.length < RUN_MIN || prompt.length > RUN_MAX) return json({ error: 'input' }, 400);

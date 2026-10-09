@@ -342,6 +342,7 @@ tabs.forEach((t) => t.addEventListener('click', () => {
   const next = 'k-' + t.dataset.kTab, cur = kScr.querySelector<HTMLElement>('.k-pane.on');
   wanted = next;
   if (next === 'k-yourkern') try { localStorage.setItem(YK_SEEN, '1'); } catch { /* storage blocked */ }
+  if (next === 'k-copilot') checkLive();
   tabs.forEach((x) => { x.classList.toggle('on', x === t); x.setAttribute('aria-current', String(x === t)); });
   const swap = () => {
     kScr.querySelectorAll('.k-pane').forEach((p) => { p.classList.remove('leaving'); p.classList.toggle('on', p.id === wanted); });
@@ -913,13 +914,20 @@ const startChat = () => {
 // If there is no key, no network or any error, the scripted coach below answers instead, so the chat always works.
 let liveOk: boolean | null = null, liveWhy = '';
 // Why the live co-pilot did not answer, from the server's error code: the line under the title says so, instead of a silent fall back to the scripted coach.
-const WHY: Record<string, string> = { no_key: 'You are talking to an AI · offline preview · no AI key on the server yet', rate: 'You are talking to an AI · offline preview · too many messages, try in a minute', rate_day: 'You are talking to an AI · offline preview · daily limit reached, try tomorrow' };
+const WHY: Record<string, string> = { no_key: 'You are talking to an AI · offline preview · no AI key on the server yet', key_rejected: 'You are talking to an AI · offline preview · the AI key on the server was rejected', upstream: 'You are talking to an AI · offline preview · the AI service is not reachable right now', rate: 'You are talking to an AI · offline preview · too many messages, try in a minute', rate_day: 'You are talking to an AI · offline preview · daily limit reached, try tomorrow' };
 const setLive = (ok: boolean, why = '') => {
   if (liveOk === ok && liveWhy === why) return;
   liveOk = ok; liveWhy = why;
   setT($('kAiLbl'), ok ? 'You are talking to an AI · live replies' : WHY[why] ?? 'You are talking to an AI · offline preview');
 };
 let lastWhy = ''; // the error code of the last failed ask
+// Opening the KERN.AI tab checks that the live AI can answer before anyone types (again after 2 minutes), so a demo never starts on a silent fallback.
+let pinged = 0;
+function checkLive() {
+  if (Date.now() - pinged < 120000) return;
+  pinged = Date.now();
+  void postCoach({ mode: 'ping' }).then((r) => setLive(r === 'live', lastWhy));
+}
 // One POST to the function, 10 s at most: its reply, or null (the error code in lastWhy).
 async function postCoach(body: object): Promise<string | null> {
   const ctl = new AbortController(), to = window.setTimeout(() => ctl.abort(), 10000);

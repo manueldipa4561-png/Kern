@@ -62,21 +62,26 @@
   "v10a": {
     "model": "claude-haiku-5-5",
     "prompt": "v10a",
-    "note": "v7d plus only the refusal fix from v9d: no refusal, apology or \"not the place\" sentence, straight to the question (join wording as in v7d)"
+    "note": "v7d plus only the refusal fix from v9d: no refusal, apology or \"not the place\" sentence, straight to the question (join wording as in v7d). RESULT on 71 cases: pass 70%, natural 89%, but no answer 7 fails vs 5 and on task 2 vs 1 (takes up off-topic requests). Not shipped."
   },
   "v10b": {
     "model": "claude-haiku-5-5",
     "prompt": "v10b",
-    "note": "v10a plus replies in the language of the last message (EN/IT/DE/FR, else the app language) and the pause phrase in German and French"
+    "note": "v10a plus replies in the language of the last message (EN/IT/DE/FR, else the app language) and the pause phrase in German and French. RESULT on 71 cases: pass 68%, natural 89%, no answer 7 fails vs 5. Not shipped."
   },
   "v10c": {
     "model": "claude-haiku-5-5",
     "prompt": "v10c",
-    "note": "v10b plus: when stuck in a mission, ask about one concrete thing in the mission material"
+    "note": "v10b plus: when stuck in a mission, ask about one concrete thing in the mission material. RESULT on 71 cases: pass 65%, specific 69% (down). Not shipped."
   },
   "v10d": {
     "model": "claude-haiku-5-5",
     "prompt": "v10d",
-    "note": "v10c plus: the reply is one short sentence, the question"
+    "note": "v10c plus: the reply is one short sentence, the question. RESULT on 71 cases: pass 70% vs 65% for v7d, natural 99% vs 82%, format and language 100%, but no answer 7 fails vs 5 (option menus in one sentence) and on task 3 vs 1 (takes up off-topic). Not shipped; v11 fixes both."
+  },
+  "v11": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v11",
+    "note": "v10d plus v7d's short off-topic redirect (four words, then the question) and the question is about one single thing (no options). Waiting for a run: npm run eval:coach:all -- v11"
   }
 }
