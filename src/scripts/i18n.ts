@@ -335,6 +335,13 @@ export const IT: Record<string, string> = {
         'Dare someone to try it': 'Sfida qualcuno a provarla',
         'Do it here': 'Fallo qui',
         'Your picks fill in your answer. Add a line of your own if you like.': 'Le tue scelte riempiono la risposta. Se vuoi, aggiungi una riga tua.',
+        'Almost stayed home. Bag strap snapped on the bus. Lifted 40 kg anyway.': 'Stavo per restare a casa. Tracolla rotta sul bus. 40 kg sollevati lo stesso.',
+        'Fix a flat caption · Time flew': 'Sistema una caption piatta · Il tempo è volato',
+        'So far, you get into it when you start from zero.': 'Finora ti appassioni quando parti da zero.',
+        '3 of 6 missions': '3 su 6 missioni',
+        'Saved. This guess stays on your card and on the image you share.': 'Salvato. Questa ipotesi resta sulla card e nell’immagine che condividi.',
+        'Noted. Your card marks this guess “not really” and leaves it off the image you share.': 'Preso nota. La card segna questa ipotesi come “non proprio” e la lascia fuori dall’immagine che condividi.',
+        'Testing {f} on KERN.': 'Sto provando {f} su KERN.',
 };
 // English texts registered twice with different Italian: the last one silently wins. npm test fails if this list is not empty.
 export const CLASHES: string[] = [];
