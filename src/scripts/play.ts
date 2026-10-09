@@ -23,9 +23,9 @@ export type Play = (Pick | Sort | Beat)[];
 export const PLAY: Record<string, Play> = {
   ...PLAY_DESIGN, ...PLAY_WRITING, ...PLAY_CODE, ...PLAY_VIDEO, ...PLAY_SELLING, ...PLAY_MUSIC, ...PLAY_PROMPTING, // missions 2 to 6, one file per field
   'Design.0': [
-    { kind: 'pick', label: t2('Keep the message that makes people turn up (1 or 2)', 'Tieni il messaggio che fa venire la gente (1 o 2)'), out: t2('Keep', 'Tengo'), rest: t2('Cut', 'Tolgo'), max: 2,
+    { kind: 'pick', label: t2('Tap 1 or 2 messages to keep: the rest are cut.', 'Tocca 1 o 2 messaggi da tenere: gli altri si tolgono.'), out: t2('Keep', 'Tengo'), rest: t2('Cut', 'Tolgo'), max: 2,
       items: [t2('Pizza night Saturday', 'Serata pizza sabato'), t2('2 for 1 until 9pm', '2x1 fino alle 21'), t2('Live DJ from 10', 'DJ dal vivo dalle 22'), t2('New menu', 'Nuovo menu'), t2('Win a year of pizza', 'Vinci un anno di pizza'), t2('Tag 3 friends', 'Tagga 3 amici'), t2('12 Via Verdi', 'Via Verdi 12')] }, // the dog is part of the photo, not a message: keeping it is the person's call
-    { kind: 'pick', label: t2('One colour', 'Un solo colore'), out: t2('Colour', 'Colore'), max: 1,
+    { kind: 'pick', label: t2('Tap one colour for the words', 'Tocca un colore per le parole'), out: t2('Colour', 'Colore'), max: 1,
       items: [t2('Red on cream', 'Rosso su crema'), t2('Yellow on black', 'Giallo su nero'), t2('Blue on white', 'Blu su bianco'), t2('Green on bone', 'Verde su avorio')] },
   ],
   'Writing.0': [
