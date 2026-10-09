@@ -57,6 +57,6 @@
   "v9d": {
     "model": "claude-haiku-5-5",
     "prompt": "v9d",
-    "note": "v7d plus: no refusal or \"not the place\" sentence at all (straight to the question), no joining words or \"or\" choices in any of the four languages, replies in the language of the last message (EN/IT/DE/FR, else the app language), pause phrase in German and French. Tuned on the train split of v7d"
+    "note": "v7d plus: no refusal or \"not the place\" sentence at all (straight to the question), no joining words or \"or\" choices in any of the four languages, replies in the language of the last message (EN/IT/DE/FR, else the app language), pause phrase in German and French. Tuned on the train split of v7d. RESULT 2026-10-09: pass 59% vs 63% for v7d (natural 88% vs 80%, specific 62% vs 75%: naming the joining words made it join two questions more). Not shipped."
   }
 }
