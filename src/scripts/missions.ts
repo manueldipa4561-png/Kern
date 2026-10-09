@@ -174,8 +174,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Camilla’s mirror selfie', 'Il selfie allo specchio di Camilla'),
       brief: t2(
-        'Camilla’s gym selfie got 3 likes and no comments. Rewrite her caption in 12 words or fewer so a friend wants to answer.',
-        'Il selfie in palestra di Camilla ha 3 like e nessun commento. Riscrivi la sua caption in 12 parole al massimo, così che i suoi amici abbiano voglia di risponderle.'),
+        'Camilla’s gym selfie got 3 likes and no comments: her caption (the text under the photo) says nothing. Write a new caption her friends want to answer.',
+        'Il selfie in palestra di Camilla ha 3 like e nessun commento: la caption (il testo sotto la foto) non dice niente. Scrivine una nuova a cui i suoi amici abbiano voglia di rispondere.'),
       asset: {
         mono: false,
         img: '/img/m/camilla.webp',
@@ -186,8 +186,8 @@ export const MX: Record<string, MissionX[]> = {
       },
       steps: [
         t2('Pick the details a friend would ask about.', 'Scegli i dettagli che farebbero fare domande agli amici.'),
-        t2('Write the caption in 12 words or fewer. No hashtags.', 'Scrivi la caption in 12 parole al massimo. Niente hashtag.'),
-        t2('Send it to a friend who lifts.', 'Mandala a chi viene in palestra con te.'),
+        t2('Write the caption with those details.', 'Scrivi la caption con quei dettagli.'),
+        t2('Check: 12 words or fewer, no hashtags.', 'Controlla: 12 parole al massimo, niente hashtag.'),
       ],
       mins: 2,
       bar: [
@@ -195,24 +195,25 @@ export const MX: Record<string, MissionX[]> = {
         t2('No hashtags, 12 words or fewer', 'Niente hashtag, 12 parole al massimo'),
         t2('A friend would want to reply', 'Gli amici avrebbero voglia di rispondere'),
       ],
-      twist: t2('Bonus: cut it to 6 words and keep the funny part.', 'Bonus: riducila a 6 parole e tieni la parte buffa.'),
+      twist: t2('Bonus: cut it to 6 words, keep the funny part, and send it to a friend who goes to the gym.', 'Bonus: riducila a 6 parole, tieni la parte buffa e mandala a chi viene in palestra con te.'),
+      answer: t2('One caption, 12 words or fewer, no hashtags.', 'Una caption, 12 parole al massimo, niente hashtag.'),
     },
     {
       who: tag('Parlo, a language app (fictional)', 'Parlo, app di lingue (fittizia)'),
       brief: t2(
-        'Parlo, a language app, wants Leo back after 3 quiet days. Write the push notification that pops up: 10 words max, no guilt.',
-        'Parlo, un’app per le lingue, vuole che Leo torni dopo 3 giorni senza aprirla. Scrivi la notifica che compare sul telefono: 10 parole al massimo, niente sensi di colpa.'),
+        'Leo hasn’t opened Parlo, his language app, in 3 days. Write the kind message that pops up on his phone to bring him back.',
+        'Leo non apre Parlo, la sua app di lingue, da 3 giorni. Scrivi il messaggio gentile che gli compare sul telefono per farlo tornare.'),
       asset: {
         mono: false,
-        title: t2('Parlo · who you’re writing to', 'Parlo · a chi scrivi'),
+        title: t2('About Leo + the rules', 'Su Leo + le regole'),
         body: t2(
-          'Leo, learning Spanish for a trip in June\nLast lesson: ordering a coffee, 3 days ago\nLeo is busy, not lazy\nBanned: guilt, threats, fake countdowns\nSpace: one notification line, 10 words max',
-          'Leo studia spagnolo per un viaggio a giugno\nUltima lezione: ordinare un caffè, 3 giorni fa\nLeo è impegnato, non pigro\nVietato: sensi di colpa, minacce, conti alla rovescia finti\nSpazio: una riga di notifica, 10 parole al massimo'),
+          'Leo, learning Spanish for a trip in June\nLast lesson: ordering a coffee, 3 days ago\nLeo is busy, not lazy\nNot allowed: guilt, threats, fake countdowns (“only 2 hours left”)\nSpace: one line on the lock screen, 10 words max',
+          'Leo studia spagnolo per un viaggio a giugno\nUltima lezione: ordinare un caffè, 3 giorni fa\nLeo è impegnato, non pigro\nVietato: sensi di colpa, minacce, conti alla rovescia finti (“mancano solo 2 ore”)\nSpazio: una riga sulla schermata di blocco, 10 parole al massimo'),
       },
       steps: [
-        t2('Look for one real thing Leo already did.', 'Cerca una cosa che Leo ha già fatto davvero.'),
-        t2('Write the message in 10 words or fewer.', 'Scrivi il messaggio in 10 parole al massimo.'),
-        t2('Swap any nagging word for a kind one.', 'Sostituisci ogni parola da predica con una gentile.'),
+        t2('Pick one real thing Leo already did.', 'Scegli una cosa vera che Leo ha già fatto.'),
+        t2('Write a kind message that mentions it.', 'Scrivi un messaggio gentile che la nomini.'),
+        t2('Check: 10 words or fewer, no guilt.', 'Controlla: 10 parole al massimo, niente sensi di colpa.'),
       ],
       mins: 3,
       bar: [
@@ -221,23 +222,24 @@ export const MX: Record<string, MissionX[]> = {
         t2('You would tap it yourself', 'Lo toccheresti anche tu'),
       ],
       twist: t2('Bonus: reword it for a friend who owes you a reply. Send it.', 'Bonus: riscrivilo per chi ti deve una risposta. Mandalo.'),
+      answer: t2('One phone message, 10 words or fewer, no guilt.', 'Un messaggio per il telefono, 10 parole al massimo, niente sensi di colpa.'),
     },
     {
       who: tag('Elisa’s birthday', 'Il compleanno di Elisa'),
       brief: t2(
-        'Elisa turns 28 tomorrow and you always send “Happy birthday! 🎉”. Write three versions: funny, warm, tiny. A friend picks the keeper. Pair up, or do both parts.',
-        'Elisa compie 28 anni domani e tu le scrivi sempre “Buon compleanno! 🎉”. Scrivine tre versioni: divertente, calda, minuscola. Qualcuno sceglie la migliore. In due, o fai entrambe le parti.'),
+        'Elisa turns 28 tomorrow, and you always send just “Happy birthday! 🎉”. Write her three new messages: one funny, one warm, one tiny.',
+        'Elisa compie 28 anni domani e tu le scrivi sempre solo “Buon compleanno! 🎉”. Scrivile tre messaggi nuovi: uno divertente, uno affettuoso, uno minuscolo.'),
       asset: {
         mono: false,
-        title: t2('Elisa, 28 tomorrow', 'Elisa, 28 anni domani'),
+        title: t2('What you know about Elisa', 'Cosa sai di Elisa'),
         body: t2(
-          'You always send: Happy birthday! 🎉\nShe loves: midnight pasta, being late, her dog Fritz\nShe hates: surprise parties\nYou shared a flat for 2 years\nNo “wishing you all the best”',
-          'Di solito scrivi: Buon compleanno! 🎉\nLe piace: la pasta di mezzanotte, arrivare tardi, il suo cane Fritz\nOdia: le feste a sorpresa\nAvete diviso casa per 2 anni\nVietato “ti auguro il meglio”'),
+          'You always send: Happy birthday! 🎉\nShe loves: midnight pasta, being late, her dog Fritz\nShe hates: surprise parties\nYou shared a flat for 2 years\nNot allowed: “wishing you all the best”',
+          'Di solito scrivi: Buon compleanno! 🎉\nLe piace: la pasta di mezzanotte, arrivare tardi, il suo cane Fritz\nOdia: le feste a sorpresa\nAvete diviso casa per 2 anni\nVietato: “ti auguro il meglio”'),
       },
       steps: [
-        t2('Write the funny version using a detail from the list.', 'Scrivi la versione divertente con un dettaglio della lista.'),
-        t2('Write the warm version: say something you’d really say.', 'Scrivi la versione calda: di’ qualcosa che diresti davvero.'),
-        t2('Write the tiny version in 8 words or fewer.', 'Scrivi la versione minuscola in 8 parole al massimo.'),
+        t2('Write the funny one, with a detail from the list.', 'Scrivi quello divertente, con un dettaglio della lista.'),
+        t2('Write the warm one: what you’d really say to her.', 'Scrivi quello affettuoso: quello che le diresti davvero.'),
+        t2('Write the tiny one in 8 words or fewer.', 'Scrivi quello minuscolo in 8 parole al massimo.'),
       ],
       mins: 3,
       bar: [
@@ -245,32 +247,34 @@ export const MX: Record<string, MissionX[]> = {
         t2('One detail only Elisa would get', 'Un dettaglio che capirebbe solo Elisa'),
         t2('The tiny version is 8 words or fewer', 'La versione minuscola ha 8 parole al massimo'),
       ],
-      twist: t2('Copy the keeper. Send it to someone whose birthday is coming.', 'Copia quella da tenere. Mandala a chi compie gli anni presto.'),
+      twist: t2('Bonus: send your favourite to someone whose birthday is coming.', 'Bonus: manda il tuo preferito a chi compie gli anni presto.'),
+      answer: t2('Three messages: funny, warm, and tiny (8 words or fewer).', 'Tre messaggi: divertente, affettuoso e minuscolo (8 parole al massimo).'),
     },
     {
       who: tag('Bolla Laundry (fictional)', 'Lavanderia Bolla (fittizia)'),
       brief: t2(
-        'Bolla Laundry’s bio could be about any laundry. Rewrite it in 20 words or fewer so a student new in town finds it.',
-        'La bio della Lavanderia Bolla vale per qualsiasi lavanderia. Riscrivila in 20 parole al massimo, così che chi studia ed è appena arrivato in città la trovi.'),
+        'Bolla Laundry’s bio (the short text on its profile) could be about any laundry. Rewrite it so a student new in town wants to come.',
+        'La bio della Lavanderia Bolla (il testo breve sul suo profilo) potrebbe parlare di qualsiasi lavanderia. Riscrivila perché chi studia ed è appena arrivato in città abbia voglia di venire.'),
       asset: {
         mono: false,
-        title: t2('Bolla Laundry · bio today', 'Lavanderia Bolla · la bio di oggi'),
+        title: t2('Bolla’s bio today + the true facts', 'La bio di Bolla oggi + i fatti veri'),
         body: t2(
           'Welcome to Bolla! 🧺 Self-service laundry, best quality, best prices. Open most days. Visit us!\nTrue facts:\n– next to the university gate\n– wash €4, dry €3, soap included\n– free wifi and a shelf of books to swap\n– open every day, even Sunday',
           'Benvenuti da Bolla! 🧺 Lavanderia self-service, qualità migliore, prezzi migliori. Aperti quasi tutti i giorni. Venite a trovarci!\nFatti veri:\n– accanto al cancello dell’università\n– lavaggio 4 €, asciugatura 3 €, sapone incluso\n– wifi gratis e uno scaffale di libri da scambiare\n– aperti ogni giorno, anche la domenica'),
       },
       steps: [
-        t2('Cross out the words any laundry could say.', 'Cancella le parole che direbbe qualsiasi lavanderia.'),
+        t2('Spot the words any laundry could say.', 'Trova le parole che direbbe qualsiasi lavanderia.'),
         t2('Choose the 3 facts a student needs most.', 'Scegli i 3 fatti più utili per chi studia.'),
         t2('Write the bio in 20 words or fewer.', 'Scrivi la bio in 20 parole al massimo.'),
       ],
       mins: 4,
       bar: [
         t2('A student knows where to go', 'Chi studia capisce dove andare'),
-        t2('Real prices, no empty adjectives', 'Prezzi veri, niente aggettivi vuoti'),
+        t2('Real prices, no empty words like “best”', 'Prezzi veri, niente parole vuote come “migliore”'),
         t2('Sounds like a person, not a catalogue', 'Suona come una persona, non come un catalogo'),
       ],
       twist: t2('Bonus: rewrite your own bio the same way, and post it tonight.', 'Bonus: riscrivi la tua bio allo stesso modo e pubblicala stasera.'),
+      answer: t2('One bio, 20 words or fewer, using the true facts.', 'Una bio, 20 parole al massimo, con i fatti veri.'),
     },
     {
       who: tag('Cinema Orsa (fictional)', 'Cinema Orsa (fittizio)'),
@@ -281,13 +285,13 @@ export const MX: Record<string, MissionX[]> = {
         mono: false,
         title: t2('Under Orsa’s post · the rude comment', 'Sotto il post di Orsa · il commento maleducato'),
         body: t2(
-          'Post: Tickets are now €8 (was €7).\nComment: €8 to sit in the dark?? I’ll watch it at home. Greedy 🙄\nTrue: heating and film rental cost 25% more\nAlso true: first rise in 4 years, Tuesdays stay €5\nRules: no sarcasm, no insults, no begging',
-          'Post: Il biglietto ora costa 8 € (prima 7 €).\nCommento: 8 € per stare al buio?? Me lo guardo a casa. Che ladri 🙄\nVero: riscaldamento e noleggio dei film costano il 25% in più\nVero anche questo: primo aumento in 4 anni, il martedì resta 5 €\nRegole: niente sarcasmo, niente insulti, niente suppliche'),
+          'Post: Tickets are now €8 (was €7).\nComment: €8 to sit in the dark?? I’ll watch it at home. Greedy 🙄\nTrue: heating and film rental cost 25% more\nAlso true: first rise in 4 years, Tuesdays stay €5\nRules: no sarcasm, no arguing back, no begging',
+          'Post: Il biglietto ora costa 8 € (prima 7 €).\nCommento: 8 € per stare al buio?? Me lo guardo a casa. Che ladri 🙄\nVero: riscaldamento e noleggio dei film costano il 25% in più\nVero anche questo: primo aumento in 4 anni, il martedì resta 5 €\nRegole: niente sarcasmo, non ribattere, niente suppliche'),
       },
       steps: [
-        t2('Find what the angry comment is really about.', 'Trova di cosa parla davvero il commento arrabbiato.'),
-        t2('Write your reply in 25 words or fewer.', 'Scrivi la risposta in 25 parole al massimo.'),
-        t2('Cut any word that sounds defensive.', 'Togli ogni parola che suona difensiva.'),
+        t2('Find what the comment is really about.', 'Trova di cosa parla davvero il commento.'),
+        t2('Write a calm reply with one true reason.', 'Scrivi una risposta calma con un motivo vero.'),
+        t2('Check: 25 words or fewer, no sarcasm.', 'Controlla: 25 parole al massimo, niente sarcasmo.'),
       ],
       mins: 4,
       bar: [
@@ -296,31 +300,33 @@ export const MX: Record<string, MissionX[]> = {
         t2('Ends warmly, with no sarcasm', 'Finisce con calore, senza sarcasmo'),
       ],
       twist: t2('Copy it. Send it to someone and ask: would you still come?', 'Copiala. Mandala a qualcuno e chiedi: ci verresti lo stesso?'),
+      answer: t2('One reply from the cinema, 25 words or fewer.', 'Una risposta del cinema, 25 parole al massimo.'),
     },
     {
       who: tag('Pigro Gelato (fictional)', 'Pigro Gelato (fittizio)'),
       brief: t2(
-        'Pigro Gelato has a new flavour and no name. One writes three names, one picks and writes the counter sign. Pair up, or do both parts.',
-        'Pigro Gelato ha un gusto nuovo e nessun nome. Uno scrive tre nomi, l’altro sceglie e scrive il cartello per il banco. In due, o fai entrambe le parti.'),
+        'Pigro Gelato has a new flavour and no name yet. Write three names, pick one, and write the small sign for the counter.',
+        'Pigro Gelato ha un gusto nuovo e ancora nessun nome. Scrivi tre nomi, scegline uno e scrivi il cartello per il banco.'),
       asset: {
         mono: false,
         title: t2('Pigro Gelato · new flavour, no name', 'Pigro Gelato · gusto nuovo, senza nome'),
         body: t2(
-          'What’s in it: roasted hazelnuts, sea salt, a dark chocolate ribbon\nTaste: sweet first, a little salt at the end\nArrives: Friday, in the case between pistachio and lemon\nThe shop’s voice: lazy, kind, a bit funny\nRule: names are 3 words or fewer',
-          'Dentro: nocciole tostate, sale marino, un nastro di cioccolato fondente\nSapore: prima dolce, alla fine un po’ di sale\nArriva: venerdì, in vetrina tra pistacchio e limone\nLa voce del locale: pigra, gentile, un po’ buffa\nRegola: i nomi hanno 3 parole al massimo'),
+          'What’s in it: roasted hazelnuts, sea salt, a dark chocolate ribbon\nTaste: sweet first, a little salt at the end\nArrives: Friday, in the case between pistachio and lemon\nThe shop’s voice: lazy, kind, a bit funny\nRules: names 3 words or fewer, sign 12 words or fewer',
+          'Dentro: nocciole tostate, sale marino, un nastro di cioccolato fondente\nSapore: prima dolce, alla fine un po’ di sale\nArriva: venerdì, in vetrina tra pistacchio e limone\nLa voce del locale: pigra, gentile, un po’ buffa\nRegole: nomi di 3 parole al massimo, cartello di 12 parole al massimo'),
       },
       steps: [
         t2('Write 3 names, each 3 words or fewer.', 'Scrivi 3 nomi, ognuno di 3 parole al massimo.'),
-        t2('Pick the one you would say out loud at the counter.', 'Scegli quello che diresti ad alta voce al banco.'),
-        t2('Write the sign under it: 12 words or fewer.', 'Scrivi il cartello sotto: 12 parole al massimo.'),
+        t2('Pick the one you’d say out loud to order.', 'Scegli quello che diresti ad alta voce per ordinarlo.'),
+        t2('Write its sign for the counter: 12 words or fewer.', 'Scrivi il suo cartello per il banco: 12 parole al massimo.'),
       ],
       mins: 5,
       bar: [
         t2('The name hints at the taste', 'Il nome fa intuire il gusto'),
         t2('The sign sounds like the shop’s voice', 'Il cartello suona come la voce del locale'),
-        t2('The sign says facts, not adjectives', 'Il cartello dice fatti, non aggettivi'),
+        t2('The sign gives facts, not “best ever”', 'Il cartello dà fatti, non “il migliore di sempre”'),
       ],
       twist: t2('Copy the name and sign. Post them, or send them to a gelato fan.', 'Copia nome e cartello. Pubblicali, o mandali a chi ama il gelato.'),
+      answer: t2('Three names (up to 3 words each), your pick, and a sign up to 12 words.', 'Tre nomi (massimo 3 parole l’uno), la tua scelta e un cartello di massimo 12 parole.'),
     },
   ],
 
