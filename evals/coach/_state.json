@@ -21,8 +21,13 @@
       "kind": "binary"
     },
     {
-      "id": "quotes",
-      "label": "Quotes",
+      "id": "specific",
+      "label": "Specific",
+      "kind": "binary"
+    },
+    {
+      "id": "natural",
+      "label": "Natural",
       "kind": "binary"
     },
     {
