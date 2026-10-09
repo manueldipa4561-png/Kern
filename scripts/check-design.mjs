@@ -59,4 +59,9 @@ assert.ok(/id="kShClose"/.test(page) && /function renderProg\(\)/.test(readFileS
 const pics = [...readFileSync('src/scripts/missions.ts', 'utf8').matchAll(/\bimg(?:It)?: '(\/img\/m\/[^']+)'/g)].map((m) => m[1]);
 assert.ok(pics.length >= 9, `missions.ts: expected the mission pictures, found ${pics.length}`);
 for (const p of pics) assert.ok(existsSync(`public${p}`), `missions.ts: picture ${p} is not in public/`);
+// Older phones: the app must start on iOS Safari 15 (no Object.hasOwn, structuredClone, toSorted, findLast, Object.groupBy before 15.4-17), or it stops on the launch screen.
+for (const f of ['src/scripts/app.ts', 'src/scripts/play.ts']) {
+  const old = readFileSync(f, 'utf8').match(/Object\.hasOwn\(|structuredClone\(|\.toSorted\(|\.toReversed\(|\.findLast(Index)?\(|Object\.groupBy\(|Promise\.withResolvers\(/g);
+  assert.ok(!old, `${f} uses ${old} which older iPhones do not have: use an older equivalent`);
+}
 console.log('design: ok (rem text, icons for every field, 4 text sizes, 2 themes, 3 sections)');

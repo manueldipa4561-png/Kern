@@ -232,7 +232,7 @@ const TR: Record<Lang, Record<string, string>> = { en: EN, it: IT, de: DE, fr: F
 const LOCALE: Record<Lang, string> = { en: 'en-GB', it: 'it-IT', de: 'de-DE', fr: 'fr-FR' };
 const tr = (s: string) => TR[S.lang][s] || EN[s] || s; // EN: "Selling" reads "Selling online" wherever a field name shows
 // A sentence with blanks: fill(t2('Round {n} done', 'Round {n} fatto'), { n: 2 }), translated first, then every {name} filled once.
-const fill = (en: string, v: Record<string, string | number>) => tr(en).replace(/\{(\w+)\}/g, (m, k: string) => (Object.hasOwn(v, k) ? String(v[k]) : m));
+const fill = (en: string, v: Record<string, string | number>) => tr(en).replace(/\{(\w+)\}/g, (m, k: string) => (Object.prototype.hasOwnProperty.call(v, k) ? String(v[k]) : m));
 const setT = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.innerHTML = tr(en); };
 // Dynamic text built in code: clear data-en so a language switch does not overwrite it.
 const setD = (el: Element, text: string) => { (el as HTMLElement).dataset.en = ''; el.textContent = text; };
