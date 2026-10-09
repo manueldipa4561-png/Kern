@@ -88,7 +88,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
               <p class="k-msg k-hard" id="kXHardT" hidden></p>
               <div id="kXHints" aria-live="polite"></div>
             </div>
-            <div class="k-trailsigns"><div class="k-l">Reviews from people before you</div><div id="kShS" aria-live="polite"></div></div>
+            <div class="k-trailsigns" id="kShSB" hidden><div class="k-l">Tips from people before you</div><div id="kShS"></div></div>
           </div>
           <div class="k-step k-drop" id="kShD" hidden>
             <div class="k-dr-stage"><div class="k-dr-bits" id="kDrBits" aria-hidden="true"></div><div class="k-dr-art" id="kDrArt"></div></div>
@@ -119,7 +119,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
             <p class="k-q" id="kRfAQ">Would you do this kind of task again?</p>
             <div class="k-chips" id="kRfA" role="group" aria-labelledby="kRfAQ"><span role="button" tabindex="0" data-v="yes">Yes</span><span role="button" tabindex="0" data-v="maybe">Maybe</span><span role="button" tabindex="0" data-v="no">No</span></div>
             <label class="k-l" for="kRfH">Hardest part (optional)</label><input id="kRfH" type="text" maxlength="140" autocomplete="off" />
-            <label class="k-l" for="kRfT">Leave a review for the next person (optional)</label><input id="kRfT" type="text" maxlength="140" autocomplete="off" aria-describedby="kRfN" /><p class="k-rf-note" id="kRfN"></p>
+            <label class="k-l" for="kRfT">Leave a tip for the next person (optional)</label><input id="kRfT" type="text" maxlength="140" autocomplete="off" aria-describedby="kRfN" /><p class="k-rf-note" id="kRfN"></p>
             <div class="k-sh-btns"><button type="button" class="k-go" id="kRfOk">Save</button><button type="button" class="k-sk" id="kRfSkip">Skip</button></div>
           </div>
         </div>
@@ -330,7 +330,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
             <div class="k-card k-cut"><div class="k-l k-finds-h"><span>Finds</span><span id="kFN"></span></div><div class="k-finds" id="kFinds"></div><p class="k-l">Finish missions to uncover them. You never know which one drops.</p></div>
             <div class="k-card k-cut"><div class="k-l" id="kBdL">Badges</div><div class="k-badges" id="kBadges" role="group" aria-labelledby="kBdL"></div></div>
             <div class="k-duo k-cut"><div class="k-card"><div class="k-l">Answers made</div><div class="k-stat"><b id="kCnt">0</b></div><span class="k-l">on this device · only you see this</span></div><div class="k-card"><div class="k-l">Your rhythm · no pressure</div><div class="k-cal" id="kDots" aria-hidden="true"></div><p id="kRhy"></p></div></div>
-            <div class="k-card k-signs-card"><div class="k-l">Reviews from others</div><p>People who finish a mission before you leave a short tip for you. Yours helps the next person.</p><div class="k-l">Reviews you left</div><div id="kSigns"></div></div>
+            <div class="k-card k-signs-card" id="kSignsC" hidden><div class="k-l">Tips you left</div><p id="kSignsN"></p><div id="kSigns"></div></div>
             <div class="k-card"><div class="k-l">Dare a friend</div><p>Send a mission to a friend, and answer it on your own. For two answers side by side, use a co-op mission.</p><div class="k-btnrow"><button type="button" class="k-ask-btn" data-k-share="dare">Send a dare</button><button type="button" class="k-ask-btn" data-k-copy="dare">Copy link</button></div></div>
             <div class="k-card k-pilot k-cut"><div class="k-l">Testing KERN?</div><p>Send your answers and reflections to the team. It helps us build the next version.</p><button type="button" class="k-ask-btn" data-k-send>Send my answers to the KERN team</button></div>
                       </section>

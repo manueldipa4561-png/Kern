@@ -702,7 +702,8 @@ const renderProgress = () => {
   });
   const signs = $('kSigns'), tips = S.answers.filter((a) => a.r?.tip);
   signs.innerHTML = '';
-  if (!tips.length) { const p = document.createElement('p'); p.textContent = tr('After each mission, leave a short review for the next person.'); signs.appendChild(p); }
+  $('kSignsC').hidden = !tips.length; // no empty box: the card shows once there is a tip of yours
+  setT($('kSignsN'), user ? 'Shared without your name with the next people who do each mission.' : CLOUD ? 'They stay on this device. With an account, they are shared without your name.' : 'They stay on this device.');
   tips.slice(-3).reverse().forEach((a) => {
     const d = document.createElement('div'); d.className = 'k-sign';
     const q = document.createElement('p'); q.textContent = `“${a.r!.tip}”`;
@@ -733,7 +734,7 @@ const WEEKNUM = (t: number) => Math.floor(t / 6048e5);
 const BADGES: { id: string; t: string; d: string; ok: () => boolean }[] = [
   { id: 'first', t: 'First step', d: 'Your first answer', ok: () => S.answers.length > 0 },
   { id: 'reflect', t: 'Honest look', d: 'Your first reflection', ok: () => S.answers.some((a) => a.r) },
-  { id: 'sign', t: 'Trail marker', d: 'Left a review for the next person', ok: () => S.answers.some((a) => a.r?.tip) },
+  { id: 'sign', t: 'Trail marker', d: 'Left a tip for the next person', ok: () => S.answers.some((a) => a.r?.tip) },
   { id: 'full', t: 'Full trail', d: 'All 3 missions in one field', ok: () => Object.keys(FIELDS).some((f) => { const d = doneIn(f); return [0, 1, 2].every((i) => d.has(i)); }) },
   { id: 'deep', t: 'Deep dive', d: 'Every mission in one field', ok: () => Object.keys(FIELDS).some((f) => doneIn(f).size >= total(f)) },
   { id: 'twice', t: 'Do it twice', d: '3 versions of an idea in KERN.AI', ok: () => S.mine.length >= 3 },
@@ -945,29 +946,29 @@ function unshareSign(a: Answer) {
   delete a.r!.sid;
   setPend([...pend(), id]); flushSigns();
 }
-const kShS = $('kShS');
+const kShS = $('kShS'), kShSB = $('kShSB');
 let signReq = 0;
+// Tips from people who finished the mission before: the box stays hidden until there is a real one (an empty box only says nobody is here).
 const renderTrailSigns = (f: string, i: number) => {
   const req = ++signReq;
-  const note = (en: string) => { kShS.innerHTML = ''; const p = document.createElement('p'); p.className = 'k-sign-empty'; setT(p, en); kShS.appendChild(p); };
-  if (!CLOUD) return note('When people finish this mission, the reviews they leave for you appear here.');
-  note('Loading reviews…');
+  kShSB.hidden = true; kShS.replaceChildren();
+  if (!CLOUD) return;
   cloud.signs(f, i).then((list) => {
     if (req !== signReq) return;
     const ok = list.filter((s) => shareable(s.tip));
-    if (!ok.length) return note('No reviews on this mission yet. Finish it and leave the first one.');
-    kShS.innerHTML = '';
-    ok.forEach((s) => {
+    kShS.replaceChildren(...ok.map((s) => {
       const d = document.createElement('div'), q = document.createElement('p'), w = document.createElement('span');
       d.className = 'k-sign'; q.textContent = `“${s.tip}”`; w.className = 'k-l';
       setD(w, `${tr('Someone who finished it')} · ${day(Date.parse(s.at) || Date.now())}`);
-      d.append(q, w); kShS.appendChild(d);
-    });
-  }).catch(() => { if (req === signReq) note("Couldn't load reviews right now."); });
+      d.append(q, w); return d;
+    }));
+    kShSB.hidden = !ok.length;
+  }).catch(() => { /* tips are optional: when they cannot load, the box simply stays hidden */ });
 };
+// Where a tip goes, said plainly under the tip box: shared without a name only with an account, otherwise it stays on this device.
 const setRfNote = () => setT($('kRfN'), user ? 'Shared without your name with the next people who do this mission.'
   : CLOUD ? 'Stays on this device. Log in to share it, without your name, with the next people who do this mission.'
-  : 'Stays on this device for now.');
+  : 'Stays on this device.');
 // Practice brief (missions.ts): scenario, material to work on, tick-off steps with a progress bar
 // (none ticked for you), and after submitting a self-check.
 const NOTE_DEFAULT = 'It stays on this device unless you ask KERN.AI.';
@@ -1737,7 +1738,7 @@ const trailText = () => {
       if (a.r.e) p.push(tr(FEEL_EN[a.r.e]));
       if (a.r.again) p.push(`${it ? 'Di nuovo' : 'Again'}: ${tr(AGAIN_EN[a.r.again])}`);
       if (a.r.hard) p.push(`${it ? 'Più difficile' : 'Hardest'}: ${a.r.hard}`);
-      if (a.r.tip) p.push(`${it ? 'Recensione' : 'Review'}: ${a.r.tip}`);
+      if (a.r.tip) p.push(`${it ? 'Consiglio' : 'Tip'}: ${a.r.tip}`);
       L.push(p.join(' | '));
     }
     L.push('');

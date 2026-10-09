@@ -1052,3 +1052,5 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 #kXMin { text-transform: none; letter-spacing: 0; }
 .k-hard { border-left: 3px solid var(--gold); background: color-mix(in srgb, var(--gold) 12%, transparent); }
 #kXHard[hidden] { display: none; }
+/* Tips: no empty box, only real tips */
+.k-trailsigns[hidden] { display: none; }
