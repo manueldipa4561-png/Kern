@@ -53,5 +53,10 @@
     "model": "claude-haiku-5-5",
     "prompt": "v8d",
     "note": "v8 for four languages: replies in the language of the last message when it is English, Italian, German or French, else the app language; warm off-topic, field names in the reply language"
+  },
+  "v9d": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v9d",
+    "note": "v7d plus: no refusal or \"not the place\" sentence at all (straight to the question), no joining words or \"or\" choices in any of the four languages, replies in the language of the last message (EN/IT/DE/FR, else the app language), pause phrase in German and French. Tuned on the train split of v7d"
   }
 }
