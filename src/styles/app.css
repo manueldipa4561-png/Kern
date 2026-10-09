@@ -1019,3 +1019,23 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 @keyframes kPathNow { from { transform: scaleX(.2); opacity: .3; } to { transform: none; opacity: 1; } }
 .k-scr .k-dr-tw { max-width: 32ch; margin: 6px auto 0; }
 @media (prefers-reduced-motion: reduce) { .k-tk.bar.on, .k-dr-path i.now { animation: none; } }
+/* v8: Do it here (play.ts). Chips to tap, rows to drag or move with the arrows, ✕ to cut. Every target is 44px. */
+.k-play { display: flex; flex-direction: column; gap: 12px; }
+.k-pl-g { display: flex; flex-direction: column; gap: 8px; }
+.k-pl-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.k-pl-chip { min-height: 44px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--edge); background: transparent; color: var(--fg); font: 600 0.9375rem 'Inter Tight Variable', system-ui, sans-serif; cursor: pointer; transition: background .15s, color .15s, transform .15s var(--spring); }
+.k-pl-chip[aria-pressed="true"] { background: var(--acc); border-color: var(--acc); color: var(--on); transform: scale(1.04); }
+.k-pl-sort { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.k-pl-sort li { display: grid; grid-template-columns: 28px 1fr 44px 44px 44px; align-items: center; gap: 2px; min-height: 48px; padding: 2px 4px 2px 0; border-radius: 12px; background: color-mix(in srgb, var(--fg) 6%, transparent); touch-action: none; }
+.k-pl-sort li.lift { position: relative; z-index: 2; background: color-mix(in srgb, var(--acc) 22%, var(--bg)); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.k-pl-sort li.cut .k-pl-t { text-decoration: line-through; opacity: .45; }
+.k-pl-grip { align-self: stretch; cursor: grab; background: radial-gradient(circle, var(--dim) 1.5px, transparent 2px) center / 8px 8px; opacity: .7; }
+.k-pl-t { font-size: 0.9375rem; line-height: 1.3; padding: 6px 4px; }
+.k-pl-t small { font: 600 0.75rem 'Inter Tight Variable', system-ui, sans-serif; color: var(--acc); white-space: nowrap; }
+.k-pl-mv, .k-pl-x { width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--fg); font-size: 1.0625rem; cursor: pointer; }
+.k-pl-mv:disabled { opacity: .25; cursor: default; }
+.k-pl-x { color: var(--dim); }
+.k-pl-sum { margin: 0; font: 700 0.9375rem 'Inter Tight Variable', system-ui, sans-serif; color: var(--acc); }
+.k-pl-sum.over { color: var(--gold); }
+@media (prefers-reduced-motion: reduce) { .k-pl-chip { transition: none; } .k-pl-chip[aria-pressed="true"] { transform: none; } }
+#kPlayB { display: flex; flex-direction: column; gap: 18px; }

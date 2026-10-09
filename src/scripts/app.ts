@@ -11,6 +11,7 @@ import { COOP_KEYS, MAX_ANSWER, MAX_NAME, MAX_REPLY, clip, coopUrl, decodeCoop, 
 import { ASK } from './coopask';
 import { SCORE, rowsOf, verdict } from './compare';
 import { MX } from './missions';
+import { PLAY, renderPlay } from './play';
 import { RELICS, rollDrop, type Drop } from './loot';
 import { nextSpot, roundOf, PER_ROUND } from './next';
 import { SPONSORS } from './sponsors';
@@ -1021,6 +1022,10 @@ function renderBrief(f: string, i: number) {
   x.bar.forEach((b) => tick(kRfBI, b, false, 'bar', barProg)); // after Submit: does yours do what a strong answer does? Self-ticked, never graded
   barProg();
   $('kBrandNote').hidden = !sp;
+  // Do it here: tap or drag instead of typing (play.ts). Not while editing a saved answer, the picks would rewrite it.
+  const pl = PLAY[`${f}.${i}`];
+  playGen = ''; $('kPlay').hidden = !pl || cur.edit >= 0;
+  if (pl && cur.edit < 0) renderPlay($('kPlayB'), pl, tr, playWrite); else $('kPlayB').innerHTML = '';
   // Hints, KERN.AI and the easy switch. The strong answer waits until the person has written theirs: it shows after Submit, to compare (kCmp).
   hintN = 0; $('kXHints').innerHTML = '';
   setX($('kXExT'), v.ex);
@@ -1029,6 +1034,15 @@ function renderBrief(f: string, i: number) {
   hold($('kXAsk'), false);
 }
 let hintN = 0;
+// The picks own the first lines of the answer; whatever the person typed after them stays.
+// ponytail: if they edit inside the picked lines, the next pick starts a new block above their text instead of merging.
+let playGen = '';
+const playWrite = (gen: string) => {
+  const v = kTa.value;
+  const rest = playGen && v.startsWith(playGen) ? v.slice(playGen.length) : v.trim() ? `\n${v}` : '';
+  playGen = gen; kTa.value = gen + (gen ? rest : rest.replace(/^\n/, ''));
+  kTa.dispatchEvent(new Event('input'));
+};
 const barsHit = () => kRfBI.querySelectorAll('.bar.on').length, barsAll = () => kRfBI.querySelectorAll('.bar').length;
 function barProg() {
   const n = barsHit(), all = barsAll(), it = isIt();
