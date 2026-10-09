@@ -2,12 +2,13 @@ import { t2 } from './i18n';
 
 // One concrete practice mission per mission (6 fields x 6, in rounds of 3). Every company here is fictional and the sheet says so.
 // Shape: who (practice mission tag), brief (scenario + stakes), asset (the real material to work on),
-// steps (3 actions), mins (time box), bar (what strong answers do), twist (optional bonus).
+// steps (3 actions), mins (time box), bar (what strong answers do), twist (optional bonus),
+// answer (one line under the answer box: exactly what to write, with its limit).
 // img: a picture of the asset (a photo, a story, a cover) shown above the text, imgIt the Italian version when the picture has words in it.
 // only: the picture says it all, so the text is kept just as its description for a screen reader.
 // video: a real clip (public/media) shown above the text with its own controls; the text keeps the seconds.
 export type Asset = { title: string; body: string; mono: boolean; img?: string; imgIt?: string; only?: boolean; video?: string };
-export type MissionX = { who: string; brief: string; asset: Asset; steps: string[]; mins: number; bar: string[]; twist: string };
+export type MissionX = { who: string; brief: string; asset: Asset; steps: string[]; mins: number; bar: string[]; twist: string; answer?: string };
 
 const tag = (en: string, it: string) => t2('Practice mission · ' + en, 'Missione di prova · ' + it);
 

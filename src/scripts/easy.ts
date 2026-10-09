@@ -4,14 +4,15 @@ import type { Asset } from './missions';
 // "Make it easier": the same 42 missions in plain words, for people with no experience in the field.
 // No tools, no jargon, doable on paper. Rewards are identical, so the easy path is never second class.
 // A missing asset or hints list falls back to the full version's (missions.ts, helps.ts).
-export type Easy = { brief: string; steps: string[]; ex: string; asset?: Asset; hints?: string[] };
+export type Easy = { brief: string; steps: string[]; ex: string; asset?: Asset; hints?: string[]; answer?: string };
 type P = [string, string];
-const e = (brief: P, steps: P[], ex: P, asset?: { title: P; body: P }, hints?: P[]): Easy => ({
+const e = (brief: P, steps: P[], ex: P, asset?: { title: P; body: P }, hints?: P[], answer?: P): Easy => ({
   brief: t2(...brief),
   steps: steps.map((s) => t2(...s)),
   ex: t2(...ex),
   asset: asset ? { mono: false, title: t2(...asset.title), body: t2(...asset.body) } : undefined,
   hints: hints?.map((h) => t2(...h)),
+  answer: answer ? t2(...answer) : undefined,
 });
 
 export const EASY: Record<string, Easy[]> = {

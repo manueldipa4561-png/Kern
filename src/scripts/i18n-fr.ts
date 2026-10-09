@@ -469,7 +469,7 @@ const FR_GEN: Record<string, string> = {
   "What the AI made of it": "Ce que l'IA en a fait",
   "Dare someone to try it": "Lance un défi à quelqu'un",
   "Do it here": "Fais-le ici",
-  "Your picks fill in your answer. Add a line of your own if you like.": "Tes choix remplissent ta réponse. Ajoute une ligne à toi si tu veux.",
+  "Optional: your taps write the start of your answer below. Finish it in your own words.": "Facultatif : tes choix écrivent le début de ta réponse ci-dessous. Termine-la avec tes mots.",
   "Almost stayed home. Bag strap snapped on the bus. Lifted 40 kg anyway.": "J'ai failli rester chez moi. Bandoulière cassée dans le bus. 40 kg soulevés quand même.",
   "Fix a flat caption · Time flew": "Répare une légende plate · Le temps a filé",
   "So far, you get into it when you start from zero.": "Jusqu'ici, tu te prends au jeu quand tu pars de zéro.",

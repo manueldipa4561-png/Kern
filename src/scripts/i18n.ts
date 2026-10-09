@@ -355,7 +355,7 @@ export const IT: Record<string, string> = {
         'What the AI made of it': 'Cosa ne ha fatto l’AI',
         'Dare someone to try it': 'Sfida qualcuno a provarla',
         'Do it here': 'Fallo qui',
-        'Your picks fill in your answer. Add a line of your own if you like.': 'Le tue scelte riempiono la risposta. Se vuoi, aggiungi una riga tua.',
+        'Optional: your taps write the start of your answer below. Finish it in your own words.': 'Facoltativo: i tuoi tocchi scrivono l’inizio della risposta qui sotto. Finiscila con parole tue.',
         'Almost stayed home. Bag strap snapped on the bus. Lifted 40 kg anyway.': 'Stavo per restare a casa. Tracolla rotta sul bus. 40 kg sollevati lo stesso.',
         'Fix a flat caption · Time flew': 'Sistema una caption piatta · Il tempo è volato',
         'So far, you get into it when you start from zero.': 'Finora ti appassioni quando parti da zero.',

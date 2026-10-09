@@ -1072,7 +1072,7 @@ const stepProg = () => {
 const variant = (f: string, i: number) => {
   const x = MX[f]?.[i]; if (!x) return null;
   const hp = HELPS[f]?.[i], ez = S.easy ? EASY[f]?.[i] : undefined;
-  return { x, brief: ez?.brief ?? x.brief, steps: ez?.steps ?? x.steps, asset: ez?.asset ?? x.asset, ex: ez?.ex ?? hp?.ex ?? '', hints: ez?.hints ?? hp?.hints ?? [] };
+  return { x, brief: ez?.brief ?? x.brief, steps: ez?.steps ?? x.steps, asset: ez?.asset ?? x.asset, ex: ez?.ex ?? hp?.ex ?? '', hints: ez?.hints ?? hp?.hints ?? [], answer: ez?.answer ?? x.answer };
 };
 // The mission picture in the current language (some pictures carry words), with the asset text as its description.
 const setPic = () => {
@@ -1093,7 +1093,7 @@ function renderBrief(f: string, i: number) {
   const bo = boostOf(f), bEl = $('kXBoost');
   bEl.hidden = !(bo && bo.i === i && cur.edit < 0);
   if (!bEl.hidden) setD(bEl, `${boostTxt(bo!.m)} · ${tr('stones multiplied')}`);
-  setX($('kXBrief'), v.brief);
+  setX($('kXBrief'), v.brief); setX($('kLen'), v.answer || '2–3 lines is enough.'); // under the answer box: exactly what to write
   // A visual asset (a photo, a story, a cover) shows as the picture itself. With `only` the text is just its description for a screen reader.
   const pic = x.asset.img, kXAI = $<HTMLImageElement>('kXAI');
   setX($('kXAT'), pic && x.asset.only ? x.asset.title : v.asset.title); setX($('kXAB'), v.asset.body); $('kXAB').classList.toggle('mono', v.asset.mono);
