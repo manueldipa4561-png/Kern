@@ -641,7 +641,7 @@ const renderHome = () => {
   }
   const finished = next === undefined || fresh; // the card is about the Kern card now, so no time chip
   const mins = finished ? 0 : MX[S.field]?.[b + (next ?? 0)]?.mins;
-  $('kNxM').innerHTML = mins ? `<span class="k-l">~${mins} min</span>` : '';
+  $('kNxM').innerHTML = mins ? `<span class="k-l">${aboutMins(mins)}</span>` : '';
   // The list shows the round in play, or a look at the next one (never a lock: every round is open).
   const looking = peeking(), vb = viewBase(), vr = vb / PER_ROUND, vdone = new Set([0, 1, 2].filter((k) => doneSet().has(vb + k)));
   if (vr) setD($('kMsL'), it ? `Round ${vr + 1} · le tue 3 missioni` : `Round ${vr + 1} · your 3 missions`); else setT($('kMsL'), 'Your 3 missions');
@@ -970,7 +970,7 @@ const setRfNote = () => setT($('kRfN'), user ? 'Shared without your name with th
   : CLOUD ? 'Stays on this device. Log in to share it, without your name, with the next people who do this mission.'
   : 'Stays on this device for now.');
 // Practice brief (missions.ts): scenario, material to work on, tick-off steps with a progress bar
-// (first step pre-ticked), and after submitting a self-check that pays bonus stones.
+// (none ticked for you), and after submitting a self-check.
 const NOTE_DEFAULT = 'It stays on this device unless you ask KERN.AI.';
 const kShX = $('kShX'), kShH = $('kShH'), kShP = $('kShP'), kSaved = $('kSaved'), kXSteps = $('kXSteps'), kRfBar = $('kRfBar'), kRfBI = $('kRfBI');
 const setX = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.textContent = tr(en); }; // textContent: briefs contain code like <button>
@@ -1006,7 +1006,7 @@ function renderBrief(f: string, i: number) {
   kShX.hidden = kShH.hidden = kShP.hidden = kRfBar.hidden = !v;
   kXSteps.innerHTML = ''; kRfBI.innerHTML = '';
   if (!v || !x) return;
-  setX($('kXWho'), x.who); setD($('kXMin'), `~${x.mins} min`);
+  setX($('kXWho'), x.who); setD($('kXMin'), aboutMins(x.mins));
   const who = $('kXWho'), sp = SPONSORS[`${f}.${i}`]; // a brand mission shows who presents it, in their colour (sponsors.ts)
   who.classList.toggle('brand', !!sp);
   if (sp) { setD(who, `${tr('Brand mission')} · ${tr(sp.name)}`); who.style.setProperty('--brand', sp.color); } else who.style.removeProperty('--brand');
@@ -1019,7 +1019,6 @@ function renderBrief(f: string, i: number) {
   setX($('kXAT'), pic && x.asset.only ? x.asset.title : v.asset.title); setX($('kXAB'), v.asset.body); $('kXAB').classList.toggle('mono', v.asset.mono);
   $('kXAB').hidden = !!(pic && x.asset.only);
   kXAI.hidden = !pic; kXAI.dataset.en = pic ?? ''; kXAI.dataset.it = x.asset.imgIt ?? pic ?? ''; kXAI.dataset.alt = x.asset.body; setPic();
-  tick(kXSteps, t2('Read the brief', 'Leggi la missione'), true, 'st', stepProg);
   v.steps.forEach((s) => tick(kXSteps, s, cur.edit >= 0, 'st', stepProg)); // an answer being edited is a finished one: its steps show as done
   stepProg();
   x.bar.forEach((b) => tick(kRfBI, b, false, 'bar', barProg)); // after Submit: does yours do what a strong answer does? Self-ticked, never graded
@@ -1034,8 +1033,20 @@ function renderBrief(f: string, i: number) {
   setX($('kXExT'), v.ex);
   setT($('kXHint'), 'Need a hint?'); hold($('kXHint'), !v.hints.length);
   setT($('kXEasy'), S.easy ? 'Back to the full version' : 'Make it easier');
+  $('kXHard').hidden = !twistOf(f, i); showHarder(false);
   hold($('kXAsk'), false);
 }
+// The harder take every mission already has (its twist), shown under the buttons before starting, not only after finishing.
+const twistOf = (f: string, i: number) => { const tw = MX[f]?.[i]?.twist; return tw ? tr(tw).replace(/^(bonus|extra)\s*:\s*/i, '') : ''; }; // some twists start with "Bonus:"
+const showHarder = (open: boolean) => {
+  const t = $('kXHardT'), b = $('kXHard');
+  t.hidden = !open; b.setAttribute('aria-expanded', String(open));
+  setT(b, open ? 'Hide the harder take' : 'Make it harder');
+  if (open) { setD(t, `${tr('Harder take:')} ${twistOf(cur.f, cur.i)}`); reveal(t); }
+};
+$('kXHard').addEventListener('click', () => showHarder($('kXHardT').hidden));
+// Time on a mission is a soft estimate, said so nobody feels slow.
+const aboutMins = (n: number) => (isIt() ? `circa ${n} min, con calma` : `about ${n} min, no rush`);
 let hintN = 0;
 // The picks own the first lines of the answer; whatever the person typed after them stays.
 // ponytail: if they edit inside the picked lines, the next pick starts a new block above their text instead of merging.
@@ -1253,7 +1264,8 @@ const fillSheet = (f: string, i: number) => {
   kSheet.classList.remove('drop'); kShD.hidden = true;
   const m = FIELDS[f].m[i];
   setD($('kShL'), `${tr(f)} · ${isIt() ? 'missione' : 'mission'} ${(i % PER_ROUND) + 1} ${isIt() ? 'di' : 'of'} ${PER_ROUND}`); setT($('kShT'), m[1]); // not the internal label ("Mission 001 · crowded story")
-  setT($('kShQ'), FIELDS[f].qs[i % FIELDS[f].qs.length]);
+  const code = f === 'Code'; // code is typed letter by letter: the phone must not correct, capitalise or underline it
+  kTa.spellcheck = !code; kTa.setAttribute('autocorrect', code ? 'off' : 'on'); kTa.setAttribute('autocapitalize', code ? 'off' : 'sentences');
   renderBrief(f, i);
   kShA.hidden = false; kShR.hidden = true; setT(kSaved, NOTE_DEFAULT); kSaved.hidden = false;
   renderTrailSigns(f, i);
@@ -1365,8 +1377,8 @@ function showDone() {
   // The field as a path: one segment per mission, the one just finished grows in.
   const d = doneIn(f);
   $('kDrPath').innerHTML = Array.from({ length: total(f) }, (_, i) => `<i class="${d.has(i) ? 'on' : ''}${i === cur.i ? ' now' : ''}"></i>`).join('');
-  const tw = MX[f]?.[cur.i]?.twist, twEl = $('kDrTw'); // the harder take that every mission already has
-  twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tr(tw).replace(/^(bonus|extra)\s*:\s*/i, '')}`); // some twists start with "Bonus:"
+  const tw = twistOf(f, cur.i), twEl = $('kDrTw'); // the harder take that every mission already has
+  twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tw}`);
   burst(14); if ('vibrate' in navigator) navigator.vibrate(18);
   kDrOk.focus();
 }

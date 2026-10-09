@@ -76,7 +76,6 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
               <p class="k-l k-s">Your picks fill in your answer. Add a line of your own if you like.</p>
             </div>
             <div class="k-compose" id="kCompose">
-              <p class="k-msg k-ai" id="kShQ">What would make the first step easier for someone brand new?</p>
               <label class="k-l" for="kTa">Your answer</label>
               <textarea id="kTa" rows="4" maxlength="2000"></textarea>
               <p class="k-rf-note" id="kSaved" aria-live="polite">It stays on this device unless you ask KERN.AI.</p>
@@ -85,7 +84,8 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
             </div>
             <div class="k-x" id="kShH">
               <p class="k-l k-s" id="kXDemo" hidden>Demo: the question you ask KERN.AI, with your draft, is sent to the AI to get a reply. We do not store it.</p>
-              <div class="k-xbtns" id="kXBtns"><button type="button" class="k-chipb" id="kXHint">Need a hint?</button><button type="button" class="k-chipb k-ai-btn" id="kXAsk">Ask KERN.AI</button><button type="button" class="k-chipb" id="kXEasy">Make it easier</button></div>
+              <div class="k-xbtns" id="kXBtns"><button type="button" class="k-chipb" id="kXHint">Need a hint?</button><button type="button" class="k-chipb k-ai-btn" id="kXAsk">Ask KERN.AI</button><button type="button" class="k-chipb" id="kXEasy">Make it easier</button><button type="button" class="k-chipb" id="kXHard" aria-expanded="false" aria-controls="kXHardT">Make it harder</button></div>
+              <p class="k-msg k-hard" id="kXHardT" hidden></p>
               <div id="kXHints" aria-live="polite"></div>
             </div>
             <div class="k-trailsigns"><div class="k-l">Reviews from people before you</div><div id="kShS" aria-live="polite"></div></div>
