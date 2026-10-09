@@ -9,7 +9,7 @@ import { FIELDS } from './fields';
 import { FIELD_INFO } from './fieldinfo';
 import { COOP_KEYS, MAX_ANSWER, MAX_NAME, MAX_REPLY, clip, coopUrl, decodeCoop, settleReply, type Coop, type CoopRec } from './coop';
 import { ASK } from './coopask';
-import { SCORE, rowsOf, verdict } from './compare';
+import { SCORE, rowsOf, verdict, type Feel } from './compare';
 import { MX } from './missions';
 import { PLAY, renderPlay } from './play';
 import { RELICS, rollDrop, type Drop } from './loot';
@@ -23,7 +23,6 @@ import * as stats from './stats';
 import { akey, ver, stamp, mergeAnswers, type Tomb } from './sync';
 import { inTime, clampCount } from './valid';
 
-type Feel = 'flow' | 'ok' | 'drag';
 type Again = 'yes' | 'maybe' | 'no';
 type Refl = { e?: Feel; again?: Again; hard?: string; tip?: string; sid?: number }; // sid: the tip's shared sign, if published
 type Answer = { f: string; i: number; t: string; at: number; ed?: number; r?: Refl; x?: number; d?: string }; // x: extra stones (bonuses, drop), d: drop id (loot.ts)
@@ -60,7 +59,7 @@ const wipeExtras = (accountGone = false) => { if (DEMO) return; try { for (const
 const eraseStats = () => (DEMO ? Promise.resolve() : stats.erase()); // the demo must never touch the real usage-count record
 const OPEN = "What is your idea? Write it in your own words first. I won't suggest one."; // the co-pilot's first line (the demo chat starts with it too)
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
-const FEELS: Feel[] = ['flow', 'ok', 'drag'];
+const FEELS = Object.keys(SCORE) as Feel[]; // every "how did it feel" value compare.ts can score, so stored and synced reflections keep all of them
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
 const fresh = (): State => ({ v: 1, name: '', adult: false, field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'dark', text: 1, guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false, coops: [] });
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
@@ -451,7 +450,7 @@ const setLvl = () => { $<HTMLTextAreaElement>('kTa').placeholder = tr('Write it 
 const KIND_EN = ['improve what already exists', 'start from zero', 'work with someone'];
 const KIND_IT = ['migliori ciò che esiste già', 'parti da zero', 'collabori con qualcuno'];
 const KSHORT = ['Improving things', 'Starting from zero', 'Working with others'];
-const FEEL_EN: Record<Feel, string> = { flow: 'Time flew', ok: 'It was fine', drag: 'It dragged' };
+const FEEL_EN: Record<Feel, string> = { flow: 'Time flew', ok: 'It was fine', drag: 'It dragged', easy: 'Too easy' };
 const AGAIN_EN: Record<Again, string> = { yes: 'Yes', maybe: 'Maybe', no: 'No' };
 const DRAGGED = 0.5; // a kind is only called a drag when its average is this low: a lone "It was fine" scores 1 and is not one
 const readSignals = () => {
@@ -1341,12 +1340,14 @@ $('kSub').addEventListener('click', once(() => {
   groups[0].querySelector<HTMLElement>('[data-v]')!.focus({ preventScroll: true });
   kSheet.querySelector('.k-sh-in')?.scrollTo({ top: 0 }); // the comparison is read first, then the reflection
 }));
-$('kRfOk').addEventListener('click', once(() => {
-  const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value });
+// Save keeps everything; Skip keeps the chips already tapped (a quick tap then Skip is still a reflection) and drops the half-typed lines.
+const reflect = (withText: boolean) => {
+  const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, ...(withText ? { hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value } : {}) });
   if (r) track('reflect', cur.f, cur.i);
   finish(r);
-}));
-$('kRfSkip').addEventListener('click', once(() => finish(undefined)));
+};
+$('kRfOk').addEventListener('click', once(() => reflect(true)));
+$('kRfSkip').addEventListener('click', once(() => reflect(false)));
 // Finishing a mission: keep the reflection, then one calm confirmation. No bonus points, combos or random rewards.
 function finish(r: Refl | undefined) {
   const a = lastAns && S.answers.includes(lastAns) ? lastAns : undefined;

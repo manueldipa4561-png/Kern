@@ -1,7 +1,7 @@
 // Fields side by side (yourKERN): each field's average energy from the "how did it feel" answers, and what that supports saying.
 // Pure, so npm test can check it (scripts/check-sync.ts). The screen is in app.ts (renderCompare).
-export type Feel = 'flow' | 'ok' | 'drag';
-export const SCORE: Record<Feel, number> = { flow: 2, ok: 1, drag: 0 };
+export type Feel = 'flow' | 'ok' | 'drag' | 'easy';
+export const SCORE: Record<Feel, number> = { flow: 2, ok: 1, drag: 0, easy: 1 }; // "Too easy" asks for a harder mission: it counts like "fine", never as a dislike
 export type Row = { f: string; n: number; v: number }; // v: 0 to 1, the average of the feel scores over the best possible
 export const LEAD_GAP = 0.1; // the leader must be this far ahead of the next field
 export const LEAD_MIN = 2; // and rest on at least this many reflections: one lucky mission is not a verdict

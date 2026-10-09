@@ -67,7 +67,8 @@ console.log('sync rules: ok');
 
 // Fields side by side: average energy per field, fields with enough reflections first, and a leader only on a clear gap when both sides have at least two.
 import { rowsOf, verdict } from '../src/scripts/compare.ts';
-const ans = (f: string, ...e: ('flow' | 'ok' | 'drag' | undefined)[]) => e.map((x) => ({ f, r: x ? { e: x } : undefined }));
+const ans = (f: string, ...e: ('flow' | 'ok' | 'drag' | 'easy' | undefined)[]) => e.map((x) => ({ f, r: x ? { e: x } : undefined }));
+assert.deepEqual(rowsOf(ans('Code', 'easy', 'drag'), ['Code']), [{ f: 'Code', n: 2, v: 0.25 }]); // "Too easy" counts like "fine", never as a dislike
 const rows = rowsOf([...ans('Design', 'flow', 'flow'), ...ans('Writing', 'drag', undefined), ...ans('Code', undefined)], ['Design', 'Writing', 'Code']);
 assert.deepEqual(rows, [{ f: 'Design', n: 2, v: 1 }, { f: 'Writing', n: 1, v: 0 }]); // a field with no reflection is left out
 assert.equal(verdict(rows), 'early'); // one reflection on Writing is not enough to compare it

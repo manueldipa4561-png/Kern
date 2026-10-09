@@ -189,6 +189,7 @@ export const IT: Record<string, string> = {
         'Time flew': 'Il tempo è volato',
         'It was fine': 'Tutto normale',
         'It dragged': 'Non passava più',
+        'Too easy': 'Troppo facile',
         'Would you do this kind of task again?': 'Rifaresti una missione così?',
         'Yes': 'Sì',
         'Maybe': 'Forse',
