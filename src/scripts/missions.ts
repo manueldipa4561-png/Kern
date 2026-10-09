@@ -815,8 +815,8 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Noa’s get-ready playlist', 'la playlist di Noa per prepararsi'),
       brief: t2(
-        'Noa’s friends arrive at 9 tonight. The playlist should start calm and get louder, but one song kills the mood. Cut it, then fix the order.',
-        'Gli amici di Noa arrivano stasera alle 21. La playlist deve partire calma e salire, ma una canzone rovina l’atmosfera. Toglila, poi sistema l’ordine.'),
+        'Noa’s friends arrive at 9 tonight, and one song on the playlist kills the mood. Cut it, then put the other five from calm to loud.',
+        'Gli amici di Noa arrivano stasera alle 21 e una canzone della playlist rovina l’atmosfera. Toglila, poi metti le altre cinque dalla più calma alla più forte.'),
       asset: {
         mono: false,
         title: t2('Noa’s playlist · how each song feels', 'La playlist di Noa · che effetto fa ogni canzone'),
@@ -826,58 +826,60 @@ export const MX: Record<string, MissionX[]> = {
       },
       steps: [
         t2('Name the one song to cut.', 'Scrivi la canzone da togliere.'),
-        t2('Type the other five in the order you’d play them.', 'Scrivi le altre cinque nell’ordine in cui le metteresti.'),
+        t2('Put the other five from calm to loud.', 'Metti le altre cinque dalla più calma alla più forte.'),
         t2('Add one line on why your order works.', 'Aggiungi una riga su perché questo ordine funziona.'),
       ],
       mins: 2,
       bar: [
         t2('The song you cut would kill the mood', 'La canzone tolta rovinerebbe l’atmosfera'),
-        t2('Energy builds to the end (one breather is fine)', 'L’energia cresce fino alla fine (una pausa ci sta)'),
+        t2('Calm at the start, loudest at the end', 'Calma all’inizio, la più forte alla fine'),
         t2('Your why fits in one line', 'Il tuo perché sta in una riga'),
       ],
       twist: t2('Send the new order to the friend who is always late, with “it only gets louder”.', 'Manda il nuovo ordine a chi arriva sempre in ritardo, con “da qui si sale solo”.'),
+      answer: t2('The song you cut, the other five from calm to loud, and one line on why.', 'La canzone che togli, le altre cinque dalla più calma alla più forte e una riga sul perché.'),
     },
     {
-      who: tag('Forno Gufo, a bakery opening its roller shutter at 6am (fictional)', 'Forno Gufo, un forno che alza la saracinesca alle 6 (fittizio)'),
+      who: tag('Forno Gufo, a bakery (fictional)', 'Forno Gufo, un forno (fittizio)'),
       brief: t2(
-        'Forno Gufo is posting a 10-second Monday reel. Describe its sound and pick the second the drop hits (the moment the music comes in).',
-        'Forno Gufo pubblica un reel di 10 secondi per il lunedì. Descrivi il suono e scegli il secondo in cui parte il drop (quando la musica entra).'),
+        'Forno Gufo is posting a 10-second video for Monday morning. Describe its music in three words and pick the second it comes in (the drop).',
+        'Forno Gufo pubblica un video di 10 secondi per il lunedì mattina. Descrivi la sua musica in tre parole e scegli il secondo in cui entra (il drop).'),
       asset: {
         mono: true,
-        title: t2('The reel: when each shot starts', 'Il reel: quando parte ogni scena'),
+        title: t2('The video, second by second', 'Il video, secondo per secondo'),
         body: t2(
           '0s  dark street, roller shutter down\n3s  the shutter rolls up\n5s  dough slaps down, flour flies\n8s  first loaf out of the oven\n9s  “Forno Gufo · open from 6”',
           '0s  strada buia, saracinesca giù\n3s  si alza la saracinesca\n5s  l’impasto sbatte sul banco, farina\n8s  la prima pagnotta dal forno\n9s  “Forno Gufo · aperto dalle 6”'),
       },
       steps: [
-        t2('Write your sound in three words, like “sleepy, soft, hum”.', 'Scrivi il tuo suono in tre parole, tipo “assonnato, morbido, ronzio”.'),
-        t2('Write the second the drop hits.', 'Scrivi il secondo in cui parte il drop.'),
-        t2('Write what plays before the drop.', 'Scrivi cosa si sente prima del drop.'),
+        t2('Pick three words for the music.', 'Scegli tre parole per la musica.'),
+        t2('Pick the second the music comes in.', 'Scegli il secondo in cui entra la musica.'),
+        t2('Add one line on why that second.', 'Aggiungi una riga sul perché di quel secondo.'),
       ],
       mins: 3,
       bar: [
-        t2('The drop starts exactly where a shot starts', 'Il drop parte dove inizia una scena'),
-        t2('It is quieter before the drop than after', 'Prima del drop è più piano che dopo'),
+        t2('The music comes in as a scene starts', 'La musica entra quando inizia una scena'),
+        t2('A few seconds without music come first', 'Prima ci sono alcuni secondi senza musica'),
         t2('Your three words fit a Monday morning', 'Le tre parole stanno bene a un lunedì mattina'),
       ],
-      twist: t2('Write the caption, starting “Sound on.” Swap in a real shop you love, or send it to a friend who edits videos.', 'Scrivi la caption, che inizia con “Alza l’audio.” Metti al posto del forno un negozio che ami davvero, o mandala a chi monta video.'),
+      twist: t2('Write the text that goes under the post, starting “Sound on.” Then redo it for a real shop you love.', 'Scrivi il testo che va sotto il post, che inizia con “Alza l’audio.” Poi rifallo per un negozio vero che ami.'),
+      answer: t2('Three words for the music, the second it comes in, and one line on why.', 'Tre parole per la musica, il secondo in cui entra e una riga sul perché.'),
     },
     {
       who: tag('Ilaria’s rough day', 'la giornata storta di Ilaria'),
       brief: t2(
-        'Ilaria texts you after a rough day. Write the 3 lines you’d say back in a voice message, plus the one song you’d send. Pair up, or do both parts.',
-        'Ilaria ti scrive dopo una giornata storta. Scrivi le 3 righe che le diresti in un vocale, più la canzone che le manderesti. In due, o fai entrambe le parti.'),
+        'Ilaria had a terrible day and asks you to say something, but not “it’s fine”. Write 3 lines you’d say in a voice message, and pick one song to send.',
+        'Ilaria ha avuto una giornata terribile e ti chiede di dirle qualcosa, ma non “tutto ok”. Scrivi 3 righe che le diresti in un vocale e scegli una canzone da mandarle.'),
       asset: {
         mono: false,
-        title: t2('Ilaria’s text, as a model', 'Il messaggio di Ilaria, come modello'),
+        title: t2('Ilaria’s text', 'Il messaggio di Ilaria'),
         body: t2(
           'worst day ever\nmissed the bus, coffee all over my notes\nthen the exam went badly\nsay something?? not “it’s fine”',
           'giornata peggiore di sempre\nho perso il bus, caffè su tutti gli appunti\npoi l’esame è andato male\ndimmi qualcosa?? ma non “tutto ok”'),
       },
       steps: [
-        t2('Write a 2-line text about a bad day, like Ilaria’s.', 'Scrivi un messaggio di 2 righe su una giornata storta, come Ilaria.'),
-        t2('Write 3 lines to say back out loud. Alone? Use Ilaria’s text.', 'Scrivi 3 righe da dire a voce. Senza partner? Usa il messaggio di Ilaria.'),
-        t2('Name the one song you’d send, plus one line why.', 'Scrivi la canzone che manderesti, più una riga sul perché.'),
+        t2('Read Ilaria’s text and what she asks for.', 'Leggi il messaggio di Ilaria e cosa ti chiede.'),
+        t2('Write 3 short lines you’d say to her.', 'Scrivi 3 righe brevi che le diresti.'),
+        t2('Name one song to send, and one line why.', 'Scrivi una canzone da mandarle, più una riga sul perché.'),
       ],
       mins: 3,
       bar: [
@@ -886,12 +888,13 @@ export const MX: Record<string, MissionX[]> = {
         t2('The song fits how they feel right now', 'La canzone rispecchia come si sente adesso'),
       ],
       twist: t2('Record the 3 lines as a voice note and send it with the song to someone who had a rough week.', 'Registra le 3 righe come vocale e mandalo con la canzone a chi ha avuto una settimana dura.'),
+      answer: t2('3 short lines for Ilaria, then one song and one line on why.', '3 righe brevi per Ilaria, poi una canzone e una riga sul perché.'),
     },
     {
       who: tag('Libro Lento, a bookshop (fictional)', 'Libro Lento, una libreria (fittizia)'),
       brief: t2(
-        'Libro Lento puts its shop playlist online, but “Shelf mix 3” has 12 followers and a grey cover. Rename it and describe a cover that makes anyone tap play.',
-        'Libro Lento mette online la playlist della libreria, ma “Shelf mix 3” ha 12 follower e una cover grigia. Rinominala e descrivi una cover che faccia premere play a chiunque.'),
+        'Libro Lento’s playlist “Shelf mix 3” has a grey cover and only 12 followers. Give it a new name, a cover and one line on when to press play.',
+        'La playlist di Libro Lento, “Shelf mix 3”, ha una cover grigia e solo 12 follower. Dalle un nome nuovo, una cover e una riga su quando premere play.'),
       asset: {
         mono: false,
         img: '/img/m/playlist-en.webp', imgIt: '/img/m/playlist-it.webp', only: true,
@@ -902,7 +905,7 @@ export const MX: Record<string, MissionX[]> = {
       },
       steps: [
         t2('Write a new name, four words or fewer.', 'Scrivi un nuovo nome, quattro parole al massimo.'),
-        t2('Describe the cover: one colour, one object, three words on it.', 'Descrivi la cover: un colore, un oggetto, tre parole scritte.'),
+        t2('Pick the cover: one colour and one object.', 'Scegli la cover: un colore e un oggetto.'),
         t2('Write one line: when should a stranger press play?', 'Scrivi una riga: quando conviene premere play?'),
       ],
       mins: 3,
@@ -912,12 +915,13 @@ export const MX: Record<string, MissionX[]> = {
         t2('The line says when to press play', 'La riga dice quando premere play'),
       ],
       twist: t2('Write a second name, as silly as you dare. Send both to a friend: which would they tap?', 'Scrivi un secondo nome, il più assurdo che ti viene. Mandali tutti e due a chi vuoi: quale aprirebbe?'),
+      answer: t2('A new name (four words or fewer), the cover’s colour and object, and when to press play.', 'Un nome nuovo (quattro parole al massimo), colore e oggetto della cover, e quando premere play.'),
     },
     {
       who: tag('Clank Gym (fictional)', 'Clank Gym (fittizia)'),
       brief: t2(
-        'Clank Gym wants a beat for its workout reels: eight steps, repeated four times (that makes four bars). Tap it on a table, then type it as a grid.',
-        'Clank Gym vuole un ritmo per i suoi reel di allenamento: otto passi, ripetuti quattro volte (fanno quattro battute). Battilo su un tavolo, poi scrivilo come griglia.'),
+        'Clank Gym wants a strong, steady beat for its videos. Build it on the grid: kick is the deep thump, snare the clap, hat the light tick.',
+        'Clank Gym vuole un ritmo forte e costante per i suoi video. Costruiscilo sulla griglia: la cassa è il colpo profondo, il rullante il battimani, l’hi-hat il tic leggero.'),
       asset: {
         mono: true,
         title: t2('Your empty grid', 'La tua griglia vuota'),
@@ -926,26 +930,27 @@ export const MX: Record<string, MissionX[]> = {
           'Passo     1 2 3 4 5 6 7 8\nCassa     . . . . . . . .  pugno\nRullante  . . . . . . . .  mani\nHi-hat    . . . . . . . .  dito\nX = colpo, . = pausa · ripeti 4 volte'),
       },
       steps: [
-        t2('Tap a beat on a table: fist, clap, fingertip.', 'Batti un ritmo sul tavolo: pugno, mani, dito.'),
-        t2('Type your grid: X for a hit, a dot for a rest.', 'Scrivi la griglia: X per un colpo, un punto per una pausa.'),
-        t2('Check it: 2-3 kicks, 1-2 snares, never together on a step.', 'Controlla: 2-3 casse, 1-2 rullanti, mai insieme sullo stesso passo.'),
+        t2('Tap boxes in the grid below to add hits.', 'Tocca le caselle della griglia qui sotto per aggiungere colpi.'),
+        t2('Press Play and change it until it feels strong.', 'Premi Suona e cambialo finché suona forte.'),
+        t2('Check: 2-3 kicks, 1-2 snares, never on the same step.', 'Controlla: 2-3 casse, 1-2 rullanti, mai sullo stesso passo.'),
       ],
       mins: 4,
       bar: [
-        t2('You could tap it back from the text', 'Si può battere leggendo il testo'),
+        t2('2-3 kicks, 1-2 snares, never together', '2-3 casse, 1-2 rullanti, mai insieme'),
         t2('The hat leaves at least one rest', 'L’hi-hat lascia almeno una pausa'),
         t2('It feels steady and strong, like lifting', 'Sembra stabile e forte, come sollevare pesi'),
       ],
-      twist: t2('Type it out and send it to a friend. Can they tap it from the text?', 'Scrivila e mandala a chi vuoi. Riesce a batterla solo leggendo?'),
+      twist: t2('Tap it on a table (fist, clap, fingertip), then send the grid to a friend: can they tap it back?', 'Battilo su un tavolo (pugno, mani, dito), poi manda la griglia a qualcuno: riesce a ribatterlo?'),
+      answer: t2('Your grid: 2-3 kicks, 1-2 snares, X for a hit, a dot for a rest.', 'La tua griglia: 2-3 casse, 1-2 rullanti, X per un colpo, un punto per una pausa.'),
     },
     {
       who: tag('Tiny Pan, a cooking channel (fictional)', 'Tiny Pan, un canale di cucina (fittizio)'),
       brief: t2(
-        'Tiny Pan films cooking in a student room with one hotplate. Write its hook, the 4 catchy lines people hum, two lines each. Pair up, or do both parts.',
-        'Tiny Pan cucina in una stanza da studente con un fornello. Scrivi il suo hook, 4 righe da canticchiare, due a testa. In coppia, o fai tutte e due le parti.'),
+        'Tiny Pan films cooking in a student room with one hotplate. Write its hook: 4 short, catchy lines that people hum.',
+        'Tiny Pan cucina in una stanza da studente con un solo fornello. Scrivi il suo hook: 4 righe brevi e orecchiabili da canticchiare.'),
       asset: {
         mono: false,
-        title: t2('The hook sheet', 'La scheda dell’hook'),
+        title: t2('What each line does', 'Cosa fa ogni riga'),
         body: t2(
           'Line 1: sets the scene\nLine 2: a small disaster\nLine 3: a surprise\nLine 4: says “Tiny Pan”\nSeven words or fewer per line\nEnd lines 2 and 4 on a rhyme',
           'Riga 1: apre la scena\nRiga 2: un piccolo disastro\nRiga 3: una sorpresa\nRiga 4: dice “Tiny Pan”\nSette parole al massimo a riga\nLe righe 2 e 4 finiscono in rima'),
@@ -953,7 +958,7 @@ export const MX: Record<string, MissionX[]> = {
       steps: [
         t2('Write lines 1 and 2: the scene, then a small disaster.', 'Scrivi le righe 1 e 2: la scena, poi un piccolo disastro.'),
         t2('Write lines 3 and 4: a surprise, then “Tiny Pan”.', 'Scrivi le righe 3 e 4: una sorpresa, poi “Tiny Pan”.'),
-        t2('Read all four lines aloud, slowly.', 'Leggi tutte e quattro le righe ad alta voce, piano.'),
+        t2('Check: seven words or fewer, lines 2 and 4 rhyme.', 'Controlla: sette parole al massimo, le righe 2 e 4 in rima.'),
       ],
       mins: 5,
       bar: [
@@ -962,6 +967,7 @@ export const MX: Record<string, MissionX[]> = {
         t2('You can say it without tripping', 'Si dice senza inciampare'),
       ],
       twist: t2('Say it into a voice note and send it to a friend. Singing is optional.', 'Dilla in un vocale e mandala a chi vuoi. Cantare è facoltativo.'),
+      answer: t2('Four lines, seven words or fewer each, with lines 2 and 4 rhyming.', 'Quattro righe, sette parole al massimo ciascuna, con le righe 2 e 4 in rima.'),
     },
   ],
   // Prompting: the missions are about telling an AI what you want. The answer is always the prompt you write, never the AI's reply, so nothing here needs an AI to run.
