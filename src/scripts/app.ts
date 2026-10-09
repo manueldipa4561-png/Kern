@@ -480,7 +480,7 @@ const chips = (box: HTMLElement, list: string[]) => { box.innerHTML = ''; list.f
 // Kern card: a line you wrote, the field as a path, and the pattern once all three kinds of mission have a reflection.
 // Before that it shows your latest answer and how many reflections are left. With no answer in the field yet, it is a labelled example.
 const KIND_ME = [t2('I get into it when I improve what already exists.', 'Mi appassiono quando miglioro ciò che esiste già.'), t2('I get into it when I start from zero.', 'Mi appassiono quando parto da zero.'), t2('I get into it when I work with someone.', 'Mi appassiono quando collaboro con qualcuno.')]; // first person, for the image you share
-const CARD_EX = { f: 'Writing', n: '3 of 6 missions', q: 'Almost stayed home. Bag strap snapped on the bus. Lifted 40 kg anyway.', m: 'Fix a flat caption · Time flew', h: 'So far, you get into it when you start from zero.' };
+const CARD_EX = { f: 'Writing', n: '3 of 6 missions', q: 'Almost stayed home. Bag strap snapped on the bus. Lifted 40 kg anyway.', m: 'Rewrite a caption so friends reply · Time flew', h: 'So far, you get into it when you start from zero.' };
 // "That feels right / Not really" is kept with the kind it was about ("Not really · Starting from zero"), so a new pattern starts fresh.
 const FIT = { yes: 'That feels right', no: 'Not really' } as const;
 const FIT_MSG = { yes: 'Saved. This guess stays on your card and on the image you share.', no: 'Noted. Your card marks this guess “not really” and leaves it off the image you share.' } as const;
@@ -1111,7 +1111,7 @@ function renderBrief(f: string, i: number) {
   if (sp) { setD($('kBrandFrom'), fill(t2('From {b}.', 'Da {b}.'), { b: tr(sp.name) })); $('kBrandNote').style.setProperty('--brand', sp.color); }
   // Do it here: tap or drag instead of typing (play.ts). Not while editing a saved answer, the picks would rewrite it.
   const pl = PLAY[`${f}.${i}`];
-  playGen = ''; $('kPlay').hidden = !pl || cur.edit >= 0;
+  playGen = ''; $('kPlay').hidden = !pl || cur.edit >= 0 || v.asset !== x.asset; // an easy version with its own material: the taps would not match it
   if (pl && cur.edit < 0) renderPlay($('kPlayB'), pl, tr, playWrite); else $('kPlayB').innerHTML = '';
   // Hints, KERN.AI and the easy switch. The strong answer waits until the person has written theirs: it shows after Submit, to compare (kCmp).
   hintN = 0; runTold = false; $('kXHints').innerHTML = '';
