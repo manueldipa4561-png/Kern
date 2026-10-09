@@ -193,7 +193,7 @@ export const IT: Record<string, string> = {
         'Improving things': 'Migliorare le cose',
         'Starting from zero': 'Partire da zero',
         'Working with others': 'Collaborare con altri',
-        'Share my trail with the KERN team': 'Condividi la mia traccia con il team KERN',
+        'Send my answers to the KERN team': 'Invia le mie risposte al team KERN',
         'Testing KERN?': 'Stai provando KERN?',
         'Send your answers and reflections to the team. It helps us build the next version.': 'Manda risposte e riflessioni al team. Ci aiuta a costruire la prossima versione.',
         'Answer a mission first.': 'Prima rispondi a una missione.',
