@@ -613,6 +613,8 @@ kStatSet.addEventListener('click', async () => {
 const roundJustDone = () => { const b = base(), d = winDone(); return b > 0 && ![0, 1, 2].some((k) => d.has(k) || S.drafts[`${S.field}.${b + k}`]); };
 // The word for a mission's state, the same on Home and in the Trail.
 const stateWord = (done: boolean, next: boolean, draft: boolean) => (done ? 'Done' : next ? 'Next' : draft ? 'Draft' : 'Not started');
+// The field as a path, one segment per mission, the same on Home and on the done screen (app.css splits it into its two rounds). `mark` gets `cls`.
+const pathOf = (f: string, mark: number, cls: string) => { const d = doneIn(f); return Array.from({ length: total(f) }, (_, i) => `<i class="${d.has(i) ? 'on' : ''}${i === mark ? ` ${cls}` : ''}"></i>`).join(''); };
 const renderHome = () => {
   renderStat();
   renderFields(); renderAbout(); renderFurther(); renderCoopIn();
@@ -632,13 +634,12 @@ const renderHome = () => {
     if (fresh) { setD(kAdd2, it ? `Inizia il round ${round + 1}` : `Start round ${round + 1}`); kAdd2.dataset.kAns = String(b); }
   } else {
     const m = f.m[b + next];
-    setD($('kNxL'), round
-      ? (it ? `Round ${round + 1} · missione ${next + 1} di 3` : `Round ${round + 1} · mission ${next + 1} of 3`)
-      : (it ? `Missione ${next + 1} di 3` : `Mission ${next + 1} of 3`));
+    setD($('kNxL'), it ? `${tr(S.field)} · prossima missione` : `Up next in ${tr(S.field)}`); // where you are shows as the path below, not as "1 of 3"
     setT($('kNxT'), m[1]); setT($('kNxP'), m[2]);
     setT(kAdd, S.drafts[`${S.field}.${b + next}`] ? 'Continue your draft' : 'Start mission'); kAdd.dataset.kAns = String(b + next);
   }
   const finished = next === undefined || fresh; // the card is about the Kern card now, so no time chip
+  $('kNxPath').innerHTML = pathOf(S.field, finished ? -1 : b + (next ?? 0), 'nx');
   const mins = finished ? 0 : MX[S.field]?.[b + (next ?? 0)]?.mins;
   $('kNxM').innerHTML = mins ? `<span class="k-l">${aboutMins(mins)}</span>` : '';
   // The list shows the round in play, or a look at the next one (never a lock: every round is open).
@@ -1232,7 +1233,7 @@ const dropArt = (d: Drop) => {
 function showDrop(d: Drop, side: number, withNext = false) {
   const rel = RELICS.find((r) => r.id === d.id);
   kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = d.tier; setProgText(4);
-  $('kDrCoop').hidden = true; $('kDrCoN').hidden = true; $('kDrDare').hidden = true;
+  $('kDrCoop').hidden = true; $('kDrCoN').hidden = true; $('kDrDare').hidden = true; $('kDrMore').hidden = true;
   setT(kDrOk, 'Keep going'); delete kDrOk.dataset.next; kDrNx.hidden = true; kDrNx.textContent = ''; // aria-describedby reads hidden text too
   if (withNext) offerNext(); // before the focus below, so the button is announced with its final label
   $('kDrArt').innerHTML = dropArt(d);
@@ -1363,6 +1364,19 @@ const burst = (n: number) => {
   const bits = $('kDrBits'); bits.innerHTML = '';
   if (!still) for (let i = 0; i < n; i++) { const p = document.createElement('i'); p.style.setProperty('--a', `${(360 / n) * i + Math.random() * 12}deg`); p.style.setProperty('--r', `${70 + Math.random() * 60}px`); bits.appendChild(p); }
 };
+// A field the person has not picked (or, with all picked, one not tried yet), a different one after each mission: "Curious about Video? Try one".
+const curiousField = () => {
+  const all = Object.keys(FIELDS), unpicked = all.filter((f) => !S.fields.includes(f));
+  const pool = unpicked.length ? unpicked : all.filter((f) => !doneIn(f).size);
+  return pool.length ? pool[S.answers.length % pool.length] : '';
+};
+$('kDrTry').addEventListener('click', once(() => { // opens that field's first open mission and adds it to the paths, like a co-op's "Do the mission yourself"
+  const f = $('kDrTry').dataset.f || ''; if (!FIELDS[f]) return;
+  const i = Array.from({ length: total(f) }, (_, k) => k).find((k) => !doneIn(f).has(k)) ?? 0;
+  closeSheet(kSheet);
+  if (!S.fields.includes(f)) S.fields = [...S.fields, f];
+  switchField(f); openAnswer(f, i);
+}));
 function showDone() {
   const f = cur.f, it = isIt();
   kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = 'done'; setProgText(4);
@@ -1376,9 +1390,12 @@ function showDone() {
   setD($('kDrN'), it ? `${doneIn(f).size} su ${total(f)} fatte in ${tr(f)}` : `${doneIn(f).size} of ${total(f)} done in ${tr(f)}`);
   const hit = barsHit(), all = barsAll();
   setD($('kDrS'), hit ? (it ? `${hit} controlli su ${all} · salvata su questo dispositivo.` : `${hit} of ${all} checks · saved on this device.`) : (it ? 'Salvata su questo dispositivo.' : 'Saved on this device.'));
-  // The field as a path: one segment per mission, the one just finished grows in.
-  const d = doneIn(f);
-  $('kDrPath').innerHTML = Array.from({ length: total(f) }, (_, i) => `<i class="${d.has(i) ? 'on' : ''}${i === cur.i ? ' now' : ''}"></i>`).join('');
+  $('kDrPath').innerHTML = pathOf(f, cur.i, 'now'); // the one just finished grows in
+  // One calm line under the buttons: a field not picked yet, and the weekly reminder. Small links, never a second call to action.
+  const cf = curiousField(), tryB = $('kDrTry');
+  tryB.hidden = !cf; tryB.dataset.f = cf;
+  if (cf) setD(tryB, tr('Curious about {f}? Try one').replace('{f}', tr(cf)));
+  setT($('kDrRem'), 'Remind me weekly'); $('kDrMore').hidden = false;
   const tw = twistOf(f, cur.i), twEl = $('kDrTw'); // the harder take that every mission already has
   twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tw}`);
   burst(14); if ('vibrate' in navigator) navigator.vibrate(18);
@@ -1903,7 +1920,7 @@ $('kFeed').addEventListener('click', () => {
 });
 $('kExp').addEventListener('click', () => download(JSON.stringify({ ...snapshot(), exportedAt: new Date().toISOString() }, null, 2), 'kern-data.json', 'application/json'));
 // Weekly calendar reminder (.ics): works in every calendar app, no notifications permission, no streaks.
-$('kRemind').addEventListener('click', () => {
+const remind = () => {
   const esc = (s: string) => s.replace(/[\\;,]/g, (m) => '\\' + m).replace(/\n/g, '\\n');
   const p = (n: number) => String(n).padStart(2, '0');
   const d = new Date(); d.setDate(d.getDate() + 1);
@@ -1916,7 +1933,9 @@ $('kRemind').addEventListener('click', () => {
     'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:PT0M', `DESCRIPTION:${title}`, 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
   download(ics, 'kern-reminder.ics', 'text/calendar');
   say('Open the file to add the reminder to your calendar.');
-});
+};
+$('kRemind').addEventListener('click', remind);
+$('kDrRem').addEventListener('click', remind); // the same reminder, offered on the done screen
 $('kDel').addEventListener('click', async () => {
   if (!confirm(tr(DEMO ? 'This resets the demo to its sample answers. Continue?' : 'This deletes your answers on this device. Continue?'))) return;
   await eraseStats(); // also deletes what was counted for this device (never from the demo)

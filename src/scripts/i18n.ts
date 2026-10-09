@@ -190,6 +190,8 @@ export const IT: Record<string, string> = {
         'It was fine': 'Tutto normale',
         'It dragged': 'Non passava più',
         'Too easy': 'Troppo facile',
+        'Curious about {f}? Try one': 'Ti incuriosisce {f}? Provane una',
+        'Remind me weekly': 'Ricordamelo ogni settimana',
         'Would you do this kind of task again?': 'Rifaresti una missione così?',
         'Yes': 'Sì',
         'Maybe': 'Forse',

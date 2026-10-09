@@ -95,12 +95,13 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
             <div class="k-l" id="kDrL">You found</div>
             <h5 id="kDrT"></h5>
             <p class="k-dr-n" id="kDrN" aria-live="polite"></p>
-            <div class="k-dr-path" id="kDrPath" aria-hidden="true"></div>
+            <div class="k-dr-path k-path" id="kDrPath" aria-hidden="true"></div>
             <p class="k-l" id="kDrS"></p>
             <p class="k-dr-nx" id="kDrNx" hidden></p>
             <p class="k-l k-s k-dr-tw" id="kDrTw" hidden></p>
             <div class="k-sh-btns"><button type="button" class="k-go" id="kDrOk" aria-describedby="kDrT kDrN kDrS kDrNx">Keep going</button><button type="button" class="k-sk" id="kDrCoop" aria-describedby="kDrCoN" hidden>Finish it with a friend</button><button type="button" class="k-sk" id="kDrDare" hidden>Dare someone to try it</button></div>
             <p class="k-l" id="kDrCoN" hidden>The link carries your answer, so it is only as private as the chat you send it to.</p>
+            <div class="k-dr-more" id="kDrMore" hidden><button type="button" class="k-lnk" id="kDrTry"></button><button type="button" class="k-lnk" id="kDrRem">Remind me weekly</button></div>
           </div>
           <div class="k-step" id="kShR" hidden>
             <div class="k-vs" id="kVs" hidden>
@@ -277,7 +278,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
               <div class="k-btnrow"><button type="button" class="k-go" id="kCoSend">Send back</button><button type="button" class="k-sk" id="kCoSelf">Do the mission yourself</button><button type="button" class="k-sk" id="kCoNo">Not now</button></div>
             </div>
             <div class="k-card k-dare" id="kDare" hidden><div class="k-l">A friend dared you</div><h5 id="kDareT"></h5><button type="button" class="k-go" id="kDareGo">Answer the dare</button></div>
-            <div class="k-card k-main" id="kNext"><span class="k-nxic" id="kNxIc" aria-hidden="true"></span><div class="k-l" id="kNxL">Your next step</div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><div class="k-meta" id="kNxM"></div><div class="k-boost-chip" id="kNxB" hidden></div><button type="button" class="k-btn" id="kAdd">Start mission</button><button type="button" class="k-sk" id="kAdd2" hidden></button></div>
+            <div class="k-card k-main" id="kNext"><span class="k-nxic" id="kNxIc" aria-hidden="true"></span><div class="k-l" id="kNxL">Your next step</div><div class="k-path k-nx-path" id="kNxPath" aria-hidden="true"></div><h5 id="kNxT">Fix what already exists</h5><p id="kNxP">Make a real startup's onboarding screen clearer. The opposite of starting from a blank page.</p><div class="k-meta" id="kNxM"></div><div class="k-boost-chip" id="kNxB" hidden></div><button type="button" class="k-btn" id="kAdd">Start mission</button><button type="button" class="k-sk" id="kAdd2" hidden></button></div>
             <div class="k-card k-stat" id="kStat" hidden><div class="k-l">Help improve KERN</div><p>Count my progress, without my name? We only see which missions you open and finish, when you come back, and whether you use Share or KERN.AI. Never your name, your answers or your email.</p><div class="k-btnrow"><button type="button" class="k-ask-btn" id="kStY">Yes, count me in</button><button type="button" class="k-ask-btn" id="kStN">No thanks</button></div><div><a class="k-l" href="/privacy/">What is counted?</a></div></div>
             <div class="k-card"><div class="k-l" id="kMsL">Your 3 missions</div>
               <div class="k-mlist">

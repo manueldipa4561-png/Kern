@@ -1012,9 +1012,11 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 #kRfBar[hidden], .k-dr-tw[hidden], #kBrandNote[hidden] { display: none; }
 .k-tk.bar.on { animation: kTickPop .32s var(--spring); }
 @keyframes kTickPop { 50% { transform: scale(1.03); } }
-.k-dr-path { display: flex; gap: 6px; justify-content: center; margin: 12px 0 4px; }
-.k-dr-path i { width: 24px; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--fg) 16%, transparent); }
-.k-dr-path i.on { background: var(--acc); }
+.k-path { display: flex; gap: 6px; }
+.k-dr-path { justify-content: center; margin: 12px 0 4px; }
+.k-path i { width: 24px; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--fg) 16%, transparent); }
+.k-path i:nth-child(3n):not(:last-child) { margin-right: 8px; } /* a gap between the two rounds */
+.k-path i.on { background: var(--acc); }
 .k-dr-path i.now { animation: kPathNow .8s .35s var(--out) both; box-shadow: 0 0 10px color-mix(in srgb, var(--acc) 60%, transparent); }
 @keyframes kPathNow { from { transform: scaleX(.2); opacity: .3; } to { transform: none; opacity: 1; } }
 .k-scr .k-dr-tw { max-width: 32ch; margin: 6px auto 0; }
@@ -1054,3 +1056,12 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 #kXHard[hidden] { display: none; }
 /* Tips: no empty box, only real tips */
 .k-trailsigns[hidden] { display: none; }
+/* Home: the next mission shows the field as the same path as the done screen. The card is dark green in both themes, so its colours are fixed. */
+.k-nx-path { padding-right: 74px; margin: 2px 0; }
+.k-main .k-path i { background: rgba(236,234,223,.24); }
+.k-main .k-path i.on { background: #C9F24A; }
+.k-main .k-path i.nx { box-shadow: inset 0 0 0 1.5px #C9F24A; }
+/* Done screen: one small calm line under the buttons (another field, the weekly reminder) */
+.k-dr-more { align-self: stretch; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; column-gap: 10px; margin: 4px 0 0; }
+.k-dr-more[hidden], .k-lnk[hidden] { display: none; }
+.k-lnk { min-height: 44px; padding: 0 4px; background: none; border: 0; color: var(--dim); font: 600 0.8125rem 'Inter Tight Variable', system-ui, sans-serif; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
