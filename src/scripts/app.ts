@@ -1427,7 +1427,9 @@ const burst = (n: number) => {
   if (!still) for (let i = 0; i < n; i++) { const p = document.createElement('i'); p.style.setProperty('--a', `${(360 / n) * i + Math.random() * 12}deg`); p.style.setProperty('--r', `${70 + Math.random() * 60}px`); bits.appendChild(p); }
 };
 // A field the person has not picked (or, with all picked, one not tried yet), a different one after each mission: "Curious about Video? Try one".
+// Prompting comes first until it is tried: it works with any field, and it was the pilot's most common second pick.
 const curiousField = () => {
+  if (cur.f !== 'Prompting' && !doneIn('Prompting').size) return 'Prompting';
   const all = Object.keys(FIELDS), unpicked = all.filter((f) => !S.fields.includes(f));
   const pool = unpicked.length ? unpicked : all.filter((f) => !doneIn(f).size);
   return pool.length ? pool[S.answers.length % pool.length] : '';
@@ -1456,7 +1458,7 @@ function showDone() {
   // One calm line under the buttons: a field not picked yet, and the weekly reminder. Small links, never a second call to action.
   const cf = curiousField(), tryB = $('kDrTry');
   tryB.hidden = !cf; tryB.dataset.f = cf;
-  if (cf) setD(tryB, tr('Curious about {f}? Try one').replace('{f}', tr(cf)));
+  if (cf) setD(tryB, cf === 'Prompting' ? tr('Prompting with AI works with any field. Try one.') : tr('Curious about {f}? Try one').replace('{f}', tr(cf)));
   setT($('kDrRem'), 'Remind me weekly'); $('kDrMore').hidden = false;
   const tw = twistOf(f, cur.i), twEl = $('kDrTw'); // the harder take that every mission already has
   twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tw}`);
