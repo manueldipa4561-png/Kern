@@ -1204,7 +1204,7 @@ const dropArt = (d: Drop) => {
 function showDrop(d: Drop, side: number, withNext = false) {
   const rel = RELICS.find((r) => r.id === d.id);
   kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = d.tier; setProgText(4);
-  $('kDrCoop').hidden = true; $('kDrCoN').hidden = true;
+  $('kDrCoop').hidden = true; $('kDrCoN').hidden = true; $('kDrDare').hidden = true;
   setT(kDrOk, 'Keep going'); delete kDrOk.dataset.next; kDrNx.hidden = true; kDrNx.textContent = ''; // aria-describedby reads hidden text too
   if (withNext) offerNext(); // before the focus below, so the button is announced with its final label
   $('kDrArt').innerHTML = dropArt(d);
@@ -1340,6 +1340,7 @@ function showDone() {
   $('kDrArt').innerHTML = icon('done', 'k-i k-done-i');
   const co = isCoop(cur.f, cur.i) && !!lastAns && S.answers.includes(lastAns); // a co-op mission can go on to a friend from here
   $('kDrCoop').hidden = !co; $('kDrCoN').hidden = !co;
+  $('kDrDare').hidden = co || !lastAns; // right after a mission: send this one as a dare (co-op missions already offer their friend step)
   setT($('kDrT'), 'Done.');
   setD($('kDrN'), it ? `${doneIn(f).size} su ${total(f)} fatte in ${tr(f)}` : `${doneIn(f).size} of ${total(f)} done in ${tr(f)}`);
   const hit = barsHit(), all = barsAll();
@@ -1348,7 +1349,7 @@ function showDone() {
   const d = doneIn(f);
   $('kDrPath').innerHTML = Array.from({ length: total(f) }, (_, i) => `<i class="${d.has(i) ? 'on' : ''}${i === cur.i ? ' now' : ''}"></i>`).join('');
   const tw = MX[f]?.[cur.i]?.twist, twEl = $('kDrTw'); // the harder take that every mission already has
-  twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tr(tw)}`);
+  twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tr(tw).replace(/^(bonus|extra)\s*:\s*/i, '')}`); // some twists start with "Bonus:"
   burst(14); if ('vibrate' in navigator) navigator.vibrate(18);
   kDrOk.focus();
 }
@@ -1796,6 +1797,11 @@ $('kCoSend').addEventListener('click', once(() => {
   sendCoopReply(rec);
 }));
 $('kDrCoop').addEventListener('click', () => { if (lastAns && S.answers.includes(lastAns)) sendCoop(lastAns); });
+$('kDrDare').addEventListener('click', () => { // the dare is the mission just finished, not the field's first one
+  const f = cur.f, i = cur.i; if (!FIELDS[f]?.m[i]) return;
+  track('share'); markDared();
+  void shareText('KERN', tr('I dare you: {m}. Answer it on KERN.').replace('{m}', tr(FIELDS[f].m[i][1])), `${location.origin}/?dare=${encodeURIComponent(f)}.${i}`, 'Link copied.');
+});
 function renderCoops() { // yourKERN: every co-op mission answered, sent, or replied to, with both halves once they are in
   const card = $('kCoops'), box = $('kCoopL'), it = isIt();
   const mk = (tag: string, cls = '', text = '') => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
