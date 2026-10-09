@@ -93,6 +93,7 @@ export const IT: Record<string, string> = {
         'Tell a computer what to do': 'Di’ a un computer cosa fare',
         'Plan and cut short clips': 'Pensa e monta clip brevi',
         'Sell your own things: listings, DMs, haggling': 'Vendi le tue cose: annunci, DM, trattative',
+        'Seven creative and digital paths, for now.': 'Sette strade creative e digitali, per ora.',
         'Pick sounds for a mood': 'Scegli i suoni per un’atmosfera',
         'Tell an AI exactly what you want': 'Spiega a un’AI cosa vuoi, esattamente',
         'KERN is for 18+ for now, because it is built for adults and keeps your answers.': 'Per ora KERN è per chi ha almeno 18 anni, perché è pensata per gli adulti e conserva le tue risposte.',

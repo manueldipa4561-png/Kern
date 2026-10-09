@@ -247,6 +247,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
           <div class="k-tiles" id="kPick" role="group" aria-labelledby="kPickL">
             {FIELDS.map(([f, line]) => <button type="button" class="k-tile" data-f={f} aria-pressed="false"><span class="k-ti" aria-hidden="true" set:html={icon(f)} /><span>{f}</span><small>{line}</small></button>)}
           </div>
+          <p class="k-l k-s" id="kPaths">Seven creative and digital paths, for now.</p>
           <label class="k-check" id="kS2Age" hidden><input type="checkbox" id="kAge2" aria-describedby="kAgeWhy" /><span>I am 18 or older</span></label>
           <p class="k-l k-s" id="kAgeWhy" hidden>KERN is for 18+ for now, because it is built for adults and keeps your answers.</p>
           <button type="button" class="k-go" id="kGo" aria-describedby="kGoWhy">Start my first mission</button>

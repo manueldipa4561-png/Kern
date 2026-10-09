@@ -1071,7 +1071,7 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .k-choice:active { transform: scale(.97); transition-duration: .08s; }
 .k-tile small { font: 500 0.8125rem/1.25 'Inter Tight Variable', system-ui, sans-serif; color: var(--dim); text-align: center; }
 .k-aa { position: absolute; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); z-index: 1; min-width: 44px; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--edge); background: var(--surf); color: var(--fg); font: 800 1rem var(--kd); cursor: pointer; }
-.k-sp #kGoWhy { margin-top: -6px; }
+.k-sp #kGoWhy, .k-sp #kPaths { margin-top: -6px; }
 @media (prefers-reduced-motion: reduce) { .k-choice { transition: none; } }
 /* Mission sheet: the time as a calm estimate, the harder take under the help buttons */
 #kXMin { text-transform: none; letter-spacing: 0; }
