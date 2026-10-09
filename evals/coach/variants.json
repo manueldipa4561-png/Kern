@@ -28,5 +28,15 @@
     "model": "claude-haiku-5-5",
     "prompt": "v5",
     "note": "v3 safety rules kept; quote only their own idea, never requests or meta text, declines in six words at most, 1 or 2 short sentences, question anchored in the draft or mission"
+  },
+  "v6": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v6",
+    "note": "v5 plus: the distress pause uses the exact phrase the app recognises (and coach.mts recognises more Italian pause wordings)"
+  },
+  "v7": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v7",
+    "note": "v6 plus: one question only (no 'and' joining two), no extra instruction, open with the question unless they asked for the answer"
   }
 }
