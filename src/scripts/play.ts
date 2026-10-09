@@ -1,4 +1,11 @@
 import { t2 } from './i18n';
+import { PLAY_DESIGN } from './play-design';
+import { PLAY_WRITING } from './play-writing';
+import { PLAY_CODE } from './play-code';
+import { PLAY_VIDEO } from './play-video';
+import { PLAY_SELLING } from './play-selling';
+import { PLAY_MUSIC } from './play-music';
+import { PLAY_PROMPTING } from './play-prompting';
 
 // "Do it here": the first mission of every field can be done by tapping or dragging, not only by typing.
 // The picks write a plain text summary into the answer box, so Submit, the compare, the reflection, sync and co-op keep working on text.
@@ -10,6 +17,7 @@ type Sort = { kind: 'sort'; label: string; out: string; cutOut: string; cut: num
 export type Play = (Pick | Sort)[];
 
 export const PLAY: Record<string, Play> = {
+  ...PLAY_DESIGN, ...PLAY_WRITING, ...PLAY_CODE, ...PLAY_VIDEO, ...PLAY_SELLING, ...PLAY_MUSIC, ...PLAY_PROMPTING, // missions 2 to 6, one file per field
   'Design.0': [
     { kind: 'pick', label: t2('Keep the message that makes people turn up (1 or 2)', 'Tieni il messaggio che fa venire la gente (1 o 2)'), out: t2('Keep', 'Tengo'), rest: t2('Cut', 'Tolgo'), max: 2,
       items: [t2('Pizza night Saturday', 'Serata pizza sabato'), t2('2 for 1 until 9pm', '2x1 fino alle 21'), t2('Live DJ from 10', 'DJ dal vivo dalle 22'), t2('New menu', 'Nuovo menu'), t2('Win a year of pizza', 'Vinci un anno di pizza'), t2('Tag 3 friends', 'Tagga 3 amici'), t2('12 Via Verdi', 'Via Verdi 12'), t2('The dog', 'Il cane')] },
@@ -25,7 +33,7 @@ export const PLAY: Record<string, Play> = {
       items: ['let', 'hoodiesLeft', '0', 'color', '"green"', 'if', '===', 'colour', '"red"', 'paintButton'] },
   ],
   'Video.0': [
-    { kind: 'sort', label: t2('Cut the slow shots and drag the best moment to the top', 'Togli le parti lente e trascina in cima il momento migliore'), out: t2('Cut list', 'Lista dei tagli'), cutOut: t2('Cut', 'Tolgo'), cut: 6,
+    { kind: 'sort', label: t2('Cut the slow shots and drag the best moment to the top', 'Togli le parti lente e trascina in cima il momento migliore'), out: t2('Cut list', 'Lista dei tagli'), cutOut: t2('Cut', 'Tolgo'), cut: 5,
       sum: { label: t2('Total', 'Totale'), max: 12 },
       items: [
         { t: t2('0-6s Rocco walks to the van', '0-6s Rocco cammina verso il furgone'), n: 6 },

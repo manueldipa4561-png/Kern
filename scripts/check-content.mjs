@@ -7,7 +7,7 @@ import { PER_ROUND as STATS_PER_ROUND } from './stats-core.mjs';
 // The data files import each other without extensions, so bundle them in memory instead of importing directly.
 const entry = ['fields', 'missions', 'helps', 'easy', 'i18n', 'next', 'sponsors', 'loot', 'demo', 'play'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
 const { text } = buildSync({ stdin: { contents: entry, resolveDir: process.cwd(), loader: 'ts' }, bundle: true, format: 'esm', platform: 'node', write: false }).outputFiles[0];
-const { FIELDS, MX, HELPS, EASY, IT, CLASHES, PER_ROUND, SPONSORS, RELICS, SAMPLE_ANSWERS, SAMPLE_IDEA, sampleChat, swapSample } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
+const { FIELDS, MX, HELPS, EASY, IT, CLASHES, PER_ROUND, SPONSORS, RELICS, SAMPLE_ANSWERS, SAMPLE_IDEA, sampleChat, swapSample, PLAY } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
 
 const strings = (v) => (typeof v === 'string' ? [v] : Array.isArray(v) ? v.flatMap(strings) : v && typeof v === 'object' ? Object.values(v).flatMap(strings) : []);
 // supabase/schema.sql limits kern_signs.mission and kern_events.mission to 0..MAX_MISSIONS-1: widen both there before adding a round.
@@ -76,6 +76,17 @@ for (const f of Object.keys(FIELDS)) {
       assert.ok(IT[s], `${at}: no Italian for "${s.slice(0, 60)}"`);
       assert.ok(s.length < 25 || IT[s] !== s, `${at}: Italian is the same as English for "${s.slice(0, 60)}"`);
     }
+  }
+}
+// Do it here (play.ts and play-*.ts): every mission can be done by tapping or dragging, and every group is usable.
+for (const f of Object.keys(FIELDS)) for (let i = 0; i < FIELDS[f].m.length; i++) {
+  const p = PLAY[`${f}.${i}`], at = `play ${f}.${i}`;
+  assert.ok(Array.isArray(p) && p.length >= 1 && p.length <= 3, `${at}: needs 1 to 3 groups`);
+  for (const g of p) {
+    assert.ok(g.label && g.out && g.items.length >= 2 && g.items.length <= 10, `${at}: a group needs a label, an out and 2 to 10 items`);
+    if (g.kind === 'pick') assert.ok(g.max >= 1 && g.max <= g.items.length, `${at}: max must be between 1 and the number of items`);
+    else assert.ok(g.kind === 'sort' && g.cutOut && g.cut >= 0 && g.cut < g.items.length, `${at}: a sort needs cutOut and a cut smaller than its rows`);
+    for (const s of [g.label, g.out, g.rest, g.cutOut, g.badge, g.sum?.label].filter(Boolean)) assert.ok(IT[s], `${at}: no Italian for "${s}"`);
   }
 }
 console.log(`content: ok (${Object.values(FIELDS).reduce((n, f) => n + f.m.length, 0)} missions)`);
