@@ -10,7 +10,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const variants = JSON.parse(readFileSync(path.join(here, 'variants.json'), 'utf8'));
 const named = process.argv.slice(2);
 const todo = Object.keys(variants).filter((v) => (named.length ? named.includes(v) : !existsSync(path.join(here, v, 'results.jsonl'))));
-if (!todo.length) { console.log('Nothing to run: every variant already has results. Name one to run it again: npm run eval:coach:all -- v2'); process.exit(0); }
+const runMode = named.includes('run'); // also try "Try your prompt on the AI" with the real model (runmode.mjs)
+if (!todo.length && !runMode) { console.log('Nothing to run: every variant already has results. Name one to run it again: npm run eval:coach:all -- v2'); process.exit(0); }
 let key;
 try { key = await getKey(); } catch (e) { console.error(e.message); process.exit(2); }
 const env = { ...process.env, ANTHROPIC_API_KEY: key };
@@ -20,5 +21,6 @@ for (const v of todo) {
   console.log(`\n== ${v}: ${note} (${model}, prompt ${prompt}) ==`);
   step('--experimental-strip-types', path.join(here, 'run.mjs'), '--variant', v, '--model', model, '--prompt', prompt);
 }
-step(path.join(here, 'build-report-lite.mjs'), here);
+if (runMode) { console.log('\n== Try your prompt on the AI (run mode) =='); step('--experimental-strip-types', path.join(here, 'runmode.mjs')); }
+if (todo.length) step(path.join(here, 'build-report-lite.mjs'), here);
 console.log('\nDone. Open evals/coach/report.html. Then delete the key in the Console (Settings, API keys).');

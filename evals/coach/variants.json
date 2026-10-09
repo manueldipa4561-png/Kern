@@ -37,11 +37,21 @@
   "v7": {
     "model": "claude-haiku-5-5",
     "prompt": "v7",
-    "note": "v6 plus: one question only (no 'and' joining two), no extra instruction, open with the question unless they asked for the answer (IN PRODUCTION since 2026-10-09)"
+    "note": "v6 plus: one question only (no 'and' joining two), no extra instruction, open with the question unless they asked for the answer (in production on 2026-10-09 until v7d added the German and French line)"
   },
   "v8": {
     "model": "claude-haiku-5-5",
     "prompt": "v8",
     "note": "v7 plus: warm one-line off-topic redirect (never 'not the place'), field named in the reply language, replies in the person's language when clearly English or Italian (else the app language), a request for the answer or an example hears that a strong answer comes after they submit, then the question"
+  },
+  "v7d": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v7d",
+    "note": "IN PRODUCTION since 2026-10-09 deploy 6ac8f3ac: v7 plus the German and French language line (app language always)"
+  },
+  "v8d": {
+    "model": "claude-haiku-5-5",
+    "prompt": "v8d",
+    "note": "v8 for four languages: replies in the language of the last message when it is English, Italian, German or French, else the app language; warm off-topic, field names in the reply language"
   }
 }
