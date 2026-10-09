@@ -884,6 +884,8 @@ body { min-height: 100dvh; display: flex; align-items: center; justify-content: 
 /* Mission pictures: the asset as a real image, with the same rounded frame as the cards */
 .k-xi { display: block; width: 100%; height: auto; max-height: 440px; object-fit: contain; border-radius: 12px; background: color-mix(in srgb, var(--fg) 6%, transparent); }
 .k-xi[hidden] { display: none; }
+.k-xv { display: block; width: 100%; max-width: 230px; aspect-ratio: 9 / 16; margin: 0 auto; border-radius: 12px; background: #000; }
+.k-xv[hidden] { display: none; }
 
 /* What to expect (field sheet) and Take it further (yourKERN) */
 .k-about { align-self: flex-start; min-height: 44px; padding: 0 2px; margin-top: -6px; font: 600 0.875rem 'Inter Tight Variable', system-ui, sans-serif; color: var(--acc); text-decoration: underline; text-underline-offset: 3px; }
@@ -1037,6 +1039,8 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .k-pl-mv, .k-pl-x { width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--fg); font-size: 1.0625rem; cursor: pointer; }
 .k-pl-mv:disabled { opacity: .25; cursor: default; }
 .k-pl-x { color: var(--dim); }
+.k-pl-sort li:has(.k-pl-ear) { grid-template-columns: 28px 44px 1fr 44px 44px 44px; } /* a song row: ▶ before its name */
+.k-pl-ear { color: var(--acc); }
 .k-pl-sum { margin: 0; font: 700 0.9375rem 'Inter Tight Variable', system-ui, sans-serif; color: var(--acc); }
 .k-pl-sum.over { color: var(--gold); }
 @media (prefers-reduced-motion: reduce) { .k-pl-chip { transition: none; } .k-pl-chip[aria-pressed="true"] { transform: none; } }

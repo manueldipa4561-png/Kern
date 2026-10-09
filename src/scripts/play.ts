@@ -11,9 +11,11 @@ import { PLAY_PROMPTING } from './play-prompting';
 // The picks write a plain text summary into the answer box, so Submit, the compare, the reflection, sync and co-op keep working on text.
 // pick: tap chips (up to max); `rest` also lists what was not picked ("Cut: ..."). sort: drag rows, or use the arrows, and tap ✕ to cut (up to cut);
 // `sum` adds up the n of the rows kept (seconds) against a max. beat: a row of 8 steps per drum (items name the rows: kick, snare, hat) and Play to hear it.
-// Strings go through t2 so the Italian is in IT; code tokens and song names stay as they are.
-type Pick = { kind: 'pick'; label: string; out: string; max: number; items: string[]; rest?: string };
-type Row = { t: string; n?: number };
+// Sound files (public/media): a row's `a` gives it a ▶ to hear it; a pick's `hear` plays a reel (bed from 0, cues at their second) with the music
+// coming in at the second picked, read from the item ("second 3"). Strings go through t2 so the Italian is in IT; code tokens and song names stay as they are.
+type Hear = { bed: string; cues: [string, number][]; drop: string; len: number };
+type Pick = { kind: 'pick'; label: string; out: string; max: number; items: string[]; rest?: string; hear?: Hear };
+type Row = { t: string; n?: number; a?: string };
 type Sort = { kind: 'sort'; label: string; out: string; cutOut: string; cut: number; items: Row[]; badge?: string; sum?: { label: string; max: number } };
 type Beat = { kind: 'beat'; label: string; items: string[] };
 export type Play = (Pick | Sort | Beat)[];
@@ -36,14 +38,14 @@ export const PLAY: Record<string, Play> = {
   ],
   'Video.0': [
     { kind: 'sort', label: t2('Cut the slow shots and drag the best moment to the top', 'Togli le parti lente e trascina in cima il momento migliore'), out: t2('Cut list', 'Lista dei tagli'), cutOut: t2('Cut', 'Tolgo'), cut: 5,
-      sum: { label: t2('Total', 'Totale'), max: 12 },
-      items: [
-        { t: t2('0-6s Rocco walks to the van', '0-6s Rocco cammina verso il furgone'), n: 6 },
-        { t: t2('6-16s Reads the menu, waits', '6-16s Legge il menu, aspetta'), n: 10 },
-        { t: t2('16-19s The press closes, steam', '16-19s La piastra si chiude, vapore'), n: 3 },
-        { t: t2('19-22s Cheese stretches an arm long', '19-22s Il formaggio fila lungo un braccio'), n: 3 },
-        { t: t2('22-26s First bite: “OK. OK. OK.”', '22-26s Primo morso: “OK. OK. OK.”'), n: 4 },
-        { t: t2('26-30s Walks off', '26-30s Se ne va'), n: 4 },
+      sum: { label: t2('Total', 'Totale'), max: 6 },
+      items: [ // the seconds of the real clip, public/media/tosta.mp4
+        { t: t2('0-3s Rocco walks to the van', '0-3s Rocco cammina verso il furgone'), n: 3 },
+        { t: t2('3-7s Reads the menu, waits', '3-7s Legge il menu, aspetta'), n: 4 },
+        { t: t2('7-9s The press closes', '7-9s La piastra si chiude'), n: 2 },
+        { t: t2('9-11s Cheese stretches an arm long', '9-11s Il formaggio fila lungo un braccio'), n: 2 },
+        { t: t2('11-13s First bite, eyes wide', '11-13s Primo morso, occhi spalancati'), n: 2 },
+        { t: t2('13-15s Walks off', '13-15s Se ne va'), n: 2 },
       ] },
   ],
   'Selling.0': [
@@ -51,8 +53,9 @@ export const PLAY: Record<string, Play> = {
       items: [t2('Desk lamp', 'Lampada da scrivania'), t2('Black', 'Nera'), t2('Metal', 'In metallo'), t2('40 cm', '40 cm'), t2('Bulb included', 'Lampadina inclusa'), t2('Used', 'Usata'), t2('Cheap', 'Economica'), t2('Vintage', 'Vintage')] },
   ],
   'Music.0': [
-    { kind: 'sort', label: t2('Tap ✕ on the song that kills the mood, then drag from calmest to loudest', 'Tocca ✕ sulla canzone che rovina tutto, poi trascina dalla più calma alla più forte'), out: t2('Order', 'Ordine'), cutOut: t2('Cut', 'Tolgo'), cut: 1, // no energy badge: the main version gives mood words only, the numbers live in Make it easier (easy.ts)
-      items: [{ t: 'Mango Static' }, { t: 'Sad Trombone Tuesday' }, { t: 'Pocket Sunrise' }, { t: 'Confetti Cannon' }, { t: 'Tile Floor Groove' }, { t: 'Last Bus Home' }] },
+    { kind: 'sort', label: t2('Tap ▶ to hear a song. Tap ✕ on the one that kills the mood, then drag from calmest to loudest', 'Tocca ▶ per sentire una canzone. Tocca ✕ su quella che rovina tutto, poi trascina dalla più calma alla più forte'), out: t2('Order', 'Ordine'), cutOut: t2('Cut', 'Tolgo'), cut: 1, // no energy badge: the main version gives mood words only, the numbers live in Make it easier (easy.ts)
+      items: [{ t: 'Mango Static', a: '/media/noa-mango.m4a' }, { t: 'Sad Trombone Tuesday', a: '/media/noa-trombone.m4a' }, { t: 'Pocket Sunrise', a: '/media/noa-sunrise.m4a' },
+        { t: 'Confetti Cannon', a: '/media/noa-confetti.m4a' }, { t: 'Tile Floor Groove', a: '/media/noa-tile.m4a' }, { t: 'Last Bus Home', a: '/media/noa-bus.m4a' }] },
   ],
   'Prompting.0': [
     { kind: 'pick', label: t2('Facts the AI needs (at least 3)', 'I fatti che servono all’AI (almeno 3)'), out: t2('Facts', 'Fatti'), max: 6,
@@ -100,6 +103,31 @@ const DRUMS = [ // one per row, in the order of the rows
   (out: AudioNode, t: number) => noise(out, t, 'highpass', 7000, 0.35, 0.05), // hat: a very short hiss, highs only
 ];
 
+// Sound files are decoded once into the same AudioContext and booked on its clock, so a cue lands on its second.
+// Not cached for offline (the service worker leaves /media/ to the network): offline, the button just goes back to ▶.
+const HEAR_L = t2('Hear it', 'Ascolta');
+const bufs = new Map<string, Promise<AudioBuffer>>();
+const load = (c: AudioContext, src: string) => {
+  if (!bufs.has(src)) bufs.set(src, fetch(src).then((r) => { if (!r.ok) throw new Error(`${r.status}`); return r.arrayBuffer(); }).then((b) => c.decodeAudioData(b)).catch((e) => { bufs.delete(src); throw e; }));
+  return bufs.get(src)!;
+};
+// Plays [file, second] pairs for len seconds with a short fade at the end; done() puts the button back. One sound at a time: it stops the one before.
+const playFiles = (parts: [string, number][], len: number, done: () => void) => {
+  halt();
+  const c = audio(), out = c.createGain(), srcs: AudioBufferSourceNode[] = [];
+  void c.resume(); out.connect(c.destination);
+  let timer = 0;
+  const stop = () => { clearTimeout(timer); srcs.forEach((s) => { try { s.stop(); } catch { /* older Safari: already stopped */ } }); out.disconnect(); done(); halt = () => {}; };
+  halt = stop;
+  Promise.all(parts.map(([src]) => load(c, src))).then((list) => {
+    if (halt !== stop) return; // stopped while loading
+    const t0 = c.currentTime + 0.05;
+    out.gain.setValueAtTime(1, t0 + len - 0.3); out.gain.linearRampToValueAtTime(0, t0 + len);
+    list.forEach((b, i) => { const s = c.createBufferSource(); s.buffer = b; s.connect(out); s.start(t0 + parts[i][1]); s.stop(t0 + len); srcs.push(s); });
+    timer = window.setTimeout(() => { if (halt === stop) halt(); }, (len + 0.2) * 1000);
+  }).catch(() => { if (halt === stop) halt(); });
+};
+
 // Draws the groups into host and calls change(summary) after every pick, cut, move or step. The host is emptied on the next mission, and a beat stops.
 export function renderPlay(host: HTMLElement, play: Play, tr: (s: string) => string, change: (text: string) => void) {
   halt();
@@ -124,6 +152,18 @@ export function renderPlay(host: HTMLElement, play: Play, tr: (s: string) => str
         row.append(b);
       });
       box.append(row);
+      if (g.hear && 'AudioContext' in window) {
+        const h = g.hear, hb = document.createElement('button'); hb.type = 'button'; hb.className = 'k-chipb k-pl-play';
+        let on = false;
+        const show = (p: boolean) => { on = p; hb.innerHTML = `<span aria-hidden="true">${p ? '■' : '▶'}</span> ${tr(p ? STOP_L : HEAR_L)}`; };
+        hb.addEventListener('click', () => {
+          if (on) return halt();
+          const at = Number(/\d+/.exec(chosen[0] ?? '')?.[0]); // nothing picked yet: the reel plays without the music
+          show(true);
+          playFiles([[h.bed, 0], ...h.cues, ...(Number.isFinite(at) ? [[h.drop, at] as [string, number]] : [])], h.len, () => show(false));
+        });
+        show(false); box.append(hb);
+      }
       parts.push(() => (chosen.length ? `${tr(g.out)}: ${chosen.map(tr).join(', ')}.` + (g.rest ? ` ${tr(g.rest)}: ${g.items.filter((x) => !chosen.includes(x)).map(tr).join(', ')}.` : '') : ''));
     } else if (g.kind === 'beat') {
       const on = g.items.map(() => Array<boolean>(STEPS).fill(false));
@@ -193,7 +233,12 @@ export function renderPlay(host: HTMLElement, play: Play, tr: (s: string) => str
           const txt = document.createElement('span'); txt.className = 'k-pl-t'; txt.textContent = tr(it.t);
           if (g.badge && it.n !== undefined) { const bd = document.createElement('small'); bd.textContent = `${tr(g.badge)} ${it.n}`; txt.append(' ', bd); }
           const btn = (cls: string, label: string, text: string, on: () => void, off = false) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = text; b.setAttribute('aria-label', `${tr(label)}: ${tr(it.t)}`); b.disabled = off; b.addEventListener('click', on); return b; };
-          li.append(grip, txt,
+          li.append(grip);
+          if (it.a && 'AudioContext' in window) { // the ▶ goes back when the clip ends, Stop is tapped, or another sound starts
+            const src = it.a, ear = btn('k-pl-mv k-pl-ear', HEAR_L, '▶', () => { if (ear.textContent === '■') return halt(); ear.textContent = '■'; playFiles([[src, 0]], 8, () => { ear.textContent = '▶'; }); });
+            li.append(ear);
+          }
+          li.append(txt,
             btn('k-pl-mv', UP, '↑', () => move(pos, pos - 1), pos === 0),
             btn('k-pl-mv', DOWN, '↓', () => move(pos, pos + 1), pos === order.length - 1),
             btn('k-pl-x', cut.has(idx) ? BACK : CUT, cut.has(idx) ? '↺' : '✕', () => { if (cut.has(idx)) cut.delete(idx); else { if (cut.size >= g.cut) cut.delete([...cut][0]); cut.add(idx); } touched = true; paint(); emit(); }));

@@ -8,7 +8,8 @@ export const PLAY_MUSIC: Record<string, Play> = {
   'Music.1': [
     { kind: 'pick', label: t2('Your sound in three words', 'Il tuo suono in tre parole'), out: t2('Sound', 'Suono'), max: 3,
       items: [t2('bouncy', 'saltellante'), t2('claps', 'battimani'), t2('soft hum', 'ronzio morbido'), t2('sleepy', 'assonnato'), t2('crunchy', 'croccante'), t2('whistling', 'fischiettio'), t2('sad violin', 'violino triste'), t2('distorted guitar', 'chitarra distorta')] },
-    { kind: 'pick', label: t2('Tap the second the drop hits', 'Tocca il secondo in cui parte il drop'), out: t2('The drop', 'Il drop'), max: 1, items: SECONDS },
+    { kind: 'pick', label: t2('Tap the second the drop hits, then hear it', 'Tocca il secondo in cui parte il drop, poi ascoltalo'), out: t2('The drop', 'Il drop'), max: 1, items: SECONDS,
+      hear: { bed: '/media/gufo-bed.m4a', cues: [['/media/gufo-shutter.m4a', 3], ['/media/gufo-dough.m4a', 5]], drop: '/media/gufo-beat.m4a', len: 10 } }, // the shutter at 3s and the dough at 5s, as in the reel's shot list
   ],
   'Music.2': [
     { kind: 'pick', label: t2('Three lines to say back (pick 3)', 'Tre righe da dire a voce (scegline 3)'), out: t2('My 3 lines', 'Le mie 3 righe'), max: 3,

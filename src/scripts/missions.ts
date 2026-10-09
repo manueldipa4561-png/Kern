@@ -5,7 +5,8 @@ import { t2 } from './i18n';
 // steps (3 actions), mins (time box), bar (what strong answers do), twist (optional bonus).
 // img: a picture of the asset (a photo, a story, a cover) shown above the text, imgIt the Italian version when the picture has words in it.
 // only: the picture says it all, so the text is kept just as its description for a screen reader.
-export type Asset = { title: string; body: string; mono: boolean; img?: string; imgIt?: string; only?: boolean };
+// video: a real clip (public/media) shown above the text with its own controls; the text keeps the seconds.
+export type Asset = { title: string; body: string; mono: boolean; img?: string; imgIt?: string; only?: boolean; video?: string };
 export type MissionX = { who: string; brief: string; asset: Asset; steps: string[]; mins: number; bar: string[]; twist: string };
 
 const tag = (en: string, it: string) => t2('Practice mission · ' + en, 'Missione di prova · ' + it);
@@ -479,24 +480,25 @@ export const MX: Record<string, MissionX[]> = {
     {
       who: tag('Tosta, a toasted-sandwich van (fictional)', 'Tosta, un furgone di toast (fittizio)'),
       brief: t2(
-        "Rocco’s 30-second clip of his first toastie at Tosta starts slowly. Type a cut list of 12 seconds or less that opens on the best moment.",
-        "La clip di 30 secondi di Rocco, al suo primo toast da Tosta, parte piano. Scrivi una lista dei tagli di 12 secondi al massimo che apra sul momento migliore."),
+        "Rocco’s 15-second clip of his first toastie at Tosta starts slowly. Watch it, then type a cut list of 6 seconds or less that opens on the best moment.",
+        "La clip di 15 secondi di Rocco, al suo primo toast da Tosta, parte piano. Guardala, poi scrivi una lista dei tagli di 6 secondi al massimo che apra sul momento migliore."),
       asset: {
         mono: true,
+        video: '/media/tosta.mp4',
         title: t2('The clip, second by second', 'La clip, secondo per secondo'),
         body: t2(
-          '0-6s    Rocco walks to the van\n6-16s   Reads the menu, waits, phone wobbles\n16-19s  The press closes, steam\n19-22s  Toastie lifts, cheese stretches an arm long\n22-26s  First bite: “OK. OK. OK.”\n26-30s  Walks off, says bye to nobody',
-          '0-6s    Rocco cammina verso il furgone\n6-16s   Legge il menu, aspetta, il telefono traballa\n16-19s  La piastra si chiude, vapore\n19-22s  Il toast si alza, il formaggio fila lungo un braccio\n22-26s  Primo morso: “OK. OK. OK.”\n26-30s  Se ne va e saluta il vuoto'),
+          '0-3s    Rocco walks to the van\n3-7s    Reads the menu, waits\n7-9s    The press closes\n9-11s   Toastie lifts, cheese stretches an arm long\n11-13s  First bite, his eyes go wide\n13-15s  Walks off, waves at the van',
+          '0-3s    Rocco cammina verso il furgone\n3-7s    Legge il menu, aspetta\n7-9s    La piastra si chiude\n9-11s   Il toast si alza, il formaggio fila lungo un braccio\n11-13s  Primo morso, gli occhi si spalancano\n13-15s  Se ne va e saluta il furgone'),
       },
       steps: [
         t2('Pick the best moment, the one you would replay.', 'Scegli il momento migliore, quello che riguarderesti.'),
         t2('Type your cut list: start-end seconds for each piece.', 'Scrivi la lista dei tagli: inizio-fine in secondi per ogni pezzo.'),
-        t2('Add up the seconds. Keep it at 12 or less.', 'Somma i secondi. Devono essere 12 o meno.'),
+        t2('Add up the seconds. Keep it at 6 or less.', 'Somma i secondi. Devono essere 6 o meno.'),
       ],
       mins: 2,
       bar: [
         t2('It opens on the best moment', 'Apre sul momento migliore'),
-        t2('The total is 12 seconds or less', 'Il totale è al massimo 12 secondi'),
+        t2('The total is 6 seconds or less', 'Il totale è al massimo 6 secondi'),
         t2('No walking or waiting shots', 'Niente camminate né attese'),
       ],
       twist: t2('Do the same cut on one of your own clips and post it tonight.', 'Fai lo stesso taglio su una tua clip e pubblicala stasera.'),
@@ -583,10 +585,11 @@ export const MX: Record<string, MissionX[]> = {
         "Rotella vuole una clip di 10 secondi su uno skate: una spinta, poi via. Scrivi cosa direbbe un telecronista sportivo: una riga per inquadratura, circa 2 parole al secondo."),
       asset: {
         mono: true,
+        video: '/media/skate.mp4',
         title: t2('The 4 shots, and how many words fit', 'Le 4 inquadrature, e quante parole ci stanno'),
         body: t2(
-          '0-3s   Board on the pavement, wheels still · up to 6 words\n3-6s   One foot on, one hard push · up to 6 words\n6-8s   The wheels start to roll · up to 4 words\n8-10s  Rolling away down the street · up to 4 words',
-          '0-3s   Tavola sul marciapiede, ruote ferme · fino a 6 parole\n3-6s   Un piede sopra, una spinta forte · fino a 6 parole\n6-8s   Le ruote iniziano a girare · fino a 4 parole\n8-10s  Si allontana lungo la strada · fino a 4 parole'),
+          '0-2s   Board on the pavement, wheels still · up to 4 words\n2-5s   One foot on, one hard push · up to 6 words\n5-8s   Close-up: the wheels roll · up to 6 words\n8-10s  The empty street: gone · up to 4 words',
+          '0-2s   Tavola sul marciapiede, ruote ferme · fino a 4 parole\n2-5s   Un piede sopra, una spinta forte · fino a 6 parole\n5-8s   Primo piano: le ruote girano · fino a 6 parole\n8-10s  La strada vuota: sparito · fino a 4 parole'),
       },
       steps: [
         t2('Write one line for each shot, within its word limit.', 'Scrivi una riga per inquadratura, nel suo limite di parole.'),

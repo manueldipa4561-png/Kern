@@ -1,6 +1,7 @@
 // Checks that every mission is complete and translated: same count in all four data files, rounds of 3,
 // 3 steps / 3 quality bars / 3 hints each, and an Italian text for every string. Run: npm test
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import { buildSync } from 'esbuild';
 import { PER_ROUND as STATS_PER_ROUND } from './stats-core.mjs';
 
@@ -72,7 +73,8 @@ for (const f of Object.keys(FIELDS)) {
     assert.ok(Number.isInteger(x.mins) && x.mins >= 2 && x.mins <= 5, `${at}: mins ${x.mins} is outside 2-5 (missions are snackable)`);
     assert.equal(typeof x.asset.mono, 'boolean', `${at}: asset.mono must be true or false`);
     for (const [k, v] of Object.entries({ who: x.who, brief: x.brief, twist: x.twist, ex: h.ex, easyBrief: e.brief, easyEx: e.ex })) assert.ok(v.trim(), `${at}: ${k} is empty`);
-    for (const s of strings([m, x, h, e]).filter((t) => !t.startsWith('/img/m/'))) { // picture paths are files, not copy (check-design.mjs checks they exist)
+    if (x.asset.video) assert.ok(existsSync(`public${x.asset.video}`), `${at}: clip ${x.asset.video} is missing from public/`);
+    for (const s of strings([m, x, h, e]).filter((t) => !t.startsWith('/img/m/') && !t.startsWith('/media/'))) { // picture and clip paths are files, not copy (check-design.mjs checks the pictures)
       assert.ok(IT[s], `${at}: no Italian for "${s.slice(0, 60)}"`);
       assert.ok(s.length < 25 || IT[s] !== s, `${at}: Italian is the same as English for "${s.slice(0, 60)}"`);
     }
@@ -88,6 +90,8 @@ for (const f of Object.keys(FIELDS)) for (let i = 0; i < FIELDS[f].m.length; i++
     else if (g.kind === 'beat') assert.equal(g.items.length, 3, `${at}: a beat has three rows, kick, snare and hat in that order (play.ts DRUMS)`);
     else assert.ok(g.kind === 'sort' && g.cutOut && g.cut >= 0 && g.cut < g.items.length, `${at}: a sort needs cutOut and a cut smaller than its rows`);
     for (const s of [g.label, g.out, g.rest, g.cutOut, g.badge, g.sum?.label, ...(g.kind === 'beat' ? g.items : [])].filter(Boolean)) assert.ok(IT[s], `${at}: no Italian for "${s}"`);
+    const sounds = [g.hear?.bed, g.hear?.drop, ...(g.hear?.cues ?? []).map(([f]) => f), ...(g.kind === 'sort' ? g.items.map((r) => r.a) : [])].filter(Boolean);
+    for (const f of sounds) assert.ok(existsSync(`public${f}`), `${at}: sound ${f} is missing from public/`);
   }
 }
 console.log(`content: ok (${Object.values(FIELDS).reduce((n, f) => n + f.m.length, 0)} missions)`);

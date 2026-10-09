@@ -382,9 +382,10 @@ const openSheetEl = (sh: HTMLElement, focus: HTMLElement) => {
   sh.querySelector('.k-sh-in')?.scrollTo(0, 0); // start at the top, whatever the last sheet was scrolled to
   focus.focus({ preventScroll: true });
 };
+const hush = () => { stopPlay(); $<HTMLVideoElement>('kXAV').pause(); }; // every sound of the sheet: the beat, a song, the reel, the clip
 const closeSheet = (sh: HTMLElement) => {
   const reveal = sh === kSheet && !$('kShD').hidden; // closed from the drop screen (Escape or backdrop): refresh stones and rank like Continue does
-  sh.hidden = true; syncInert(); if (sh === kSheet) { flushDraft(); stopPlay(); } lastFocus?.focus();
+  sh.hidden = true; syncInert(); if (sh === kSheet) { flushDraft(); hush(); } lastFocus?.focus();
   if (reveal) { setLvl(); renderProgress(); }
 };
 [kSheet, kSet, kFld].forEach((sh) => {
@@ -642,7 +643,7 @@ const renderFurther = () => {
     li.append(b, t); return li;
   }));
 };
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (absorb()) setLvl(); renderProgress(); track('visit'); } else stopPlay(); }); // habit button, boost, streak and dots go stale overnight otherwise
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (absorb()) setLvl(); renderProgress(); track('visit'); } else hush(); }); // habit button, boost, streak and dots go stale overnight otherwise
 const kAdd = $('kAdd'), kAdd2 = $('kAdd2');
 // Usage counts without names (stats.ts): asked once on Home, switchable in Settings. Off until yes. Without Supabase there is nowhere to send them, so neither control shows.
 const kStat = $('kStat'), kStatSet = $('kStatSet');
@@ -1085,6 +1086,10 @@ function renderBrief(f: string, i: number) {
   setX($('kXAT'), pic && x.asset.only ? x.asset.title : v.asset.title); setX($('kXAB'), v.asset.body); $('kXAB').classList.toggle('mono', v.asset.mono);
   $('kXAB').hidden = !!(pic && x.asset.only);
   kXAI.hidden = !pic; kXAI.dataset.en = pic ?? ''; kXAI.dataset.it = x.asset.imgIt ?? pic ?? ''; kXAI.dataset.alt = x.asset.body; setPic();
+  // A real clip (public/media) plays with its own controls above the text, which keeps the seconds. #t=0.1 makes phones show the first frame, not black.
+  const clip = x.asset.video, kXAV = $<HTMLVideoElement>('kXAV');
+  kXAV.pause(); kXAV.hidden = !clip; kXAV.setAttribute('aria-label', tr(x.asset.title));
+  if (clip && kXAV.dataset.src !== clip) { kXAV.dataset.src = clip; kXAV.src = `${clip}#t=0.1`; }
   v.steps.forEach((s) => tick(kXSteps, s, cur.edit >= 0, 'st', stepProg)); // an answer being edited is a finished one: its steps show as done
   stepProg();
   x.bar.forEach((b) => tick(kRfBI, b, false, 'bar', barProg)); // after Submit: does yours do what a strong answer does? Self-ticked, never graded
@@ -1431,7 +1436,7 @@ $('kSub').addEventListener('click', once(() => {
   $<HTMLInputElement>('kRfH').value = ''; $<HTMLInputElement>('kRfT').value = '';
   const ex = variant(cur.f, cur.i)?.ex || '';
   $('kVsY').textContent = na.t; $('kVs').hidden = !ex; // the example text is already in kXExT (renderBrief)
-  stopPlay(); kShA.hidden = true; kShR.hidden = false; setRfNote(); renderProg(); // the beat grid goes with the answer step, so does its sound
+  hush(); kShA.hidden = true; kShR.hidden = false; setRfNote(); renderProg(); // the beat grid goes with the answer step, so does its sound
   groups[0].querySelector<HTMLElement>('[data-v]')!.focus({ preventScroll: true });
   kSheet.querySelector('.k-sh-in')?.scrollTo({ top: 0 }); // the comparison is read first, then the reflection
 }));

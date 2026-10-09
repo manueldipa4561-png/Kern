@@ -41,10 +41,10 @@ export const PLAY_VIDEO: Record<string, Play> = {
       ] },
   ],
   'Video.4': [
-    { kind: 'pick', label: t2('Shots 1 and 2, up to 6 words each: tap them in order', 'Inquadrature 1 e 2, fino a 6 parole: toccale in ordine'), out: t2('Shots 1-2', 'Inquadrature 1-2'), max: 2,
+    { kind: 'pick', label: t2('Shot 1 (up to 4 words), then shot 2 (up to 6): tap them in order', 'Inquadratura 1 (fino a 4 parole), poi la 2 (fino a 6): toccale in ordine'), out: t2('Shots 1-2', 'Inquadrature 1-2'), max: 2,
       items: [t2('“A skateboard is on the ground.”', '“Uno skate è per terra.”'), t2('“Ladies and gentlemen: the board.”', '“Signore e signori: la tavola.”'), t2('“One push. History begins.”', '“Una spinta. Comincia la storia.”'),
         t2('“And now the foot goes on and pushes really hard.”', '“E adesso il piede sale sopra e spinge fortissimo.”'), t2('“Silence. The board. Still.”', '“Silenzio. La tavola. Immobile.”'), t2('“One foot. One push. Pure courage.”', '“Un piede. Una spinta. Coraggio puro.”')] },
-    { kind: 'pick', label: t2('Shots 3 and 4, up to 4 words each: tap them in order', 'Inquadrature 3 e 4, fino a 4 parole: toccale in ordine'), out: t2('Shots 3-4', 'Inquadrature 3-4'), max: 2,
+    { kind: 'pick', label: t2('Shot 3 (up to 6 words), then shot 4 (up to 4): tap them in order', 'Inquadratura 3 (fino a 6 parole), poi la 4 (fino a 4): toccale in ordine'), out: t2('Shots 3-4', 'Inquadrature 3-4'), max: 2,
       items: [t2('“The wheels roll.”', '“Le ruote girano.”'), t2('“It rolls! It rolls!”', '“Rotola! Ma rotola davvero!”'), t2('“The wheels are finally starting to turn.”', '“Le ruote finalmente iniziano a girare.”'), t2('“Gone. Gone for good.”', '“Via. Via per sempre.”'),
         t2('“Buy your wheels at Rotella!”', '“Compra le ruote da Rotella!”'), t2('“Off to buy bread.”', '“A comprare il pane.”'), t2('“Rotella. Goodbye, legend.”', '“Rotella. Addio, leggenda.”')] },
   ],

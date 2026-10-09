@@ -1,5 +1,5 @@
 // Offline support: pages network-first, assets cache-first. Bump CACHE to drop old caches on deploy.
-const CACHE = 'kern-v21';
+const CACHE = 'kern-v22';
 const SHELL = ['/', '/privacy/', '/terms/', '/about/','/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png',
   '/img/mark.webp', '/img/f/yourkern.webp', '/img/f/yourkern-512.webp', '/img/f/ai.webp', '/img/f/missions.webp',
   '/img/m/camilla.webp', '/img/m/guitar.webp', '/img/m/jacket.webp', '/img/m/lamp.webp', '/img/m/luca.webp', '/img/m/playlist-en.webp', '/img/m/playlist-it.webp', '/img/m/room.webp', '/img/m/sneakers.webp', '/img/m/story-en.webp', '/img/m/story-it.webp'];
@@ -27,6 +27,7 @@ self.addEventListener('message', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  if (new URL(req.url).pathname.startsWith('/media/')) return; // clips and songs: the browser asks for byte ranges, which a cache-first copy would break
   if (req.mode === 'navigate') {
     // Keyed by path only: sign-in codes and dare links in the query never land in the cache.
     const key = new URL(req.url).pathname;
