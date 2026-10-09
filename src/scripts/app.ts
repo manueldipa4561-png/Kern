@@ -1621,7 +1621,7 @@ const closeStart = () => {
   const pick = (S.onboarded && picks.includes(S.field) ? S.field : picks[0]) || S.field;
   const changed = pick !== S.field;
   const commit = () => { S.fields = picks.length ? [...picks] : [pick]; S.field = pick; S.onboarded = true; save(); };
-  if (!S.adult) { // Explore missions skips the choice, not the 18+ box: show the picker with the box
+  if (!S.adult) { // "I know what I want to try" skips the choice, not the 18+ box: show the picker with the box
     if (!kAge2.checked) { showPick("Pick where to start."); return; }
     S.adult = true;
   }
