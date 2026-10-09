@@ -109,10 +109,10 @@ create table if not exists public.kern_events (
   field      text,
   mission    smallint,
   brand      boolean not null default false,
-  lang       text check (lang in ('en', 'it')),
+  lang       text,
   created_at timestamptz not null default now()
 );
--- The lists that grow (a new event, a new field, a new round) are named constraints that this script replaces on every run,
+-- The lists that grow (a new event, a new field, a new round, a new language) are named constraints that this script replaces on every run,
 -- so running it again after an update also updates a table made earlier. mission: same limit as kern_signs.
 alter table public.kern_events drop constraint if exists kern_events_ev_check;
 alter table public.kern_events add constraint kern_events_ev_check check (ev in ('optin', 'visit', 'open', 'answer', 'reflect', 'share', 'ask_ai'));
@@ -120,6 +120,8 @@ alter table public.kern_events drop constraint if exists kern_events_field_check
 alter table public.kern_events add constraint kern_events_field_check check (field in ('Design', 'Writing', 'Code', 'Video', 'Selling', 'Music', 'Prompting'));
 alter table public.kern_events drop constraint if exists kern_events_mission_check;
 alter table public.kern_events add constraint kern_events_mission_check check (mission between 0 and 5);
+alter table public.kern_events drop constraint if exists kern_events_lang_check; -- the inline check of earlier versions had this name too
+alter table public.kern_events add constraint kern_events_lang_check check (lang in ('en', 'it', 'de', 'fr'));
 create index if not exists kern_events_aid on public.kern_events (aid, created_at);
 create index if not exists kern_events_time on public.kern_events (created_at);
 alter table public.kern_events enable row level security;

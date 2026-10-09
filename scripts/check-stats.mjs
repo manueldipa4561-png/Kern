@@ -19,7 +19,7 @@ const rows = [
   row('C', 'optin', '2026-10-08T10:00:00Z', null, null, { lang: 'it' }), row('C', 'open', '2026-10-08T10:01:00Z', 'Writing', 1, { brand: true, lang: 'it' }),
   row('C', 'ask_ai', '2026-10-08T10:02:00Z', 'Writing', 1, { brand: true, lang: 'it' }), row('C', 'answer', '2026-10-08T10:05:00Z', 'Writing', 1, { brand: true, lang: 'it' }),
   row('C', 'share', '2026-10-08T10:06:00Z', null, null, { lang: 'it' }),
-  row('D', 'optin', '2026-10-09T08:30:00Z'), row('D', 'open', '2026-10-09T08:31:00Z', 'Code', 3), row('D', 'answer', '2026-10-09T08:35:00Z', 'Code', 3),
+  row('D', 'optin', '2026-10-09T08:30:00Z', null, null, { lang: 'de' }), row('D', 'open', '2026-10-09T08:31:00Z', 'Code', 3, { lang: 'de' }), row('D', 'answer', '2026-10-09T08:35:00Z', 'Code', 3, { lang: 'de' }),
 ];
 
 const s = summarize(rows, { now: NOW });
@@ -34,7 +34,7 @@ assert.deepEqual(s.byField.find((x) => x.field === 'Design'), { field: 'Design',
 assert.deepEqual(s.byField.map((x) => x.field).sort(), ['Code', 'Design', 'Writing']);
 assert.deepEqual(s.byMission.find((x) => x.field === 'Design' && x.mission === 0), { field: 'Design', mission: 0, brand: false, opened: 2, answered: 1 });
 assert.deepEqual(s.brand, { brand: { opened: 1, answered: 1 }, plain: { opened: 5, answered: 4 } });
-assert.deepEqual(s.langs, { en: 2, it: 2 });
+assert.deepEqual(s.langs, { en: 1, it: 2, de: 1, fr: 0 }, 'D uses KERN in German');
 assert.equal(s.firstDay, '2026-10-07');
 
 // Only the timezone moves A's last event to the next day: in UTC A never came back.

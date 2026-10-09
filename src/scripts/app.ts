@@ -4,6 +4,8 @@
 //                           ^            │ (draft autosaved)      │
 //                           └────────────┴── yourKERN / Trail ◄───┘
 import { EN, IT, t2 } from './i18n';
+import { DE } from './i18n-de';
+import { FR } from './i18n-fr';
 import { icon } from './icons';
 import { FIELDS } from './fields';
 import { FIELD_INFO } from './fieldinfo';
@@ -28,7 +30,7 @@ type Refl = { e?: Feel; again?: Again; hard?: string; tip?: string; sid?: number
 type Answer = { f: string; i: number; t: string; at: number; ed?: number; r?: Refl; x?: number; d?: string }; // x: extra stones (bonuses, drop), d: drop id (loot.ts)
 type Msg = { who: 'ai' | 'me'; t: string; typing?: boolean; p?: string }; // p: the person's own words quoted in front of a scripted question, kept apart so a language switch still translates the question
 type Theme = 'dark' | 'light';
-type Lang = 'en' | 'it';
+type Lang = 'en' | 'it' | 'de' | 'fr';
 type Habit = { t: string; c: string; l: [number, string][] }; // t: the tiny habit, c: the cue (after I...), l: [day number, relic id found that day or ''] per day done
 type State = { v: 1; name: string; adult: boolean; field: string; fields: string[]; onboarded: boolean; stones: number; answers: Answer[]; drafts: Record<string, string>; msgs: Msg[]; mine: string[]; lang: Lang; theme: Theme; text: number; guess: string; saves: number; badges: string[]; dared: boolean; gone: Tomb[]; habit: Habit; easy: boolean; coops: CoopRec[] }; // text: the text size step in Settings (0 small, 1 default, 2 large, 3 larger)
 
@@ -63,7 +65,11 @@ const OPEN = "What is your idea? Write it in your own words first. I won't sugge
 const DROP_IDS = ['spark', 'gem', 'jackpot', ...RELICS.map((r) => r.id)];
 const FEELS = Object.keys(SCORE) as Feel[]; // every "how did it feel" value compare.ts can score, so stored and synced reflections keep all of them
 const AGAINS: Again[] = ['yes', 'maybe', 'no'];
-const fresh = (): State => ({ v: 1, name: '', adult: false, field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: navigator.language.toLowerCase().startsWith('it') ? 'it' : 'en', theme: 'dark', text: 1, guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false, coops: [] });
+const LANGS: Lang[] = ['en', 'it', 'de', 'fr'];
+const isLang = (v: unknown): v is Lang => LANGS.includes(v as Lang);
+// First run: the first language the browser asks for that KERN speaks (de-AT, fr-CH... count), else English.
+const firstLang = (): Lang => (navigator.languages?.length ? navigator.languages : [navigator.language]).map((l) => l.slice(0, 2).toLowerCase()).find(isLang) ?? 'en';
+const fresh = (): State => ({ v: 1, name: '', adult: false, field: 'Design', fields: [], onboarded: false, stones: 0, answers: [], drafts: {}, msgs: [], mine: [], lang: firstLang(), theme: 'dark', text: 1, guess: '', saves: 0, badges: [], dared: false, gone: [], habit: { t: '', c: '', l: [] }, easy: false, coops: [] });
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
 // A name is cut by whole characters (never half an emoji) and holds no text-direction controls (U+202A-202E, U+2066-2069): they flip the text around them and leave the avatar empty.
 const cleanName = (v: unknown) => (typeof v === 'string' ? [...v.replace(/[\u202A-\u202E\u2066-\u2069]/g, '')].slice(0, 40).join('') : '');
@@ -113,7 +119,7 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
       drafts,
       msgs: Array.isArray(s.msgs) ? s.msgs.filter((m: Msg) => m && (m.who === 'ai' || m.who === 'me') && typeof m.t === 'string').map((m: Msg): Msg => ({ who: m.who, t: m.t.slice(0, 500), ...(m.who === 'ai' && typeof m.p === 'string' && m.p ? { p: m.p.slice(0, 200) } : {}) })) : [],
       mine: Array.isArray(s.mine) ? s.mine.filter((m: unknown) => typeof m === 'string').map((m: string) => m.slice(0, 140)) : [],
-      lang: s.lang === 'it' || s.lang === 'en' ? s.lang : d.lang,
+      lang: isLang(s.lang) ? s.lang : d.lang,
       theme: s.theme === 'light' ? 'light' : 'dark', // two themes, dark first (a profile saved with the old "system" choice becomes dark)
       text: s.text === 0 || s.text === 2 || s.text === 3 ? s.text : 1,
       guess: str(s.guess, 200),
@@ -131,7 +137,7 @@ const sanitize = (s: any): State | null => { // eslint-disable-line @typescript-
 const demoState = (): State => {
   let real: { lang?: string; theme?: string; text?: number } = {};
   try { real = JSON.parse(localStorage.getItem('kern:v1') || '{}') || {}; } catch { /* no real profile to read */ }
-  const lang: Lang = real.lang === 'it' || real.lang === 'en' ? real.lang : fresh().lang, theme: Theme = real.theme === 'light' ? 'light' : 'dark', text = real.text;
+  const lang: Lang = isLang(real.lang) ? real.lang : fresh().lang, theme: Theme = real.theme === 'light' ? 'light' : 'dark', text = real.text;
   const it = lang === 'it', answers = sampleAnswers(it, Date.now());
   return sanitize({ v: 1, name: 'Giulia', field: 'Design', fields: ['Design', 'Writing', 'Video'], onboarded: true, stones: answers.reduce((s, a) => s + 50 + (a.r ? 20 : 0) + (a.x || 0), 0), answers, msgs: [{ who: 'ai', t: OPEN }, ...sampleChat(it)], mine: sampleMine(it), dared: true, lang, theme, text, guess: 'Saved. This sharpens your KERN.' }) || fresh(); // guess: the reply to "A first guess" (That feels right), not a sentence of its own
 };
@@ -222,14 +228,17 @@ const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Phones (touch, no hover) get a lighter look: no moving aurora, noise, blur or mask behind the content, no View Transitions, no endless animations (app.css .lite). ?lite shows it on a computer.
 const lite = matchMedia('(hover: none) and (pointer: coarse)').matches || /[?&]lite\b/.test(location.search);
 document.documentElement.classList.toggle('lite', lite);
-const isIt = () => S.lang === 'it';
-const tr = (s: string) => (S.lang === 'it' ? IT[s] : EN[s]) || s; // EN: "Selling" reads "Selling online" wherever a field name shows
+const TR: Record<Lang, Record<string, string>> = { en: EN, it: IT, de: DE, fr: FR };
+const LOCALE: Record<Lang, string> = { en: 'en-GB', it: 'it-IT', de: 'de-DE', fr: 'fr-FR' };
+const tr = (s: string) => TR[S.lang][s] || EN[s] || s; // EN: "Selling" reads "Selling online" wherever a field name shows
+// A sentence with blanks: fill(t2('Round {n} done', 'Round {n} fatto'), { n: 2 }), translated first, then every {name} filled once.
+const fill = (en: string, v: Record<string, string | number>) => tr(en).replace(/\{(\w+)\}/g, (m, k: string) => (Object.hasOwn(v, k) ? String(v[k]) : m));
 const setT = (el: Element, en: string) => { (el as HTMLElement).dataset.en = en; el.innerHTML = tr(en); };
 // Dynamic text built in code: clear data-en so a language switch does not overwrite it.
 const setD = (el: Element, text: string) => { (el as HTMLElement).dataset.en = ''; el.textContent = text; };
 const pressed = (attr: string, val: string) => document.querySelectorAll<HTMLElement>(`[data-k-${attr}]`).forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute(`data-k-${attr}`) === val)));
 const F = () => FIELDS[S.field] || FIELDS.Design;
-const day = (t: number) => new Date(t).toLocaleDateString(isIt() ? 'it-IT' : 'en-GB', { day: 'numeric', month: 'short' });
+const day = (t: number) => new Date(t).toLocaleDateString(LOCALE[S.lang], { day: 'numeric', month: 'short' });
 const doneIn = (f: string) => new Set(S.answers.filter((a) => a.f === f).map((a) => a.i));
 const doneSet = () => doneIn(S.field);
 // Rounds: the screen shows 3 missions at a time. base() is the index of the first mission of the round in play; the
@@ -444,17 +453,14 @@ const kSetIn = kSet.querySelector<HTMLElement>('.k-sh-in')!, kSetHd = kSet.query
 kSetIn.addEventListener('scroll', () => kSetHd.classList.toggle('scrolled', kSetIn.scrollTop > 2), { passive: true });
 
 // Ranks
-const RANKS: [string, number][] = [['Pebble', 0], ['Stone', 100], ['Cairn', 300], ['Ridge', 700], ['Summit', 1500]];
-const RIT: Record<string, string> = { Pebble: 'Ciottolo', Stone: 'Pietra', Cairn: 'Cairn', Ridge: 'Cresta', Summit: 'Vetta' };
-const rn = (n: string) => (isIt() && RIT[n]) || n;
+const RANKS: [string, number][] = [[t2('Pebble', 'Ciottolo'), 0], [t2('Stone', 'Pietra'), 100], [t2('Cairn', 'Cairn'), 300], [t2('Ridge', 'Cresta'), 700], [t2('Summit', 'Vetta'), 1500]];
 const rankIdx = (s: number) => RANKS.reduce((a, r, i) => (s >= r[1] ? i : a), 0);
 // Points and ranks are cut from the interface; this only keeps the answer box placeholder in step with the language.
 const setLvl = () => { $<HTMLTextAreaElement>('kTa').placeholder = tr('Write it your way.'); };
 
 // Signals: which kind of mission you light up on, from your own reflections. The kind is the mission index % 3
 // (improve what exists, start from zero, work with someone), so each round adds evidence for the same three kinds.
-const KIND_EN = ['improve what already exists', 'start from zero', 'work with someone'];
-const KIND_IT = ['migliori ciò che esiste già', 'parti da zero', 'collabori con qualcuno'];
+const KIND_EN = [t2('improve what already exists', 'migliori ciò che esiste già'), t2('start from zero', 'parti da zero'), t2('work with someone', 'collabori con qualcuno')]; // "when you ...": i18n-de.ts and i18n-fr.ts write them to end that sentence
 const KSHORT = ['Improving things', 'Starting from zero', 'Working with others'];
 const FEEL_EN: Record<Feel, string> = { flow: 'Time flew', ok: 'It was fine', drag: 'It dragged', easy: 'Too easy' };
 const AGAIN_EN: Record<Again, string> = { yes: 'Yes', maybe: 'Maybe', no: 'No' };
@@ -473,7 +479,7 @@ const ready = (sg: ReturnType<typeof readSignals>) => !!sg && sg.n === 3; // a r
 const chips = (box: HTMLElement, list: string[]) => { box.innerHTML = ''; list.forEach((t) => { const s = document.createElement('span'); s.textContent = t; box.appendChild(s); }); };
 // Kern card: a line you wrote, the field as a path, and the pattern once all three kinds of mission have a reflection.
 // Before that it shows your latest answer and how many reflections are left. With no answer in the field yet, it is a labelled example.
-const KIND_ME_IT = ['miglioro ciò che esiste già', 'parto da zero', 'collaboro con qualcuno']; // first person, for the image you share (English reads the same as KIND_EN)
+const KIND_ME = [t2('I get into it when I improve what already exists.', 'Mi appassiono quando miglioro ciò che esiste già.'), t2('I get into it when I start from zero.', 'Mi appassiono quando parto da zero.'), t2('I get into it when I work with someone.', 'Mi appassiono quando collaboro con qualcuno.')]; // first person, for the image you share
 const CARD_EX = { f: 'Writing', n: '3 of 6 missions', q: 'Almost stayed home. Bag strap snapped on the bus. Lifted 40 kg anyway.', m: 'Fix a flat caption · Time flew', h: 'So far, you get into it when you start from zero.' };
 // "That feels right / Not really" is kept with the kind it was about ("Not really · Starting from zero"), so a new pattern starts fresh.
 const FIT = { yes: 'That feels right', no: 'Not really' } as const;
@@ -493,9 +499,9 @@ const answerLine = (t: string, max = 100) => {
   const cut = clip(s, max), sp = cut.lastIndexOf(' ');
   return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,.;:!?·–—-]+$/, '') + '…';
 };
-const missionsLine = (done: number, all: number) => (isIt() ? `${done} su ${all} missioni` : `${done} of ${all} missions`);
+const missionsLine = (done: number, all: number) => fill(t2('{n} of {all} missions', '{n} su {all} missioni'), { n: done, all });
 const cardData = () => {
-  const sg = readSignals(), it = isIt(), f = S.field, mine = S.answers.filter((a) => a.f === f);
+  const sg = readSignals(), f = S.field, mine = S.answers.filter((a) => a.f === f);
   const latest = mine.reduce<Answer | undefined>((m, a) => (!m || a.at >= m.at ? a : m), undefined);
   const best = sg && ready(sg) ? sg.best : -1, a = sg && best >= 0 ? sg.bestA : latest;
   // The pattern is named only when its kind did better than "It was fine": three "It dragged" never become "you get into it".
@@ -506,13 +512,13 @@ const cardData = () => {
     sg, a, lit, fit, done: doneIn(f), all: total(f), refl: mine.filter((x) => x.r?.e).length,
     src: a ? `${tr(FIELDS[a.f].m[a.i][1])}${a.r?.e ? ' · ' + tr(FEEL_EN[a.r.e]) : ''}` : '',
     you: best < 0 ? ''
-      : !lit ? (it ? 'Finora nessun tipo di missione ti ha fatto volare il tempo. Anche questo conta.' : 'So far, no kind of mission made time fly for you. That counts too.')
-      : it ? `Finora ti appassioni quando ${KIND_IT[best]}.` : `So far, you get into it when you ${KIND_EN[best]}.`,
-    me: !lit || fit === 'no' ? '' : it ? `Mi appassiono quando ${KIND_ME_IT[best]}.` : `I get into it when I ${KIND_EN[best]}.`, // "Not really" keeps it off the image
+      : !lit ? tr(t2('So far, no kind of mission made time fly for you. That counts too.', 'Finora nessun tipo di missione ti ha fatto volare il tempo. Anche questo conta.'))
+      : fill(t2('So far, you get into it when you {k}.', 'Finora ti appassioni quando {k}.'), { k: tr(KIND_EN[best]) }),
+    me: !lit || fit === 'no' ? '' : tr(KIND_ME[best]), // "Not really" keeps it off the image
   };
 };
 const renderCard = () => {
-  const c = cardData(), it = isIt(), h = $('kCardH'), fbEl = $('kFb');
+  const c = cardData(), h = $('kCardH'), fbEl = $('kFb');
   $('kSample').hidden = !!c.a;
   const on = c.a ? c.done : new Set([0, 1, 2]);
   $('kCardP').innerHTML = Array.from({ length: c.a ? c.all : 6 }, (_, i) => `<i${on.has(i) ? ' class="on"' : ''}></i>`).join('');
@@ -525,10 +531,11 @@ const renderCard = () => {
     setD($('kCardN'), missionsLine(c.done.size, c.all));
     setD($('kCardQ'), answerLine(c.a.t));
     setD($('kCardM'), c.src);
-    setD(h, c.you || (it ? `Ancora ${left} ${left === 1 ? 'riflessione' : 'riflessioni'} e la card prova a dire cosa ti appassiona.` : `${left} more ${left === 1 ? 'reflection' : 'reflections'} and the card takes a guess at what you get into.`));
+    setD(h, c.you || fill(left === 1 ? t2('1 more reflection and the card takes a guess at what you get into.', 'Ancora 1 riflessione e la card prova a dire cosa ti appassiona.')
+      : t2('{n} more reflections and the card takes a guess at what you get into.', 'Ancora {n} riflessioni e la card prova a dire cosa ti appassiona.'), { n: left }));
     setD($('kCardL'), c.you
-      ? (it ? `Basata sulle tue ${n} riflessioni. Non è un test.${c.fit === 'no' ? ' Hai detto: non proprio.' : ''}` : `Based on your ${n} reflections. Not a test.${c.fit === 'no' ? ' You said: not really.' : ''}`)
-      : (it ? `La tua ultima risposta · ${n} ${n === 1 ? 'riflessione' : 'riflessioni'} finora` : `Your latest answer · ${n} ${n === 1 ? 'reflection' : 'reflections'} so far`));
+      ? fill(t2('Based on your {n} reflections. Not a test.', 'Basata sulle tue {n} riflessioni. Non è un test.'), { n }) + (c.fit === 'no' ? ` ${tr(t2('You said: not really.', 'Hai detto: non proprio.'))}` : '')
+      : fill(n === 1 ? t2('Your latest answer · 1 reflection so far', 'La tua ultima risposta · 1 riflessione finora') : t2('Your latest answer · {n} reflections so far', 'La tua ultima risposta · {n} riflessioni finora'), { n }));
   }
   $('kCardAsk').hidden = !c.lit; // nothing to agree with until the card names a pattern
   kScr.querySelectorAll<HTMLElement>('#kCardAsk [data-k-fit]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.kFit === c.fit)));
@@ -538,7 +545,7 @@ const renderCard = () => {
   kScr.querySelector<HTMLElement>('#kKernCard [data-k-share="card"]')!.hidden = !c.a; // your own line is worth sharing before the pattern is
 };
 const renderSignals = () => {
-  const sg = readSignals(), it = isIt(), K = it ? KIND_IT : KIND_EN;
+  const sg = readSignals();
   renderCard();
   if (!sg) {
     setT($('kGuess'), SAMPLE.guess); setT($('kWhy'), SAMPLE.why);
@@ -546,12 +553,11 @@ const renderSignals = () => {
   } else {
     const title = (a: Answer) => tr(FIELDS[a.f].m[a.i][1]);
     const feel = (a: Answer) => tr(FEEL_EN[a.r!.e!]);
-    setD($('kGuess'), it
-      ? `Sembri appassionarti quando ${K[sg.best]}${sg.worst >= 0 ? ` e faticare quando ${K[sg.worst]}` : ''}.`
-      : `You seemed to light up when you ${K[sg.best]}${sg.worst >= 0 ? ` and drag when you ${K[sg.worst]}` : ''}.`);
-    setD($('kWhy'), it
-      ? `Il motivo: hai segnato "${feel(sg.bestA)}" su ${title(sg.bestA)}${sg.worstA ? ` e "${feel(sg.worstA)}" su ${title(sg.worstA)}` : ''}.`
-      : `Why we think so: you marked "${feel(sg.bestA)}" on ${title(sg.bestA)}${sg.worstA ? ` and "${feel(sg.worstA)}" on ${title(sg.worstA)}` : ''}.`);
+    const k = tr(KIND_EN[sg.best]), e = feel(sg.bestA), m = title(sg.bestA);
+    setD($('kGuess'), sg.worst >= 0 ? fill(t2('You seemed to light up when you {k} and drag when you {w}.', 'Sembri appassionarti quando {k} e faticare quando {w}.'), { k, w: tr(KIND_EN[sg.worst]) })
+      : fill(t2('You seemed to light up when you {k}.', 'Sembri appassionarti quando {k}.'), { k }));
+    setD($('kWhy'), sg.worstA ? fill(t2('Why we think so: you marked "{e}" on {m} and "{e2}" on {m2}.', 'Il motivo: hai segnato "{e}" su {m} e "{e2}" su {m2}.'), { e, m, e2: feel(sg.worstA), m2: title(sg.worstA) })
+      : fill(t2('Why we think so: you marked "{e}" on {m}.', 'Il motivo: hai segnato "{e}" su {m}.'), { e, m }));
     chips($('kDrawn'), [tr(S.field), tr(KSHORT[sg.best])]);
   }
   $('kWhy').hidden = $('kMeterC').hidden = !ready(sg); // the card only names a pattern once all three kinds of mission have a reflection
@@ -569,18 +575,18 @@ const renderSignals = () => {
   });
   setT($('kMeterN'), any ? 'From your reflections. Not a test.' : 'Reflect after a mission to fill this.');
   const n = S.mine.length;
-  if (n >= 2) setD($('kAiSig'), it ? `Hai riscritto la tua idea ${n} volte in KERN.AI. Confronta la versione 1 con l’ultima.` : `You rewrote your idea ${n} times in KERN.AI. Compare version 1 with your latest one.`);
+  if (n >= 2) setD($('kAiSig'), fill(t2('You rewrote your idea {n} times in KERN.AI. Compare version 1 with your latest one.', 'Hai riscritto la tua idea {n} volte in KERN.AI. Confronta la versione 1 con l’ultima.'), { n }));
   else setT($('kAiSig'), 'Write your idea in KERN.AI. Your versions show up here.'); // never a made-up insight shown as if it were yours
   renderCompare();
 };
 // Fields side by side: once two fields have a reflection, each one's average energy next to how many reflections it rests on (compare.ts).
 const renderCompare = () => {
-  const card = $('kFcmp'), it = isIt(), rows = rowsOf(S.answers, Object.keys(FIELDS)), v = verdict(rows);
+  const card = $('kFcmp'), rows = rowsOf(S.answers, Object.keys(FIELDS)), v = verdict(rows);
   card.hidden = v === 'none';
   if (card.hidden) return;
-  setD($('kFcmpT'), v === 'early' ? (it ? 'Siamo all’inizio. Prova una seconda missione in ognuno.' : 'Early days. Try a second mission in each.')
-    : v === 'close' ? (it ? 'Ancora troppo vicini per dire.' : 'Too close to call yet.')
-    : it ? `${tr(rows[0].f)} ti ha dato più energia finora.` : `${tr(rows[0].f)} gave you the most energy so far.`);
+  setD($('kFcmpT'), v === 'early' ? tr(t2('Early days. Try a second mission in each.', 'Siamo all’inizio. Prova una seconda missione in ognuno.'))
+    : v === 'close' ? tr(t2('Too close to call yet.', 'Ancora troppo vicini per dire.'))
+    : fill(t2('{f} gave you the most energy so far.', '{f} ti ha dato più energia finora.'), { f: tr(rows[0].f) }));
   $('kFcmpM').replaceChildren(...rows.map((r) => {
     const row = document.createElement('div'), lab = document.createElement('span'), val = document.createElement('b'), bar = document.createElement('i'), fill = document.createElement('s');
     row.className = 'k-mt'; lab.textContent = tr(r.f); val.textContent = `${Math.round(r.v * 100)}% · ${r.n}`;
@@ -614,7 +620,7 @@ const renderFields = () => {
 const listOf = (id: string, items: string[]) => $(id).replaceChildren(...items.map((t) => Object.assign(document.createElement('li'), { textContent: tr(t) })));
 const renderAbout = () => {
   const f = tr(S.field);
-  setD($('kAbout'), isIt() ? `Cosa aspettarsi: ${f}` : `What to expect: ${f}`);
+  setD($('kAbout'), `${tr('What to expect')}: ${f}`);
 };
 const openAbout = () => {
   const info = FIELD_INFO[S.field];
@@ -682,23 +688,23 @@ const pathOf = (f: string, mark: number, cls: string) => { const d = doneIn(f); 
 const renderHome = () => {
   renderStat();
   renderFields(); renderAbout(); renderFurther(); renderCoopIn();
-  const f = F(), b = base(), round = b / PER_ROUND, done = winDone(), next = [0, 1, 2].find((k) => !done.has(k)), it = isIt();
+  const f = F(), b = base(), round = b / PER_ROUND, done = winDone(), next = [0, 1, 2].find((k) => !done.has(k));
   // fresh: a round was just finished and the next one is not started. Celebrate the Kern card first, then offer the new missions.
   const fresh = roundJustDone();
-  setD($('kHi'), S.name ? `${it ? 'Ciao' : 'Hi'} ${S.name}` : ''); $('kHi').hidden = !S.name; // no name is asked any more: no bare "Hi"
+  setD($('kHi'), S.name ? `${tr('Hi')} ${S.name}` : ''); $('kHi').hidden = !S.name; // no name is asked any more: no bare "Hi"
   const glyph = next === undefined || fresh ? 'yourkern' : S.field, kNxIc = $('kNxIc');
   if (kNxIc.dataset.g !== glyph) { kNxIc.dataset.g = glyph; kNxIc.innerHTML = icon(glyph); }
   kAdd2.hidden = !fresh;
   if (next === undefined || fresh) {
-    if (fresh) setD($('kNxL'), it ? `Round ${round} completato` : `Round ${round} complete`);
-    else setD($('kNxL'), it ? `Le tue ${total()} missioni sono fatte` : `Your ${total()} missions are done`);
+    if (fresh) setD($('kNxL'), fill(t2('Round {n} complete', 'Round {n} completato'), { n: round }));
+    else setD($('kNxL'), fill(t2('Your {n} missions are done', 'Le tue {n} missioni sono fatte'), { n: total() }));
     setT($('kNxT'), 'Your Kern card is ready.');
     setT($('kNxP'), fresh ? 'See what your answers say about you, or keep going with 3 new missions.' : 'See what your answers say about you, and share it.');
     setT(kAdd, 'See your Kern card'); kAdd.dataset.kAns = 'card';
-    if (fresh) { setD(kAdd2, it ? `Inizia il round ${round + 1}` : `Start round ${round + 1}`); kAdd2.dataset.kAns = String(b); }
+    if (fresh) { setD(kAdd2, fill(t2('Start round {n}', 'Inizia il round {n}'), { n: round + 1 })); kAdd2.dataset.kAns = String(b); }
   } else {
     const m = f.m[b + next];
-    setD($('kNxL'), it ? `${tr(S.field)} · prossima missione` : `Up next in ${tr(S.field)}`); // where you are shows as the path below, not as "1 of 3"
+    setD($('kNxL'), fill(t2('Up next in {f}', '{f} · prossima missione'), { f: tr(S.field) })); // where you are shows as the path below, not as "1 of 3"
     setT($('kNxT'), m[1]); setT($('kNxP'), m[2]);
     setT(kAdd, S.drafts[`${S.field}.${b + next}`] ? 'Continue your draft' : 'Start mission'); kAdd.dataset.kAns = String(b + next);
   }
@@ -708,10 +714,10 @@ const renderHome = () => {
   $('kNxM').innerHTML = mins ? `<span class="k-l">${aboutMins(mins)}</span>` : '';
   // The list shows the round in play, or a look at the next one (never a lock: every round is open).
   const looking = peeking(), vb = viewBase(), vr = vb / PER_ROUND, vdone = new Set([0, 1, 2].filter((k) => doneSet().has(vb + k)));
-  if (vr) setD($('kMsL'), it ? `Round ${vr + 1} · le tue 3 missioni` : `Round ${vr + 1} · your 3 missions`); else setT($('kMsL'), 'Your 3 missions');
+  if (vr) setD($('kMsL'), fill(t2('Round {n} · your 3 missions', 'Round {n} · le tue 3 missioni'), { n: vr + 1 })); else setT($('kMsL'), 'Your 3 missions');
   const more = b + PER_ROUND < total(), peekBtn = $('kPeek');
   peekBtn.hidden = !more;
-  if (more) setD(peekBtn, looking ? (it ? `‹ Torna al round ${round + 1}` : `‹ Back to round ${round + 1}`) : (it ? `Round ${round + 2} · altre 3 missioni ›` : `Round ${round + 2} · 3 more missions ›`));
+  if (more) setD(peekBtn, looking ? fill(t2('‹ Back to round {n}', '‹ Torna al round {n}'), { n: round + 1 }) : fill(t2('Round {n} · 3 more missions ›', 'Round {n} · altre 3 missioni ›'), { n: round + 2 }));
   const nb = boostOf(S.field), nbEl = $('kNxB');
   nbEl.hidden = !nb || finished;
   if (nb) setD(nbEl, `${boostTxt(nb.m)} · ${tr(f.m[nb.i][1])}`);
@@ -729,9 +735,9 @@ const renderHome = () => {
 
 // The pill and the three steps of the Trail: the round in play and where each of its missions stands.
 const renderSteps = () => {
-  const it = isIt(), b = base(), round = b / PER_ROUND, done = winDone(), n = done.size, next = [0, 1, 2].find((k) => !done.has(k));
+  const b = base(), round = b / PER_ROUND, done = winDone(), n = done.size, next = [0, 1, 2].find((k) => !done.has(k));
   const justDone = roundJustDone(), tb = justDone ? b - PER_ROUND : b; // until the next round is started, the Trail shows the round that was just finished
-  $('kPill').textContent = justDone ? (it ? `Round ${round} fatto` : `Round ${round} done`) : round ? `Round ${round + 1} · ${n}/3` : it ? `${n} su 3 fatte` : `${n} of 3 done`;
+  $('kPill').textContent = justDone ? fill(t2('Round {n} done', 'Round {n} fatto'), { n: round }) : round ? fill(t2('Round {n} · {k}/3', 'Round {n} · {k}/3'), { n: round + 1, k: n }) : fill(t2('{n} of 3 done', '{n} su 3 fatte'), { n });
   $('kRing').style.setProperty('--p', String(justDone ? 1 : n / 3));
   [0, 1, 2].forEach((i) => {
     setT($('kTr' + i), F().m[tb + i][1]);
@@ -742,7 +748,6 @@ const renderSteps = () => {
 };
 // Progress: pill, trail, answers list, signs, real stats from saved answers.
 const renderProgress = () => {
-  const it = isIt();
   renderSteps();
   const kc = $('kTrK');
   const ready = doneSet().size >= PER_ROUND; // the Kern card unlocks with round 1 and sharpens with every round after
@@ -790,7 +795,7 @@ const renderProgress = () => {
     cal.appendChild(c);
   }
   const w = weeks.filter(Boolean).length;
-  $('kRhy').textContent = it ? `In ${w} delle ultime 4 settimane hai creato qualcosa.` : `${w} of the last 4 weeks you made something.`;
+  $('kRhy').textContent = fill(t2('{n} of the last 4 weeks you made something.', 'In {n} delle ultime 4 settimane hai creato qualcosa.'), { n: w });
   renderHome(); renderSignals(); renderBadges(); renderLoot(); renderCoops();
 };
 
@@ -860,11 +865,11 @@ function deleteAnswer(idx: number) {
 // Co-pilot chat (scripted: it only asks, never proposes the idea)
 const chatEl = $('kChat'), inEl = $<HTMLInputElement>('kIn'), cmp = $('kCmp');
 let busy = false, gen = 0; // gen: bumped by startChat, so a reply that was in flight when the chat restarted is dropped
-// Distress words (English and Italian, with or without accents and curly apostrophes). The same line sits in netlify/functions/coach.mts: scripts/check-heavy.mjs fails npm test when they differ.
-const HEAVY = /(kill(ing)? myself|kill me\b|suicid|self.?harm|hurt(ing)? myself|end (my life|it all)|take my (own )?life|hopeless|want(ed)? to die|wish i (was|were) (dead|gone)|better off dead|(no|any) reason to live|don['’]?t want to (live|be here|wake up)|cut(ting)? myself|voglio morire|vorrei morire|farla finita|mi (voglio |vorrei |devo )?(uccid|ammazz|impicc)|uccider(mi|e me)|ammazzar(mi|e me)|impiccar(mi|e me)|tagliarmi le vene|mi taglio le vene|togliermi la vita|togliermi di mezzo|farmi del male|mi faccio del male|autolesion|non (voglio|riesco) pi[uù]['’]? (a )?vivere|non voglio pi[uù]['’]? stare qui|meglio morto|meglio morta|non ce la faccio pi[uù]|senza speranza|non vedo (una )?via d['’]?uscita|vorrei sparire|voglio sparire)/i;
+// Distress words (English, Italian, German and French, with or without accents and curly apostrophes). The same line sits in netlify/functions/coach.mts: scripts/check-heavy.mjs fails npm test when they differ.
+const HEAVY = /(kill(ing)? myself|kill me\b|suicid|self.?harm|hurt(ing)? myself|end (my life|it all)|take my (own )?life|hopeless|want(ed)? to die|wish i (was|were) (dead|gone)|better off dead|(no|any) reason to live|don['’]?t want to (live|be here|wake up)|cut(ting)? myself|voglio morire|vorrei morire|farla finita|mi (voglio |vorrei |devo )?(uccid|ammazz|impicc)|uccider(mi|e me)|ammazzar(mi|e me)|impiccar(mi|e me)|tagliarmi le vene|mi taglio le vene|togliermi la vita|togliermi di mezzo|farmi del male|mi faccio del male|autolesion|non (voglio|riesco) pi[uù]['’]? (a )?vivere|non voglio pi[uù]['’]? stare qui|meglio morto|meglio morta|non ce la faccio pi[uù]|senza speranza|non vedo (una )?via d['’]?uscita|vorrei sparire|voglio sparire|suizid|selbstmord|mich (um(zu)?bringen|(zu )?t[öo]ten)|bringe? mich um\b|mir das leben (zu )?nehmen|nicht mehr leben|(will|m[öo]chte) nicht mehr (hier|da) sein|nicht mehr aufwachen|(will|m[öo]chte) (lieber )?sterben|lieber tot|besser tot|ritze mich|mich (selbst )?ritzen|selbst ?verletz|verletze mich selbst|mir (selbst )?weh ?(zu ?)?tun|hoffnungslos|keinen ausweg|kein ausweg|ich kann (einfach )?nicht mehr(?! *[a-zäöüß])|(will|m[öo]chte) (einfach )?verschwinden|(veux|vais|voudrais|envie de|pense [àa]) me tuer|(veux|voudrais|envie de|pr[ée]f[ée]rerais) mourir|en finir avec (la|ma) vie|(veux|vais|envie d['’]) ?en finir|mettre fin [àa] (mes jours|ma vie)|me fai(re|s) du mal|automutil|scarifi|me pendre|(ouvrir|taillader|couper) les veines|(veux|peux) plus vivre|plus envie de vivre|(aucune|plus de|pas de) raison de vivre|sans espoir|en peux plus|(veux|voudrais|envie de) dispara[iî]tre)/i;
 const HEAVY_REPLY = "This sounds heavy, so I'm pausing the mission. Please talk to someone you trust or a local helpline: in the UK and Ireland, Samaritans answer free, day or night, on 116 123. If you are in danger, call 112 (999 in the UK).";
-const ASKED = /(give me|tell me|what should|write it for me|any ideas|dammi|dimmi|che idea|scrivilo tu|cosa dovrei)/i;
-const STUCK = /(stuck|don'?t know|do not know|no idea|not sure|blank|boh|non so|bloccat|nessuna idea)/i;
+const ASKED = /(give me|tell me|what should|write it for me|any ideas|dammi|dimmi|che idea|scrivilo tu|cosa dovrei|gib mir|sag mir|was soll ich|schreib du|hast du (eine )?idee|donne-moi|dis-moi|que dois-je|je dois faire quoi|[ée]cris-le|tu as une id[ée]e)/i;
+const STUCK = /(stuck|don'?t know|do not know|no idea|not sure|blank|boh|non so|bloccat|nessuna idea|wei[ßs] nicht|keine ahnung|keine idee|komme nicht weiter|h[äa]nge fest|sais pas|aucune id[ée]e|bloqu[ée]|pas s[ûu]r)/i;
 const pick = <T,>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
 const Q_STUCK = [t2('Let us make it smaller. What is one sentence you could write in 30 seconds?', 'Facciamolo più piccolo. Qual è una frase che potresti scrivere in 30 secondi?'), t2('Forget good. What would the roughest version look like?', 'Dimentica il bello. Come sarebbe la versione più grezza?'), t2('Who is it for? Name one real person.', 'Per chi è? Fai il nome di una persona vera.')];
 const Q_SMALL = [t2('What is the smallest part of it you could finish today?', 'Qual è la parte più piccola che potresti finire oggi?'), t2('If you only had 5 minutes, what would you do first?', 'Se avessi solo 5 minuti, cosa faresti per prima cosa?')];
@@ -1064,7 +1069,7 @@ const variant = (f: string, i: number) => {
 // The mission picture in the current language (some pictures carry words), with the asset text as its description.
 const setPic = () => {
   const im = $<HTMLImageElement>('kXAI'); if (im.hidden) return;
-  const src = (isIt() ? im.dataset.it : im.dataset.en) || '';
+  const src = (S.lang === 'it' ? im.dataset.it : im.dataset.en) || ''; // the Italian picture only in Italian, the English one everywhere else
   if (im.getAttribute('src') !== src) im.src = src;
   im.alt = tr(im.dataset.alt || '').replace(/\n/g, '. ');
 };
@@ -1117,7 +1122,7 @@ const showHarder = (open: boolean) => {
 };
 $('kXHard').addEventListener('click', () => showHarder($('kXHardT').hidden));
 // Time on a mission is a soft estimate, said so nobody feels slow.
-const aboutMins = (n: number) => (isIt() ? `circa ${n} min, con calma` : `about ${n} min, no rush`);
+const aboutMins = (n: number) => fill(t2('about {n} min, no rush', 'circa {n} min, con calma'), { n });
 let hintN = 0;
 // The picks own the first lines of the answer; whatever the person typed after them stays.
 // ponytail: if they edit inside the picked lines, the next pick starts a new block above their text instead of merging.
@@ -1130,8 +1135,8 @@ const playWrite = (gen: string) => {
 };
 const barsHit = () => kRfBI.querySelectorAll('.bar.on').length, barsAll = () => kRfBI.querySelectorAll('.bar').length;
 function barProg() {
-  const n = barsHit(), all = barsAll(), it = isIt();
-  setD($('kRfBN'), !n ? '' : n < all ? (it ? `${n} su ${all}` : `${n} of ${all}`) : (it ? 'Tutti e tre. È una risposta forte.' : 'All three. That is a strong answer.'));
+  const n = barsHit(), all = barsAll();
+  setD($('kRfBN'), !n ? '' : n < all ? fill(t2('{n} of {all}', '{n} su {all}'), { n, all }) : tr(t2('All three. That is a strong answer.', 'Tutti e tre. È una risposta forte.')));
 }
 // Busy or spent buttons are dimmed but stay focusable: a disabled button drops keyboard focus to the page body.
 const hold = (b: Element, on: boolean) => b.setAttribute('aria-disabled', String(on));
@@ -1256,8 +1261,8 @@ const STARTERS: Record<string, string[]> = {
   Prompting: [t2('Add one detail to a prompt you used', 'Aggiungi un dettaglio a un prompt che hai usato'), t2('Ask an AI what it is unsure about', 'Chiedi a un’AI di cosa non è sicura')],
 };
 const CUES = [t2('wake up', 'mi sveglio'), t2('have my coffee', 'bevo il caffè'), t2('finish lunch', 'finisco di pranzare'), t2('get home', 'torno a casa'), t2('brush my teeth', 'mi lavo i denti')];
-// A habit or cue picked from the chips is saved as the words on the chip at that moment (English or Italian): show it in the current language. Words typed by hand stay as typed.
-const HB_EN = new Map([...Object.values(STARTERS).flat(), ...CUES].flatMap((en): [string, string][] => [[en, en], [IT[en], en]]));
+// A habit or cue picked from the chips is saved as the words on the chip at that moment (in any language): show it in the current language. Words typed by hand stay as typed.
+const HB_EN = new Map([...Object.values(STARTERS).flat(), ...CUES].flatMap((en) => [en, IT[en], DE[en], FR[en]].filter((t): t is string => !!t).map((t): [string, string] => [t, en])));
 const hbText = (s: string) => tr(HB_EN.get(s) ?? s);
 const HB_MSG = [t2('That counts. Small is the point.', 'Conta. Il bello è essere piccoli.'), t2('Done. Your future self noticed.', 'Fatto. Il tuo io futuro se n’è accorto.'), t2('Again tomorrow, same cue. That is the whole trick.', 'Di nuovo domani, stesso segnale. È tutto qui il trucco.'), t2('Easy on purpose. Keep it that way.', 'Facile di proposito. Resta così.'), t2('One more day on the trail.', 'Un altro giorno sulla traccia.')];
 const kHbSet = $('kHbSet'), kHbRun = $('kHbRun'), kHbT = $<HTMLInputElement>('kHbT'), kHbC = $<HTMLInputElement>('kHbC');
@@ -1283,7 +1288,7 @@ function renderHabit() {
   for (let i = 6; i >= 0; i--) {
     const d = document.createElement('i'), day = today - i;
     d.className = (done.has(day) ? 'on' : '') + (i === 0 ? ' now' : '');
-    d.setAttribute('role', 'img'); d.setAttribute('aria-label', `${new Date(day * DAY + 12 * 36e5).toLocaleDateString(isIt() ? 'it-IT' : 'en-GB', { weekday: 'long', timeZone: 'UTC' })}: ${done.has(day) ? tr('done') : tr('not yet')}`);
+    d.setAttribute('role', 'img'); d.setAttribute('aria-label', `${new Date(day * DAY + 12 * 36e5).toLocaleDateString(LOCALE[S.lang], { weekday: 'long', timeZone: 'UTC' })}: ${done.has(day) ? tr('done') : tr('not yet')}`);
     dots.appendChild(d);
   }
   const doneToday = done.has(today), btn = $<HTMLButtonElement>('kHbDo');
@@ -1335,8 +1340,9 @@ function showDrop(d: Drop, side: number, withNext = false) {
   if (withNext) offerNext(); // before the focus below, so the button is announced with its final label
   $('kDrArt').innerHTML = dropArt(d);
   setT($('kDrT'), DROP_T[d.tier]);
-  if (rel) setD($('kDrN'), `${tr(rel.name)} · ${relicsOwned().length + 0}/${RELICS.length}`); else setD($('kDrN'), `+${d.stones} ${isIt() ? 'pietre' : 'stones'}`);
-  setD($('kDrS'), rel ? `${d.stones ? `+${d.stones} ${isIt() ? 'pietre' : 'stones'}` : ''}${side ? ` · +${side} bonus` : ''}` : side ? `+${side} bonus` : '');
+  const stones = fill(t2('+{n} stones', '+{n} pietre'), { n: d.stones });
+  if (rel) setD($('kDrN'), `${tr(rel.name)} · ${relicsOwned().length + 0}/${RELICS.length}`); else setD($('kDrN'), stones);
+  setD($('kDrS'), rel ? `${d.stones ? stones : ''}${side ? ` · +${side} bonus` : ''}` : side ? `+${side} bonus` : '');
   burst(18); $('kDrPath').innerHTML = ''; $('kDrTw').hidden = true;
   if ('vibrate' in navigator) navigator.vibrate(d.tier === 'jackpot' ? [30, 40, 30, 40, 60] : d.tier === 'relic' ? [20, 30, 40] : [18]);
   kDrOk.focus();
@@ -1361,7 +1367,7 @@ kDrOk.addEventListener('click', once(() => {
 const fillSheet = (f: string, i: number) => {
   kSheet.classList.remove('drop'); kShD.hidden = true; kSheet.dataset.fa = f; // the header takes the field's accent colour (app.css)
   const m = FIELDS[f].m[i];
-  setD($('kShL'), `${tr(f)} · ${isIt() ? 'missione' : 'mission'} ${(i % PER_ROUND) + 1} ${isIt() ? 'di' : 'of'} ${PER_ROUND}`); setT($('kShT'), m[1]); // not the internal label ("Mission 001 · crowded story")
+  setD($('kShL'), fill(t2('{f} · mission {n} of {all}', '{f} · missione {n} di {all}'), { f: tr(f), n: (i % PER_ROUND) + 1, all: PER_ROUND })); setT($('kShT'), m[1]); // not the internal label ("Mission 001 · crowded story")
   const code = f === 'Code'; // code is typed letter by letter: the phone must not correct, capitalise or underline it
   kTa.spellcheck = !code; kTa.setAttribute('autocorrect', code ? 'off' : 'on'); kTa.setAttribute('autocapitalize', code ? 'off' : 'sentences');
   renderBrief(f, i);
@@ -1478,7 +1484,7 @@ $('kDrTry').addEventListener('click', once(() => { // opens that field's first o
   switchField(f); openAnswer(f, i);
 }));
 function showDone() {
-  const f = cur.f, it = isIt();
+  const f = cur.f;
   kSheet.classList.add('drop'); kShA.hidden = true; kShR.hidden = true; kShD.hidden = false; kShD.dataset.tier = 'done'; setProgText(4);
   setT(kDrOk, 'Keep going'); delete kDrOk.dataset.next; kDrNx.hidden = true; kDrNx.textContent = ''; // aria-describedby reads hidden text too
   offerNext(); // before the focus below, so the button is announced with its final label
@@ -1487,9 +1493,9 @@ function showDone() {
   $('kDrCoop').hidden = !co; $('kDrCoN').hidden = !co;
   $('kDrDare').hidden = co || !lastAns; // right after a mission: send this one as a dare (co-op missions already offer their friend step)
   setT($('kDrT'), 'Done.');
-  setD($('kDrN'), it ? `${doneIn(f).size} su ${total(f)} fatte in ${tr(f)}` : `${doneIn(f).size} of ${total(f)} done in ${tr(f)}`);
+  setD($('kDrN'), fill(t2('{n} of {all} done in {f}', '{n} su {all} fatte in {f}'), { n: doneIn(f).size, all: total(f), f: tr(f) }));
   const hit = barsHit(), all = barsAll();
-  setD($('kDrS'), hit ? (it ? `${hit} controlli su ${all} · salvata su questo dispositivo.` : `${hit} of ${all} checks · saved on this device.`) : (it ? 'Salvata su questo dispositivo.' : 'Saved on this device.'));
+  setD($('kDrS'), hit ? fill(t2('{n} of {all} checks · saved on this device.', '{n} controlli su {all} · salvata su questo dispositivo.'), { n: hit, all }) : tr(t2('Saved on this device.', 'Salvata su questo dispositivo.')));
   $('kDrPath').innerHTML = pathOf(f, cur.i, 'now'); // the one just finished grows in
   // One calm line under the buttons: a field not picked yet, and the weekly reminder. Small links, never a second call to action.
   const cf = curiousField(), tryB = $('kDrTry');
@@ -1497,7 +1503,7 @@ function showDone() {
   if (cf) setD(tryB, cf === 'Prompting' ? tr('Prompting with AI works with any field. Try one.') : tr('Curious about {f}? Try one').replace('{f}', tr(cf)));
   setT($('kDrRem'), 'Remind me weekly'); $('kDrMore').hidden = false;
   const tw = twistOf(f, cur.i), twEl = $('kDrTw'); // the harder take that every mission already has
-  twEl.hidden = !tw; if (tw) setD(twEl, `${it ? 'Troppo facile? Prova questo:' : 'Too easy? Try this:'} ${tw}`);
+  twEl.hidden = !tw; if (tw) setD(twEl, `${tr(t2('Too easy? Try this:', 'Troppo facile? Prova questo:'))} ${tw}`);
   burst(14); if ('vibrate' in navigator) navigator.vibrate(18);
   kDrOk.focus();
 }
@@ -1508,7 +1514,7 @@ const closeWin = () => { kRw.hidden = true; syncInert(); kWin.focus(); };
 kWin.addEventListener('click', () => {
   const gain = 200, before = rankIdx(S.stones), after = rankIdx(S.stones + gain);
   kRU.hidden = after === before;
-  $('kRU2').textContent = rn(RANKS[after][0]);
+  $('kRU2').textContent = tr(RANKS[after][0]);
   kRw.hidden = false;
   kConf.innerHTML = '';
   if (still) kGain.textContent = '+' + gain;
@@ -1800,7 +1806,7 @@ const STORY_W = 1080, STORY_H = 1920, STORY_X = 96, LIME = '#C9F24A', BONE = '#E
 const cardImage = async (): Promise<Blob | null> => {
   const c = cardData();
   if (!c.a) return null;
-  const it = isIt(), X = STORY_X, TW = STORY_W - 2 * X;
+  const X = STORY_X, TW = STORY_W - 2 * X;
   const D = "'Bricolage Grotesque Variable', sans-serif", B = "'Inter Tight Variable', sans-serif", SR = "'Instrument Serif', Georgia, serif";
   try { await Promise.all([`800 96px ${D}`, `600 36px ${B}`, `italic 400 80px ${SR}`].map((f) => document.fonts.load(f))); } catch { /* the fallback fonts will do */ }
   const cv = document.createElement('canvas'); cv.width = STORY_W; cv.height = STORY_H;
@@ -1850,12 +1856,12 @@ const cardImage = async (): Promise<Blob | null> => {
   y = block(src, SF, SS, DIMB, y + 20);
   if (pat.length) {
     x.fillStyle = LIME; x.fillRect(X, y + 60, 72, 6);
-    y = block([(it ? `Finora · da ${c.refl} riflessioni` : `So far · from ${c.refl} reflections`).toUpperCase()], LF, LS, DIMB, y + 88);
+    y = block([fill(t2('So far · from {n} reflections', 'Finora · da {n} riflessioni'), { n: c.refl }).toUpperCase()], LF, LS, DIMB, y + 88);
     block(pat, PF, PS, BONE, y + 14);
   }
   // The slogan and the address, above the strip a story covers with its reply bar.
   const slogan = tr('Don’t guess your passion.');
-  let ss = 80; // one line in both languages: the longer Italian line steps down until it fits
+  let ss = 80; // one line in every language: a longer line steps down until it fits
   for (x.font = `italic 400 ${ss}px ${SR}`; x.measureText(slogan).width > TW && ss > 48; x.font = `italic 400 ${ss}px ${SR}`) ss -= 4;
   put(slogan, `italic 400 ${ss}px ${SR}`, BONE, X, 1490);
   put(tr('Test it.'), `italic 400 ${ss}px ${SR}`, LIME, X, 1490 + ss * 1.08);
@@ -1886,23 +1892,23 @@ kScr.querySelectorAll<HTMLElement>('[data-k-share]').forEach((b) => b.addEventLi
 
 // Pilot: send your trail (answers + reflections) to the KERN team as plain text.
 const trailText = () => {
-  const it = isIt(), L = [`KERN · ${it ? 'traccia di' : 'trail of'} ${S.name}`, `${it ? 'Campo' : 'Field'}: ${tr(S.field)}`, ''];
+  const L = [fill(t2('KERN · trail of {n}', 'KERN · traccia di {n}'), { n: S.name }), fill(t2('Field: {f}', 'Campo: {f}'), { f: tr(S.field) }), ''];
   S.answers.forEach((a, k) => {
     L.push(`${k + 1}. ${tr(FIELDS[a.f].m[a.i][1])} (${day(a.at)})`, a.t);
     if (a.r) {
       const p: string[] = [];
       if (a.r.e) p.push(tr(FEEL_EN[a.r.e]));
-      if (a.r.again) p.push(`${it ? 'Di nuovo' : 'Again'}: ${tr(AGAIN_EN[a.r.again])}`);
-      if (a.r.hard) p.push(`${it ? 'Più difficile' : 'Hardest'}: ${a.r.hard}`);
-      if (a.r.tip) p.push(`${it ? 'Consiglio' : 'Tip'}: ${a.r.tip}`);
+      if (a.r.again) p.push(fill(t2('Again: {a}', 'Di nuovo: {a}'), { a: tr(AGAIN_EN[a.r.again]) }));
+      if (a.r.hard) p.push(fill(t2('Hardest: {h}', 'Più difficile: {h}'), { h: a.r.hard }));
+      if (a.r.tip) p.push(fill(t2('Tip: {t}', 'Consiglio: {t}'), { t: a.r.tip }));
       L.push(p.join(' | '));
     }
     L.push('');
   });
   if (S.mine.length) L.push(`KERN.AI: ${S.mine.join(' > ')}`);
   if (!$('kSample').hidden) return L.join('\n');
-  L.push(`${it ? 'Prima ipotesi' : 'First guess'}: ${$('kGuess').textContent}`);
-  if (S.guess) L.push(`${it ? 'Risposta' : 'Reply'}: ${tr(S.guess)}`);
+  L.push(fill(t2('First guess: {g}', 'Prima ipotesi: {g}'), { g: $('kGuess').textContent ?? '' }));
+  if (S.guess) L.push(fill(t2('Reply: {r}', 'Risposta: {r}'), { r: tr(S.guess) }));
   return L.join('\n');
 };
 document.querySelectorAll<HTMLElement>('[data-k-send]').forEach((b) => b.addEventListener('click', () => {
@@ -1924,16 +1930,17 @@ $('kDareGo').addEventListener('click', () => { if (dare) openAnswer(dare.f, dare
 // Co-op with a friend (coop.ts): two missions in every field are finished by two people through links, with no server. A link carries one answer
 // after the #; the friend's reply comes back the same way. The pair lives in S.coops, so it survives a reload and syncs with the trail.
 function isCoop(f: string, i: number) { return COOP_KEYS.includes(`${f}.${i}`); }
-const myName = () => [...cleanName(S.name)].slice(0, MAX_NAME).join('') || (isIt() ? 'Qualcuno' : 'A friend');
+const A_FRIEND = t2('A friend', 'Qualcuno'); // a co-op partner who left no name
+const myName = () => [...cleanName(S.name)].slice(0, MAX_NAME).join('') || tr(A_FRIEND);
 const coopAsk = (f: string, i: number) => tr(ASK[`${f}.${i}`]);
 const keepCoops = () => { S.coops = S.coops.slice(-30); };
 let coopIn: Coop | null = null, coopNote = '', coopGo = false; // the friend's request waiting to be answered; a one-line notice (and whether to open yourKERN) after a link was opened
 function receiveCoopReply(c: Coop) { // someone answered my co-op: keep both halves (coop.ts decides which row it belongs to, or that it is not for me)
-  const res = settleReply(S.coops, c, Date.now()), it = isIt(), who = c.m || (it ? 'Qualcuno' : 'A friend');
-  if (res.status === 'stranger') { coopNote = it ? 'Questa risposta non è per una tua missione.' : 'This reply is not for one of your missions.'; return; }
-  if (res.status === 'own') { coopNote = it ? 'Questa è la risposta che hai mandato tu.' : 'This is the reply you sent.'; return; }
+  const res = settleReply(S.coops, c, Date.now()), who = c.m || tr(A_FRIEND);
+  if (res.status === 'stranger') { coopNote = tr(t2('This reply is not for one of your missions.', 'Questa risposta non è per una tua missione.')); return; }
+  if (res.status === 'own') { coopNote = tr(t2('This is the reply you sent.', 'Questa è la risposta che hai mandato tu.')); return; }
   if (res.status !== 'same') { S.coops = res.coops; keepCoops(); save(); }
-  coopNote = it ? `${who} ha risposto. La trovi in yourKERN.` : `${who} replied. It is in yourKERN.`; coopGo = true;
+  coopNote = fill(t2('{n} replied. It is in yourKERN.', '{n} ha risposto. La trovi in yourKERN.'), { n: who }); coopGo = true;
 }
 // The link stays in the address bar until the request is answered or dismissed, so a reload, "Open in Safari" from a chat app's browser or a bookmark still finds it.
 function dropCoopHash() { if (location.hash.startsWith('#coop=')) try { history.replaceState(null, '', location.pathname.replace(/^\/{2,}/, '/') + location.search); } catch { /* leave the address as it is */ } }
@@ -1941,7 +1948,7 @@ function readCoopLink() {
   const c = decodeCoop(location.hash);
   if (c?.r) { receiveCoopReply(c); dropCoopHash(); } // a reply is kept in the trail at once
   else if (c) coopIn = c;
-  else if (location.hash.startsWith('#coop=')) { coopNote = isIt() ? 'Questo link non funziona: chiedi di rimandartelo.' : 'This link is broken: ask your friend to send it again.'; dropCoopHash(); } // a chat app may cut or add characters to a link
+  else if (location.hash.startsWith('#coop=')) { coopNote = tr(t2('This link is broken: ask your friend to send it again.', 'Questo link non funziona: chiedi di rimandartelo.')); dropCoopHash(); } // a chat app may cut or add characters to a link
 }
 readCoopLink();
 addEventListener('hashchange', () => { if (location.hash.startsWith('#coop=')) location.reload(); }); // a link opened while KERN is already open changes only the fragment
@@ -1964,9 +1971,9 @@ function renderCoopIn() { // the card for a friend's request
   const c = coopIn, card = $('kCoop');
   card.hidden = !c;
   if (!c) return;
-  const who = c.n || (isIt() ? 'Qualcuno' : 'A friend');
+  const who = c.n || tr(A_FRIEND);
   setD($('kCoL'), `Co-op · ${who}`); setD($('kCoT'), tr(FIELDS[c.f].m[c.i][1]));
-  setD($('kCoQL'), isIt() ? `La risposta di ${who}` : `${who}’s answer`); setD($('kCoQ'), c.a);
+  setD($('kCoQL'), fill(t2('{n}’s answer', 'La risposta di {n}'), { n: who })); setD($('kCoQ'), c.a);
   setD($('kCoAsk'), coopAsk(c.f, c.i));
   setT(kScr.querySelector<HTMLElement>('label[for="kCoTa"]')!, 'Your reply'); // the label only a screen reader sees
 }
@@ -1994,7 +2001,7 @@ $('kDrDare').addEventListener('click', () => { // the dare is the mission just f
   void shareText('KERN', tr('I dare you: {m}. Answer it on KERN.').replace('{m}', tr(FIELDS[f].m[i][1])), `${location.origin}/?dare=${encodeURIComponent(f)}.${i}`, 'Link copied.');
 });
 function renderCoops() { // yourKERN: every co-op mission answered, sent, or replied to, with both halves once they are in
-  const card = $('kCoops'), box = $('kCoopL'), it = isIt();
+  const card = $('kCoops'), box = $('kCoopL');
   const mk = (tag: string, cls = '', text = '') => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
   const row = (title: string, status: string, quotes: [string, string][], act?: [string, () => void]) => {
     const r = mk('div', 'k-coopr'); r.append(mk('div', 'k-l', title), mk('p', 'k-coopst', status));
@@ -2002,19 +2009,20 @@ function renderCoops() { // yourKERN: every co-op mission answered, sent, or rep
     if (act) { const b = mk('button', 'k-ask-btn', act[0]) as HTMLButtonElement; b.type = 'button'; b.setAttribute('aria-label', `${act[0]}: ${title}`); b.addEventListener('click', act[1]); r.append(b); } // the same two words repeat on every row
     return r;
   };
-  const rows: { pri: number; el: HTMLElement }[] = [], used = new Set<CoopRec>(), seen = new Set<string>(), me = tr('You'), unknown = it ? 'Qualcuno' : 'A friend';
+  const rows: { pri: number; el: HTMLElement }[] = [], used = new Set<CoopRec>(), seen = new Set<string>(), me = tr('You'), unknown = tr(A_FRIEND);
+  // "Done with Sara", or "Done with a friend" when the friend left no name: a sentence of its own, so every language can bend "a friend" its way.
+  const doneWith = (n: string) => (n ? fill(t2('Done with {n}', 'Fatta con {n}'), { n }) : tr(t2('Done with a friend', 'Fatta con qualcuno')));
   for (const a of [...S.answers].reverse()) {
     if (!isCoop(a.f, a.i) || seen.has(`${a.f}.${a.i}`)) continue;
     seen.add(`${a.f}.${a.i}`);
     const rec = S.coops.find((r) => r.role === 'out' && r.f === a.f && r.i === a.i && (r.at === a.at || r.mine.trim() === clip(a.t, MAX_ANSWER).trim()));
     if (rec) used.add(rec);
-    const friend = rec?.with || (it ? 'qualcuno' : 'a friend');
-    rows.push({ pri: rec?.theirs ? 0 : rec ? 1 : 2, el: row(tr(FIELDS[a.f].m[a.i][1]), !rec ? tr('Not sent yet') : rec.theirs ? (it ? `Fatta con ${friend}` : `Done with ${friend}`) : tr('Sent. Waiting for a reply.'),
-      rec?.theirs ? [[me, clip(a.t, MAX_ANSWER)], [friend, rec.theirs]] : [], [tr(rec ? 'Send again' : 'Send to a friend'), () => sendCoop(a)]) });
+    rows.push({ pri: rec?.theirs ? 0 : rec ? 1 : 2, el: row(tr(FIELDS[a.f].m[a.i][1]), !rec ? tr('Not sent yet') : rec.theirs ? doneWith(rec.with) : tr('Sent. Waiting for a reply.'),
+      rec?.theirs ? [[me, clip(a.t, MAX_ANSWER)], [rec.with || unknown, rec.theirs]] : [], [tr(rec ? 'Send again' : 'Send to a friend'), () => sendCoop(a)]) });
   }
   for (const r of [...S.coops].reverse()) {
-    if (r.role === 'out' && !used.has(r)) rows.push({ pri: r.theirs ? 0 : 1, el: row(tr(FIELDS[r.f].m[r.i][1]), r.theirs ? (it ? `Fatta con ${r.with || 'qualcuno'}` : `Done with ${r.with || 'a friend'}`) : tr('Sent. Waiting for a reply.'), r.theirs ? [[me, r.mine], [r.with || unknown, r.theirs]] : []) }); // a second friend's reply, or an answer deleted since
-    if (r.role === 'in') rows.push({ pri: 0, el: row(tr(FIELDS[r.f].m[r.i][1]), it ? `Hai risposto a ${r.with || 'qualcuno'}` : `You replied to ${r.with || 'a friend'}`, [[r.with || unknown, r.theirs], [me, r.mine]], [tr('Send again'), () => sendCoopReply(r)]) });
+    if (r.role === 'out' && !used.has(r)) rows.push({ pri: r.theirs ? 0 : 1, el: row(tr(FIELDS[r.f].m[r.i][1]), r.theirs ? doneWith(r.with) : tr('Sent. Waiting for a reply.'), r.theirs ? [[me, r.mine], [r.with || unknown, r.theirs]] : []) }); // a second friend's reply, or an answer deleted since
+    if (r.role === 'in') rows.push({ pri: 0, el: row(tr(FIELDS[r.f].m[r.i][1]), r.with ? fill(t2('You replied to {n}', 'Hai risposto a {n}'), { n: r.with }) : tr(t2('You replied to a friend', 'Hai risposto a qualcuno')), [[r.with || unknown, r.theirs], [me, r.mine]], [tr('Send again'), () => sendCoopReply(r)]) });
   }
   card.hidden = !rows.length;
   box.replaceChildren(...rows.sort((x, y) => x.pri - y.pri).slice(0, 12).map((x) => x.el)); // finished pairs first, so a reply that just arrived is never past the cut
@@ -2041,13 +2049,13 @@ const setLang = (l: Lang) => {
   document.title = tr("KERN · Don't guess your passion. Test it.");
   kDesc?.setAttribute('content', tr(descEn));
   kTxt.forEach((e) => { const en = e.dataset.en; if (!en) return; if (e.classList.contains('k-xb')) e.textContent = tr(en); else e.innerHTML = tr(en); });
-  for (const page of ['privacy', 'terms', 'about']) document.querySelectorAll<HTMLAnchorElement>(`a[href^="/${page}/"]`).forEach((a) => a.setAttribute('href', `/${page}/${l === 'it' ? '#it' : ''}`)); // after the texts above: they bring their own links back
+  for (const page of ['privacy', 'terms', 'about']) document.querySelectorAll<HTMLAnchorElement>(`a[href^="/${page}/"]`).forEach((a) => a.setAttribute('href', `/${page}/${l === 'en' ? '' : `#${l}`}`)); // after the texts above: they bring their own links back
   document.querySelectorAll<HTMLElement>('[aria-label]').forEach((e) => { const en = (e.dataset.enLabel ??= e.getAttribute('aria-label') || ''); e.setAttribute('aria-label', tr(en)); });
   if (fb.dataset.src) fb.textContent = tr(fb.dataset.src);
   pressed('lang', l); setPic();
   setLvl(); renderProgress(); renderChat(); renderAcct();
 };
-document.querySelectorAll<HTMLElement>('[data-k-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.kLang === 'it' ? 'it' : 'en')));
+document.querySelectorAll<HTMLElement>('[data-k-lang]').forEach((b) => b.addEventListener('click', () => setLang(isLang(b.dataset.kLang) ? b.dataset.kLang : 'en')));
 $('kAv').addEventListener('click', () => openSheetEl(kSet, $('kSetX')));
 $('kSetX').addEventListener('click', () => dismiss(kSet));
 $('kChField').addEventListener('click', () => { kSet.hidden = true; openStart(true, true); });
@@ -2055,7 +2063,7 @@ $('kChField').addEventListener('click', () => { kSet.hidden = true; openStart(tr
 const CONTACT = 'manuel@trykern.it';
 $('kFeed').addEventListener('click', () => {
   location.href = `mailto:${CONTACT}?subject=${encodeURIComponent('KERN feedback')}&body=${encodeURIComponent(`\n\n---\nKERN 1.0 · ${S.lang.toUpperCase()}`)}`;
-  say(isIt() ? `Si apre la tua app di posta. Oppure scrivi a ${CONTACT}` : `Opening your email app. Or write to ${CONTACT}`);
+  say(fill(t2('Opening your email app. Or write to {e}', 'Si apre la tua app di posta. Oppure scrivi a {e}'), { e: CONTACT }));
 });
 $('kExp').addEventListener('click', () => download(JSON.stringify({ ...snapshot(), exportedAt: new Date().toISOString() }, null, 2), 'kern-data.json', 'application/json'));
 // Weekly calendar reminder (.ics): works in every calendar app, no notifications permission, no streaks.

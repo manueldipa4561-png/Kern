@@ -1,14 +1,14 @@
 // Checks that every mission is complete and translated: same count in all four data files, rounds of 3,
 // 3 steps / 3 quality bars / 3 hints each, and an Italian text for every string. Run: npm test
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { buildSync } from 'esbuild';
 import { PER_ROUND as STATS_PER_ROUND } from './stats-core.mjs';
 
 // The data files import each other without extensions, so bundle them in memory instead of importing directly.
-const entry = ['fields', 'missions', 'helps', 'easy', 'i18n', 'next', 'sponsors', 'loot', 'demo', 'play'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
+const entry = ['fields', 'missions', 'helps', 'easy', 'i18n', 'next', 'sponsors', 'loot', 'demo', 'play', 'fieldinfo', 'coopask', 'i18n-de', 'i18n-fr'].map((f) => `export * from './src/scripts/${f}.ts';`).join('\n');
 const { text } = buildSync({ stdin: { contents: entry, resolveDir: process.cwd(), loader: 'ts' }, bundle: true, format: 'esm', platform: 'node', write: false }).outputFiles[0];
-const { FIELDS, MX, HELPS, EASY, IT, CLASHES, PER_ROUND, SPONSORS, RELICS, SAMPLE_ANSWERS, SAMPLE_IDEA, sampleChat, swapSample, PLAY } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
+const { FIELDS, MX, HELPS, EASY, IT, DE, FR, CLASHES, PER_ROUND, SPONSORS, RELICS, SAMPLE_ANSWERS, SAMPLE_IDEA, sampleChat, swapSample, PLAY } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);
 
 const strings = (v) => (typeof v === 'string' ? [v] : Array.isArray(v) ? v.flatMap(strings) : v && typeof v === 'object' ? Object.values(v).flatMap(strings) : []);
 // supabase/schema.sql limits kern_signs.mission and kern_events.mission to 0..MAX_MISSIONS-1: widen both there before adding a round.
@@ -94,4 +94,18 @@ for (const f of Object.keys(FIELDS)) for (let i = 0; i < FIELDS[f].m.length; i++
     for (const f of sounds) assert.ok(existsSync(`public${f}`), `${at}: sound ${f} is missing from public/`);
   }
 }
+// German and French: every English text has both (src/scripts/i18n-de.ts and i18n-fr.ts), with none of the job-world words of that language, nor the English or
+// Italian ones. The texts are the IT keys of the modules above plus the ones app.ts registers itself with t2('...', ...) (it needs a browser, so they are read from its source).
+const appPairs = [...readFileSync('src/scripts/app.ts', 'utf8').matchAll(/\bt2\((['"])(.*?)\1, (['"])(.*?)\3\)/g)].map((m) => [m[2], m[4]]);
+assert.ok(appPairs.length > 40, `app.ts: expected its own t2() texts, found ${appPairs.length}`);
+const appClash = appPairs.filter(([en, it]) => IT[en] !== undefined && IT[en] !== it).map(([en]) => en);
+assert.deepEqual(appClash, [], 'app.ts registers these English texts with a different Italian than the rest of the app');
+const KEYS = [...new Set([...Object.keys(IT), ...appPairs.map(([en]) => en)])], missing = [];
+for (const [name, L, BANNED] of [['German', DE, /arbeit|\bjobs?\b|karriere|beruf|freiberuf|bewerb|stellenang/i], ['French', FR, /travail|emploi|carri[eè]re|boulot|\bjobs?\b|m[ée]tier|freelanc|embauch|recrut/i]]) {
+  const bad = Object.entries(L).filter(([, v]) => BANNED.test(v) || BANNED_UI.test(v)).map(([en]) => en.slice(0, 50));
+  assert.deepEqual(bad, [], `i18n: job-world words in the ${name} copy: ${bad.join(' | ')}`);
+  const none = KEYS.filter((k) => !L[k]);
+  if (none.length) missing.push(`${name}: ${none.length} of ${KEYS.length} texts have no translation (first: "${none[0].slice(0, 60)}")`);
+}
+assert.deepEqual(missing, [], `i18n: German and French are not complete. ${missing.join('. ')}`);
 console.log(`content: ok (${Object.values(FIELDS).reduce((n, f) => n + f.m.length, 0)} missions)`);

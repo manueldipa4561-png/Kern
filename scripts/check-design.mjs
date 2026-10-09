@@ -28,7 +28,7 @@ for (const [name, body] of Object.entries(ICONS)) {
 for (const k of ['Text size', 'Small', 'Default', 'Large', 'Larger', 'Done.', 'What to expect', 'A day in it', 'People like', 'People find hard', 'Try the next mission', 'Take it further', 'Three steps outside the app', 'Ask', 'Make', 'Learn', 'Send feedback', 'Terms']) assert.ok(IT[k], `i18n.ts: no Italian for "${k}"`);
 
 // What to expect + Take it further: every field has all of it, in both languages, and none of the words the brand never uses.
-const BANNED = /lavor|career|freelance|real work|real job|choose a job/i;
+const BANNED = /lavor|career|freelance|real work|real job|choose a job|arbeit|\bjobs?\b|karriere|beruf|freiberuf|bewerb|stellenang|travail|emploi|carri[eè]re|boulot|m[ée]tier|freelanc|embauch|recrut/i; // the same list as BANNED in netlify/functions/coach.mts
 for (const f of Object.keys(FIELDS)) {
   const info = FIELD_INFO[f];
   assert.ok(info, `fieldinfo.ts: field ${f} has no info`);
