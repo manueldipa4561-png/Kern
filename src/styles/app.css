@@ -1065,3 +1065,24 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
 .k-dr-more { align-self: stretch; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; column-gap: 10px; margin: 4px 0 0; }
 .k-dr-more[hidden], .k-lnk[hidden] { display: none; }
 .k-lnk { min-height: 44px; padding: 0 4px; background: none; border: 0; color: var(--dim); font: 600 0.8125rem 'Inter Tight Variable', system-ui, sans-serif; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* Readability: labels one step bigger, and the grey a little stronger in both themes (8:1 or better on the page, still AA on cards and tints) */
+.k-scr { --dim: #c4c7b9; }
+.k-scr.light { --dim: #3c4237; }
+.k-l, .k-card p.k-l, .k-foot .k-l { font-size: 0.8125rem; }
+.k-main .k-l { opacity: 1; }
+/* KERN.AI's send button in the palette's lime */
+.k-send { background: var(--acc); color: var(--on); }
+/* An accent per field, for its chip and the mission header: mid tones that read on both themes, never used for text */
+[data-fa="Design"] { --fa: #E07A5F; } [data-fa="Writing"] { --fa: #6F8FE0; } [data-fa="Code"] { --fa: #3FB28C; } [data-fa="Video"] { --fa: #E0609A; }
+[data-fa="Selling"] { --fa: #E8A33A; } [data-fa="Music"] { --fa: #9B7BE0; } [data-fa="Prompting"] { --fa: #3AAFCB; }
+.k-fchip[data-fa]:not(.on) { border-color: color-mix(in srgb, var(--fa) 70%, transparent); }
+.k-fchip.on[data-fa] { box-shadow: 0 0 0 2px var(--fa); }
+#kSheet[data-fa] .k-shbar { background: linear-gradient(color-mix(in srgb, var(--fa) 16%, var(--bg)), var(--bg)); }
+#kSheet[data-fa] #kShL::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--fa); vertical-align: 1px; }
+/* Asked for less transparency: no glass blur, and solid scrims and bars */
+@media (prefers-reduced-transparency: reduce) {
+  .k-sheet, .k-reward, .k-tabs { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  #kSet, #kFld { background: color-mix(in srgb, var(--bg) calc(90% * (1 - var(--drag, 0))), transparent); }
+  .k-tabs { background: var(--bg); }
+  .k-scr::before { display: none; }
+}

@@ -538,7 +538,7 @@ const renderFields = () => {
   box.innerHTML = '';
   S.fields.forEach((f) => {
     const b = document.createElement('button'), im = document.createElement('span'), t = document.createElement('span'), n = document.createElement('small');
-    b.type = 'button'; b.className = 'k-fchip' + (f === S.field ? ' on' : ''); b.setAttribute('aria-pressed', String(f === S.field));
+    b.type = 'button'; b.className = 'k-fchip' + (f === S.field ? ' on' : ''); b.setAttribute('aria-pressed', String(f === S.field)); b.dataset.fa = f; // the field's accent colour (app.css)
     im.className = 'k-fi'; im.setAttribute('aria-hidden', 'true'); im.innerHTML = icon(f);
     t.textContent = tr(f);
     n.textContent = `${doneIn(f).size}/${total(f)}`;
@@ -1262,7 +1262,7 @@ kDrOk.addEventListener('click', once(() => {
   openAnswer(f, Number(i));
 }));
 const fillSheet = (f: string, i: number) => {
-  kSheet.classList.remove('drop'); kShD.hidden = true;
+  kSheet.classList.remove('drop'); kShD.hidden = true; kSheet.dataset.fa = f; // the header takes the field's accent colour (app.css)
   const m = FIELDS[f].m[i];
   setD($('kShL'), `${tr(f)} · ${isIt() ? 'missione' : 'mission'} ${(i % PER_ROUND) + 1} ${isIt() ? 'di' : 'of'} ${PER_ROUND}`); setT($('kShT'), m[1]); // not the internal label ("Mission 001 · crowded story")
   const code = f === 'Code'; // code is typed letter by letter: the phone must not correct, capitalise or underline it
