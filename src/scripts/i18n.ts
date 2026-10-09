@@ -151,7 +151,7 @@ export const IT: Record<string, string> = {
         'Your idea, your words…': 'La tua idea, a parole tue…',
         'Welcome': 'Ciao', 'Save your<br><b>progress.</b>': 'Salva i tuoi<br><b>progressi.</b>',
         'Your name': 'Il tuo nome', 'I am 18 or older': 'Ho almeno 18 anni', 'Start': 'Inizia',
-        'No account needed. Your answers stay on this device. <a href="/privacy/">Privacy</a>': 'Non serve un account. Le tue risposte restano su questo dispositivo. <a href="/privacy/">Privacy</a>',
+        'No account needed. Your answers stay on this device. What you write to KERN.AI goes to our AI provider to get a reply. <a href="/privacy/#keep">What we keep</a>': 'Non serve un account. Le tue risposte restano su questo dispositivo. Quello che scrivi a KERN.AI va al nostro fornitore di AI per avere una risposta. <a href="/privacy/#keep">Cosa conserviamo</a>',
         'Add your name and confirm your age to continue.': 'Aggiungi il tuo nome e conferma la tua età per continuare.',
         'Settings': 'Impostazioni', 'Language': 'Lingua', 'Theme': 'Tema', 'System': 'Sistema', 'Dark': 'Scuro', 'Light': 'Chiaro',
         'Change field': 'Cambia campo', 'Install KERN': 'Installa KERN',
@@ -348,7 +348,9 @@ export const IT: Record<string, string> = {
         'This card is an example until you finish a mission and reflect.': 'Questa card è un esempio finché non finisci una missione e rifletti.',
         'Your idea in KERN.AI': 'La tua idea in KERN.AI',
         'Does yours do this?': 'La tua risposta fa questo?',
-        'A company sees your answer only if you choose to send it to them.': 'Un’azienda vede la tua risposta solo se scegli di mandargliela.',
+        'If you choose to send your answer, they see only that answer, never your email or your other answers.': 'Se scegli di mandare la tua risposta, vedono solo quella, mai la tua email o le tue altre risposte.',
+        'You decide each time, and saying no changes nothing.': 'Decidi tu ogni volta, e dire di no non cambia niente.',
+        "Sending isn't active yet: this is a sample.": 'L’invio non è ancora attivo: questa è una prova.',
         'Sends only your prompt to the AI. Nothing is saved.': 'Invia solo il tuo prompt all’AI. Non salviamo niente.',
         'What the AI made of it': 'Cosa ne ha fatto l’AI',
         'Dare someone to try it': 'Sfida qualcuno a provarla',
@@ -361,6 +363,16 @@ export const IT: Record<string, string> = {
         'Saved. This guess stays on your card and on the image you share.': 'Salvato. Questa ipotesi resta sulla card e nell’immagine che condividi.',
         'Noted. Your card marks this guess “not really” and leaves it off the image you share.': 'Preso nota. La card segna questa ipotesi come “non proprio” e la lascia fuori dall’immagine che condividi.',
         'Testing {f} on KERN.': 'Sto provando {f} su KERN.',
+        // MiroFish fixes (9 Oct): say what is kept and where it goes, the strong answer on request, the gaps first, helplines any time, AI credits.
+        'What we keep': 'Cosa conserviamo',
+        'What you write here goes to our AI provider to get a reply. KERN doesn\'t keep it.': 'Quello che scrivi qui va al nostro fornitore di AI per avere una risposta. KERN non lo conserva.',
+        'See a strong answer': 'Guarda una buona risposta',
+        'Good enough, next': 'Va bene così, avanti',
+        '2–3 lines is enough.': '2–3 righe bastano.',
+        'Missions are set in Italy. Most are text; a few have real sound and clips.': 'Le missioni sono ambientate in Italia. Quasi tutte sono testo; alcune hanno suoni e clip veri.',
+        'Your Kern card comes from your own taps after each mission. No AI scores you.': 'La tua Kern card nasce dai tuoi tocchi dopo ogni missione. Nessuna AI ti dà un voto.',
+        'Need to talk to someone now?': 'Hai bisogno di parlare con qualcuno adesso?',
+        'Clip made with AI for KERN. Everything in it is fictional.': 'Clip creata con l’AI per KERN. Tutto quello che si vede è inventato.',
 };
 // English shown for a key that reads differently on screen: the field key 'Selling' stays in storage, links and data (Italian is in IT).
 // Null prototype: tr() looks up any text, typed words too, and "constructor" must not find a function.

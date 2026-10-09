@@ -286,7 +286,7 @@ toast.addEventListener('pointerenter', () => clearTimeout(tT));
 toast.addEventListener('pointerleave', () => { if (toastAct) tT = window.setTimeout(hideToast, 4000); });
 
 // Static text: remember the English source so language switches are lossless.
-const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-tile small, .k-choice, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs .tt, #kXAsk, .k-streak small, .k-finds-h span');
+const kTxt = kScr.querySelectorAll<HTMLElement>('.k-l:not(.k-finds-h), h4, h5, p, .k-sig, .k-chips span, .k-tile span, .k-tile small, .k-choice, .k-done span, .k-tag span, .k-tag strong, .k-ask button, .k-btn, .k-ask-btn, .k-go, .k-sk, .k-win, .k-check span, .k-seg button, .k-tabs .tt, #kXAsk, .k-streak small, .k-finds-h span, .k-lnk, #kVsAsk button');
 kTxt.forEach((e) => { e.dataset.en = e.innerHTML.trim(); });
 // Headings: the page is an h1 (screen-reader only), panes (h4) and cards (h5). Levels 2 and 3 are what a screen reader announces; the tags keep the look.
 kScr.querySelectorAll('h4').forEach((h) => h.setAttribute('aria-level', '2'));
@@ -971,6 +971,14 @@ document.querySelectorAll<HTMLElement>('#kEx span').forEach((c, i) => {
 });
 $('kSaveV').addEventListener('click', () => { S.saves++; say(save() ? 'Saved to yourKERN. Every version counts as evidence.' : UNSAVED); });
 $('kToAi').addEventListener('click', () => goTab('copilot'));
+// Helplines any time (Settings and KERN.AI): the pause text with the checked numbers, minus its first sentence ("...so I'm pausing the mission";
+// check-heavy.mjs keeps the numbers out of it). It is in the app itself, so it works offline; setLang refills it.
+const helpText = () => document.querySelectorAll<HTMLElement>('[data-k-help]').forEach((b) => setD($(b.getAttribute('aria-controls')!), tr(HEAVY_REPLY).replace(/^[^.]*\.\s*/, '')));
+document.querySelectorAll<HTMLElement>('[data-k-help]').forEach((b) => b.addEventListener('click', () => {
+  const t = $(b.getAttribute('aria-controls')!);
+  t.hidden = !t.hidden; b.setAttribute('aria-expanded', String(!t.hidden));
+  if (!t.hidden) reveal(t);
+}));
 
 // Field: trail titles, progress, chat.
 const applyField = (resetChat: boolean) => {
@@ -1093,13 +1101,14 @@ function renderBrief(f: string, i: number) {
   kXAI.hidden = !pic; kXAI.dataset.en = pic ?? ''; kXAI.dataset.it = x.asset.imgIt ?? pic ?? ''; kXAI.dataset.alt = x.asset.body; setPic();
   // A real clip (public/media) plays with its own controls above the text, which keeps the seconds. #t=0.1 makes phones show the first frame, not black.
   const clip = x.asset.video, kXAV = $<HTMLVideoElement>('kXAV');
-  kXAV.pause(); kXAV.hidden = !clip; kXAV.setAttribute('aria-label', tr(x.asset.title));
+  kXAV.pause(); kXAV.hidden = $('kXAVC').hidden = !clip; kXAV.setAttribute('aria-label', tr(x.asset.title)); // the clip says it is made with AI (design/mission-media.md)
   if (clip && kXAV.dataset.src !== clip) { kXAV.dataset.src = clip; kXAV.src = `${clip}#t=0.1`; }
   v.steps.forEach((s) => tick(kXSteps, s, cur.edit >= 0, 'st', stepProg)); // an answer being edited is a finished one: its steps show as done
   stepProg();
   x.bar.forEach((b) => tick(kRfBI, b, false, 'bar', barProg)); // after Submit: does yours do what a strong answer does? Self-ticked, never graded
   barProg();
-  $('kBrandNote').hidden = !sp;
+  $('kBrandNote').hidden = !sp; // a brand mission says its rules before the answer box
+  if (sp) { setD($('kBrandFrom'), fill(t2('From {b}.', 'Da {b}.'), { b: tr(sp.name) })); $('kBrandNote').style.setProperty('--brand', sp.color); }
   // Do it here: tap or drag instead of typing (play.ts). Not while editing a saved answer, the picks would rewrite it.
   const pl = PLAY[`${f}.${i}`];
   playGen = ''; $('kPlay').hidden = !pl || cur.edit >= 0;
@@ -1441,11 +1450,16 @@ $('kSub').addEventListener('click', once(() => {
   groups.forEach((g) => { g.dataset.val = ''; g.querySelectorAll('[data-v]').forEach((o) => { o.classList.remove('sel'); o.setAttribute('aria-pressed', 'false'); }); });
   $<HTMLInputElement>('kRfH').value = ''; $<HTMLInputElement>('kRfT').value = '';
   const ex = variant(cur.f, cur.i)?.ex || '';
-  $('kVsY').textContent = na.t; $('kVs').hidden = !ex; // the example text is already in kXExT (renderBrief)
+  $('kVsY').textContent = na.t; showStrong(false); $('kVsAsk').hidden = !ex; // the example text is already in kXExT (renderBrief)
   hush(); kShA.hidden = true; kShR.hidden = false; setRfNote(); renderProg(); // the beat grid goes with the answer step, so does its sound
-  groups[0].querySelector<HTMLElement>('[data-v]')!.focus({ preventScroll: true });
-  kSheet.querySelector('.k-sh-in')?.scrollTo({ top: 0 }); // the comparison is read first, then the reflection
+  (ex ? $('kVsGo') : firstChip()).focus({ preventScroll: true });
+  kSheet.querySelector('.k-sh-in')?.scrollTo({ top: 0 });
 }));
+// After Submit the strong answer waits to be asked for: "See a strong answer" shows it with the self-check ticks, "Good enough, next" goes on to the reflection.
+const firstChip = () => groups[0].querySelector<HTMLElement>('[data-v]')!;
+const showStrong = (on: boolean) => { $('kVs').hidden = kRfBar.hidden = !on; $('kVsAsk').hidden = on; };
+$('kVsGo').addEventListener('click', () => { showStrong(true); land($('kVs')); });
+$('kVsNo').addEventListener('click', () => { reveal($('kRfEQ')); firstChip().focus({ preventScroll: true }); });
 // Save keeps everything; Skip keeps the chips already tapped (a quick tap then Skip is still a reflection) and drops the half-typed lines.
 const reflect = (withText: boolean) => {
   const r = cleanR({ e: groups[0].dataset.val, again: groups[1].dataset.val, ...(withText ? { hard: $<HTMLInputElement>('kRfH').value, tip: $<HTMLInputElement>('kRfT').value } : {}) });
@@ -2049,10 +2063,13 @@ const setLang = (l: Lang) => {
   document.title = tr("KERN · Don't guess your passion. Test it.");
   kDesc?.setAttribute('content', tr(descEn));
   kTxt.forEach((e) => { const en = e.dataset.en; if (!en) return; if (e.classList.contains('k-xb')) e.textContent = tr(en); else e.innerHTML = tr(en); });
-  for (const page of ['privacy', 'terms', 'about']) document.querySelectorAll<HTMLAnchorElement>(`a[href^="/${page}/"]`).forEach((a) => a.setAttribute('href', `/${page}/${l === 'en' ? '' : `#${l}`}`)); // after the texts above: they bring their own links back
+  for (const page of ['privacy', 'terms', 'about']) document.querySelectorAll<HTMLAnchorElement>(`a[href^="/${page}/"]`).forEach((a) => { // after the texts above: they bring their own links back
+    const h = [a.hash.startsWith('#keep') ? 'keep' : '', l === 'en' ? '' : l].filter(Boolean).join('-'); // "What we keep" lands on its table in this language: #keep, #keep-it...
+    a.setAttribute('href', `/${page}/${h && `#${h}`}`);
+  });
   document.querySelectorAll<HTMLElement>('[aria-label]').forEach((e) => { const en = (e.dataset.enLabel ??= e.getAttribute('aria-label') || ''); e.setAttribute('aria-label', tr(en)); });
   if (fb.dataset.src) fb.textContent = tr(fb.dataset.src);
-  pressed('lang', l); setPic();
+  pressed('lang', l); setPic(); helpText();
   setLvl(); renderProgress(); renderChat(); renderAcct();
 };
 document.querySelectorAll<HTMLElement>('[data-k-lang]').forEach((b) => b.addEventListener('click', () => setLang(isLang(b.dataset.kLang) ? b.dataset.kLang : 'en')));
@@ -2142,7 +2159,7 @@ renderAcct();
 booted = true;
 if (DEMO) {
   const LEAVE_ARM_MS = 4000, kDemo = $('kDemo'); let armed = 0;
-  kDemo.hidden = false; $('kAiDemo').hidden = false; $('kXDemo').hidden = false; kScr.classList.add('demo'); // app.css repeats a Demo tag over every sheet, where the scrim covers this marker
+  kDemo.hidden = false; $('kAiDemo').hidden = false; $('kAiNote').hidden = true; $('kXDemo').hidden = false; kScr.classList.add('demo'); // app.css repeats a Demo tag over every sheet, where the scrim covers this marker
   // The first tap says what the marker does, a second one within a few seconds leaves: a stray tap mid-pitch must not drop the sample trail.
   kDemo.addEventListener('click', () => {
     if (Date.now() - armed > LEAVE_ARM_MS) { armed = Date.now(); say('Tap again to leave the demo.'); return; }

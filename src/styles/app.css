@@ -1125,3 +1125,13 @@ html:not(.has-vt) .k-pane.on { animation: kFade .16s both; }
   .k-tabs { background: var(--bg); }
   .k-scr::before { display: none; }
 }
+/* MiroFish fixes (9 Oct): "What we keep" links, the picker's honest lines, the brand rules before the answer box, helplines any time */
+.k-keep { display: inline-flex; align-items: center; min-height: 44px; }
+#kPaths { display: flex; flex-direction: column; gap: 4px; }
+.k-set-list a.k-ask-btn { box-sizing: border-box; color: var(--fg); text-decoration: none; } /* a link row sized like the button rows */
+.k-set-list #kKeepS { --ic: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgM2w3LjUgM3Y1LjVjMCA0LjMtMy4xIDgtNy41IDkuNS00LjQtMS41LTcuNS01LjItNy41LTkuNVY2eiIvPjxwYXRoIGQ9Ik04LjggMTIuMmwyLjIgMi4yIDQuNC00LjYiLz48L3N2Zz4="); }
+.k-set-list #kHelpS { --ic: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNyAzLjVoMi42YTEgMSAwIDAgMSAuOTUuNjhsMS4xIDMuM2ExIDEgMCAwIDEtLjQgMS4xNUw5LjYgOS44YTExIDExIDAgMCAwIDQuNiA0LjZsMS4xNy0xLjY1YTEgMSAwIDAgMSAxLjE1LS40bDMuMyAxLjFhMSAxIDAgMCAxIC42OC45NVYxN2EzLjUgMy41IDAgMCAxLTMuNSAzLjVBMTMuNSAxMy41IDAgMCAxIDMuNSA3IDMuNSAzLjUgMCAwIDEgNyAzLjV6Ii8+PC9zdmc+"); }
+.k-brandnote { border-left: 3px solid var(--brand, var(--acc)); background: color-mix(in srgb, var(--fg) 5%, transparent); border-radius: 4px 14px 14px 4px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.k-brandnote ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+#kBrandFrom { color: var(--fg); font-weight: 700; }
+.k-card .k-lnk { align-self: flex-start; margin-left: -4px; }

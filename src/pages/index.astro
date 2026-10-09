@@ -62,7 +62,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
               <div class="k-xm"><span class="k-l" id="kXWho"></span><span class="k-l" id="kXMin"></span></div>
               <div class="k-boost-chip" id="kXBoost" hidden></div>
               <p class="k-xb" id="kXBrief"></p>
-              <div class="k-xa"><div class="k-l" id="kXAT"></div><img class="k-xi" id="kXAI" alt="" hidden decoding="async" /><video class="k-xv" id="kXAV" controls playsinline preload="metadata" hidden></video><pre id="kXAB"></pre></div>
+              <div class="k-xa"><div class="k-l" id="kXAT"></div><img class="k-xi" id="kXAI" alt="" hidden decoding="async" /><video class="k-xv" id="kXAV" controls playsinline preload="metadata" hidden></video><p class="k-l k-s" id="kXAVC" hidden>Clip made with AI for KERN. Everything in it is fictional.</p><pre id="kXAB"></pre></div>
             </div>
             <p class="k-l k-s k-coop-hint" id="kCoopHint" hidden>Co-op mission: answer it, then send it to a friend to finish together.</p>
             <div class="k-x" id="kShP">
@@ -76,10 +76,11 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
               <p class="k-l k-s">Your picks fill in your answer. Add a line of your own if you like.</p>
             </div>
             <div class="k-compose" id="kCompose">
+              <div class="k-brandnote" id="kBrandNote" hidden><p class="k-l k-s" id="kBrandFrom"></p><ul><li class="k-l k-s">If you choose to send your answer, they see only that answer, never your email or your other answers.</li><li class="k-l k-s">You decide each time, and saying no changes nothing.</li><li class="k-l k-s">Sending isn't active yet: this is a sample.</li></ul></div>
               <label class="k-l" for="kTa">Your answer</label>
-              <textarea id="kTa" rows="4" maxlength="2000"></textarea>
+              <textarea id="kTa" rows="4" maxlength="2000" aria-describedby="kLen"></textarea>
+              <p class="k-rf-note" id="kLen">2–3 lines is enough.</p>
               <p class="k-rf-note" id="kSaved" aria-live="polite">It stays on this device unless you ask KERN.AI.</p>
-              <p class="k-l k-s" id="kBrandNote" hidden>A company sees your answer only if you choose to send it to them.</p>
               <div class="k-x" id="kRun" hidden>
                 <div class="k-xbtns"><button type="button" class="k-chipb" id="kRunB" aria-describedby="kRunN">Try your prompt on the AI</button></div>
                 <p class="k-l k-s" id="kRunN">Sends only your prompt to the AI. Nothing is saved.</p>
@@ -109,6 +110,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
             <div class="k-dr-more" id="kDrMore" hidden><button type="button" class="k-lnk" id="kDrTry"></button><button type="button" class="k-lnk" id="kDrRem">Remind me weekly</button></div>
           </div>
           <div class="k-step" id="kShR" hidden>
+            <div class="k-xbtns" id="kVsAsk" hidden><button type="button" class="k-chipb" id="kVsGo" aria-expanded="false" aria-controls="kVs">See a strong answer</button><button type="button" class="k-chipb" id="kVsNo">Good enough, next</button></div>
             <div class="k-vs" id="kVs" hidden>
               <div class="k-vs-y"><div class="k-l">Yours</div><p id="kVsY"></p></div>
               <div class="k-xex" id="kXExB"><div class="k-l">One strong answer</div><pre id="kXExT"></pre></div>
@@ -160,6 +162,11 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
             <button type="button" class="k-ask-btn" id="kFeed">Send feedback</button>
             <button type="button" class="k-ask-btn" id="kStatSet" hidden>Usage counts: off</button>
             <button type="button" class="k-ask-btn" id="kExp">Export my data</button>
+            <a class="k-ask-btn" id="kKeepS" href="/privacy/#keep">What we keep</a>
+          </div>
+          <div class="k-set-list">
+            <button type="button" class="k-ask-btn" id="kHelpS" data-k-help aria-expanded="false" aria-controls="kHelpST">Need to talk to someone now?</button>
+            <p class="k-l k-s" id="kHelpST" hidden></p>
           </div>
           <div class="k-set-list">
             <button type="button" class="k-ask-btn k-danger" id="kDel">Delete my data</button>
@@ -223,7 +230,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
           <button type="submit" class="k-go" id="kLog">Start</button>
           <button type="button" class="k-sk" id="kForgot" hidden>Forgot password?</button>
           <button type="button" class="k-sk" id="kGuest" hidden>Continue without an account</button>
-          <p class="k-l" id="kNoteLocal">No account needed. Your answers stay on this device. <a href="/privacy/">Privacy</a></p>
+          <p class="k-l" id="kNoteLocal">No account needed. Your answers stay on this device. What you write to KERN.AI goes to our AI provider to get a reply. <a href="/privacy/#keep">What we keep</a></p>
           <p class="k-l" id="kNoteCloud" hidden>Your answers are saved to your account and synced across your devices. <a href="/privacy/">Privacy</a></p>
         </form>
       </div>
@@ -244,6 +251,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
             <button type="button" class="k-choice" id="kIdk">I don't know yet</button>
             <button type="button" class="k-choice" id="kSkip">I know what I want to try</button>
           </div>
+          <a class="k-l k-s k-keep" href="/privacy/#keep">What we keep</a>
         </div>
         <div id="kS2" class="k-sp" hidden>
           <div class="k-l" id="kS2K">Good. Let's find out.</div>
@@ -252,12 +260,12 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
           <div class="k-tiles" id="kPick" role="group" aria-labelledby="kPickL">
             {FIELDS.map(([f, line]) => <button type="button" class="k-tile" data-f={f} aria-pressed="false"><span class="k-ti" aria-hidden="true" set:html={icon(f)} /><span>{f}</span><small>{line}</small></button>)}
           </div>
-          <p class="k-l k-s" id="kPaths">Seven creative and digital paths, for now.</p>
+          <div id="kPaths"><p class="k-l k-s">Seven creative and digital paths, for now.</p><p class="k-l k-s">Missions are set in Italy. Most are text; a few have real sound and clips.</p><p class="k-l k-s">Your Kern card comes from your own taps after each mission. No AI scores you.</p></div>
           <label class="k-check" id="kS2Age" hidden><input type="checkbox" id="kAge2" aria-describedby="kAgeWhy" /><span>I am 18 or older</span></label>
           <p class="k-l k-s" id="kAgeWhy" hidden>KERN is for 18+ for now, because it is built for adults and keeps your answers.</p>
           <button type="button" class="k-go" id="kGo" aria-describedby="kGoWhy">Start my first mission</button>
           <p class="k-l k-s" id="kGoWhy" aria-live="polite" hidden></p>
-          <p class="k-l k-s" id="kS2Note" hidden>No account needed. Your answers stay on this device. <a href="/privacy/">Privacy</a></p>
+          <p class="k-l k-s" id="kS2Note" hidden>No account needed. Your answers stay on this device. What you write to KERN.AI goes to our AI provider to get a reply. <a href="/privacy/#keep">What we keep</a></p>
           <button type="button" class="k-sk" id="kPickX" hidden>Not now</button>
         </div>
       </div>
@@ -364,6 +372,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
             <div class="k-hd"><div class="k-l">KERN.AI · your co-pilot</div><h4>Your idea.<br>My <b>questions.</b></h4></div>
             <div class="k-ait"><span class="k-ci" aria-hidden="true" set:html={icon('copilot')} /><div class="k-l" id="kAiLbl">You are talking to an AI · live when online</div></div>
             <p class="k-l" id="kAiDemo" hidden>Demo: what you type here is sent to the AI to get a reply. We do not store it.</p>
+            <p class="k-l k-s" id="kAiNote">What you write here goes to our AI provider to get a reply. KERN doesn't keep it.</p>
             <div class="k-card k-chat">
               <div class="k-log" id="kChat"></div><div class="k-sr" id="kSr" role="status" aria-live="polite"></div>
               <div class="k-cmp" id="kCmp" hidden><div class="k-l">Version 1</div><p id="kV1"></p><div class="k-l">Version 3</div><p id="kV3"></p><button type="button" class="k-ask-btn" id="kSaveV">Save to yourKERN</button></div>
@@ -371,7 +380,7 @@ const FIELDS = [['Design', 'Make things clear at a glance'], ['Writing', 'Words 
               <div class="k-chips" id="kEx"><span role="button" tabindex="0">Use an example</span><span role="button" tabindex="0">Start over</span><span role="button" tabindex="0">I’m stuck</span><span role="button" tabindex="0">Make it smaller</span></div>
             </div>
             <div class="k-card k-cut"><div class="k-l">Do it twice</div><p>Make it alone first. Then with the co-pilot. Compare the two.</p></div>
-            <div class="k-card"><div class="k-l">The rules</div><p>It asks. It never answers.</p><p>Your idea always comes first.</p><p>If it gets heavy, it stops and points you to a person.</p></div>
+            <div class="k-card"><div class="k-l">The rules</div><p>It asks. It never answers.</p><p>Your idea always comes first.</p><p>If it gets heavy, it stops and points you to a person.</p><button type="button" class="k-lnk" id="kHelpA" data-k-help aria-expanded="false" aria-controls="kHelpAT">Need to talk to someone now?</button><p id="kHelpAT" hidden></p></div>
           </section>
         </div>
         <div class="k-toast" id="kToast" role="status" aria-live="polite"><span id="kToastT"></span><button type="button" id="kToastB" hidden>Undo</button></div>

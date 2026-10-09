@@ -105,7 +105,7 @@ const DRUMS = [ // one per row, in the order of the rows
 
 // Sound files are decoded once into the same AudioContext and booked on its clock, so a cue lands on its second.
 // Not cached for offline (the service worker leaves /media/ to the network): offline, the button just goes back to ▶.
-const HEAR_L = t2('Hear it', 'Ascolta');
+const HEAR_L = t2('Hear it', 'Ascolta'), CREDIT = t2('Sounds made with AI for KERN. Fictional.', 'Suoni creati con l’AI per KERN. Inventati.');
 const bufs = new Map<string, Promise<AudioBuffer>>();
 const load = (c: AudioContext, src: string) => {
   if (!bufs.has(src)) bufs.set(src, fetch(src).then((r) => { if (!r.ok) throw new Error(`${r.status}`); return r.arrayBuffer(); }).then((b) => c.decodeAudioData(b)).catch((e) => { bufs.delete(src); throw e; }));
@@ -254,6 +254,9 @@ export function renderPlay(host: HTMLElement, play: Play, tr: (s: string) => str
         const gone = [...cut].map((i) => tr(g.items[i].t));
         return `${gone.length ? `${tr(g.cutOut)}: ${gone.join(', ')}. ` : ''}${tr(g.out)}: ${kept().map((i) => tr(g.items[i].t)).join(', ')}.${g.sum ? ` ${tr(g.sum.label)}: ${total()}s.` : ''}`;
       });
+    }
+    if ((g.kind === 'pick' && g.hear) || (g.kind === 'sort' && g.items.some((r) => r.a))) { // sound files say they are made with AI (design/mission-media.md)
+      const cr = document.createElement('p'); cr.className = 'k-l k-s'; cr.textContent = tr(CREDIT); box.append(cr);
     }
     host.append(box);
   }
