@@ -33,7 +33,7 @@ export const PLAY: Record<string, Play> = {
       items: [t2('She almost stayed home', 'Stava per restare a casa'), t2('Bag strap snapped on the bus', 'Tracolla rotta sul bus'), t2('First time lifting 40 kg', 'Prima volta con 40 kg'), t2('Feeling good', 'Mi sento bene'), '#gym #fitness'] },
   ],
   'Code.0': [
-    { kind: 'pick', label: t2('Tap the word that is off', 'Tocca la parola sbagliata'), out: t2('The word that is off', 'La parola sbagliata'), max: 1,
+    { kind: 'pick', label: t2('Tap the word that is spelled wrong', 'Tocca la parola scritta male'), out: t2('Word spelled wrong', 'Parola scritta male'), max: 1,
       items: ['let', 'hoodiesLeft', '0', 'color', '"green"', 'if', '===', 'colour', '"red"', 'paintButton'] },
   ],
   'Video.0': [
